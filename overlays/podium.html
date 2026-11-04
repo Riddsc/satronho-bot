@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Satronho · Podio</title>
+<meta name="author" content="RiddsSatronho">
+<!-- Podio en vivo para OBS (Fuente de navegador 900 × 420).
+     Muestra a quienes más likes, regalos o mensajes dan en este directo.
+     Se ajusta en la app (Overlays para OBS → Podio). Parámetros opcionales:
+     ?metrica=likes|regalos|mensajes · ?puestos=3|4|5 · ?titulo=Texto -->
+<link rel="stylesheet" href="base.css">
+<style>
+  :root { --accent: #ffb23e; --gold: #ffd23e; --silver: #c9d3e6; --bronze: #e39a5c; --other: #9b8cff; }
+  body { height: 100vh; display: grid; place-items: end center; }
+  .wrap { transform: scale(var(--scale, 1)); transform-origin: bottom center; padding-bottom: 8px; display: grid; justify-items: center; gap: 34px; }
+  .title { font-weight: 800; font-size: 24px; letter-spacing: .02em; padding: 6px 18px; border-radius: calc(99px * var(--r)); background: var(--bg); border: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); }
+  .title small { color: var(--accent); margin-left: 6px; font-size: 18px; }
+  .podium { display: flex; align-items: flex-end; gap: 12px; }
+  .spot { --c: var(--other); display: grid; justify-items: center; gap: 6px; width: 150px; animation: rise .7s cubic-bezier(.2, 1.3, .4, 1) both; }
+  .spot[data-p="1"] { --c: var(--gold); width: 172px; }
+  .spot[data-p="2"] { --c: var(--silver); animation-delay: .08s; }
+  .spot[data-p="3"] { --c: var(--bronze); animation-delay: .16s; }
+  .spot[data-p="4"], .spot[data-p="5"] { width: 128px; animation-delay: .24s; }
+  .av { position: relative; width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 30px; color: #160f22; background: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 45%, transparent), 0 10px 26px rgba(0,0,0,.45); overflow: hidden; }
+  .spot[data-p="1"] .av { width: 92px; height: 92px; font-size: 38px; }
+  .spot[data-p="4"] .av, .spot[data-p="5"] .av { width: 58px; height: 58px; font-size: 24px; }
+  .av img { width: 100%; height: 100%; object-fit: cover; }
+  .crown { position: absolute; top: -26px; font-size: 30px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.5)); }
+  .spot[data-p="1"] .avw { position: relative; display: grid; justify-items: center; }
+  .name { max-width: 100%; font-weight: 800; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 10px; border-radius: 99px; background: var(--bg); }
+  .val { font-weight: 800; font-size: 15px; color: var(--c); font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0,0,0,.75), 0 0 1px rgba(0,0,0,.9); }
+  .block { width: 100%; border-radius: calc(16px * var(--r)) calc(16px * var(--r)) 4px 4px; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 85%, #fff 15%), color-mix(in srgb, var(--c) 55%, #160f22)); display: grid; place-items: start center; padding-top: 8px; color: #160f22; font-weight: 900; font-size: 34px; box-shadow: inset 0 2px 0 rgba(255,255,255,.35), 0 12px 26px rgba(0,0,0,.35); }
+  .spot[data-p="1"] .block { height: 130px; } .spot[data-p="2"] .block { height: 96px; } .spot[data-p="3"] .block { height: 74px; }
+  .spot[data-p="4"] .block, .spot[data-p="5"] .block { height: 52px; font-size: 24px; }
+  .spot.up .av { animation: bump .6s ease; }
+  .empty { padding: 14px 22px; border-radius: calc(16px * var(--r)); background: var(--bg); font-weight: 700; }
+  body[data-hide-values="1"] .val { display: none; }
+  @keyframes rise { from { opacity: 0; transform: translateY(40px); } }
+  @keyframes bump { 50% { transform: scale(1.18); } }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap"></div>
+<script type="module">
+  import { connectSatronho, param } from './client.js';
+  import { applyOverlayStyle, overlayStyle, listenPreview, isPreview } from './style.js';
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const METRIC = { likes: 'likes', regalos: 'gifts', gifts: 'gifts', mensajes: 'chat', chat: 'chat' };
+  const UNIT = { likes: 'likes', gifts: 'monedas', chat: 'mensajes' };
+  const TITLE = { likes: 'Top likes', gifts: 'Top regalos', chat: 'Más activos' };
+  const nf = new Intl.NumberFormat('es-CO', { notation: 'compact', maximumFractionDigits: 1 });
+  let data = {};
+  const prev = new Map();
+
+  const cfg = () => {
+    const p = overlayStyle().podium || {};
+    const metric = METRIC[param('metrica', '')] || p.metric || 'likes';
+    const size = Math.max(3, Math.min(5, Number(param('puestos', '')) || Number(p.size) || 3));
+    return { metric, size, title: param('titulo', '') || p.title || TITLE[metric], showValues: p.showValues !== false, avatars: p.avatars !== false, crown: p.crown !== false };
+  };
+
+  function avatar(u, c) {
+    const letter = esc([...String(u.name || '?')][0]?.toUpperCase() || '?');
+    return c.avatars && /^https:\/\//.test(u.avatar || '') ? `<img src="/gift-img?u=${encodeURIComponent(u.avatar)}" alt="" onerror="this.replaceWith(document.createTextNode('${letter}'))">` : letter;
+  }
+
+  function render() {
+    const c = cfg();
+    document.body.dataset.hideValues = c.showValues ? '0' : '1';
+    const list = (data[c.metric] || []).slice(0, c.size);
+    const wrap = document.getElementById('wrap');
+    if (!list.length) {
+      wrap.innerHTML = `<div class="title surface">${esc(c.title)}</div><div class="empty surface">¡Todavía nadie! Sé el primero 💜</div>`;
+      return;
+    }
+    // Orden de podio: 4 · 2 · 1 · 3 · 5
+    const order = [4, 2, 1, 3, 5].filter((p) => p <= list.length);
+    wrap.innerHTML = `<div class="title surface">${esc(c.title)}</div><div class="podium">${order.map((pos) => {
+      const u = list[pos - 1];
+      const key = `${u.platform}:${u.name}`;
+      const up = prev.has(key) && prev.get(key) > pos;
+      return `<div class="spot ${up ? 'up' : ''}" data-p="${pos}"><div class="avw">${pos === 1 && c.crown ? '<span class="crown">👑</span>' : ''}<div class="av">${avatar(u, c)}</div></div>
+        <div class="name surface">${esc(u.name)}</div><div class="val">${nf.format(u.value)} ${UNIT[c.metric]}</div><div class="block">${pos}</div></div>`;
+    }).join('')}</div>`;
+    prev.clear();
+    list.forEach((u, i) => prev.set(`${u.platform}:${u.name}`, i + 1));
+  }
+
+  // Vista previa en la app: datos de ejemplo que se mueven.
+  const DEMO = ['Angélica', 'Dacreth', 'Aroa Malena', 'fabiosan622', 'Adriana'];
+  function demo() {
+    const vals = DEMO.map((n, i) => ({ name: n, platform: 'tiktok', value: Math.round((5 - i) * 900 + Math.random() * 1200) })).sort((a, b) => b.value - a.value);
+    data = { likes: vals, gifts: vals.map((v) => ({ ...v, value: Math.round(v.value / 20) })), chat: vals.map((v) => ({ ...v, value: Math.round(v.value / 60) })) };
+    render();
+  }
+  listenPreview(() => render());
+  applyOverlayStyle({});
+  if (isPreview) { demo(); setInterval(demo, 3500); }
+  connectSatronho((kind, payload) => {
+    if (kind === 'hello') { applyOverlayStyle(payload.overlayStyle); if (!isPreview) { data = payload.podium || {}; render(); } }
+    if (kind === 'overlay-style') { applyOverlayStyle(payload); render(); }
+    if (kind === 'podium' && !isPreview) { data = payload; render(); }
+  });
+  window.addEventListener('message', () => setTimeout(render, 0));
+</script>
+</body>
+</html>
