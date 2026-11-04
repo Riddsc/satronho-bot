@@ -91,7 +91,64 @@ function createYoutubeResolver({ fetch: fetchFn = fetch } = {}) {
     throw new Error(`No encontré una versión de menos de ${Math.round(maxDurationSec / 60)} min que se pueda reproducir`);
   }
 
-  return { resolve };
+  // Varios resultados para el buscador del panel (sin revisar cada ficha).
+  async function search(query, { limit = 12 } = {}) {
+    const q = String(query || '').trim();
+    if (!q) return [];
+    const yt = await getClient(fetchFn);
+    const id = parseVideoId(q);
+    if (id) {
+      try {
+        const v = await details(yt, id);
+        return [{ videoId: v.videoId, title: v.title, author: v.author, durationSec: v.durationSec, thumbnail: v.thumbnail, isLive: v.isLive }];
+      } catch {
+        return [];
+      }
+    }
+    const res = await yt.search(q, { type: 'video' });
+    return (res.videos || [])
+      .filter((v) => v.video_id)
+      .slice(0, limit)
+      .map((v) => ({
+        videoId: v.video_id,
+        title: textOf(v.title),
+        author: textOf(v.author?.name),
+        durationSec: v.duration?.seconds || 0,
+        thumbnail: `https://i.ytimg.com/vi/${v.video_id}/mqdefault.jpg`,
+        isLive: Boolean(v.is_live),
+      }));
+  }
+
+  // Canciones de una lista de YouTube (enlace con ?list=…), hasta 100.
+  async function playlist(input) {
+    let listId = '';
+    try {
+      listId = new URL(String(input).trim()).searchParams.get('list') || '';
+    } catch {
+      listId = /^(PL|OL|UU|FL|RD)[\w-]{10,}$/.test(String(input).trim()) ? String(input).trim() : '';
+    }
+    if (!listId) throw new Error('Pega el enlace de una lista de YouTube (con «list=» en la dirección)');
+    const yt = await getClient(fetchFn);
+    let pl = await yt.getPlaylist(listId);
+    const title = textOf(pl.info?.title) || 'Lista de YouTube';
+    const songs = [];
+    const take = (items) => {
+      for (const v of items || []) {
+        const vid = v.id || v.video_id;
+        if (!vid || songs.length >= 100) continue;
+        songs.push({ videoId: vid, title: textOf(v.title), author: textOf(v.author?.name), durationSec: v.duration?.seconds || 0, thumbnail: `https://i.ytimg.com/vi/${vid}/mqdefault.jpg` });
+      }
+    };
+    take(pl.videos);
+    while (songs.length < 100 && pl.has_continuation) {
+      pl = await pl.getContinuation();
+      take(pl.videos);
+    }
+    if (!songs.length) throw new Error('Esa lista está vacía o es privada');
+    return { title, songs };
+  }
+
+  return { resolve, search, playlist };
 }
 
 module.exports = { createYoutubeResolver, parseVideoId };

@@ -20,6 +20,8 @@ Cada guía te dice qué hacer según el estado de la app y cambia de ánimo: bri
 
 Si haces clic en la cara de un guía puedes ponerle una foto real; con clic derecho vuelve a su dibujo.
 
+**Menú lateral:** compacto por defecto (solo iconos); al pasar el ratón se despliega con los nombres. Abajo está «Dejar el menú abierto».
+
 ## Arrancar en modo desarrollo (Windows)
 
 1. Instala **Node.js 20 o superior** (LTS) desde nodejs.org.
@@ -179,9 +181,13 @@ También eliges qué voces entran en el reparto.
 
 **Voces de Latinoamérica.** En *Voces* hay una tarjeta por país (Colombia, México, Argentina…) con una voz femenina y una masculina. Pulsas ▶ para oírla y ★ para que sea tu voz principal.
 
+**Elegir voz.** En *Voz principal → Cambiar voz* se abre una ventana con todas las voces (en tu PC, Latinoamérica y Windows), buscador, filtro de idioma y país, y ▶ para escucharlas. **Tono** cambia la voz sin cambiar la velocidad, y el **volumen** llega hasta 200 % (por encima de 100 % se amplifica).
+
 **Respaldo.** Si Piper no está listo, se usan las voces de Windows.
 
 ## Música (Ñoño)
+
+La página **Música** es una consola: «Sonando ahora» con el video (se puede ocultar), barra de progreso y controles; **Buscar y añadir** con resultados de YouTube; la **cola** con *A continuación* e *Historial* (mezclar, guardar como lista, vaciar, subir una canción); **Listas de reproducción** guardadas o importadas de YouTube (hasta 100 canciones); y la **actividad** de música.
 
 En Kick y Starvios:
 

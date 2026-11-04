@@ -1,15 +1,64 @@
 [
   {
+    "version": "0.10.0",
+    "date": "2026-11-04",
+    "title": "Música renovada, menú compacto y elegir voz",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Música: consola completa con «Sonando ahora», buscador con resultados de YouTube, cola con A continuación e Historial, mezclar, guardar la cola como lista, listas de reproducción (también importadas de YouTube) y actividad."
+      },
+      {
+        "type": "nuevo",
+        "text": "Menú lateral compacto: solo iconos; al pasar el ratón o tocarlo se despliega con los nombres. Puedes dejarlo abierto siempre."
+      },
+      {
+        "type": "nuevo",
+        "text": "Ventana «Elegir voz»: voces de tu PC, de Latinoamérica y de Windows, con buscador, idioma, país y ▶ para escucharlas."
+      },
+      {
+        "type": "nuevo",
+        "text": "Control de tono de la voz, sin cambiar la velocidad."
+      },
+      {
+        "type": "mejora",
+        "text": "El volumen de la voz llega hasta 200 % para voces bajitas."
+      },
+      {
+        "type": "mejora",
+        "text": "MechaRidds más caricaturizado y pequeño, con orejas y candongas como Ridds; los perritos vuelven a ser los protagonistas del Inicio."
+      }
+    ]
+  },
+  {
     "version": "0.9.0",
     "date": "2026-11-04",
     "title": "Llega MechaRidds y el Chat Bot",
     "items": [
-      { "type": "nuevo", "text": "MechaRidds, la versión androide de Ridds, es el guía del nuevo Chat Bot." },
-      { "type": "nuevo", "text": "Chat Bot: una sola sección con Inicio, Comandos y Mensajes automáticos. Desde Inicio ves dónde escribe el bot, lo que ha escrito y puedes escribir algo a mano." },
-      { "type": "nuevo", "text": "Interruptor general del Chat Bot para pausarlo sin tocar nada más." },
-      { "type": "nuevo", "text": "Ayuda → Reportar un problema: cuéntanos qué falla, pide ayuda o comparte una idea y nos llega directo, con diagnóstico opcional." },
-      { "type": "nuevo", "text": "Novedades: esta página, la campana de arriba y un aviso cada vez que la app se actualiza." },
-      { "type": "mejora", "text": "Conexiones: cada plataforma muestra Escuchar y Escribir lado a lado, y en «Plataformas que usas» eliges cuáles ver y en qué orden." }
+      {
+        "type": "nuevo",
+        "text": "MechaRidds, la versión androide de Ridds, es el guía del nuevo Chat Bot."
+      },
+      {
+        "type": "nuevo",
+        "text": "Chat Bot: una sola sección con Inicio, Comandos y Mensajes automáticos. Desde Inicio ves dónde escribe el bot, lo que ha escrito y puedes escribir algo a mano."
+      },
+      {
+        "type": "nuevo",
+        "text": "Interruptor general del Chat Bot para pausarlo sin tocar nada más."
+      },
+      {
+        "type": "nuevo",
+        "text": "Ayuda → Reportar un problema: cuéntanos qué falla, pide ayuda o comparte una idea y nos llega directo, con diagnóstico opcional."
+      },
+      {
+        "type": "nuevo",
+        "text": "Novedades: esta página, la campana de arriba y un aviso cada vez que la app se actualiza."
+      },
+      {
+        "type": "mejora",
+        "text": "Conexiones: cada plataforma muestra Escuchar y Escribir lado a lado, y en «Plataformas que usas» eliges cuáles ver y en qué orden."
+      }
     ]
   },
   {
@@ -17,13 +66,34 @@
     "date": "2026-11-04",
     "title": "Comandos, mensajes automáticos y atajos",
     "items": [
-      { "type": "nuevo", "text": "Comandos del chat como !redes, con alias, permisos, esperas y variables como {usuario} o {azar:1-6}." },
-      { "type": "nuevo", "text": "Mensajes automáticos cada X minutos, solo si el chat está activo." },
-      { "type": "nuevo", "text": "Atajos de teclado que funcionan dentro de OBS o de un juego." },
-      { "type": "nuevo", "text": "Voces de Latinoamérica: una tarjeta por país para escucharlas y elegir tu voz principal." },
-      { "type": "mejora", "text": "Ya no se leen los bots del chat (BotRix, Nightbot, …bot)." },
-      { "type": "mejora", "text": "Logos de Kick, Starvios y TikTok en el panel." },
-      { "type": "arreglo", "text": "«Usar otra cuenta» en Kick y Starvios; el Client ID propio se muestra oculto." }
+      {
+        "type": "nuevo",
+        "text": "Comandos del chat como !redes, con alias, permisos, esperas y variables como {usuario} o {azar:1-6}."
+      },
+      {
+        "type": "nuevo",
+        "text": "Mensajes automáticos cada X minutos, solo si el chat está activo."
+      },
+      {
+        "type": "nuevo",
+        "text": "Atajos de teclado que funcionan dentro de OBS o de un juego."
+      },
+      {
+        "type": "nuevo",
+        "text": "Voces de Latinoamérica: una tarjeta por país para escucharlas y elegir tu voz principal."
+      },
+      {
+        "type": "mejora",
+        "text": "Ya no se leen los bots del chat (BotRix, Nightbot, …bot)."
+      },
+      {
+        "type": "mejora",
+        "text": "Logos de Kick, Starvios y TikTok en el panel."
+      },
+      {
+        "type": "arreglo",
+        "text": "«Usar otra cuenta» en Kick y Starvios; el Client ID propio se muestra oculto."
+      }
     ]
   },
   {
@@ -31,10 +101,22 @@
     "date": "2026-11-04",
     "title": "Alertas con sonido y Starvios escribe",
     "items": [
-      { "type": "nuevo", "text": "Alertas con sus propios segundos, sonido (8 incluidos o el tuyo), volumen y lectura en voz alta." },
-      { "type": "nuevo", "text": "Alerta especial para regalos grandes." },
-      { "type": "nuevo", "text": "El bot escribe en el chat de Starvios con tu cuenta o una aparte." },
-      { "type": "mejora", "text": "Aspecto más pulido en todo el panel." }
+      {
+        "type": "nuevo",
+        "text": "Alertas con sus propios segundos, sonido (8 incluidos o el tuyo), volumen y lectura en voz alta."
+      },
+      {
+        "type": "nuevo",
+        "text": "Alerta especial para regalos grandes."
+      },
+      {
+        "type": "nuevo",
+        "text": "El bot escribe en el chat de Starvios con tu cuenta o una aparte."
+      },
+      {
+        "type": "mejora",
+        "text": "Aspecto más pulido en todo el panel."
+      }
     ]
   },
   {
@@ -42,9 +124,18 @@
     "date": "2026-11-04",
     "title": "Kick para todos y actualizaciones automáticas",
     "items": [
-      { "type": "nuevo", "text": "Autoriza tu cuenta de Kick con un clic, sin pegar claves." },
-      { "type": "nuevo", "text": "Conexiones con Escuchar y Escribir, y opción para ocultar plataformas." },
-      { "type": "nuevo", "text": "Instalador y actualizaciones automáticas desde GitHub." }
+      {
+        "type": "nuevo",
+        "text": "Autoriza tu cuenta de Kick con un clic, sin pegar claves."
+      },
+      {
+        "type": "nuevo",
+        "text": "Conexiones con Escuchar y Escribir, y opción para ocultar plataformas."
+      },
+      {
+        "type": "nuevo",
+        "text": "Instalador y actualizaciones automáticas desde GitHub."
+      }
     ]
   }
 ]

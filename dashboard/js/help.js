@@ -65,6 +65,12 @@ const KB = [
     go: '#card-reportar',
   },
   {
+    guide: 'nono', q: '¿Cómo busco canciones y guardo listas?',
+    keys: ['buscar', 'lista', 'listas', 'playlist', 'historial', 'mezclar', 'importar', 'guardar cola'],
+    answer: 'En <b>Música</b>, escribe en <b>Buscar y añadir</b> y pulsa Enter: toca <b>+</b> para poner la canción en cola. En la cola puedes mezclar, guardar como lista o vaciar, y en <b>Historial</b> volver a poner lo que ya sonó. En <b>Listas de reproducción</b> pones tus listas o importas una de YouTube.',
+    go: '#mz-results',
+  },
+  {
     guide: 'samy', q: '¿Cómo escondo las plataformas que no uso?',
     keys: ['esconder', 'ocultar', 'quitar plataforma', 'no uso', 'plataformas que uso', 'twitch', 'starvios'],
     answer: 'En <b>Conexiones</b>, abre <b>Plataformas que uso</b> y desmarca las que no usas. Se esconden del panel y no se conectan solas. Puedes volver a marcarlas cuando quieras.',

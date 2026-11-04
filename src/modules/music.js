@@ -21,6 +21,7 @@ const strip = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
   let current = null;
   let queue = [];
+  let history = []; // lo que ya sonó (más reciente primero)
   let paused = false;
   let playerId = null; // ventana que reproduce el audio
   let seq = 0;
@@ -29,13 +30,22 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
   const cfg = () => store.get('music');
   const keyOf = (user, platform) => `${platform}:${user.id}`;
 
+  const playlists = () => store.get('musicPlaylists') || [];
   function snapshot() {
-    return { current, queue, paused, volume: cfg().volume, enabled: cfg().enabled, playerId };
+    return {
+      current, queue, paused, volume: cfg().volume, enabled: cfg().enabled, playerId,
+      history: history.slice(0, 40),
+      playlists: playlists().map((p) => ({ id: p.id, name: p.name, count: p.songs.length, durationSec: p.songs.reduce((a, x) => a + (x.durationSec || 0), 0) })),
+    };
   }
   const publish = () => broadcast('music', snapshot());
   const notice = (text, kind = 'info', user = null, platform = '') => broadcast('music-notice', { text, kind, user, platform, ts: Date.now() });
 
   function playNext() {
+    if (current) {
+      history.unshift({ ...current, playedAt: Date.now() });
+      history = history.slice(0, 60);
+    }
     current = queue.shift() || null;
     paused = false;
     if (current) onSong(current);
@@ -153,6 +163,72 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
     },
     setPlayer(clientId) {
       playerId = clientId;
+      publish();
+    },
+    // ---------- Consola ----------
+    shuffle() {
+      for (let i = queue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [queue[i], queue[j]] = [queue[j], queue[i]];
+      }
+      notice('Cola mezclada', 'info');
+      publish();
+    },
+    move(id, to) {
+      const i = queue.findIndex((s) => s.id === id);
+      if (i < 0) return;
+      const [song] = queue.splice(i, 1);
+      queue.splice(Math.max(0, Math.min(queue.length, Number(to) || 0)), 0, song);
+      publish();
+    },
+    // Añadir sin pasar por la búsqueda (resultados del panel, historial, listas).
+    addSongs(songs, by = 'Streamer') {
+      const c = cfg();
+      let added = 0;
+      for (const sng of songs) {
+        if (!sng?.videoId || queue.length >= Math.max(c.maxQueue, 100)) break;
+        if (current?.videoId === sng.videoId || queue.some((x) => x.videoId === sng.videoId)) continue;
+        seq += 1;
+        queue.push({ videoId: sng.videoId, title: sng.title || 'Sin título', author: sng.author || '', durationSec: sng.durationSec || 0, thumbnail: sng.thumbnail || `https://i.ytimg.com/vi/${sng.videoId}/mqdefault.jpg`, id: `s${Date.now()}-${seq}`, requester: by, requesterKey: 'panel:streamer', platform: 'panel', query: sng.title || '' });
+        added++;
+      }
+      if (added && !current) playNext();
+      else publish();
+      return added;
+    },
+    clearHistory() {
+      history = [];
+      publish();
+    },
+    savePlaylist(name) {
+      const songs = [current, ...queue].filter(Boolean).map(({ videoId, title, author, durationSec, thumbnail }) => ({ videoId, title, author, durationSec, thumbnail }));
+      if (!songs.length) throw new Error('La cola está vacía: no hay nada que guardar');
+      const pl = { id: `pl${Date.now()}`, name: String(name || '').trim().slice(0, 60) || `Lista ${playlists().length + 1}`, songs, createdAt: Date.now() };
+      store.set('musicPlaylists', [...playlists(), pl]);
+      publish();
+      return pl;
+    },
+    addPlaylist(name, songs) {
+      const pl = { id: `pl${Date.now()}`, name: String(name || '').slice(0, 60) || 'Lista', songs: songs.slice(0, 200), createdAt: Date.now() };
+      store.set('musicPlaylists', [...playlists(), pl]);
+      publish();
+      return pl;
+    },
+    loadPlaylist(id, shuffle = false) {
+      const pl = playlists().find((p) => p.id === id);
+      if (!pl) throw new Error('Lista no encontrada');
+      const songs = [...pl.songs];
+      if (shuffle) songs.sort(() => Math.random() - 0.5);
+      const n = controls.addSongs(songs, `Lista «${pl.name}»`);
+      notice(`Añadí ${n} canciones de «${pl.name}»`, 'ok');
+      return n;
+    },
+    renamePlaylist(id, name) {
+      store.set('musicPlaylists', playlists().map((p) => (p.id === id ? { ...p, name: String(name || '').trim().slice(0, 60) || p.name } : p)));
+      publish();
+    },
+    deletePlaylist(id) {
+      store.set('musicPlaylists', playlists().filter((p) => p.id !== id));
       publish();
     },
   };
