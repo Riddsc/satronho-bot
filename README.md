@@ -6,7 +6,7 @@ App de escritorio para streamers con **voz neuronal, música pedida por el chat,
 
 ## Los guías
 
-Cuatro perritos te acompañan, cada uno a cargo de una parte del panel:
+Cuatro perritos y MechaRidds te acompañan, cada uno a cargo de una parte del panel:
 
 | Guía | Cómo es | Se encarga de |
 |---|---|---|
@@ -14,6 +14,7 @@ Cuatro perritos te acompañan, cada uno a cargo de una parte del panel:
 | **Troya** | Atigrada, orejas paradas, gafas en la frente | Voz |
 | **Ñoño** | Blanco con parches negros, lengua afuera, corbatín | Música |
 | **Juana** | Negrita de hocico gris con moño rosado | Alertas, metas y estadísticas |
+| **MechaRidds** | Ridds en versión androide: gorra con control, gafas, antena y bata | Chat Bot, comandos, reportes y novedades |
 
 Cada guía te dice qué hacer según el estado de la app y cambia de ánimo: brinca cuando algo sale bien, se queda pensando mientras descarga o busca, y se sacude si hay un problema.
 
@@ -75,7 +76,7 @@ La pantalla **Conexiones** tiene dos pestañas:
 - **Escuchar:** escribes tu usuario y Satronho Bot lee el chat (y en TikTok, los regalos).
 - **Escribir:** Satronho Bot responde en tu chat de **Kick** y de **Starvios**. TikTok solo se escucha por ahora.
 
-En **Plataformas que uso** desmarcas las que no usas: se esconden del panel y no se conectan solas.
+Cada plataforma tiene una tarjeta con **Escuchar** y **Escribir** lado a lado. En **Plataformas que usas** apagas las que no usas (se esconden y no se conectan solas) y eliges su orden, que se respeta en todo el panel.
 
 ### Escribir en Kick
 
@@ -93,7 +94,20 @@ El Secret se puede extraer del `.exe`. Si alguien abusa, lo regeneras en Kick, a
 
 Pulsa **Iniciar sesión** en «Tu cuenta de Starvios». Se abre una ventana de starvios.com dentro de la app. Cuando inicias sesión, la app toma la sesión que guardó la web, la cifra y la renueva sola. Satronho Bot nunca ve tu contraseña. Envía los mensajes igual que la web de Starvios, con `send_live_message`. En **Avanzado** puedes entrar con una cuenta aparte para el bot.
 
-## Comandos del chat y mensajes automáticos (Samy)
+## Chat Bot (MechaRidds)
+
+Todo lo que el bot escribe en el chat está en **Chat Bot**, con tres pestañas:
+- **Inicio:** el interruptor general, dónde escribe (y con qué cuenta), un cuadro para escribir algo a mano y el registro de lo que ha escrito.
+- **Comandos** y **Mensajes automáticos** (abajo).
+
+## Ayuda y novedades
+
+- **Ayuda → Reportar un problema:** el streamer cuenta qué falla, pide ayuda o comparte una idea y llega a un canal de Discord. Puede adjuntar un diagnóstico (versión, Windows, plataformas y últimos errores) que ve antes de enviar; las claves se tachan. El webhook se graba al empaquetar desde el secreto `DISCORD_WEBHOOK_URL` de GitHub Actions (o `SATRONHO_DISCORD_WEBHOOK` en tu PC). Límite: un reporte por minuto y 10 al día.
+- **Novedades:** historial de cada versión desde `CHANGELOG.json`. Tras actualizar, MechaRidds muestra «qué hay de nuevo» y la campana de arriba se marca. Las mismas notas se publican solas en GitHub Releases.
+
+**Para cada versión nueva:** agrega su entrada al principio de `CHANGELOG.json` y sube el número en `package.json`.
+
+## Comandos del chat y mensajes automáticos
 
 **Comandos del chat:** creas `!redes`, `!discord` o lo que quieras, con su respuesta. Cuando alguien lo escribe, el bot responde en Kick y en Starvios; en Twitch y TikTok, Troya puede decirlo en voz alta. Cada comando tiene:
 - otros nombres (alias);

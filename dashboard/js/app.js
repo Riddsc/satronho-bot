@@ -9,7 +9,7 @@ import { initVoice, renderEngine, renderAllowed, onTtsItem, updateTroya, onTtsQu
 import { initMusic, onMusic, onMusicNotice } from './music.js';
 import { initStats, onStats, onStatsHistory } from './stats.js';
 import { initHelp, setHelpContext, openHelp, _test as helpKb } from './help.js';
-import { initNav, countEvent, setStepFacts } from './nav.js';
+import { initNav, countEvent, setStepFacts, onPageChange } from './nav.js';
 import { initAppearance, applyAppearance } from './appearance.js';
 import { initOverlays, setOverlayGoals } from './overlays.js';
 import { initKickbot, renderKickbot } from './kickbot.js';
@@ -17,6 +17,9 @@ import { initAlerts } from './alerts.js';
 import { initStarviosbot, renderStarviosbot } from './starviosbot.js';
 import { initCommands, onCommands, onTimers } from './commands.js';
 import { initHotkeys, onHotkeysStatus, onHotkey } from './hotkeys.js';
+import { initChatbot, onBotSaid, onChatbotAccounts, onChatbotStatus } from './chatbot.js';
+import { initSupport } from './support.js';
+import { initNews, onNewsPage } from './news.js';
 import { initHome, homeEvent, homeVoice, homeMusic, homeStats } from './home.js';
 
 let config = null;
@@ -65,35 +68,57 @@ function updateConnCount() {
   updateSamy();
 }
 
+const PLAT_LOGO = {
+  kick: '<span class="pl plogo" data-logo="kick" aria-hidden="true"></span>',
+  starvios: '<span class="pl plogo" data-logo="starvios" aria-hidden="true"></span>',
+  tiktok: '<span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span>',
+  twitch: '<span class="pl" style="background:#9146ff;color:#fff">Tw</span>',
+};
+const PLAT_FULL = { kick: 'Kick', starvios: 'Starvios', twitch: 'Twitch', tiktok: 'TikTok LIVE' };
+
+// Orden elegido por el streamer (Conexiones → Plataformas que usas).
+export function platformOrder() {
+  const saved = (config.platformOrder || []).filter((p) => ALL_PLATFORMS.includes(p));
+  return [...saved, ...ALL_PLATFORMS.filter((p) => !saved.includes(p))];
+}
+
+function renderPlatformOrder() {
+  const order = platformOrder();
+  $('#plat-order').innerHTML = order.map((p, i) => `<li class="${isShown(p) ? '' : 'off'}" data-p="${p}">
+    <span class="num">${i + 1}</span>${PLAT_LOGO[p]}<b>${PLAT_FULL[p]}</b>
+    <label class="switch" title="${isShown(p) ? 'Ocultar' : 'Mostrar'} ${PLAT_FULL[p]}"><input type="checkbox" data-show="${p}" ${isShown(p) ? 'checked' : ''}><span></span></label>
+    <span class="row tight"><button type="button" class="btn small ghost" data-move="-1" ${i === 0 ? 'disabled' : ''} aria-label="Subir ${PLAT_FULL[p]}">▲</button><button type="button" class="btn small ghost" data-move="1" ${i === order.length - 1 ? 'disabled' : ''} aria-label="Bajar ${PLAT_FULL[p]}">▼</button></span>
+  </li>`).join('');
+}
+
 function applyPlatformVisibility() {
+  const order = platformOrder();
+  // Tarjetas y botones de arriba en el orden elegido.
+  const cards = $('#card-conexiones');
+  const chips = $('#chip-kick')?.parentElement;
+  for (const p of order) {
+    const card = $(`.platform[data-platform="${p}"]`);
+    if (card) cards.appendChild(card);
+  }
+  // Los botones de arriba van juntos: se reinsertan en orden en el mismo sitio.
+  if (chips) {
+    const anchor = chips.querySelector('.pchip')?.previousSibling || null;
+    const frag = document.createDocumentFragment();
+    for (const p of order) frag.appendChild($(`#chip-${p}`));
+    chips.insertBefore(frag, anchor ? anchor.nextSibling : chips.firstChild);
+  }
   for (const p of ALL_PLATFORMS) {
     const show = isShown(p);
     $(`#chip-${p}`).hidden = !show;
-    for (const el of $$(`[data-platform="${p}"], [data-platform-write="${p}"]`)) el.hidden = !show;
-    const box = $(`#conn-pick [data-show="${p}"]`);
-    if (box) box.checked = show;
+    for (const el of $$(`[data-platform="${p}"]`)) el.hidden = !show;
   }
-  const none = !ALL_PLATFORMS.some(isShown);
-  $('#conn-pick').toggleAttribute('open', none || $('#conn-pick').open);
+  renderPlatformOrder();
   updateConnCount();
 }
 
 function initConnTabs() {
-  const tabs = $('#conn-tabs');
-  const show = (tab) => {
-    for (const b of tabs.querySelectorAll('[data-conn-tab]')) b.setAttribute('aria-pressed', String(b.dataset.connTab === tab));
-    for (const pane of $$('[data-conn-pane]')) pane.hidden = pane.dataset.connPane !== tab;
-    try { localStorage.setItem('satronho.connTab', tab); } catch { /* sin almacenamiento */ }
-  };
-  tabs.addEventListener('click', (ev) => {
-    const b = ev.target.closest('[data-conn-tab]');
-    if (b) show(b.dataset.connTab);
-  });
-  let saved = 'listen';
-  try { saved = localStorage.getItem('satronho.connTab') || 'listen'; } catch { /* sin almacenamiento */ }
-  show(saved === 'write' ? 'write' : 'listen');
-
-  $('#conn-pick').addEventListener('change', async (ev) => {
+  const list = $('#plat-order');
+  list.addEventListener('change', async (ev) => {
     const p = ev.target.dataset.show;
     if (!p) return;
     const hidden = !ev.target.checked;
@@ -104,6 +129,20 @@ function initConnTabs() {
       await api('POST', `/api/disconnect/${p}`).catch(() => {});
     }
     applyPlatformVisibility();
+  });
+  list.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-move]');
+    if (!b) return;
+    const p = b.closest('li').dataset.p;
+    const order = platformOrder();
+    const i = order.indexOf(p);
+    const j = i + Number(b.dataset.move);
+    if (j < 0 || j >= order.length) return;
+    [order[i], order[j]] = [order[j], order[i]];
+    config.platformOrder = order;
+    saveConfig({ platformOrder: order });
+    applyPlatformVisibility();
+    $(`#plat-order li[data-p="${p}"] [data-move="${b.dataset.move}"]`)?.focus();
   });
   applyPlatformVisibility();
 }
@@ -312,7 +351,7 @@ function renderUpdate(u) {
 
 // ---------- Ayuda: preguntas por guía ----------
 function renderHelpPage() {
-  $('#help-guides').innerHTML = ['samy', 'troya', 'nono', 'juana']
+  $('#help-guides').innerHTML = ['samy', 'troya', 'nono', 'juana', 'mecha']
     .map((id) => {
       const qs = helpKb.KB.filter((e) => e.guide === id);
       return `<div class="card help-guide" style="--g:${GUIDES[id].color}">
@@ -360,6 +399,9 @@ async function init() {
   initHome();
   initAppSettings();
   initHotkeys(config);
+  initSupport();
+  initNews(config, state.app?.version);
+  onPageChange(onNewsPage);
   for (const p of ['tiktok', 'kick', 'starvios', 'twitch']) renderStatus({ platform: p, state: 'disconnected' });
 
   let started = false;
@@ -382,6 +424,7 @@ async function init() {
             initKickbot(config, p.kickbot);
             initStarviosbot(config, p.starviosbot);
             initCommands(p);
+            initChatbot(config, p);
           } else {
             renderKickbot(p.kickbot);
             renderStarviosbot(p.starviosbot);
@@ -406,8 +449,9 @@ async function init() {
           renderUpdate(p.update);
           break;
         case 'update': renderUpdate(p); break;
-        case 'kickbot': renderKickbot(p); kickWriteState(p); break;
-        case 'starviosbot': renderStarviosbot(p); break;
+        case 'kickbot': renderKickbot(p); kickWriteState(p); onChatbotAccounts('kick', p); break;
+        case 'starviosbot': renderStarviosbot(p); onChatbotAccounts('starvios', p); break;
+        case 'bot-said': onBotSaid(p); break;
         case 'commands': onCommands(p); break;
         case 'timers': onTimers(p); break;
         case 'hotkeys-status': onHotkeysStatus(p); break;
@@ -416,7 +460,7 @@ async function init() {
         case 'goal': goals.set(p.id, p); renderGoals(); break;
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;
         case 'goal-complete': sayFor('juana', `¡Cumpliste la meta «${esc(p.title)}»! 🎉`, 9000, 'ok'); break;
-        case 'status': renderStatus(p); break;
+        case 'status': renderStatus(p); onChatbotStatus(p); break;
         case 'tts': onTtsItem(p); break;
         case 'tts-engine':
           lastEngine = p;
