@@ -9,7 +9,13 @@
      ?sound=0 (sin sonido) · ?scale=1.5 (más grande) · ?color=%23ffb23e -->
 <link rel="stylesheet" href="base.css">
 <style>
-  :root { --accent: #ffb23e; --follow: #8b7bff; --sub: #ffb23e; --gift: #ff5d8f; --like: #4fd1c5; --share: #5ab0ff; }
+  :root { --accent: #ffb23e; --follow: #8b7bff; --sub: #ffb23e; --gift: #ff5d8f; --like: #4fd1c5; --share: #5ab0ff; --sticker: #c084fc; --join: #74d14c; --superfan: #ffd23e; --live-start: #ff4d6a; --live-end: #9b8cff; }
+  /* Stickers: saltan al instante, sin cola, en cualquier parte del escenario. */
+  .pops { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  .pop { position: absolute; display: grid; justify-items: center; gap: 4px; animation: stick 2.2s cubic-bezier(.2, 1.5, .4, 1) both; }
+  .pop img { width: calc(110px * var(--scale, 1)); height: calc(110px * var(--scale, 1)); object-fit: contain; filter: drop-shadow(0 8px 18px rgba(0,0,0,.45)); }
+  .pop span { font-weight: 800; font-size: 18px; padding: 3px 12px; border-radius: 99px; background: var(--bg); color: var(--fg, #fff); border: 2px solid var(--sticker); white-space: nowrap; }
+  @keyframes stick { 0% { opacity: 0; transform: scale(.2) rotate(-25deg); } 18% { opacity: 1; transform: scale(1.15) rotate(8deg); } 28% { transform: scale(1) rotate(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-60px) scale(.9); } }
   body { height: 100vh; display: grid; place-items: center; }
   .stage { transform: scale(var(--scale, 1)); }
   .alert {
@@ -49,6 +55,7 @@
 </head>
 <body>
 <div class="stage" id="stage"></div>
+<div class="pops" id="pops"></div>
 
 <script type="module">
   import { connectSatronho, param } from './client.js';
@@ -69,14 +76,37 @@
     } },
     like:   { icon: '👍', label: 'Likes',         title: (e) => `<b>${e.user.name}</b> dio ${e.amount} likes` },
     share:  { icon: '↗', label: 'Compartido',    title: (e) => `<b>${e.user.name}</b> compartió el directo` },
+    sticker: { icon: '✨', label: 'Sticker',       title: (e) => `<b>${e.user.name}</b>` },
+    join:   { icon: '👋', label: 'Llegó',          title: (e) => `<b>${e.user.name}</b> llegó al directo` },
+    superfan: { icon: '⭐', label: '¡Superfan!',   title: (e) => `<b>${e.user.name}</b> ahora es superfan` },
+    'live-start': { icon: '🔴', label: 'En vivo',  title: () => '¡Empezó el directo!' },
+    'live-end': { icon: '⏹', label: 'Fin',        title: () => 'Gracias por acompañarme' },
   };
+  const okImg = (u) => /^(https:\/\/|\/gift-img\?|\/alert-sounds\/|\/alert-img\/)/.test(u || '');
+
+  // Sticker o alerta instantánea: sonido ya y un salto en pantalla.
+  async function instant(e) {
+    if (soundOn()) playAlertSound(e.sound || { sound: 'burbuja' });
+    const pops = document.getElementById('pops');
+    const el = document.createElement('div');
+    el.className = 'pop';
+    el.style.left = `${8 + Math.random() * 74}%`;
+    el.style.top = `${14 + Math.random() * 52}%`;
+    if (e.color) el.style.setProperty('--sticker', e.color);
+    const img = okImg(e.image) ? `<img src="${esc(e.image)}" alt="">` : `<div style="font-size:72px">${(TEMPLATES[e.type] || TEMPLATES.sticker).icon}</div>`;
+    el.innerHTML = `${img}<span>${esc(e.custom ? e.title : e.user?.name || '')}</span>`;
+    pops.append(el);
+    while (pops.children.length > 12) pops.firstChild.remove();
+    setTimeout(() => el.remove(), 2300);
+  }
 
   // Cola: las alertas salen de una en una, nunca se pisan.
   const queue = [];
   let busy = false;
 
   function enqueue(e) {
-    if (!TEMPLATES[e.type]) return;
+    if (e.instant) return instant(e);
+    if (!TEMPLATES[e.type] && !e.custom) return;
     queue.push(e);
     if (!busy) next();
   }
@@ -86,8 +116,8 @@
     if (!e) { busy = false; return; }
     busy = true;
 
-    const t = TEMPLATES[e.type];
-    const safe = { ...e, user: { ...e.user, name: esc(e.user.name) } };
+    const t = TEMPLATES[e.type] || { icon: '✦', label: 'Alerta', title: (x) => `<b>${x.user.name}</b>` };
+    const safe = { ...e, user: { ...e.user, name: esc(e.user?.name || '') } };
 
     // El sonido arranca con la alerta; si «dura lo que dura el sonido»,
     // la alerta se queda en pantalla hasta que termina (mínimo 2 s).
@@ -97,14 +127,15 @@
 
     const el = document.createElement('div');
     el.className = `alert surface${e.big ? ' big' : ''}`;
-    el.style.setProperty('--c', `var(--${e.type})`);
-    // Si el regalo trae imagen (TikTok), la usamos como insignia.
-    const img = /^https:\/\//.test(e.extra?.image || '') ? `<img src="${esc(e.extra.image)}" alt="" style="width:62px;height:62px;object-fit:contain">` : t.icon;
+    el.style.setProperty('--c', e.color || `var(--${e.type})`);
+    // Si el regalo trae imagen, la usamos como insignia (copiada en tu PC).
+    const src = okImg(e.image) ? e.image : /^https:\/\//.test(e.extra?.image || '') ? e.extra.image : '';
+    const img = src ? `<img src="${esc(src)}" alt="" style="width:62px;height:62px;object-fit:contain">` : t.icon;
     el.innerHTML = `
       <div class="badge">${img}</div>
       <div>
-        <div class="label">${e.big ? '¡Regalo grande!' : t.label}</div>
-        <div class="title">${t.title(safe)}</div>
+        <div class="label">${e.custom ? esc(e.label) : e.big ? '¡Regalo grande!' : t.label}</div>
+        <div class="title">${e.custom ? esc(e.title).replace(esc(e.user?.name || '\u0000'), `<b>${esc(e.user?.name || '')}</b>`) : t.title(safe)}</div>
         ${e.message ? `<div class="msg muted">${esc(e.message)}</div>` : ''}
         <div class="bar" style="animation-duration:${dur}ms"></div>
       </div>`;

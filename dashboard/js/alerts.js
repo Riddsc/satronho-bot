@@ -13,6 +13,9 @@ const KINDS = [
   { key: 'sub', icon: '★', color: '#ffb23e', name: 'Suscripción', desc: 'Subs y meses acumulados' },
   { key: 'like', icon: '👍', color: '#4fd1c5', name: 'Likes', desc: 'Cada tanda de likes (puede ser mucho)' },
   { key: 'share', icon: '↗', color: '#5ab0ff', name: 'Compartido', desc: 'Cuando alguien comparte tu LIVE' },
+  { key: 'sticker', icon: '✨', color: '#c084fc', name: 'Sticker', desc: 'Stickers del chat: salen al instante, con su imagen' },
+  { key: 'superfan', icon: '⭐', color: '#ffd23e', name: 'Superfan', desc: 'Alguien se vuelve superfan en TikTok' },
+  { key: 'join', icon: '👋', color: '#74d14c', name: 'Llega al directo', desc: 'Alguien entra a tu LIVE (puede ser mucho)' },
 ];
 
 let config;

@@ -7,6 +7,8 @@ import { sayFor } from './guides.js';
 const LABEL = { follow: 'te sigue', sub: 'se suscribió', like: 'dio likes', share: 'compartió el LIVE' };
 
 export function homeEvent(e) {
+  // Las entradas al directo y el inicio o fin del LIVE no llenan el resumen.
+  if (['join', 'live-start', 'live-end'].includes(e.type)) return;
   const feed = $('#home-feed');
   feed.querySelector('.empty')?.remove();
   const li = document.createElement('li');
@@ -14,6 +16,8 @@ export function homeEvent(e) {
   if (e.type === 'chat') what = `: ${esc(e.message)}`;
   else if (e.type === 'gift') what = ` envió ${esc(e.extra?.giftName || 'un regalo')}${e.extra?.count > 1 ? ` ×${e.extra.count}` : ''}`;
   else if (e.type === 'like') what = ` dio ${e.amount} likes`;
+  else if (e.type === 'sticker') what = ' mandó un sticker';
+  else if (e.type === 'superfan') what = ' ahora es superfan';
   else what = ` ${LABEL[e.type] || e.type}`;
   li.innerHTML = `<span class="tag ${e.type}">${e.type === 'chat' ? 'chat' : e.type === 'gift' ? 'regalo' : e.type}</span>
     <span class="txt"><span class="plat ${e.platform}">${esc(PLATFORM_NAMES[e.platform] || e.platform)}</span><b>${esc(e.user.name)}</b>${what}</span><time>${timeOf(e.ts).slice(0, 5)}</time>`;
