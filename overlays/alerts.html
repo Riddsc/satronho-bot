@@ -60,7 +60,7 @@
 <script type="module">
   import { connectSatronho, param } from './client.js';
   import { applyOverlayStyle, overlayStyle, listenPreview, isPreview } from './style.js';
-  import { playAlertSound } from './sounds.js';
+  import { playAlertSound, stopAlertSound } from './sounds.js';
 
   const stage = document.getElementById('stage');
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -142,6 +142,7 @@
     stage.replaceChildren(el);
 
     setTimeout(() => {
+      if (!el.isConnected) return; // la cortaron desde la app
       el.classList.add('leaving');
       setTimeout(() => { el.remove(); next(); }, 450);
     }, dur);
@@ -163,6 +164,14 @@
     if (kind === 'hello') applyOverlayStyle(payload.overlayStyle);
     if (kind === 'overlay-style') applyOverlayStyle(payload);
     if (kind === 'alert' && !isPreview) enqueue(payload);
+    // Desde la barra derecha de la app: cortar la que suena o vaciar la cola.
+    if (kind === 'alert-control' && !isPreview) {
+      queue.length = payload.action === 'clear' ? 0 : queue.length;
+      stopAlertSound?.();
+      const cur = stage.firstElementChild;
+      if (cur) { cur.remove(); busy = false; next(); }
+      document.getElementById('pops').replaceChildren();
+    }
   });
 </script>
 </body>

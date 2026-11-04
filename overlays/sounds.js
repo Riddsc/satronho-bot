@@ -99,6 +99,15 @@ const RECIPES = {
   },
 };
 
+// Lo que está sonando, para poder cortarlo (barra derecha → «Cortar alerta»).
+const playing = new Set();
+export function stopAlertSound() {
+  for (const x of playing) {
+    try { if (x.pause) x.pause(); else { x.gain.cancelScheduledValues(0); x.gain.value = 0; } } catch { /* ya terminó */ }
+  }
+  playing.clear();
+}
+
 export async function playAlertSound({ sound = 'campanita', volume = 70, maxSeconds = 0, url = '' } = {}) {
   if (sound === 'none' || volume <= 0) return 0;
   const vol = Math.max(0, Math.min(100, volume)) / 100;
@@ -107,6 +116,8 @@ export async function playAlertSound({ sound = 'campanita', volume = 70, maxSeco
     if (!url) return 0;
     const el = new Audio(url);
     el.volume = vol;
+    playing.add(el);
+    el.addEventListener('ended', () => playing.delete(el), { once: true });
     const length = await new Promise((resolve) => {
       el.addEventListener('loadedmetadata', () => resolve(el.duration || 0), { once: true });
       el.addEventListener('error', () => resolve(0), { once: true });
@@ -141,6 +152,8 @@ export async function playAlertSound({ sound = 'campanita', volume = 70, maxSeco
     const out = c.createGain();
     out.gain.value = vol;
     out.connect(c.destination);
+    playing.add(out);
+    setTimeout(() => playing.delete(out), 8000);
     const t = c.currentTime + 0.02;
     const length = recipe(c, out, t);
     if (maxSeconds > 0 && maxSeconds < length) {

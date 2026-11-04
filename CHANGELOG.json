@@ -1,5 +1,64 @@
 [
   {
+    "version": "0.13.0",
+    "date": "2026-11-04",
+    "title": "Alertas propias, permisos de música, podio y tu perfil",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Alertas propias: dale a cada regalo su propio sonido, texto, imagen y duración. Eliges los regalos tocándolos en una cuadrícula con su imagen y su valor, o usas un rango de monedas."
+      },
+      {
+        "type": "nuevo",
+        "text": "«Importar regalos de TikTok» trae el catálogo de tu cuenta con imagen, ID y valor, y se actualiza solo al conectarte. Kick y Starvios van guardando los regalos que llegan a tus directos."
+      },
+      {
+        "type": "nuevo",
+        "text": "Stickers: salen al instante, sin esperar turno, con su imagen y sonido. También hay alertas para superfans, para quien llega al directo, para cada N likes de una persona o de todos, para palabras del chat y para cuando empieza o termina el directo."
+      },
+      {
+        "type": "nuevo",
+        "text": "«Solo la suya» o «Las dos»: tú decides si una alerta propia reemplaza a la de serie o suena junto a ella."
+      },
+      {
+        "type": "nuevo",
+        "text": "Música → Permisos y comandos: quién pide en cada plataforma (también solo tu equipo con Quiéreme), los comandos !cola, !sonando, !mia y !votar con nombres a tu gusto, espera entre pedidos y votos para saltar."
+      },
+      {
+        "type": "nuevo",
+        "text": "Cuidado con los derechos de autor: evita los videos oficiales de sellos o pone solo música libre. Lo puedes apagar si prefieres correr el riesgo."
+      },
+      {
+        "type": "nuevo",
+        "text": "Podio en vivo para OBS: top 3, 4 o 5 de likes, regalos o mensajes, con corona, fotos y su título."
+      },
+      {
+        "type": "nuevo",
+        "text": "Siete temas de pantalla para todos los overlays: Satronho, Neón, Cristal, Cuaderno, Arcade, Dulce y Minimal."
+      },
+      {
+        "type": "nuevo",
+        "text": "Tu perfil: tu nombre (las guías te saludan), tu foto, tus cuentas, ocultar y ordenar el menú, y la barra rápida."
+      },
+      {
+        "type": "nuevo",
+        "text": "Barra rápida a la derecha, fija o flotante: apagar la voz, saltar mensaje, pausar o saltar música, abrir o cerrar pedidos, cortar o silenciar alertas, reiniciar el podio y más."
+      },
+      {
+        "type": "mejora",
+        "text": "Tus cuentas arriba: un clic abre su menú para ver solo esa plataforma en el chat, conectar, desconectar o ir a Conexiones. ««» las encoge a solo el logo."
+      },
+      {
+        "type": "mejora",
+        "text": "Voz → Quién se lee más claro: cada plataforma tiene su interruptor y su regla en una sola caja, y lo de Quiéreme vive dentro de TikTok."
+      },
+      {
+        "type": "arreglo",
+        "text": "Cada guía habla solo de lo suyo: en Chat en vivo, Samy ya no habla por Troya."
+      }
+    ]
+  },
+  {
     "version": "0.12.0",
     "date": "2026-11-04",
     "title": "Chat en vivo, quién puede hablar y estadísticas nuevas",

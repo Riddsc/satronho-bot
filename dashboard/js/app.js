@@ -6,6 +6,7 @@ import { connectSatronho } from '/overlays/client.js';
 import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSaved } from './util.js';
 import { initGuides, setBubble, sayFor, guideToast, GUIDES } from './guides.js';
 import { initAlertRules, onCatalogChange } from './alertRulesUI.js';
+import { initQuick, onQuickStatus, onQuickMusic, refreshRail } from './quick.js';
 import { addChatEvent, markChatDecision, initLiveChat, resetChat } from './livechat.js';
 import { initVoice, renderEngine, renderAllowed, onTtsItem, updateTroya, onTtsQueue, setOnlineVoices, setTtsLog, addTtsLog } from './voice.js';
 import { initMusic, onMusic, onMusicNotice } from './music.js';
@@ -38,6 +39,7 @@ const STATE_TEXT = { connected: 'Conectado', connecting: 'Conectando…', error:
 
 function renderStatus(s) {
   if (!PLATFORM_NAMES[s.platform] || s.platform === 'panel') return;
+  onQuickStatus(s);
   status[s.platform] = s;
   const name = PLATFORM_NAMES[s.platform];
   const chip = $(`#chip-${s.platform}`);
@@ -353,6 +355,7 @@ async function init() {
   initGoalsAndAlerts();
   initOverlays(config);
   initLiveChat();
+  initQuick(config);
   initHome();
   initAppSettings();
   initHotkeys(config);
@@ -428,7 +431,7 @@ async function init() {
           setStepFacts({ voice: p.voices?.some((x) => x.installed) });
           break;
         case 'tts-allowed': renderAllowed(p); break;
-        case 'music': lastMusic = p; onMusic(p); homeMusic(p); break;
+        case 'music': lastMusic = p; onMusic(p); homeMusic(p); onQuickMusic(p); break;
         case 'music-notice': onMusicNotice(p); break;
         case 'tts-decision': markDecision(p); break;
         case 'tts-log': addTtsLog(p); break;

@@ -241,6 +241,22 @@ export function markChatDecision(d) {
   if (e) li.replaceWith(nodeFor(e));
 }
 
+// Desde las cuentas de arriba: ver solo una plataforma o mostrarla u ocultarla.
+export function showOnlyPlatform(p) {
+  prefs.split = false;
+  prefs.tab = p;
+  prefs.platforms[p] = true;
+  savePrefs();
+  if ($('#lc-feeds')) { renderFeeds(); fillPanel(); }
+}
+export const chatShows = (p) => prefs.platforms[p] !== false;
+export function setChatShows(p, on) {
+  prefs.platforms[p] = on;
+  if (!on && prefs.tab === p) prefs.tab = 'all';
+  savePrefs();
+  if ($('#lc-feeds')) { renderFeeds(); fillPanel(); }
+}
+
 // Al (re)conectar con la app: se vacía y llegan de nuevo los recientes.
 export function resetChat() {
   items.length = 0;
