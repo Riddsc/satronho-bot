@@ -1,0 +1,65 @@
+# Publica una versión nueva de Satronho Bot en GitHub Releases.
+#
+# Cómo se usa:
+#   1. Sube el número de versión en package.json (por ejemplo 0.6.0).
+#   2. Crea una etiqueta con ese número:  git tag v0.6.0  &&  git push --tags
+#      (o en GitHub: Releases → Draft a new release → Tag v0.6.0).
+#   3. GitHub arma la app en Windows con Velopack y la publica sola.
+#      Las apps instaladas la descargan y muestran «Reiniciar y actualizar»;
+#      las portables muestran el aviso «Hay una versión nueva».
+name: Publicar versión
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Instalar Velopack (vpk)
+        run: dotnet tool install -g vpk
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisar que la etiqueta y package.json coinciden
+        shell: bash
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "v$V" != "${GITHUB_REF_NAME}" ]; then
+            echo "La etiqueta ${GITHUB_REF_NAME} no coincide con package.json (v$V)"; exit 1
+          fi
+
+      - name: Bajar la versión anterior (para actualizaciones más pequeñas)
+        continue-on-error: true
+        run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --outputDir releases
+
+      - name: Empaquetar
+        env:
+          SATRONHO_UPDATE_REPO: https://github.com/${{ github.repository }}
+          # App de Kick «SatronhoBot»: Settings → Secrets and variables → Actions.
+          SATRONHO_KICK_CLIENT_ID: ${{ secrets.KICK_CLIENT_ID }}
+          SATRONHO_KICK_CLIENT_SECRET: ${{ secrets.KICK_CLIENT_SECRET }}
+        run: node scripts/release.mjs
+
+      - name: Publicar en GitHub Releases
+        shell: bash
+        run: |
+          V=$(node -p "require('./package.json').version")
+          vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "Satronho Bot $V" --tag "v$V" --outputDir releases

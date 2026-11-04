@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Satronho Bot · © 2026 RiddsSatronho -->
+  <defs>
+    <radialGradient id="planet" cx="38%" cy="32%" r="70%">
+      <stop offset="0" stop-color="#ffd58a"/><stop offset=".55" stop-color="#ffb23e"/><stop offset="1" stop-color="#b8650f"/>
+    </radialGradient>
+    <clipPath id="front"><rect x="-200" y="270" width="912" height="400" transform="rotate(-18 256 270)"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0f0d17"/>
+  <circle cx="256" cy="256" r="230" fill="#1d1733"/>
+  <ellipse cx="256" cy="270" rx="214" ry="62" fill="none" stroke="#8b7bff" stroke-width="26" transform="rotate(-18 256 270)"/>
+  <circle cx="256" cy="256" r="132" fill="url(#planet)"/>
+  <g clip-path="url(#front)"><ellipse cx="256" cy="270" rx="214" ry="62" fill="none" stroke="#8b7bff" stroke-width="26" transform="rotate(-18 256 270)"/></g>
+  <g fill="#1b1430" opacity=".9" transform="translate(226 206)">
+    <ellipse cx="30" cy="52" rx="28" ry="24"/>
+    <ellipse cx="2" cy="16" rx="11" ry="14"/><ellipse cx="22" cy="2" rx="11" ry="14"/>
+    <ellipse cx="44" cy="2" rx="11" ry="14"/><ellipse cx="62" cy="18" rx="11" ry="14"/>
+  </g>
+</svg>

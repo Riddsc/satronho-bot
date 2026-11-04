@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Satronho · Meta</title>
+<meta name="author" content="RiddsSatronho">
+<!-- Overlay para OBS: Fuente de navegador de 700x140.
+     Parámetros: ?id=seguidores (obligatorio) · ?color=%23ffb23e · ?scale=1.2 -->
+<link rel="stylesheet" href="base.css">
+<style>
+  :root { --accent: #8b7bff; --track: rgba(18, 14, 30, 0.88); }
+  body { padding: 16px; }
+  #root { transform: scale(var(--scale)); transform-origin: 0 0; width: calc(100% / var(--scale)); }
+  .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  .title { font-size: 26px; font-weight: 800; }
+  .count { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .track { position: relative; height: 34px; border-radius: calc(17px * var(--r) + 2px); background: var(--bg); overflow: hidden; border: 2px solid color-mix(in srgb, var(--accent) 55%, transparent); }
+  .fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 65%, #ffffff), var(--accent));
+    border-radius: inherit;
+    transition: width .9s cubic-bezier(.2, .9, .3, 1);
+    box-shadow: 0 0 18px var(--accent);
+  }
+  .pct { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; font-size: 17px; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+  .done .track { animation: glow 1.2s ease-in-out 3; }
+  @keyframes glow { 50% { box-shadow: 0 0 40px var(--accent); transform: scale(1.02); } }
+  .missing { font-size: 18px; opacity: .8; }
+</style>
+</head>
+<body>
+<div id="root" class="missing">Esperando a Satronho Bot…</div>
+
+<script type="module">
+  import { connectSatronho, param } from './client.js';
+  import { applyOverlayStyle, listenPreview, isPreview } from './style.js';
+
+  const id = param('id', 'seguidores');
+  const root = document.getElementById('root');
+
+  function render(g) {
+    if (!g) {
+      root.className = 'missing';
+      root.textContent = `No existe la meta «${id}»`;
+      return;
+    }
+    const pct = g.target > 0 ? Math.min(100, (g.current / g.target) * 100) : 0;
+    if (!root.querySelector('.track')) {
+      root.className = '';
+      root.innerHTML = `
+        <div class="head"><span class="title"></span><span class="count"></span></div>
+        <div class="track surface"><div class="fill"></div><div class="pct"></div></div>`;
+    }
+    root.querySelector('.title').textContent = g.title;
+    root.querySelector('.count').textContent = `${g.current} / ${g.target}`;
+    root.querySelector('.fill').style.width = `${pct}%`;
+    root.querySelector('.pct').textContent = `${Math.floor(pct)}%`;
+  }
+
+  function celebrate() {
+    root.classList.remove('done');
+    void root.offsetWidth; // reinicia la animación
+    root.classList.add('done');
+  }
+
+  listenPreview();
+  applyOverlayStyle({});
+  let demo = 62;
+  if (isPreview) setInterval(() => { demo = demo >= 100 ? 20 : demo + 9; render({ title: 'Meta de diamantes', current: demo * 10, target: 1000 }); }, 1500);
+
+  connectSatronho((kind, payload) => {
+    if (kind === 'hello') {
+      applyOverlayStyle(payload.overlayStyle);
+      if (isPreview) return render(payload.goals.find((g) => g.id === id) || { title: 'Meta de diamantes', current: 620, target: 1000 });
+      render(payload.goals.find((g) => g.id === id));
+    }
+    if (kind === 'overlay-style') applyOverlayStyle(payload);
+    if (isPreview) return;
+    if (kind === 'goal' && payload.id === id) render(payload);
+    if (kind === 'goal-complete' && payload.id === id) celebrate();
+    if (kind === 'goal-removed' && payload.id === id) render(null);
+  });
+</script>
+</body>
+</html>

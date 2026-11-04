@@ -1,0 +1,11 @@
+/* Satronho Bot · base de los overlays (© 2026 RiddsSatronho) */
+@import url('/fonts.css');
+:root { --font: 'Bricolage Grotesque', system-ui, sans-serif; --ink: #fff7ec; --muted: #c9bfdc; --bg: rgba(18, 14, 30, 0.92); --r: 1; --scale: 1; }
+html, body { margin: 0; background: transparent; overflow: hidden; }
+body { font-family: var(--font); color: var(--ink); }
+/* Fondo de las tarjetas: sólido, translúcido o sin fondo */
+body[data-card="glass"] { --bg: rgba(18, 14, 30, 0.5); }
+body[data-card="glass"] .surface { backdrop-filter: blur(10px); }
+body[data-card="none"] .surface { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
+body[data-card="none"] { text-shadow: 0 2px 6px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.9); }
+.muted { color: color-mix(in srgb, var(--ink) 72%, transparent); }
