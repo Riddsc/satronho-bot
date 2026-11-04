@@ -1,16 +1,18 @@
 # Publica una versión nueva de Satronho Bot en GitHub Releases.
 #
 # Cómo se usa:
-#   1. Sube el número de versión en package.json (por ejemplo 0.6.0).
-#   2. Crea una etiqueta con ese número:  git tag v0.6.0  &&  git push --tags
-#      (o en GitHub: Releases → Draft a new release → Tag v0.6.0).
-#   3. GitHub arma la app en Windows con Velopack y la publica sola.
+#   1. Sube el número de versión en package.json (por ejemplo 0.7.0) y súbelo a main.
+#   2. GitHub ve que esa versión todavía no está publicada, arma la app en
+#      Windows con Velopack y la publica sola con la etiqueta v0.7.0.
+#   (También sirve crear la etiqueta a mano o pulsar «Run workflow».)
 #      Las apps instaladas la descargan y muestran «Reiniciar y actualizar»;
 #      las portables muestran el aviso «Hay una versión nueva».
 name: Publicar versión
 
 on:
   push:
+    branches: [main]
+    paths: ['package.json', '.github/workflows/publicar.yml']
     tags: ['v*']
   workflow_dispatch:
 
@@ -23,22 +25,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: ¿Esta versión ya está publicada?
+        id: check
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          V=$(node -p "require('./package.json').version")
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          if gh release view "v$V" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "La versión v$V ya está publicada: no hay nada que hacer."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip != 'true'
         with:
           node-version: 22
           cache: npm
 
       - uses: actions/setup-dotnet@v4
+        if: steps.check.outputs.skip != 'true'
         with:
           dotnet-version: '8.0.x'
 
       - name: Instalar Velopack (vpk)
+        if: steps.check.outputs.skip != 'true'
         run: dotnet tool install -g vpk
 
       - name: Instalar dependencias
+        if: steps.check.outputs.skip != 'true'
         run: npm ci
 
       - name: Revisar que la etiqueta y package.json coinciden
+        if: steps.check.outputs.skip != 'true'
         shell: bash
         run: |
           V=$(node -p "require('./package.json').version")
@@ -47,10 +67,12 @@ jobs:
           fi
 
       - name: Bajar la versión anterior (para actualizaciones más pequeñas)
+        if: steps.check.outputs.skip != 'true'
         continue-on-error: true
         run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --outputDir releases
 
       - name: Empaquetar
+        if: steps.check.outputs.skip != 'true'
         env:
           SATRONHO_UPDATE_REPO: https://github.com/${{ github.repository }}
           # App de Kick «SatronhoBot»: Settings → Secrets and variables → Actions.
@@ -59,6 +81,7 @@ jobs:
         run: node scripts/release.mjs
 
       - name: Publicar en GitHub Releases
+        if: steps.check.outputs.skip != 'true'
         shell: bash
         run: |
           V=$(node -p "require('./package.json').version")
