@@ -15,6 +15,8 @@ import { initOverlays, setOverlayGoals } from './overlays.js';
 import { initKickbot, renderKickbot } from './kickbot.js';
 import { initAlerts } from './alerts.js';
 import { initStarviosbot, renderStarviosbot } from './starviosbot.js';
+import { initCommands, onCommands, onTimers } from './commands.js';
+import { initHotkeys, onHotkeysStatus, onHotkey } from './hotkeys.js';
 import { initHome, homeEvent, homeVoice, homeMusic, homeStats } from './home.js';
 
 let config = null;
@@ -41,6 +43,12 @@ function renderStatus(s) {
   const box = $(`.platform[data-platform="${s.platform}"] .pstate`);
   box.textContent = s.detail ? `${STATE_TEXT[s.state] || s.state} · ${s.detail}` : STATE_TEXT[s.state] || s.state;
   box.className = `pstate ${STATE_CLASS[s.state] || ''}`;
+  // «Desconectar» solo cuando está conectado o intentándolo.
+  const card = $(`.platform[data-platform="${s.platform}"]`);
+  const off = !s.state || s.state === 'disconnected';
+  card.querySelector('[data-act="disconnect"]').hidden = off;
+  card.querySelector('[data-act="connect"]').textContent = off ? 'Conectar' : 'Reconectar';
+  card.classList.toggle('live', s.state === 'connected');
 
   updateConnCount();
 }
@@ -139,7 +147,7 @@ function initPlatforms() {
       if (!channel) return guideToast('samy', `Necesito tu usuario de ${PLATFORM_NAMES[platform]}`);
       // Error común: escribir el nombre del bot en vez del canal propio.
       if (platform === 'kick' && /^@?satronho_?bot$/i.test(channel)) {
-        return sayFor('samy', 'Ahí va <b>tu canal</b>, el de tus directos (por ejemplo <b>riddsc</b>), no el de SatronhoBot. El bot escribe en el canal que pongas aquí.', 10000, 'warn');
+        return sayFor('samy', 'Ahí va <b>tu canal</b>, el de tus directos, no el del bot. El bot escribe en el canal que pongas aquí.', 10000, 'warn');
       }
       await api('POST', `/api/connect/${platform}`, { channel }).catch((e) => toast(e.message));
     };
@@ -351,6 +359,7 @@ async function init() {
   initSimulator();
   initHome();
   initAppSettings();
+  initHotkeys(config);
   for (const p of ['tiktok', 'kick', 'starvios', 'twitch']) renderStatus({ platform: p, state: 'disconnected' });
 
   let started = false;
@@ -372,6 +381,7 @@ async function init() {
           if (!started) {
             initKickbot(config, p.kickbot);
             initStarviosbot(config, p.starviosbot);
+            initCommands(p);
           } else {
             renderKickbot(p.kickbot);
             renderStarviosbot(p.starviosbot);
@@ -398,6 +408,10 @@ async function init() {
         case 'update': renderUpdate(p); break;
         case 'kickbot': renderKickbot(p); kickWriteState(p); break;
         case 'starviosbot': renderStarviosbot(p); break;
+        case 'commands': onCommands(p); break;
+        case 'timers': onTimers(p); break;
+        case 'hotkeys-status': onHotkeysStatus(p); break;
+        case 'hotkey': onHotkey(p); break;
         case 'event': addLog(p); homeEvent(p); countEvent(); break;
         case 'goal': goals.set(p.id, p); renderGoals(); break;
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;

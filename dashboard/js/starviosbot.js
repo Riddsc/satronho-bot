@@ -14,7 +14,7 @@ function accountRow(id, label, primary = false) {
   const wait = busy === id;
   const btn = a.ok
     ? `<button type="button" class="btn small ghost" data-sv="logout" data-acc="${id}">Cerrar sesión</button>`
-    : `<button type="button" class="btn small ${primary ? 'primary' : ''}" data-sv="login" data-acc="${id}" ${wait || !st.canLogin ? 'disabled' : ''}>${wait ? 'Esperando…' : 'Iniciar sesión'}</button>`;
+    : `<span class="row tight"><button type="button" class="btn small ${primary ? 'primary' : ''}" data-sv="login" data-acc="${id}" ${wait || !st.canLogin ? 'disabled' : ''}>${wait ? 'Esperando…' : 'Iniciar sesión'}</button>${wait ? '' : `<button type="button" class="btn small ghost" data-sv="login-fresh" data-acc="${id}" ${st.canLogin ? '' : 'disabled'} title="Abre Starvios sin la sesión guardada en este PC">Usar otra cuenta</button>`}</span>`;
   return `<div class="kb-acc"><span><b>${esc(label)}</b><small>${a.ok ? `✓ conectada${a.name ? ` · @${esc(a.name)}` : ''}` : wait ? 'inicia sesión en la ventana que se abrió' : 'sin iniciar sesión'}</small></span>${btn}</div>`;
 }
 
@@ -63,11 +63,11 @@ export function initStarviosbot(cfg, status) {
         return renderStarviosbot();
       }
       const what = b.dataset.sv;
-      if (what === 'login') {
+      if (what === 'login' || what === 'login-fresh') {
         busy = b.dataset.acc;
         renderStarviosbot();
         guideToast('samy', 'Se abrió una ventana de Starvios. Inicia sesión ahí y yo me encargo del resto.');
-        const r = await api('POST', '/api/starviosbot/login', { account: b.dataset.acc });
+        const r = await api('POST', '/api/starviosbot/login', { account: b.dataset.acc, fresh: what === 'login-fresh' });
         busy = '';
         renderStarviosbot(r.starviosbot);
         if (!r.cancelled) guideToast('samy', `¡Listo! Ya puedo escribir en Starvios${r.name ? ` como @${esc(r.name)}` : ''}.`);

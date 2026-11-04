@@ -2,7 +2,7 @@
 // está listo, usa las voces instaladas en Windows como respaldo.
 
 import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES } from './util.js';
-import { setBubble, sayFor, setMood } from './guides.js';
+import { setBubble, sayFor, setMood, guideToast } from './guides.js';
 
 let config;
 let engine = null;
@@ -134,6 +134,53 @@ export function setOnlineVoices(list) {
   onlineVoices = list || [];
   renderPool();
   renderSpecial();
+  renderOnline();
+}
+
+// Tarjeta «Voces de Latinoamérica»: por país, escuchar y elegir como principal.
+function renderOnline() {
+  const box = $('#ov-voices');
+  if (!box || !config) return;
+  const byCountry = new Map();
+  for (const v of onlineVoices) {
+    if (!byCountry.has(v.country)) byCountry.set(v.country, []);
+    byCountry.get(v.country).push(v);
+  }
+  const main = config.tts.mainVoice || '';
+  box.innerHTML = [...byCountry].map(([country, voices]) => `<div class="ov-country"><b>${esc(country)}</b>
+    ${voices.map((v) => `<span class="ov-voice ${main === v.key ? 'main' : ''}">
+      <button type="button" class="ov-play" data-ov-play="${esc(v.key)}" title="Escuchar a ${esc(v.name)}">▶</button>
+      <span>${esc(v.name)}<small>${GENDER_SHORT[v.gender] || ''}</small></span>
+      <button type="button" class="ov-star" data-ov-main="${esc(v.key)}" aria-pressed="${main === v.key}" title="${main === v.key ? 'Es tu voz principal (pulsa para quitarla)' : 'Usar como voz principal'}">★</button></span>`).join('')}
+  </div>`).join('') || '<p class="hint">Cargando voces…</p>';
+}
+
+function initOnline() {
+  const box = $('#ov-voices');
+  if (!box) return;
+  box.addEventListener('click', async (ev) => {
+    const play = ev.target.closest('[data-ov-play]');
+    if (play) {
+      const v = onlineVoices.find((x) => x.key === play.dataset.ovPlay);
+      try {
+        await api('POST', '/api/tts/say', { text: `Hola, soy ${v?.name || 'una voz'}${v?.country ? `, de ${v.country}` : ''}. Así sonaría tu chat.`, voice: play.dataset.ovPlay });
+      } catch (e) {
+        toast(e.message);
+      }
+      return;
+    }
+    const star = ev.target.closest('[data-ov-main]');
+    if (star) {
+      const key = config.tts.mainVoice === star.dataset.ovMain ? '' : star.dataset.ovMain;
+      config.tts.mainVoice = key;
+      saveConfig({ tts: { mainVoice: key } });
+      renderOnline();
+      if (key) {
+        const v = onlineVoices.find((x) => x.key === key);
+        guideToast('troya', `Ahora tu voz principal es ${esc(v?.name || '')} (${esc(v?.country || '')}). Necesita internet; si falla, uso la de Windows.`);
+      }
+    }
+  });
 }
 const GENDER_SHORT = { f: 'femenina', m: 'masculina' };
 
@@ -312,6 +359,7 @@ export function initVoice(cfg) {
   config = cfg;
   fillForm();
   populateWindowsVoices();
+  initOnline();
   speechSynthesis.onvoiceschanged = populateWindowsVoices;
 
   for (const el of $$('[data-tts]')) {

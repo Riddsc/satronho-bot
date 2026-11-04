@@ -93,6 +93,22 @@ El Secret se puede extraer del `.exe`. Si alguien abusa, lo regeneras en Kick, a
 
 Pulsa **Iniciar sesión** en «Tu cuenta de Starvios». Se abre una ventana de starvios.com dentro de la app. Cuando inicias sesión, la app toma la sesión que guardó la web, la cifra y la renueva sola. Satronho Bot nunca ve tu contraseña. Envía los mensajes igual que la web de Starvios, con `send_live_message`. En **Avanzado** puedes entrar con una cuenta aparte para el bot.
 
+## Comandos del chat y mensajes automáticos (Samy)
+
+**Comandos del chat:** creas `!redes`, `!discord` o lo que quieras, con su respuesta. Cuando alguien lo escribe, el bot responde en Kick y en Starvios; en Twitch y TikTok, Troya puede decirlo en voz alta. Cada comando tiene:
+- otros nombres (alias);
+- quién puede usarlo: todos, moderadores o solo tú;
+- espera entre usos y espera por persona;
+- en qué plataformas funciona.
+
+En la respuesta puedes usar `{usuario}`, `{mensaje}`, `{1}` `{2}`…, `{canal}`, `{plataforma}`, `{cancion}`, `{cola}`, `{usos}`, `{comandos}`, `{azar:1-100}` y `{hora}`. La tarjeta **Probar** te muestra qué respondería, sin escribir en el chat. `!play`, `!temita`, `!skip` y `!quitar` son de la música.
+
+**Mensajes automáticos:** el bot escribe un texto cada X minutos en Kick y Starvios, solo si estás conectado y si hubo al menos N mensajes en el chat, para no hablar solo.
+
+## Atajos de teclado
+
+En **Ajustes → Atajos de teclado** activas atajos que funcionan aunque estés en OBS o en un juego: saltar el mensaje de voz, apagar o encender la voz, siguiente canción, pausar la música, lanzar una alerta de prueba y mostrar la app. Vienen apagados para no chocar con otros programas, y cada uno se puede cambiar.
+
 ## Alertas (Troya)
 
 Cada alerta (seguidor, regalo, suscripción, likes, compartido) tiene sus propios ajustes:
@@ -144,6 +160,10 @@ También eliges qué voces entran en el reparto.
 - **Trucos:** detecta variantes como `T0NT0`, `ToonTo0`, `t o n t o`, `toooonto`, `p.u.t.a` o letras de otros alfabetos. Compara palabras completas, así que «pera» y «cálculo» no se censuran.
 
 **Por qué se lee o no.** En **Actividad**, cada mensaje se marca con 🔊 (se leyó) o con 🔇 y el motivo. En **Probar filtros** escribes un mensaje y la app te dice si lo leería, cómo y con qué voz.
+
+**Bots del chat.** BotRix, Nightbot, StreamElements y otros bots conocidos no se leen, ni nombres como `Sery_Bot` o `StreamBot`. Puedes sumar los tuyos en *Quién se lee → Bots del chat*.
+
+**Voces de Latinoamérica.** En *Voces* hay una tarjeta por país (Colombia, México, Argentina…) con una voz femenina y una masculina. Pulsas ▶ para oírla y ★ para que sea tu voz principal.
 
 **Respaldo.** Si Piper no está listo, se usan las voces de Windows.
 

@@ -69,6 +69,30 @@ function createTts({ store, broadcast, engine, online = null }) {
     return names.includes(normalizeName(e.extra?.giftName));
   }
 
+  // ---------- Bots del chat ----------
+  // Bots conocidos de Kick, Twitch, TikTok y Starvios. Se comparan sin
+  // mayúsculas, espacios ni símbolos («Sery_Bot» = «serybot»).
+  const KNOWN_BOTS = [
+    'botrix', 'kickbot', 'kicklet', 'serybot', 'satronhobot', 'nightbot', 'streamelements', 'streamlabs', 'moobot',
+    'fossabot', 'wizebot', 'botisimo', 'coebot', 'phantombot', 'deepbot', 'soundalerts', 'streamerbot', 'commanderroot',
+    'pokemoncommunitygame', 'kofistreambot', 'tangiabot', 'blerp', 'own3d', 'tikfinity', 'overinteractive', 'botrixoficial',
+  ];
+  const squash = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '');
+  function isBot(e) {
+    const c = cfg();
+    if (!c.ignoreBots) return false;
+    const special = specialOf(e.platform, e.user);
+    if (special?.action === 'allow') return false; // «Siempre leer» manda
+    const n = squash(e.user?.name);
+    if (!n) return false;
+    if ((e.extra?.badges || []).some((b) => /bot/.test(b))) return true;
+    const mine = (c.botNames || []).map(squash).filter(Boolean);
+    if (KNOWN_BOTS.includes(n) || mine.includes(n)) return true;
+    // «…bot» separado: Sery_Bot, mi-bot, mi.bot, StreamBot (no «robot» ni «elrobot»).
+    const raw = String(e.user?.name || '').trim();
+    return c.ignoreBotSuffix !== false && (/[_\-. \d]bot$/i.test(raw) || /[a-z]Bot$/.test(raw));
+  }
+
   const specialOf = (platform, user) => cfg().special.find((s) => s.key === keyOf(platform, user) || s.key === `*:${String(user.id).toLowerCase()}`);
 
   // ---------- Elección de voz ----------
@@ -88,7 +112,10 @@ function createTts({ store, broadcast, engine, online = null }) {
   const withTones = (base) => (cfg().toneVariants ? base.flatMap((k) => [k, `${k}~g`, `${k}~a`]) : base);
   const allKeys = () => withTones(baseKeys(true));
   const anyKeys = () => withTones(baseKeys(false));
-  const isUsable = (k) => anyKeys().includes(k);
+  // Las voces en línea se pueden usar una a una (voz principal o especial)
+  // aunque no estén sumadas al reparto.
+  const isOnline = (k) => Boolean(online) && String(k).startsWith('ms:') && online.voices().some((v) => v.key === String(k).split('~')[0]);
+  const isUsable = (k) => isOnline(k) || anyKeys().includes(k);
 
   function pool() {
     const all = allKeys();
@@ -98,11 +125,13 @@ function createTts({ store, broadcast, engine, online = null }) {
 
   function pickVoice(platform, user, special) {
     const c = cfg();
-    const main = `${c.piperVoice}#${Number(c.speaker) || 0}`;
+    const piperMain = `${c.piperVoice}#${Number(c.speaker) || 0}`;
+    // Voz principal: una elegida a mano (por ejemplo una en línea) o la de Piper.
+    const main = c.mainVoice && isUsable(c.mainVoice) ? c.mainVoice : piperMain;
     const all = allKeys();
     if (special?.voice && isUsable(special.voice)) return special.voice;
     const p = pool();
-    const fallback = all.includes(main) ? main : p[0];
+    const fallback = main === c.mainVoice || all.includes(main) ? main : p[0];
     if (!user || c.voiceMode === 'single' || !p.length) return fallback;
     if (c.voiceMode === 'random') return p[Math.floor(Math.random() * p.length)];
     return p[hash(keyOf(platform, user)) % p.length];
@@ -117,6 +146,7 @@ function createTts({ store, broadcast, engine, online = null }) {
 
     const special = specialOf(e.platform, e.user);
     if (special?.action === 'mute') return no('espectador silenciado');
+    if (isBot(e)) return no('es un bot');
     if (c.skipCommands && e.message.trim().startsWith('!')) return no('es un comando');
     if (e.platform === 'tiktok' && c.tiktokGate.enabled && special?.action !== 'allow' && !isAllowed(e.user)) {
       return no(`no ha enviado ${c.tiktokGate.giftNames[0] || 'el regalo'}`);

@@ -17,12 +17,15 @@ function accountRow(id, label, primary = false) {
   const a = st[id];
   const btn = a.ok
     ? `<button type="button" class="btn small ghost" data-kb="logout" data-acc="${id}">Quitar</button>`
-    : `<button type="button" class="btn small ${primary ? 'primary' : ''}" data-kb="auth" data-acc="${id}">Autorizar</button>`;
+    : `<span class="row tight"><button type="button" class="btn small ${primary ? 'primary' : ''}" data-kb="auth" data-acc="${id}">Autorizar</button><button type="button" class="btn small ghost" data-kb="auth-fresh" data-acc="${id}" title="Abre Kick sin la sesión guardada en este PC">Usar otra cuenta</button></span>`;
   return `<div class="kb-acc"><span><b>${esc(label)}</b><small>${accState(a)}</small></span>${btn}</div>`;
 }
 
+// El Client ID guardado se muestra oculto (solo los 4 últimos caracteres).
+const masked = (id) => (id ? `${'•'.repeat(Math.max(4, id.length - 4))}${id.slice(-4)}` : '');
+
 function ownAppForm() {
-  return `<label class="field"><span>Client ID</span><input id="kb-id" autocomplete="off" value="${esc(st.clientId || '')}"></label>
+  return `<label class="field"><span>Client ID</span><input id="kb-id" autocomplete="off" spellcheck="false" ${st.clientId ? `placeholder="${esc(masked(st.clientId))} · déjalo vacío para conservarlo"` : ''}></label>
     <label class="field"><span>Client Secret${st.ownApp ? ' nuevo' : ''}</span><input id="kb-secret" type="password" autocomplete="off" ${st.ownApp ? 'placeholder="Déjalo vacío para conservar el actual"' : ''}></label>
     <p class="hint">Redirección en tu app de Kick: <code>http://localhost:3800/auth/kick/callback</code></p>
     <div class="row wrap mt"><button type="button" class="btn small" data-kb="save">Guardar mi app</button>${st.ownApp ? '<button type="button" class="btn small ghost" data-kb="forget">Borrar mi app</button>' : ''}</div>
@@ -60,9 +63,9 @@ export function renderKickbot(status) {
     <p class="hint">${st.encrypted ? '🔒 Los permisos se guardan cifrados: solo tu usuario de Windows, en este PC, puede leerlos.' : 'Los permisos se guardan solo en este PC.'}</p>`;
 }
 
-async function authorize(account, external = false) {
+async function authorize(account, external = false, fresh = false) {
   try {
-    const r = await api('POST', '/api/kickbot/authorize', { account, external });
+    const r = await api('POST', '/api/kickbot/authorize', { account, external, fresh });
     if (!r.opened) window.open(r.url, '_blank');
     guideToast('samy', account === 'bot'
       ? (r.opened ? 'Entra con la cuenta del bot y acepta el permiso.' : 'En tu navegador, entra con la cuenta del bot y acepta el permiso.')
@@ -88,7 +91,7 @@ export function initKickbot(cfg, status) {
       }
       const what = b.dataset.kb;
       if (what === 'save') {
-        const clientId = $('#kb-id').value.trim();
+        const clientId = $('#kb-id').value.trim() || st.clientId || '';
         const clientSecret = $('#kb-secret').value.trim();
         if (!clientId) return toast('Falta el Client ID');
         const { kickbot } = await api('POST', '/api/kickbot/app', { clientId, clientSecret, useOwnApp: true });
@@ -98,6 +101,7 @@ export function initKickbot(cfg, status) {
       }
       if (what === 'forget') renderKickbot((await api('POST', '/api/kickbot/app/forget')).kickbot);
       if (what === 'auth') authorize(b.dataset.acc);
+      if (what === 'auth-fresh') authorize(b.dataset.acc, false, true);
       if (what === 'auth-ext') authorize(st.sendAs === 'bot' ? 'bot' : 'me', true);
       if (what === 'logout') renderKickbot((await api('POST', '/api/kickbot/logout', { account: b.dataset.acc })).kickbot);
       if (what === 'test') {

@@ -71,7 +71,7 @@ function createTwitchConnector({ bus, onStatus, url = URL }) {
           type: 'chat',
           user: { id: m.tags['user-id'] || login, name: m.tags['display-name'] || login },
           message: text,
-          extra: { color: m.tags.color || '' },
+          extra: { color: m.tags.color || '', badges: String(m.tags.badges || '').split(',').map((b) => b.split('/')[0]).filter(Boolean) },
         });
         break;
       }
