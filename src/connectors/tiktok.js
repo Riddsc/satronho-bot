@@ -29,13 +29,37 @@ function userOf(data) {
   };
 }
 
+// Quién es en tu LIVE. TikTok lo manda en cada mensaje del chat:
+//   userIdentity: si te sigue, es suscriptor, moderador o eres tú.
+//   Insignia «Fans» (tipo 10): es Miembro de tu equipo, con su nivel.
+//   fansClub: su equipo «preferido»; solo cuenta si es el tuyo (hostId),
+//   porque puede llevar la insignia del equipo de otro streamer.
+function rolesOf(d, hostId) {
+  const u = d?.user || {};
+  const who = d?.userIdentity || {};
+  const badges = Array.isArray(u.badgeList) ? u.badgeList : [];
+  const scene = (b) => Number(b?.sceneType ?? b?.badgeSceneType);
+  const fans = badges.find((b) => scene(b) === 10);
+  let team = fans ? Number(fans.privilegeLogExtra?.level) || 1 : 0;
+  const club = u.fansClub?.data;
+  if (!team && club && Number(club.level) > 0 && hostId && String(club.anchorId) === String(hostId)) team = Number(club.level);
+  return {
+    follower: Boolean(who.isFollowerOfAnchor || who.isMutualFollowingWithAnchor),
+    sub: Boolean(who.isSubscriberOfAnchor || badges.some((b) => [4, 7].includes(scene(b)))),
+    mod: Boolean(who.isModeratorOfAnchor || badges.some((b) => scene(b) === 1)),
+    host: Boolean(who.isAnchor),
+    team, // 0 = no es del equipo; 1+ = nivel en tu equipo
+  };
+}
+
 function createTiktokConnector({ bus, onStatus, getSettings = () => ({}) }) {
   const base = createConnectorBase({ platform: 'tiktok', bus, onStatus });
   let conn = null;
+  let hostId = ''; // id de tu cuenta de TikTok (dueña del LIVE)
 
   function attach(c) {
     const { WebcastEvent, ControlEvent } = lib;
-    c.on(WebcastEvent.CHAT, (d) => base.emit({ type: 'chat', user: userOf(d), message: d.comment || '' }));
+    c.on(WebcastEvent.CHAT, (d) => base.emit({ type: 'chat', user: userOf(d), message: d.comment || '', extra: { roles: rolesOf(d, hostId) } }));
 
     c.on(WebcastEvent.FOLLOW, (d) => base.emit({ type: 'follow', user: userOf(d) }));
 
@@ -134,6 +158,8 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}) }) {
         }),
       ]).finally(() => clearTimeout(timer));
       if (base.stopped || conn !== c) return c.disconnect();
+      const room = c.roomInfo || {};
+      hostId = String(room.owner?.id_str || room.owner_user_id || room.data?.owner?.id_str || '');
       base.resetBackoff();
       base.status('connected');
     } catch (err) {

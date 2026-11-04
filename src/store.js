@@ -55,6 +55,17 @@ const DEFAULTS = {
     read: { tiktok: true, kick: true, starvios: true, twitch: true },
     // En TikTok solo se lee a quien envió este regalo.
     tiktokGate: { enabled: true, giftNames: ['Quiéreme', 'Heart Me'], hours: 24 },
+    // Quién puede hablar en cada plataforma (0.12). TikTok:
+    //   all · followers · subs · team · team-gift · gift · mods
+    //   team-gift = Miembro de tu equipo que ya te mandó «Quiéreme» alguna vez.
+    // Kick y Twitch: all · subs · vip · mods. Starvios no dice roles: all.
+    // Moderadores y tú siempre pasan; «Espectadores especiales» manda sobre todo.
+    who: {
+      tiktok: { mode: 'team-gift', teamMinLevel: 1 },
+      kick: { mode: 'all' },
+      twitch: { mode: 'all' },
+      starvios: { mode: 'all' },
+    },
     filterProfanity: true, // reemplaza groserías por "piip"
     filterTricks: true, // detecta trucos: T0NT0, t.o.n.t.o, toooonto, letras raras
     bannedWords: DEFAULT_BANNED,
@@ -181,7 +192,11 @@ class Store {
     fs.mkdirSync(dataDir, { recursive: true });
     this.dir = dataDir;
     this.file = path.join(dataDir, 'satronho-config.json');
-    this.data = deepMerge(DEFAULTS, this.load());
+    const saved = this.load();
+    this.data = deepMerge(DEFAULTS, saved);
+    // 0.12: el filtro «solo quien envió Quiéreme» pasa a ser una regla de
+    // «Quién puede hablar». Si lo tenías apagado, TikTok queda en «Todos».
+    if (saved.tts && !saved.tts.who && saved.tts.tiktokGate?.enabled === false) this.data.tts.who.tiktok.mode = 'all';
     this.saveTimer = null;
   }
 
