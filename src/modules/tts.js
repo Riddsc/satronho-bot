@@ -14,7 +14,7 @@
 // Cada decisión trae un motivo, que el panel muestra en Actividad
 // ("🔊 leído" o "🔇 no se lee: ...") y en la prueba de filtros.
 
-const { sanitize, normalizeName } = require('../tts/textFilter');
+const { sanitize, screen, normalizeName } = require('../tts/textFilter');
 const { MS_VOICES } = require('../tts/msonline');
 const { VOICES: PIPER_VOICES } = require('../tts/voices');
 
@@ -150,7 +150,15 @@ function createTts({ store, broadcast, engine, online = null }) {
     return c.ignoreBotSuffix !== false && (/[_\-. \d]bot$/i.test(raw) || /[a-z]Bot$/.test(raw));
   }
 
-  const specialOf = (platform, user) => cfg().special.find((s) => s.key === keyOf(platform, user) || s.key === `*:${String(user.id).toLowerCase()}`);
+  // Un espectador especial se anota por su nombre (como sale en el chat);
+  // Kick y Twitch dan además un número interno, así que probamos ambos.
+  function specialOf(platform, user) {
+    const ids = new Set([user?.id, user?.name, user?.login].filter(Boolean).map((x) => String(x).toLowerCase().replace(/^@/, '')));
+    return cfg().special.find((s) => {
+      const [p, who] = String(s.key).split(':');
+      return (p === platform || p === '*') && ids.has(String(who).toLowerCase());
+    });
+  }
 
   // ---------- Elección de voz ----------
   // Claves de voz:
@@ -205,6 +213,7 @@ function createTts({ store, broadcast, engine, online = null }) {
     const special = specialOf(e.platform, e.user);
     if (special?.action === 'mute') return no('espectador silenciado');
     if (isBot(e)) return no('es un bot');
+    if (c.skipHost && (e.extra?.roles?.host || (e.extra?.badges || []).includes('broadcaster'))) return no('lo escribiste tú');
     if (c.skipCommands && e.message.trim().startsWith('!')) return no('es un comando');
     if (special?.action !== 'allow') {
       const why = notAllowedReason(e);
@@ -215,7 +224,9 @@ function createTts({ store, broadcast, engine, online = null }) {
     const now = Date.now();
     if (c.cooldownSec > 0 && now - (lastRead.get(key) || 0) < c.cooldownSec * 1000) return no('escribe muy seguido (tiempo de espera)');
 
-    let clean = sanitize(e.message, c);
+    const screened = screen(e.message, c);
+    if (screened.skip) return no(screened.skip);
+    let clean = sanitize(screened.text, c);
     if (c.stripNumbers) clean = clean.replace(/\p{N}+/gu, ' ').replace(/\s+/g, ' ').trim();
     if (!clean || !/\p{L}/u.test(clean)) return no('no queda texto que leer tras los filtros');
 
@@ -231,7 +242,7 @@ function createTts({ store, broadcast, engine, online = null }) {
     const voice = pickVoice(e.platform, e.user, special);
     // «dice» en el idioma de la voz (inglés y francés se dan a mano).
     const says = /^en_/.test(voice || '') ? 'says' : /^fr_/.test(voice || '') ? 'dit' : 'dice';
-    return { read: true, reason: 'se lee', text: c.sayName ? `${spoken} ${says}: ${clean}` : clean, voice };
+    return { read: true, reason: 'se lee', text: c.sayName ? `${spoken} ${says}: ${clean}` : clean, voice, rate: special?.rate, pitch: special?.pitch };
   }
 
   // ---------- Generar audio ----------
@@ -253,9 +264,10 @@ function createTts({ store, broadcast, engine, online = null }) {
       // Tono: el panel reproduce más rápido o más lento (sube o baja el tono)
       // y aquí generamos la voz al revés de rápida, así la velocidad final
       // queda igual y solo cambia el tono.
-      pitch: Math.max(0.6, Math.min(1.6, Number(c.pitch) || 1)),
+      pitch: Math.max(0.6, Math.min(1.6, Number(meta.pitch) || Number(c.pitch) || 1)),
     };
-    const synthRate = Math.max(0.3, Math.min(3, (Number(c.rate) || 1) / item.pitch));
+    if (Number(meta.rate)) item.rate = Number(meta.rate);
+    const synthRate = Math.max(0.3, Math.min(3, (Number(item.rate) || 1) / item.pitch));
     const [base, tone = ''] = String(voice || '').split('~');
     item.tone = tone;
     if (base.startsWith('win:')) {
@@ -287,12 +299,23 @@ function createTts({ store, broadcast, engine, online = null }) {
     broadcast('tts', item);
   }
 
+  // Registro de voz: lo último que se leyó o no, con la voz y el motivo.
+  const log = [];
+  function remember(e, d) {
+    const entry = { eventId: e.id, ts: Date.now(), platform: e.platform, user: e.user?.name || '', text: d.read ? d.text : e.message, read: d.read, reason: d.reason, voice: d.voice || '' };
+    log.unshift(entry);
+    log.length = Math.min(log.length, 300);
+    broadcast('tts-log', entry);
+  }
+  const recentLog = () => log.slice(0, 150);
+
   // Devuelve la decisión para que el servidor la muestre en Actividad.
   function handleEvent(e) {
     if (e.platform === 'tiktok' && e.type === 'gift' && isGateGift(e)) allow(e.user);
     if (e.type !== 'chat') return null;
     const d = decide(e);
-    if (d.read) speak(d.text, { user: e.user.name, platform: e.platform, voice: d.voice });
+    if (d.read) speak(d.text, { user: e.user.name, platform: e.platform, voice: d.voice, rate: d.rate, pitch: d.pitch });
+    remember(e, d);
     return d;
   }
 
@@ -306,7 +329,7 @@ function createTts({ store, broadcast, engine, online = null }) {
     if (cfg().enabled && cfg().readMusicNotices) speak(text);
   }
 
-  return { handleEvent, speak, speakNotice, check, allowedList, revoke, pool, allKeys };
+  return { handleEvent, speak, speakNotice, check, allowedList, revoke, pool, allKeys, recentLog };
 }
 
 module.exports = { createTts };

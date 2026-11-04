@@ -5,7 +5,8 @@
 import { connectSatronho } from '/overlays/client.js';
 import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSaved } from './util.js';
 import { initGuides, setBubble, sayFor, guideToast, GUIDES } from './guides.js';
-import { initVoice, renderEngine, renderAllowed, onTtsItem, updateTroya, onTtsQueue, setOnlineVoices } from './voice.js';
+import { addChatEvent, markChatDecision, initLiveChat, resetChat } from './livechat.js';
+import { initVoice, renderEngine, renderAllowed, onTtsItem, updateTroya, onTtsQueue, setOnlineVoices, setTtsLog, addTtsLog } from './voice.js';
 import { initMusic, onMusic, onMusicNotice } from './music.js';
 import { initStats, onStats, onStatsHistory } from './stats.js';
 import { initHelp, setHelpContext, openHelp, _test as helpKb } from './help.js';
@@ -265,55 +266,9 @@ function initGoalsAndAlerts() {
   initAlerts(config);
 }
 
-// ---------- Chat y actividad ----------
-function describe(e) {
-  switch (e.type) {
-    case 'follow': return 'te sigue';
-    case 'sub': return e.amount > 1 ? `se suscribió (${e.amount} meses)` : 'se suscribió';
-    case 'gift': {
-      const x = e.extra || {};
-      return `envió ${x.count > 1 ? `${x.count}× ` : ''}${esc(x.giftName || 'un regalo')} (${e.amount} diamantes)`;
-    }
-    case 'like': return `dio ${e.amount} likes`;
-    case 'share': return 'compartió el directo';
-    default: return '';
-  }
-}
-
-function addLog(e) {
-  const log = $('#log');
-  log.querySelector('.empty')?.remove();
-  const li = document.createElement('li');
-  li.dataset.id = e.id;
-  const action = e.type === 'chat' ? `: ${esc(e.message)}` : ` ${describe(e)}`;
-  li.innerHTML = `<span class="tag ${e.type}">${e.type === 'chat' ? 'chat' : e.type === 'gift' ? 'regalo' : e.type}</span>
-    <span class="txt"><span class="plat ${e.platform}">${esc(PLATFORM_NAMES[e.platform] || e.platform)}</span><b>${esc(e.user.name)}</b>${action}${e.test ? ' <small>(prueba)</small>' : ''}</span>
-    <time>${timeOf(e.ts)}</time>`;
-  log.prepend(li);
-  while (log.children.length > 200) log.lastChild.remove();
-}
-
-// Marca cada mensaje con lo que decidió Troya.
-function markDecision(d) {
-  const txt = $(`#log li[data-id="${CSS.escape(d.eventId)}"] .txt`);
-  if (!txt) return;
-  const span = document.createElement('span');
-  span.className = 'tts';
-  span.textContent = d.read ? '🔊' : `🔇 ${d.reason}`;
-  span.title = d.read ? 'Leído en voz alta' : `No se leyó: ${d.reason}`;
-  txt.append(span);
-}
-
-function initSimulator() {
-  $('#sim').addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const f = Object.fromEntries(new FormData(ev.target));
-    if (!f.message.trim()) return;
-    const name = f.user.trim() || 'Espectador';
-    await api('POST', '/api/test/chat', { platform: f.platform, user: { id: name.toLowerCase(), name }, message: f.message }).catch((e) => toast(e.message));
-    ev.target.message.value = '';
-  });
-}
+// ---------- Chat en vivo (livechat.js) ----------
+const addLog = (e) => addChatEvent(e);
+const markDecision = (d) => markChatDecision(d);
 
 // ---------- Ajustes → App ----------
 function initAppSettings() {
@@ -395,7 +350,7 @@ async function init() {
   onTtsQueue(() => homeVoice(config, lastEngine));
   initGoalsAndAlerts();
   initOverlays(config);
-  initSimulator();
+  initLiveChat();
   initHome();
   initAppSettings();
   initHotkeys(config);
@@ -413,9 +368,11 @@ async function init() {
           p.goals.forEach((g) => goals.set(g.id, g));
           renderGoals();
           Object.values(p.status || {}).forEach(renderStatus);
-          $('#log').innerHTML = '<li class="empty">Aún no hay actividad.</li>';
+          resetChat();
           $('#home-feed').innerHTML = '<li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li>';
           [...(p.recent || [])].reverse().forEach((e) => { addLog(e); homeEvent(e); });
+          setTtsLog(p.ttsLog);
+          [...(p.ttsLog || [])].reverse().forEach((x) => x.eventId && markChatDecision({ eventId: x.eventId, read: x.read, reason: x.reason }));
           lastEngine = p.engine;
           lastStats = p.stats;
           lastMusic = p.music;
@@ -472,6 +429,7 @@ async function init() {
         case 'music': lastMusic = p; onMusic(p); homeMusic(p); break;
         case 'music-notice': onMusicNotice(p); break;
         case 'tts-decision': markDecision(p); break;
+        case 'tts-log': addTtsLog(p); break;
         case 'stats': lastStats = p; onStats(p); homeStats(p); break;
         case 'stats-history': onStatsHistory(p); break;
         default: break;

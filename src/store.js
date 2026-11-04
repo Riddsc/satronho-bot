@@ -70,6 +70,16 @@ const DEFAULTS = {
     filterTricks: true, // detecta trucos: T0NT0, t.o.n.t.o, toooonto, letras raras
     bannedWords: DEFAULT_BANNED,
     stripNumbers: false, // no leer números (ni los escondidos en palabras)
+    // Escudo anti-trampas (0.12): alfabetos permitidos y qué hacer con los demás.
+    scripts: ['latin'],
+    otherScripts: 'skip', // skip = no leer el mensaje · strip = quitar esas palabras · keep = leerlas
+    oddSymbols: true, // quitar símbolos raros y no leer mensajes hechos casi solo de símbolos
+    links: 'say', // say = decir «enlace» · remove = quitarlos
+    skipMentions: false, // no leer mensajes que empiezan con @alguien
+    stripMentions: false, // quitar los @menciones del texto
+    skipHost: false, // no leer lo que escribes tú desde tu cuenta
+    // Lo que escribe tu bot y se lee en voz alta.
+    readBot: { commands: true, timers: false, manual: false },
     antiSpam: true, // no repetir el mismo mensaje de la misma persona
     // Bots del chat (BotRix, Nightbot…): no se leen. botNames suma nombres propios.
     pitch: 1, // tono de la voz (0.6 grave – 1.6 aguda); no cambia la velocidad
