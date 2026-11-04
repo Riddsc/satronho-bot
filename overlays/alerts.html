@@ -25,6 +25,10 @@
   }
   body[data-alert-colors="accent"] .alert { --c: var(--accent) !important; }
   .alert.leaving { animation: leave .45s ease-in both; }
+  .alert.big { --c: var(--gift); animation: enter .6s cubic-bezier(.2, 1.4, .4, 1) both, glow 1.4s .6s ease-in-out infinite alternate; }
+  .alert.big .title { font-size: 40px; }
+  .alert.big.leaving { animation: leave .45s ease-in both; }
+  @keyframes glow { to { box-shadow: 0 0 0 10px color-mix(in srgb, var(--c) 30%, transparent), 0 0 60px color-mix(in srgb, var(--c) 55%, transparent), 0 18px 50px rgba(0,0,0,.45); } }
   .badge {
     flex: none; width: 76px; height: 76px; border-radius: calc(38px * var(--r) + 4px);
     display: grid; place-items: center;
@@ -49,6 +53,7 @@
 <script type="module">
   import { connectSatronho, param } from './client.js';
   import { applyOverlayStyle, overlayStyle, listenPreview, isPreview } from './style.js';
+  import { playAlertSound } from './sounds.js';
 
   const stage = document.getElementById('stage');
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -76,56 +81,39 @@
     if (!busy) next();
   }
 
-  function next() {
+  async function next() {
     const e = queue.shift();
     if (!e) { busy = false; return; }
     busy = true;
 
     const t = TEMPLATES[e.type];
     const safe = { ...e, user: { ...e.user, name: esc(e.user.name) } };
-    const dur = e.durationMs || 5000;
+
+    // El sonido arranca con la alerta; si «dura lo que dura el sonido»,
+    // la alerta se queda en pantalla hasta que termina (mínimo 2 s).
+    const soundLen = soundOn() ? await playAlertSound(e.sound || { sound: 'campanita' }) : 0;
+    let dur = e.durationMs || 5000;
+    if (e.fitSound && soundLen) dur = Math.max(2000, Math.round(soundLen * 1000) + 400);
 
     const el = document.createElement('div');
-    el.className = 'alert surface';
+    el.className = `alert surface${e.big ? ' big' : ''}`;
     el.style.setProperty('--c', `var(--${e.type})`);
     // Si el regalo trae imagen (TikTok), la usamos como insignia.
     const img = /^https:\/\//.test(e.extra?.image || '') ? `<img src="${esc(e.extra.image)}" alt="" style="width:62px;height:62px;object-fit:contain">` : t.icon;
     el.innerHTML = `
       <div class="badge">${img}</div>
       <div>
-        <div class="label">${t.label}</div>
+        <div class="label">${e.big ? '¡Regalo grande!' : t.label}</div>
         <div class="title">${t.title(safe)}</div>
         ${e.message ? `<div class="msg muted">${esc(e.message)}</div>` : ''}
         <div class="bar" style="animation-duration:${dur}ms"></div>
       </div>`;
     stage.replaceChildren(el);
-    if (soundOn()) chime(e.type);
 
     setTimeout(() => {
       el.classList.add('leaving');
       setTimeout(() => { el.remove(); next(); }, 450);
     }, dur);
-  }
-
-  // Sonido generado con WebAudio (sin archivos).
-  let ctx;
-  function chime(type) {
-    try {
-      ctx ??= new AudioContext();
-      const base = { follow: 660, sub: 523, gift: 784, like: 880, share: 700 }[type] || 660;
-      [0, 0.12, 0.24].forEach((delay, i) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'triangle';
-        o.frequency.value = base * [1, 1.25, 1.5][i];
-        g.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
-        g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + delay + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.35);
-        o.connect(g).connect(ctx.destination);
-        o.start(ctx.currentTime + delay);
-        o.stop(ctx.currentTime + delay + 0.4);
-      });
-    } catch { /* sin audio disponible */ }
   }
 
   // Vista previa en la app: una alerta de ejemplo que se repite.

@@ -35,6 +35,12 @@ const KB = [
     go: '#kickbot',
   },
   {
+    guide: 'samy', q: '¿Cómo hago que el bot escriba en mi chat de Starvios?',
+    keys: ['escribir', 'responder', 'starvios', 'iniciar sesión', 'sesion', 'bot en el chat'],
+    answer: 'En <b>Conexiones → Escribir</b>, en Starvios, pulsa <b>Iniciar sesión</b>. Se abre una ventana de Starvios: entra con tu cuenta y yo tomo la sesión sola. No veo tu contraseña. Si tienes una cuenta aparte para el bot, entra con ella en <b>Avanzado</b>.',
+    go: '#starviosbot',
+  },
+  {
     guide: 'samy', q: '¿Cómo escondo las plataformas que no uso?',
     keys: ['esconder', 'ocultar', 'quitar plataforma', 'no uso', 'plataformas que uso', 'twitch', 'starvios'],
     answer: 'En <b>Conexiones</b>, abre <b>Plataformas que uso</b> y desmarca las que no usas. Se esconden del panel y no se conectan solas. Puedes volver a marcarlas cuando quieras.',

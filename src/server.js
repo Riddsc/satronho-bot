@@ -24,6 +24,7 @@ const { createTiktokConnector } = require('./connectors/tiktok');
 const { createStarviosConnector } = require('./connectors/starvios');
 const { createTwitchConnector } = require('./connectors/twitch');
 const { createKickChat } = require('./connectors/kickChat');
+const { createStarviosChat } = require('./connectors/starviosChat');
 
 const ROOT = path.join(__dirname, '..');
 const PLATFORMS = ['tiktok', 'kick', 'starvios', 'twitch'];
@@ -102,6 +103,15 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     onChange: (st) => broadcast('kickbot', st),
     vault: hooks.vault || null,
   });
+  const starviosChat = createStarviosChat({
+    store,
+    fetch: fetchFn,
+    onChange: (st) => broadcast('starviosbot', st),
+    vault: hooks.vault || null,
+    openLogin: hooks.openLogin || null,
+  });
+  // Quién escribe en cada plataforma.
+  const writers = { kick: kickChat, starvios: starviosChat };
   const tts = createTts({ store, broadcast, engine, online });
   const stats = createStats({ store, dataDir, broadcast });
   const music = createMusic({
@@ -110,11 +120,12 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       broadcast(kind, payload);
       if (kind === 'music-notice' && payload.kind !== 'busy') {
         tts.speakNotice(payload.text);
-        // SatronhoBot responde en el chat de Kick a los pedidos que vienen de Kick.
-        const cb = store.get('chatBot').kick;
-        if (payload.platform === 'kick' && cb.enabled && cb.music) {
+        // Satronho Bot responde en el chat de la plataforma de donde vino el pedido.
+        const cb = store.get('chatBot')[payload.platform];
+        const writer = writers[payload.platform];
+        if (writer && cb?.enabled !== false && cb?.music !== false) {
           const icon = { ok: '🎵', warn: '⚠️', error: '❌' }[payload.kind] || '🐾';
-          kickChat.say(`${icon} ${payload.text}`);
+          writer.say(`${icon} ${payload.text}`);
         }
       }
     },
@@ -136,11 +147,13 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const alerts = store.get('alerts');
     const bigEnough = e.type !== 'gift' || e.amount >= (alerts.minGift || 0);
     if (e.type !== 'chat' && alerts.enabled[e.type] !== false && bigEnough) {
-      broadcast('alert', { ...e, durationMs: alerts.durationMs });
+      const a = alertFor(e);
+      broadcast('alert', a);
+      if (a.speak) tts.speak(alertText(e));
     }
     goals.handleEvent(e);
     // Lo que escribe la propia app (con la cuenta aparte o con la tuya) no se lee en voz alta.
-    const fromBot = e.type === 'chat' && e.platform === 'kick' && kickChat.isOwnMessage(e.user?.name, e.message);
+    const fromBot = e.type === 'chat' && Boolean(writers[e.platform]?.isOwnMessage(e.user?.name, e.message));
     const decision = fromBot ? { read: false, reason: 'lo escribió Satronho Bot' } : tts.handleEvent(e);
     if (decision) {
       // El panel marca cada mensaje con 🔊 o 🔇 y el motivo.
@@ -149,6 +162,41 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     }
     music.handleEvent(e);
   });
+
+  // Cómo sale cada alerta: duración, sonido y si se lee en voz alta.
+  function alertFor(e) {
+    const alerts = store.get('alerts');
+    const big = alerts.bigGift || {};
+    const isBig = e.type === 'gift' && big.enabled && e.amount >= (Number(big.min) || 0);
+    const t = isBig ? big : alerts.types?.[e.type] || {};
+    const seconds = Number(t.seconds) || (alerts.durationMs || 5000) / 1000;
+    const sound = t.sound === 'file' && !t.file ? 'none' : t.sound || 'campanita';
+    return {
+      ...e,
+      big: isBig,
+      durationMs: Math.round(Math.max(1, Math.min(60, seconds)) * 1000),
+      fitSound: Boolean(t.fitSound),
+      speak: Boolean(t.speak),
+      sound: {
+        sound,
+        volume: t.volume ?? 70,
+        maxSeconds: Number(t.maxSeconds) || 0,
+        url: sound === 'file' ? `/alert-sounds/${t.file}` : '',
+      },
+    };
+  }
+  function alertText(e) {
+    const n = e.user?.name || 'Alguien';
+    const x = e.extra || {};
+    switch (e.type) {
+      case 'follow': return `${n} te sigue`;
+      case 'sub': return `${n} se suscribió`;
+      case 'gift': return `${n} envió ${x.count > 1 ? `${x.count} ` : ''}${x.giftName || 'un regalo'}`;
+      case 'like': return `${n} dio ${e.amount} likes`;
+      case 'share': return `${n} compartió el directo`;
+      default: return '';
+    }
+  }
 
   // ---- WebSocket: cada cliente recibe un id y el estado inicial ----
   wss.on('connection', (ws) => {
@@ -170,6 +218,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           overlayStyle: store.get('overlayStyle'),
           onlineVoices: online.voices(),
           kickbot: kickChat.status(),
+          starviosbot: starviosChat.status(),
           app: { window: store.get('window') },
         },
       })
@@ -398,6 +447,48 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     } catch (err) {
       res.send(page('No se pudo autorizar', String(err.message).replace(/[<>&]/g, ''), false));
     }
+  });
+
+  // ---- Satronho Bot en el chat de Starvios ----
+  app.get('/api/starviosbot', (_req, res) => ok(res, { starviosbot: starviosChat.status() }));
+  app.post('/api/starviosbot/login', async (req, res) => {
+    try {
+      const r = await starviosChat.login(req.body?.account);
+      ok(res, { ...r, starviosbot: starviosChat.status() });
+    } catch (err) {
+      fail(res, err);
+    }
+  });
+  app.post('/api/starviosbot/logout', (req, res) => {
+    const account = req.body?.account === 'bot' ? 'bot' : 'me';
+    starviosChat.logout(account);
+    hooks.clearLogin?.('starvios', account);
+    ok(res, { starviosbot: starviosChat.status() });
+  });
+  app.post('/api/starviosbot/test', (_req, res) => {
+    const sent = starviosChat.say('🐾 Satronho Bot está listo. Pide música con !play o !temita.');
+    if (!sent) return fail(res, 'Inicia sesión y escribe tu canal de Starvios en Conexiones → Escuchar');
+    ok(res);
+  });
+
+  // Sonidos propios para las alertas (mp3, wav u ogg).
+  const SOUND_TYPES = { 'audio/mpeg': 'mp3', 'audio/mp3': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/wave': 'wav', 'audio/ogg': 'ogg', 'audio/webm': 'webm' };
+  const ALERT_KEYS = ['follow', 'sub', 'gift', 'like', 'share', 'bigGift'];
+  const soundsDir = path.join(dataDir, 'alert-sounds');
+  fs.mkdirSync(soundsDir, { recursive: true });
+  app.use('/alert-sounds', express.static(soundsDir, { maxAge: 0 }));
+  app.post('/api/alerts/:key/sound', express.raw({ type: Object.keys(SOUND_TYPES), limit: '10mb' }), (req, res) => {
+    const { key } = req.params;
+    const ext = SOUND_TYPES[req.headers['content-type']];
+    if (!ALERT_KEYS.includes(key)) return fail(res, 'Alerta desconocida');
+    if (!ext || !Buffer.isBuffer(req.body) || !req.body.length) return fail(res, 'Usa un sonido MP3, WAV u OGG (hasta 10 MB)');
+    for (const f of fs.readdirSync(soundsDir)) if (f.startsWith(`${key}.`)) fs.rmSync(path.join(soundsDir, f));
+    const file = `${key}.${ext}`;
+    fs.writeFileSync(path.join(soundsDir, file), req.body);
+    const name = String(req.headers['x-file-name'] || '').slice(0, 80);
+    const patch = { file: `${file}?v=${Date.now()}`, fileName: decodeURIComponent(name), sound: 'file' };
+    store.update({ alerts: key === 'bigGift' ? { bigGift: patch } : { types: { [key]: patch } } });
+    ok(res, { alerts: store.get('alerts') });
   });
 
   // Fotos de los guías (opcional: si no hay foto se usa su dibujo).

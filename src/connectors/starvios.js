@@ -213,4 +213,4 @@ function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
   return { connect, disconnect };
 }
 
-module.exports = { createStarviosConnector };
+module.exports = { createStarviosConnector, discoverConfig };

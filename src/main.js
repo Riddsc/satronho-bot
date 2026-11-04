@@ -19,7 +19,7 @@ try {
 }
 
 const path = require('path');
-const { app, BrowserWindow, shell, dialog, net, Tray, Menu, nativeImage, safeStorage } = require('electron');
+const { app, BrowserWindow, shell, dialog, net, Tray, Menu, nativeImage, safeStorage, session } = require('electron');
 const { Store } = require('./store');
 const { createServer } = require('./server');
 
@@ -163,6 +163,80 @@ function openAuthWindow(url, account) {
   return true;
 }
 
+// ---------- Iniciar sesión para escribir (Starvios) ----------
+// Se abre la web de la plataforma en una ventana con su propia sesión
+// guardada (una por cuenta). Cuando la persona inicia sesión, la app lee
+// la sesión que la web guardó y cierra la ventana.
+const LOGIN_SITES = {
+  starvios: {
+    url: 'https://starvios.com/auth',
+    title: { me: 'Inicia sesión en Starvios con tu cuenta', bot: 'Inicia sesión en Starvios con la cuenta del bot' },
+    // Supabase guarda la sesión como «sb-<proyecto>-auth-token», en
+    // localStorage o en cookies (a veces partida en .0, .1… y en base64).
+    async read(w) {
+      const fromStorage = await w.webContents.executeJavaScript(`(() => {
+        for (const k of Object.keys(localStorage)) {
+          if (/^sb-.+-auth-token$/.test(k)) return localStorage.getItem(k);
+        }
+        return null;
+      })()`).catch(() => null);
+      let raw = fromStorage;
+      if (!raw) {
+        const cookies = await w.webContents.session.cookies.get({ url: 'https://starvios.com' }).catch(() => []);
+        const parts = cookies.filter((c) => /^sb-.+-auth-token(\.\d+)?$/.test(c.name)).sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }));
+        if (parts.length) raw = parts.map((c) => decodeURIComponent(c.value)).join('');
+      }
+      if (!raw) return null;
+      try {
+        if (raw.startsWith('base64-')) raw = Buffer.from(raw.slice(7), 'base64').toString('utf8');
+        const data = JSON.parse(raw);
+        const s = data.currentSession || data;
+        return s?.refresh_token && s?.access_token ? s : null;
+      } catch {
+        return null;
+      }
+    },
+  },
+};
+
+function openLoginWindow(platform, account) {
+  const site = LOGIN_SITES[platform];
+  if (!site) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const w = new BrowserWindow({
+      parent: win || undefined,
+      width: 520,
+      height: 800,
+      title: site.title[account] || site.title.me,
+      autoHideMenuBar: true,
+      backgroundColor: '#0f0d17',
+      webPreferences: { partition: `persist:${platform}-${account}`, contextIsolation: true, nodeIntegration: false },
+    });
+    let done = false;
+    const finish = (value) => {
+      if (done) return;
+      done = true;
+      clearInterval(timer);
+      resolve(value);
+      if (value) setTimeout(() => !w.isDestroyed() && w.close(), 900);
+    };
+    const timer = setInterval(async () => {
+      if (w.isDestroyed()) return finish(null);
+      const s = await site.read(w);
+      if (s) finish(s);
+    }, 1500);
+    w.on('closed', () => finish(null));
+    w.loadURL(site.url);
+  });
+}
+
+// Al quitar una cuenta se borra su sesión de esa ventana, así la próxima vez
+// se puede entrar con otra cuenta.
+function clearLogin(platform, account) {
+  if (!LOGIN_SITES[platform]) return;
+  session.fromPartition(`persist:${platform}-${account}`).clearStorageData().catch(() => {});
+}
+
 // Una sola instancia: si el usuario abre la app dos veces, enfocamos la primera.
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -182,6 +256,8 @@ if (!app.requestSingleInstanceLock()) {
       appInfo: { version: app.getVersion(), portable: Boolean(velopack) },
       hooks: { applyUpdate, checkForUpdates: () => checkForUpdates(store), onWindowConfig: applyWindowConfig,
         openAuthWindow,
+        openLogin: openLoginWindow,
+        clearLogin,
         // Cifrado de Windows (DPAPI) para el Client Secret y los permisos de Kick.
         vault: safeStorage.isEncryptionAvailable()
           ? {
