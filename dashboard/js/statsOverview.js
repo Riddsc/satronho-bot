@@ -15,7 +15,7 @@ const compact = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat('es-CO', { 
 const money = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n || 0);
 const dateShort = (ts) => new Date(ts).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 const dur = (min) => (min >= 60 ? `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')} min` : `${min} min`);
-const LOGO = (p) => (p === 'twitch' ? '<span class="pl" style="background:#9146ff;color:#fff">Tw</span>' : `<span class="pl plogo" data-logo="${esc(p)}" aria-hidden="true"></span>`);
+const LOGO = (p) => (p === 'twitch' ? '<span class="pl plogo" data-logo="twitch" aria-hidden="true"></span>' : `<span class="pl plogo" data-logo="${esc(p)}" aria-hidden="true"></span>`);
 
 const st = { plat: 'all', period: '30', from: '', to: '', metric: 'diamonds', compare: new Set() };
 let all = [];

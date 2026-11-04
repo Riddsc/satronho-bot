@@ -49,7 +49,7 @@ function savePrefs() {
 }
 
 const LOGO = (p) => (p === 'twitch'
-  ? '<span class="pl lc-pl" style="background:#9146ff;color:#fff">Tw</span>'
+  ? '<span class="pl plogo lc-pl" data-logo="twitch" aria-hidden="true"></span>'
   : `<span class="pl plogo lc-pl" data-logo="${esc(p)}" aria-hidden="true"></span>`);
 
 // ---------- Insignias ----------

@@ -62,6 +62,7 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
       history = history.slice(0, 60);
     }
     current = queue.shift() || null;
+    if (current) { current.startedAt = Date.now(); current.pausedMs = 0; current.pausedAt = 0; }
     paused = false;
     votes = new Set();
     if (current) onSong(current);
@@ -209,6 +210,11 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
       publish();
     },
     setPaused(v) {
+      // Para la barra de progreso de los overlays: cuánto tiempo estuvo en pausa.
+      if (current && Boolean(v) !== paused) {
+        if (v) current.pausedAt = Date.now();
+        else if (current.pausedAt) { current.pausedMs = (current.pausedMs || 0) + (Date.now() - current.pausedAt); current.pausedAt = 0; }
+      }
       paused = Boolean(v);
       publish();
     },

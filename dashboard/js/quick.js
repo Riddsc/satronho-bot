@@ -18,7 +18,7 @@ let music = { paused: false, enabled: true, current: null };
 
 const STATE = { connected: ['on', 'Conectado'], connecting: ['wait', 'Conectando…'], error: ['err', 'Con problemas'], disconnected: ['', 'Desconectado'] };
 const CHANNEL_URL = { kick: (c) => `https://kick.com/${c}`, twitch: (c) => `https://twitch.tv/${c}`, tiktok: (c) => `https://www.tiktok.com/@${c}/live` };
-const LOGO = (p) => (p === 'twitch' ? '<span class="pl" style="background:#9146ff;color:#fff">Tw</span>' : `<span class="pl plogo" data-logo="${p}" aria-hidden="true"></span>`);
+const LOGO = (p) => (p === 'twitch' ? '<span class="pl plogo" data-logo="twitch" aria-hidden="true"></span>' : `<span class="pl plogo" data-logo="${p}" aria-hidden="true"></span>`);
 const store = {
   get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } },
@@ -53,7 +53,25 @@ function renderPop(p) {
     ${ch ? `<button type="button" data-pp="${off ? 'connect' : 'reconnect'}">${iconSVG('plug')}<span>${off ? 'Conectar' : 'Reconectar'}</span></button>` : ''}
     ${!off ? `<button type="button" data-pp="disconnect">${iconSVG('door')}<span>Desconectar</span></button>` : ''}
     ${ch && CHANNEL_URL[p] ? `<button type="button" data-pp="open">${iconSVG('link')}<span>Abrir mi canal</span></button>` : ''}
-    <button type="button" data-pp="go">${iconSVG('gear')}<span>${ch ? 'Ajustes en Conexiones' : 'Poner mi cuenta en Conexiones'}</span></button>`;
+    <button type="button" data-pp="go">${iconSVG('gear')}<span>${ch ? 'Ajustes en Conexiones' : 'Poner mi cuenta en Conexiones'}</span></button>
+    <div class="pp-sep"></div>
+    <button type="button" data-pp="hide">${iconSVG('bellOff')}<span>Ocultar de esta barra</span></button>`;
+}
+// Cuentas ocultas de la barra (las que no usas). Vuelven con el botón «+N».
+const hiddenChips = () => (Array.isArray(profile().chipsHidden) ? profile().chipsHidden : []);
+function applyHiddenChips() {
+  const hid = hiddenChips();
+  for (const p of ['kick', 'starvios', 'twitch', 'tiktok']) { const c = $(`#chip-${p}`); if (c) c.hidden = hid.includes(p); }
+  const more = $('#pchips-more');
+  more.hidden = !hid.length;
+  more.textContent = `+${hid.length}`;
+  more.title = `Cuentas ocultas: ${hid.map((p) => PLATFORM_NAMES[p]).join(', ')}`;
+}
+function renderHiddenPop() {
+  const pop = $('#pchip-pop');
+  pop.dataset.p = '';
+  pop.innerHTML = `<div class="pp-head pp-solo"><div><b>Cuentas ocultas</b><small>No salen en esta barra, pero siguen funcionando si las conectas.</small></div></div>
+    ${hiddenChips().map((p) => `<button type="button" data-pp="unhide" data-plat="${p}">${LOGO(p)}<span>Mostrar ${esc(PLATFORM_NAMES[p])}</span></button>`).join('')}`;
 }
 function openPop(p, chip) {
   const pop = $('#pchip-pop');
@@ -80,7 +98,20 @@ function initChips() {
   };
   applyFold();
   fold.addEventListener('click', () => { store.set('satronho.chipsFolded', !store.get('satronho.chipsFolded', false)); applyFold(); });
+  applyHiddenChips();
   $('#pchips').addEventListener('click', (ev) => {
+    if (ev.target.closest('#pchips-more')) {
+      ev.stopPropagation();
+      const pop = $('#pchip-pop');
+      if (!pop.hidden && popFor === '+') return closePop();
+      popFor = '+';
+      renderHiddenPop();
+      pop.hidden = false;
+      const r = ev.target.getBoundingClientRect();
+      pop.style.left = `${Math.max(8, Math.min(r.left, innerWidth - 300))}px`;
+      pop.style.top = `${r.bottom + 8}px`;
+      return;
+    }
     const chip = ev.target.closest('[data-pchip]');
     if (chip) { ev.stopPropagation(); openPop(chip.dataset.pchip, chip); }
   });
@@ -91,6 +122,17 @@ function initChips() {
     const act = b.dataset.pp;
     if (act === 'only') { showOnlyPlatform(p); showPage('actividad'); closePop(); }
     if (act === 'go') { showPage('conexiones'); closePop(); }
+    if (act === 'hide') {
+      saveProfile({ chipsHidden: [...new Set([...hiddenChips(), p])] });
+      applyHiddenChips();
+      closePop();
+      guideToast('samy', `Escondí ${PLATFORM_NAMES[p]} de la barra. Vuelve con el botón «+» de al lado.`);
+    }
+    if (act === 'unhide') {
+      saveProfile({ chipsHidden: hiddenChips().filter((x) => x !== b.dataset.plat) });
+      applyHiddenChips();
+      closePop();
+    }
     if (act === 'open') window.open(CHANNEL_URL[p](String(config.platforms[p].channel).replace(/^@/, '')), '_blank');
     if (act === 'connect' || act === 'reconnect') api('POST', `/api/connect/${p}`, {}).catch((e) => toast(e.message));
     if (act === 'disconnect') api('POST', `/api/disconnect/${p}`).catch((e) => toast(e.message));

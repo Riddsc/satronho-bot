@@ -15,6 +15,7 @@
   .pop { position: absolute; display: grid; justify-items: center; gap: 4px; animation: stick 2.2s cubic-bezier(.2, 1.5, .4, 1) both; }
   .pop img { width: calc(110px * var(--scale, 1)); height: calc(110px * var(--scale, 1)); object-fit: contain; filter: drop-shadow(0 8px 18px rgba(0,0,0,.45)); }
   .pop span { font-weight: 800; font-size: 18px; padding: 3px 12px; border-radius: 99px; background: var(--bg); color: var(--fg, #fff); border: 2px solid var(--sticker); white-space: nowrap; }
+  @keyframes stickIn { 0% { opacity: 0; transform: scale(.2) rotate(-25deg); } 60% { opacity: 1; transform: scale(1.15) rotate(8deg); } 100% { opacity: 1; transform: scale(1); } }
   @keyframes stick { 0% { opacity: 0; transform: scale(.2) rotate(-25deg); } 18% { opacity: 1; transform: scale(1.15) rotate(8deg); } 28% { transform: scale(1) rotate(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-60px) scale(.9); } }
   body { height: 100vh; display: grid; place-items: center; }
   .stage { transform: scale(var(--scale, 1)); }
@@ -90,14 +91,16 @@
     const pops = document.getElementById('pops');
     const el = document.createElement('div');
     el.className = 'pop';
-    el.style.left = `${8 + Math.random() * 74}%`;
-    el.style.top = `${14 + Math.random() * 52}%`;
+    const still = param('still', '') === '1';
+    el.style.left = still ? '38%' : `${8 + Math.random() * 74}%`;
+    el.style.top = still ? '22%' : `${14 + Math.random() * 52}%`;
+    if (still) el.style.animation = 'stick 1.2s cubic-bezier(.2, 1.5, .4, 1) both paused', el.style.animationPlayState = 'running', el.style.animationIterationCount = '1', el.style.animationFillMode = 'forwards', el.style.animationName = 'stickIn';
     if (e.color) el.style.setProperty('--sticker', e.color);
     const img = okImg(e.image) ? `<img src="${esc(e.image)}" alt="">` : `<div style="font-size:72px">${(TEMPLATES[e.type] || TEMPLATES.sticker).icon}</div>`;
     el.innerHTML = `${img}<span>${esc(e.custom ? e.title : e.user?.name || '')}</span>`;
     pops.append(el);
     while (pops.children.length > 12) pops.firstChild.remove();
-    setTimeout(() => el.remove(), 2300);
+    if (!still) setTimeout(() => el.remove(), 2300);
   }
 
   // Cola: las alertas salen de una en una, nunca se pisan.
@@ -157,7 +160,18 @@
   let demoI = 0;
   const demo = () => { if (!busy) enqueue(DEMO[demoI++ % DEMO.length]); };
   listenPreview(demo);
-  if (isPreview) { demo(); setInterval(demo, 4200); }
+  // ?still=1: vista previa del editor (sin demo; muestra la alerta que le mandan).
+  let demoTimer = null;
+  if (isPreview && param('still', '') !== '1') { demo(); demoTimer = setInterval(demo, 4200); }
+  window.addEventListener('message', (ev) => {
+    if (ev.origin !== location.origin || !ev.data?.satronhoAlert) return;
+    clearInterval(demoTimer);
+    queue.length = 0;
+    stage.replaceChildren();
+    document.getElementById('pops').replaceChildren();
+    busy = false;
+    enqueue({ ...ev.data.satronhoAlert, durationMs: 60000 });
+  });
 
   applyOverlayStyle({});
   connectSatronho((kind, payload) => {

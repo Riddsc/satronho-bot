@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Satronho · Overlay</title>
+<meta name="author" content="RiddsSatronho">
+<!-- Overlay de la galería: /overlays/w.html?id=<overlay>
+     Se configura en la app (Overlays para OBS). El tamaño recomendado de la
+     fuente de navegador sale en la app, debajo de la URL. -->
+<link rel="stylesheet" href="base.css">
+<style id="kind-css"></style>
+<style>
+  body { height: 100vh; }
+  #root { position: fixed; inset: 0; display: grid; align-items: center; justify-items: center; padding: 14px; box-sizing: border-box; }
+  #root > .w { transform: scale(var(--scale, 1)); transform-origin: var(--origin, center); }
+  body[data-pos="left"] #root { justify-items: start; } body[data-pos="right"] #root { justify-items: end; }
+  .missing { font-size: 18px; font-weight: 700; place-self: center; padding: 10px 16px; border-radius: 12px; background: var(--bg); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+  import { connectSatronho, param } from './client.js';
+  import { applyOverlayStyle, overlayStyle, isPreview } from './style.js';
+  import { KINDS, settingsOf, styleOf } from './catalog.js';
+  import { RENDER, demoState } from './kinds.js';
+  import { morph } from './morph.js';
+
+  const id = param('id', '');
+  // En la app: datos de ejemplo, salvo que pidan ver los datos reales (&real=1).
+  const demo = isPreview && param('real') !== '1';
+  const root = document.getElementById('root');
+  const S = { goals: [], podium: {}, live: {}, music: {}, recent: [], widgets: {}, preview: isPreview };
+  let widget = null;
+  let kind = null;
+  let lastKind = '';
+  let look = {};
+
+  function current() {
+    const w = S.widgets?.[id] || (KINDS[id] ? { kind: id } : null);
+    return w;
+  }
+  function apply() {
+    widget = current();
+    if (!widget || !KINDS[widget.kind]) { root.innerHTML = `<div class="missing">No existe el overlay «${id}». Cópialo de nuevo desde la app.</div>`; return; }
+    if (widget.kind !== lastKind) {
+      lastKind = widget.kind;
+      kind = RENDER[widget.kind];
+      document.getElementById('kind-css').textContent = kind?.css || '';
+      kind?.init?.(root, ctx());
+    }
+    // Estilo propio del overlay sobre el estilo general de los overlays.
+    look = widget.look || {};
+    const base = { ...(S.overlayStyle || {}) };
+    for (const [k, v] of Object.entries(look)) if (v !== '' && v != null) base[k] = v;
+    applyOverlayStyle(base);
+    document.body.dataset.kind = widget.kind;
+    document.body.dataset.style = styleOf(widget);
+    document.body.dataset.pos = settingsOf(widget).pos || 'center';
+    draw();
+  }
+  const ctx = () => ({ S, set: settingsOf(widget), style: styleOf(widget), preview: isPreview, root });
+  let raf = 0;
+  function draw() {
+    if (!kind?.render) return;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const html = `<div class="w">${kind.render(ctx())}</div>`;
+      if (!root.firstElementChild || root.firstElementChild.classList.contains('missing')) root.innerHTML = html;
+      else morph(root, html);
+    });
+  }
+
+  // Vista previa en la app: datos de ejemplo y cambios al instante.
+  if (demo) {
+    Object.assign(S, demoState());
+    setInterval(() => { demoState(S); draw(); }, 2600);
+    setInterval(() => { const e = demoState.event(); if (e && kind?.onEvent) kind.onEvent(e, ctx()); }, 1700);
+  }
+  if (isPreview) {
+    window.addEventListener('message', (ev) => {
+      if (ev.origin !== location.origin) return;
+      if (ev.data?.satronhoWidget) { S.widgets = { ...S.widgets, [id]: ev.data.satronhoWidget }; apply(); }
+      if (ev.data?.satronhoStyle) { S.overlayStyle = { ...S.overlayStyle, ...ev.data.satronhoStyle }; apply(); }
+    });
+  }
+
+  // Cada segundo, para relojes y cuentas atrás.
+  setInterval(() => { if (kind?.tick) draw(); }, 1000);
+
+  connectSatronho((k, p) => {
+    if (k === 'hello') {
+      S.overlayStyle = p.overlayStyle;
+      S.widgets = { ...(p.widgets || {}), ...(isPreview ? S.widgets : {}) };
+      if (!demo) Object.assign(S, { goals: p.goals || [], podium: p.podium || {}, live: p.live || {}, music: p.music || {}, recent: p.recent || [] });
+      return apply();
+    }
+    if (k === 'overlay-style') { S.overlayStyle = p; return apply(); }
+    if (k === 'widgets' && !isPreview) { S.widgets = p || {}; return apply(); }
+    if (demo) return;
+    if (k === 'goal') { const i = S.goals.findIndex((g) => g.id === p.id); if (i >= 0) S.goals[i] = p; else S.goals.push(p); }
+    if (k === 'goal-removed') S.goals = S.goals.filter((g) => g.id !== p.id);
+    if (k === 'goal-complete') kind?.onGoalDone?.(p, ctx());
+    if (k === 'podium') S.podium = p;
+    if (k === 'live') { const prev = S.live; S.live = p; kind?.onLive?.(prev, p, ctx()); }
+    if (k === 'music') S.music = p;
+    if (k === 'event') { S.recent.unshift(p); S.recent.length = Math.min(S.recent.length, 80); kind?.onEvent?.(p, ctx()); }
+    if (['goal', 'goal-removed', 'podium', 'live', 'music', 'event'].includes(k)) draw();
+  });
+</script>
+</body>
+</html>

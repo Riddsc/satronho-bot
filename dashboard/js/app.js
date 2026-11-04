@@ -14,7 +14,7 @@ import { initStats, onStats, onStatsHistory } from './stats.js';
 import { initHelp, setHelpContext, openHelp, _test as helpKb } from './help.js';
 import { initNav, countEvent, setStepFacts, onPageChange } from './nav.js';
 import { initAppearance, applyAppearance } from './appearance.js';
-import { initOverlays, setOverlayGoals } from './overlays.js';
+import { initOverlays, setOverlayGoals, setOverlayLive, setOverlayWidgets } from './overlays.js';
 import { initKickbot, renderKickbot } from './kickbot.js';
 import { initAlerts } from './alerts.js';
 import { initStarviosbot, renderStarviosbot } from './starviosbot.js';
@@ -76,7 +76,7 @@ const PLAT_LOGO = {
   kick: '<span class="pl plogo" data-logo="kick" aria-hidden="true"></span>',
   starvios: '<span class="pl plogo" data-logo="starvios" aria-hidden="true"></span>',
   tiktok: '<span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span>',
-  twitch: '<span class="pl" style="background:#9146ff;color:#fff">Tw</span>',
+  twitch: '<span class="pl plogo" data-logo="twitch" aria-hidden="true"></span>',
 };
 const PLAT_FULL = { kick: 'Kick', starvios: 'Starvios', twitch: 'Twitch', tiktok: 'TikTok LIVE' };
 
@@ -372,6 +372,7 @@ async function init() {
           goals.clear();
           p.goals.forEach((g) => goals.set(g.id, g));
           renderGoals();
+          setOverlayLive(p.live);
           Object.values(p.status || {}).forEach(renderStatus);
           resetChat();
           $('#home-feed').innerHTML = '<li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li>';
@@ -421,6 +422,8 @@ async function init() {
         case 'event': addLog(p); homeEvent(p); countEvent(); break;
         case 'goal': goals.set(p.id, p); renderGoals(); break;
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;
+        case 'live': setOverlayLive(p); break;
+        case 'widgets': setOverlayWidgets(p); break;
         case 'goal-complete': sayFor('juana', `¡Cumpliste la meta «${esc(p.title)}»! 🎉`, 9000, 'ok'); break;
         case 'status': renderStatus(p); onChatbotStatus(p); break;
         case 'tts': onTtsItem(p); break;

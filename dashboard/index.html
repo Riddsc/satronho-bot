@@ -33,6 +33,7 @@
     <a class="nav-item" href="#/alertas" data-page="alertas"><span class="ic" data-icon="bell"></span>Alertas</a>
     <a class="nav-item" href="#/metas" data-page="metas"><span class="ic" data-icon="target"></span>Metas</a>
     <a class="nav-item" href="#/overlays" data-page="overlays"><span class="ic" data-icon="layers"></span>Overlays para OBS</a>
+    <div class="nav-pins" id="nav-pins" hidden></div>
   </nav>
   <nav class="nav-group" style="--g:#ff8fb5"><h6><i></i>Tus números</h6>
     <a class="nav-item" href="#/estadisticas" data-page="estadisticas"><span class="ic" data-icon="chart"></span>Estadísticas</a>
@@ -58,8 +59,9 @@
   <div class="pchips" id="pchips">
   <button class="pchip" id="chip-kick" data-pchip="kick" aria-haspopup="true"><span class="pl plogo" data-logo="kick" aria-hidden="true"></span><span class="who">Kick</span><span class="st"></span></button>
   <button class="pchip" id="chip-starvios" data-pchip="starvios" aria-haspopup="true"><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span><span class="who">Starvios</span><span class="st"></span></button>
-  <button class="pchip" id="chip-twitch" data-pchip="twitch" aria-haspopup="true"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><span class="who">Twitch</span><span class="st"></span></button>
+  <button class="pchip" id="chip-twitch" data-pchip="twitch" aria-haspopup="true"><span class="pl plogo" data-logo="twitch" aria-hidden="true"></span><span class="who">Twitch</span><span class="st"></span></button>
   <button class="pchip" id="chip-tiktok" data-pchip="tiktok" aria-haspopup="true"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span><span class="who">TikTok</span><span class="st"></span></button>
+  <button type="button" class="pchips-more" id="pchips-more" hidden aria-haspopup="true">+0</button>
   <button type="button" class="pchips-fold" id="pchips-fold" title="Encoger las cuentas" aria-pressed="false">«</button>
   </div>
   <div class="search">
@@ -110,8 +112,8 @@
 <section class="page" id="page-inicio" data-page="inicio" hidden>
   <section id="welcome" class="welcome" hidden>
     <div>
-      <h2>¡Hola! Somos Samy y Troya</h2>
-      <p>Somos tus guías principales: Samy te conecta y te ayuda a encontrar todo, y Troya es la voz de tu stream. Nos acompañan Ñoño, que pone la música, y Juana, que lleva las metas y las cuentas.</p>
+      <h2>¡Hola! Somos Samy, Troya, Ñoño y Juana</h2>
+      <p>Cada uno cuida una parte de tu directo: Samy te conecta y te ayuda a encontrar todo, Troya le pone voz al chat y luce tus regalos, Ñoño pone la música y Juana lleva las metas y las cuentas. Y MechaRidds, el creador de la app en versión androide, maneja tu Chat Bot.</p>
       <p class="tip">💬 <b>Toca a cualquiera de nosotros</b> para preguntarnos dónde está algo o cómo funciona.</p>
     </div>
     <ul class="crew">
@@ -119,6 +121,7 @@
       <li><span data-avatar="troya" data-size="110"></span><b>Troya</b><small>Voz y alertas</small></li>
       <li><span data-avatar="nono" data-size="110"></span><b>Ñoño</b><small>Música</small></li>
       <li><span data-avatar="juana" data-size="110"></span><b>Juana</b><small>Metas y números</small></li>
+      <li class="crew-mecha"><span data-avatar="mecha" data-size="110"></span><b>MechaRidds</b><small>Chat Bot y comunidad</small></li>
     </ul>
     <button class="btn primary" id="welcome-done">¡Empecemos!</button>
   </section>
@@ -180,7 +183,7 @@
       </div>
     </article>
     <article class="platform pcard" data-platform="twitch">
-      <div class="pcard-head"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><div><b>Twitch</b><small>Chat → voz · Música con !play</small></div><span class="pstate">Desconectado</span></div>
+      <div class="pcard-head"><span class="pl plogo" data-logo="twitch" aria-hidden="true"></span><div><b>Twitch</b><small>Chat → voz · Música con !play</small></div><span class="pstate">Desconectado</span></div>
       <div class="pcols">
       <div class="pcol">
         <h4>Escuchar</h4>
@@ -329,7 +332,7 @@
               <label class="who-opt"><input type="radio" name="who-kick" value="vip" data-tts="who.kick.mode"><span><b>VIP</b></span></label>
               <label class="who-opt"><input type="radio" name="who-kick" value="mods" data-tts="who.kick.mode"><span><b>Solo moderadores</b></span></label>
             </section>
-            <section class="who-box" data-who="twitch"><h4><span class="pl" style="background:#9146ff;color:#fff" aria-hidden="true">Tw</span>Twitch<label class="switch who-read" title="Leer este chat"><input type="checkbox" data-tts="read.twitch"><span></span></label></h4>
+            <section class="who-box" data-who="twitch"><h4><span class="pl plogo" data-logo="twitch" aria-hidden="true"></span>Twitch<label class="switch who-read" title="Leer este chat"><input type="checkbox" data-tts="read.twitch"><span></span></label></h4>
               <label class="who-opt"><input type="radio" name="who-twitch" value="all" data-tts="who.twitch.mode"><span><b>Todos</b></span></label>
               <label class="who-opt"><input type="radio" name="who-twitch" value="subs" data-tts="who.twitch.mode"><span><b>Suscriptores</b><small>También VIP y fundadores</small></span></label>
               <label class="who-opt"><input type="radio" name="who-twitch" value="vip" data-tts="who.twitch.mode"><span><b>VIP</b></span></label>
@@ -493,7 +496,7 @@
       <div class="who-grid">
         <section class="who-box" data-mbox="tiktok"><h4><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span>TikTok<label class="switch who-read" title="Pedidos en TikTok"><input type="checkbox" data-music="platforms.tiktok"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-tiktok" value="all" data-mwho="tiktok"><span><b>Todos</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="followers" data-mwho="tiktok"><span><b>Quienes te siguen</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="subs" data-mwho="tiktok"><span><b>Suscriptores</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="team" data-mwho="tiktok"><span><b>Miembros de tu equipo</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="team-gift" data-mwho="tiktok"><span><b>Miembros de tu equipo que ya te mandaron Quiéreme</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="mods" data-mwho="tiktok"><span><b>Solo moderadores</b></span></label><label class="field who-level" data-mlevel><span>Nivel mínimo en tu equipo</span><input type="number" min="1" max="50" data-mlevel-in></label></section>
         <section class="who-box" data-mbox="kick"><h4><span class="pl plogo" data-logo="kick" aria-hidden="true"></span>Kick<label class="switch who-read" title="Pedidos en Kick"><input type="checkbox" data-music="platforms.kick"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-kick" value="all" data-mwho="kick"><span><b>Todos</b></span></label><label class="who-opt"><input type="radio" name="mwho-kick" value="subs" data-mwho="kick"><span><b>Suscriptores</b><small>También VIP, OG y fundadores</small></span></label><label class="who-opt"><input type="radio" name="mwho-kick" value="vip" data-mwho="kick"><span><b>VIP</b></span></label><label class="who-opt"><input type="radio" name="mwho-kick" value="mods" data-mwho="kick"><span><b>Solo moderadores</b></span></label></section>
-        <section class="who-box" data-mbox="twitch"><h4><span class="pl" style="background:#9146ff;color:#fff" aria-hidden="true">Tw</span>Twitch<label class="switch who-read" title="Pedidos en Twitch"><input type="checkbox" data-music="platforms.twitch"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-twitch" value="all" data-mwho="twitch"><span><b>Todos</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="subs" data-mwho="twitch"><span><b>Suscriptores</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="vip" data-mwho="twitch"><span><b>VIP</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="mods" data-mwho="twitch"><span><b>Solo moderadores</b></span></label></section>
+        <section class="who-box" data-mbox="twitch"><h4><span class="pl plogo" data-logo="twitch" aria-hidden="true"></span>Twitch<label class="switch who-read" title="Pedidos en Twitch"><input type="checkbox" data-music="platforms.twitch"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-twitch" value="all" data-mwho="twitch"><span><b>Todos</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="subs" data-mwho="twitch"><span><b>Suscriptores</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="vip" data-mwho="twitch"><span><b>VIP</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="mods" data-mwho="twitch"><span><b>Solo moderadores</b></span></label></section>
         <section class="who-box" data-mbox="starvios"><h4><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span>Starvios<label class="switch who-read" title="Pedidos en Starvios"><input type="checkbox" data-music="platforms.starvios"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-starvios" value="all" data-mwho="starvios"><span><b>Todos</b></span></label><p class="hint">Starvios no le dice a la app quién es quién: aquí pide todo el mundo.</p></section>
       </div></div>
     <div class="cols c2">
@@ -595,10 +598,10 @@
       <div class="ar-head">
         <div class="seg" id="ar-plats"></div>
         <div class="mz-search-form ar-search"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="ar-q" placeholder="Buscar alerta…" autocomplete="off"></div>
-        <button type="button" class="btn" id="ar-import" title="Trae todos los regalos de tu TikTok con su imagen, ID y valor">⬇ Importar regalos de TikTok <small></small></button>
+        <button type="button" class="btn" id="ar-import" title="Ya tienes los regalos de TikTok de serie. En LIVE, esto trae también los de comunidad y de tu región, con su nombre en tu idioma.">⬇ Importar desde mi TikTok <small></small></button>
         <button type="button" class="btn primary" id="ar-new">＋ Nueva alerta</button>
       </div>
-      <p class="hint ar-note">✦ Lo que no tenga alerta propia suena con su <b>alerta de serie</b>. Los stickers saltan al instante, sin esperar turno.</p>
+      <p class="hint ar-note">✦ Los regalos de TikTok ya vienen de serie. Lo que no tenga alerta propia suena con su <b>alerta de serie</b>, y los stickers saltan al instante.</p>
       <div id="ar-list" class="ar-list"></div>
     </div>
   </div>
@@ -633,24 +636,25 @@
 
 <!-- ---------- Overlays (Samy) ---------- -->
 <section class="page" id="page-overlays" data-page="overlays" hidden>
-  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Overlays para OBS</h1><p>Copia la URL y en OBS: Fuentes → + → Navegador. Funciona igual en Streamlabs y TikTok LIVE Studio.</p></div>
-    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Aquí cambias también cómo se ven: tipografía, color, tamaño y fondo. La vista previa se actualiza al instante.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
-  <div class="cols ov-layout" style="grid-template-columns:minmax(0,1fr) 340px">
-    <div id="overlay-list" class="ov-grid urls"></div>
-    <div style="display:grid;gap:16px;align-content:start">
+  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Overlays para OBS</h1><p>Toca uno para personalizarlo con vista previa en vivo. Luego copia su URL y en OBS: Fuentes → + → Navegador (igual en Streamlabs y TikTok LIVE Studio).</p></div>
+    <div class="host ovg-hosts" id="ovg-hosts"></div></div>
+  <div class="tabs" role="tablist" data-tabs="overlays"><button data-tab="galeria">Galería</button><button data-tab="estilo">Estilo general</button></div>
+  <div class="tabpanel" data-tabpanel="galeria">
+    <div id="ovg">
+      <div class="ovg-bar"><div class="seg" id="ovg-cats"></div><label class="ovg-find"><span class="ic" data-icon="search"></span><input id="ovg-q" placeholder="Buscar overlay…" aria-label="Buscar overlay"></label></div>
+      <div id="ovg-pins"></div>
+      <div id="ovg-list"></div>
+      <details class="card ovg-classic"><summary>Overlays clásicos (siguen funcionando si ya los tienes en OBS)</summary><div id="overlay-list" class="ovg-classic-list"></div></details>
+    </div>
+    <div id="ove" hidden></div>
+  </div>
+  <div class="tabpanel" data-tabpanel="estilo" hidden>
+    <p class="hint">Esto se aplica a <b>todos</b> tus overlays. Dentro de cada overlay, en «Estilo», puedes cambiarle solo a ese el tema, el color o la letra.</p>
+    <div class="cols" style="grid-template-columns:minmax(0,1fr) 360px;align-items:start">
     <div class="card"><h3 class="card-title">Tema de pantalla</h3>
       <p class="hint">Uno para todo lo que pones en OBS. Cada tema trae su letra y sus colores; después puedes ajustarlos.</p>
       <div class="ov-themes" id="ov-themes"></div></div>
-    <div class="card" id="ov-podium"><div class="row space"><h3 class="card-title">Podio en vivo</h3><button type="button" class="btn small ghost" id="pd-reset">Reiniciar</button></div>
-      <span class="field-label">Qué mide</span>
-      <div class="seg pd-seg"><label><input type="radio" name="pd-metric" value="likes" data-pd="metric"><span>Likes</span></label><label><input type="radio" name="pd-metric" value="gifts" data-pd="metric"><span>Regalos</span></label><label><input type="radio" name="pd-metric" value="chat" data-pd="metric"><span>Mensajes</span></label></div>
-      <span class="field-label mt">Puestos</span>
-      <div class="seg pd-seg"><label><input type="radio" name="pd-size" value="3" data-pd="size"><span>Top 3</span></label><label><input type="radio" name="pd-size" value="4" data-pd="size"><span>Top 4</span></label><label><input type="radio" name="pd-size" value="5" data-pd="size"><span>Top 5</span></label></div>
-      <label class="field mt"><span>Título (vacío = automático)</span><input data-pd="title" placeholder="Top likes"></label>
-      <label class="switch"><input type="checkbox" data-pd="showValues"><span></span> Mostrar los números</label>
-      <label class="switch"><input type="checkbox" data-pd="avatars"><span></span> Fotos de perfil (TikTok)</label>
-      <label class="switch"><input type="checkbox" data-pd="crown"><span></span> Corona para el primero</label>
-      <p class="hint">¿Varios podios? Añade a la URL <code>?metrica=regalos</code> o <code>?puestos=5</code>. Se reinicia solo al terminar el directo.</p></div>
+    
     <div class="card" id="ov-style"><h3 class="card-title">Estilo de los overlays</h3>
       <label class="field"><span>Tipografía</span><select data-ov="font"></select></label>
       <label class="field"><span>Color principal</span><span class="row"><input type="color" data-ov="accent"><span class="swatches" id="ov-swatches"></span></span></label>
@@ -846,17 +850,26 @@
 </div>
 <div class="vp-modal ar-modal" id="ar-modal" hidden role="dialog" aria-modal="true" aria-labelledby="ar-modal-title">
   <div class="vp-card ar-mcard" style="--g:#9b8cff">
-    <div class="vp-head"><h2 id="ar-modal-title">Nueva alerta</h2><button type="button" class="btn small ghost" id="ar-close" aria-label="Cerrar">✕</button></div>
+    <div class="vp-head"><div class="ar-mtitle"><span class="guide" data-avatar="troya" data-size="40"></span><div><h2 id="ar-modal-title">Nueva alerta</h2><small>Con Troya, en tres pasos</small></div></div><button type="button" class="btn small ghost" id="ar-close" aria-label="Cerrar">✕</button></div>
     <div class="ar-mbody">
-      <div class="ar-left">
-        <h5>¿De dónde llega?</h5><div class="ar-src" id="ar-src"></div>
-        <h5>¿Qué tiene que pasar?</h5><div class="ar-trigs" id="ar-trigs"></div>
-        <div id="ar-opts"></div>
-        <div id="ar-picker" class="ar-picker"></div>
+      <div class="ar-steps">
+        <section class="ar-step"><h5><i>1</i>¿Cuándo suena?</h5>
+          <div class="ar-src" id="ar-src"></div>
+          <div class="ar-trigs" id="ar-trigs"></div>
+          <div id="ar-opts"></div>
+          <div id="ar-picker" class="ar-picker"></div></section>
+        <section class="ar-step"><h5><i>2</i>¿Cómo se ve?</h5><div id="ar-look"></div></section>
+        <section class="ar-step"><h5><i>3</i>¿Cómo suena?</h5><div id="ar-sound"></div></section>
       </div>
-      <div class="ar-side" id="ar-side"></div>
+      <aside class="ar-live">
+        <div class="ar-stage"><iframe id="ar-prev" title="Vista previa de la alerta" tabindex="-1"></iframe><button type="button" class="btn small ar-replay" id="ar-test-prev">↻ Repetir</button></div>
+        <p class="ar-sentence" id="ar-sentence"></p>
+        <span class="field-label">Si ese evento también tiene alerta de serie</span>
+        <div class="seg ar-excl-big"><button type="button" data-excl="1">Solo esta</button><button type="button" data-excl="0">Las dos</button></div>
+        <p class="hint" id="ar-excl-hint"></p>
+      </aside>
     </div>
-    <div class="vp-foot"><span class="hint">Lo que no tenga alerta propia suena con la de serie.</span><span class="row tight"><button type="button" class="btn ghost" id="ar-cancel">Cancelar</button><button type="button" class="btn primary" id="ar-save">Guardar</button></span></div>
+    <div class="vp-foot"><span class="hint">Lo que no tenga alerta propia suena con la de serie.</span><span class="row tight"><button type="button" class="btn ghost" id="ar-cancel">Cancelar</button><button type="button" class="btn primary" id="ar-save">Guardar alerta</button></span></div>
   </div>
 </div>
 <div class="news-modal" id="news-modal" hidden role="dialog" aria-modal="true" aria-labelledby="news-modal-title">

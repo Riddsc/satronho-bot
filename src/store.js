@@ -159,6 +159,14 @@ const DEFAULTS = {
       y: null,
     },
   },
+  // Overlays de la galería: { id: { kind, name, style, settings, look } }
+  widgets: {},
+  // Contadores en pantalla: { id, name, icon, value, step, command, gift, anyone }
+  counters: [
+    { id: 'muertes', name: 'Muertes', icon: '💀', value: 0, step: 1, command: 'muerte', gift: '', anyone: false },
+    { id: 'jefes', name: 'Jefes', icon: '⚔️', value: 0, step: 1, command: 'jefe', gift: '', anyone: false, goal: 5 },
+  ],
+  countdown: { endsAt: 0, left: 3600000, running: false },
   // Alertas propias: reglas por regalo, sticker, rango de monedas, likes… (alertRules.js)
   alertRules: [],
   ttsAllowed: {}, // usuarios de TikTok que enviaron el regalo: { id: { name, ts } }
