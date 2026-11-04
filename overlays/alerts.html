@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Satronho · Alertas</title>
+<meta name="author" content="RiddsSatronho">
+<!-- Overlay para OBS: agrégalo como "Fuente de navegador" de 800x300.
+     El estilo se cambia en la app (Overlays para OBS). Parámetros opcionales:
+     ?sound=0 (sin sonido) · ?scale=1.5 (más grande) · ?color=%23ffb23e -->
+<link rel="stylesheet" href="base.css">
+<style>
+  :root { --accent: #ffb23e; --follow: #8b7bff; --sub: #ffb23e; --gift: #ff5d8f; --like: #4fd1c5; --share: #5ab0ff; }
+  body { height: 100vh; display: grid; place-items: center; }
+  .stage { transform: scale(var(--scale, 1)); }
+  .alert {
+    --c: var(--follow);
+    display: flex; align-items: center; gap: 22px;
+    min-width: 520px; max-width: 720px;
+    padding: 22px 30px 22px 22px;
+    background: var(--bg);
+    border-radius: calc(22px * var(--r));
+    border: 2px solid color-mix(in srgb, var(--c) 70%, transparent);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--c) 18%, transparent), 0 18px 50px rgba(0,0,0,.45);
+    animation: enter .6s cubic-bezier(.2, 1.4, .4, 1) both;
+  }
+  body[data-alert-colors="accent"] .alert { --c: var(--accent) !important; }
+  .alert.leaving { animation: leave .45s ease-in both; }
+  .badge {
+    flex: none; width: 76px; height: 76px; border-radius: calc(38px * var(--r) + 4px);
+    display: grid; place-items: center;
+    background: var(--c); color: #140f22;
+    font-size: 38px; font-weight: 800;
+    animation: pop .9s .25s ease-out both;
+  }
+  .label { font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: var(--c); font-weight: 800; }
+  .title { font-size: 34px; font-weight: 800; line-height: 1.1; margin-top: 2px; }
+  .title b { color: var(--c); }
+  .msg { font-size: 19px; margin-top: 6px; font-weight: 600; }
+  .bar { height: 4px; border-radius: 4px; background: var(--c); margin-top: 12px; transform-origin: left; animation: shrink linear both; }
+  @keyframes enter { from { opacity: 0; transform: translateY(40px) scale(.9); } }
+  @keyframes leave { to { opacity: 0; transform: translateY(-30px) scale(.95); } }
+  @keyframes pop { 0% { transform: scale(.4) rotate(-20deg); } 60% { transform: scale(1.15) rotate(6deg); } }
+  @keyframes shrink { to { transform: scaleX(0); } }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+
+<script type="module">
+  import { connectSatronho, param } from './client.js';
+  import { applyOverlayStyle, overlayStyle, listenPreview, isPreview } from './style.js';
+
+  const stage = document.getElementById('stage');
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const soundOn = () => param('sound', '1') !== '0' && overlayStyle().sound !== false && !isPreview;
+
+  const TEMPLATES = {
+    follow: { icon: '♥', label: 'Nuevo seguidor', title: (e) => `<b>${e.user.name}</b> te sigue` },
+    sub:    { icon: '★', label: 'Suscripción',   title: (e) => `<b>${e.user.name}</b> se suscribió${e.amount > 1 ? ` · ${e.amount} meses` : ''}` },
+    gift:   { icon: '🎁', label: 'Regalo',        title: (e) => {
+      const x = e.extra || {};
+      const what = x.giftName ? `${x.count > 1 ? `${x.count}× ` : ''}${esc(x.giftName)}` : `${e.amount} ${esc(x.currency || '')}`;
+      return `<b>${e.user.name}</b> envió ${what}`;
+    } },
+    like:   { icon: '👍', label: 'Likes',         title: (e) => `<b>${e.user.name}</b> dio ${e.amount} likes` },
+    share:  { icon: '↗', label: 'Compartido',    title: (e) => `<b>${e.user.name}</b> compartió el directo` },
+  };
+
+  // Cola: las alertas salen de una en una, nunca se pisan.
+  const queue = [];
+  let busy = false;
+
+  function enqueue(e) {
+    if (!TEMPLATES[e.type]) return;
+    queue.push(e);
+    if (!busy) next();
+  }
+
+  function next() {
+    const e = queue.shift();
+    if (!e) { busy = false; return; }
+    busy = true;
+
+    const t = TEMPLATES[e.type];
+    const safe = { ...e, user: { ...e.user, name: esc(e.user.name) } };
+    const dur = e.durationMs || 5000;
+
+    const el = document.createElement('div');
+    el.className = 'alert surface';
+    el.style.setProperty('--c', `var(--${e.type})`);
+    // Si el regalo trae imagen (TikTok), la usamos como insignia.
+    const img = /^https:\/\//.test(e.extra?.image || '') ? `<img src="${esc(e.extra.image)}" alt="" style="width:62px;height:62px;object-fit:contain">` : t.icon;
+    el.innerHTML = `
+      <div class="badge">${img}</div>
+      <div>
+        <div class="label">${t.label}</div>
+        <div class="title">${t.title(safe)}</div>
+        ${e.message ? `<div class="msg muted">${esc(e.message)}</div>` : ''}
+        <div class="bar" style="animation-duration:${dur}ms"></div>
+      </div>`;
+    stage.replaceChildren(el);
+    if (soundOn()) chime(e.type);
+
+    setTimeout(() => {
+      el.classList.add('leaving');
+      setTimeout(() => { el.remove(); next(); }, 450);
+    }, dur);
+  }
+
+  // Sonido generado con WebAudio (sin archivos).
+  let ctx;
+  function chime(type) {
+    try {
+      ctx ??= new AudioContext();
+      const base = { follow: 660, sub: 523, gift: 784, like: 880, share: 700 }[type] || 660;
+      [0, 0.12, 0.24].forEach((delay, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = 'triangle';
+        o.frequency.value = base * [1, 1.25, 1.5][i];
+        g.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
+        g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + delay + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + 0.35);
+        o.connect(g).connect(ctx.destination);
+        o.start(ctx.currentTime + delay);
+        o.stop(ctx.currentTime + delay + 0.4);
+      });
+    } catch { /* sin audio disponible */ }
+  }
+
+  // Vista previa en la app: una alerta de ejemplo que se repite.
+  const DEMO = [
+    { type: 'follow', user: { name: 'Rosalinda' }, durationMs: 3200 },
+    { type: 'gift', user: { name: 'DJ_Fan' }, amount: 5, extra: { giftName: 'Rosa', count: 5 }, durationMs: 3200 },
+    { type: 'sub', user: { name: 'SuscriptorFiel' }, amount: 3, durationMs: 3200 },
+  ];
+  let demoI = 0;
+  const demo = () => { if (!busy) enqueue(DEMO[demoI++ % DEMO.length]); };
+  listenPreview(demo);
+  if (isPreview) { demo(); setInterval(demo, 4200); }
+
+  applyOverlayStyle({});
+  connectSatronho((kind, payload) => {
+    if (kind === 'hello') applyOverlayStyle(payload.overlayStyle);
+    if (kind === 'overlay-style') applyOverlayStyle(payload);
+    if (kind === 'alert' && !isPreview) enqueue(payload);
+  });
+</script>
+</body>
+</html>

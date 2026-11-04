@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="es" data-theme="noche">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="RiddsSatronho">
+<meta name="copyright" content="© 2026 RiddsSatronho">
+<meta name="application-name" content="Satronho Bot">
+<title>Satronho Bot</title>
+<link rel="icon" href="/favicon.png">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===================== Menú lateral ===================== -->
+<aside class="side" aria-label="Menú">
+  <a class="brand" href="#/inicio"><span class="logo" aria-hidden="true"><span></span></span><span><b>Satronho Bot</b><small id="app-version">v0.4.0</small></span></a>
+
+  <nav class="nav-group" style="--g:#ffb23e"><h6><i></i>Tu directo</h6>
+    <a class="nav-item" href="#/inicio" data-page="inicio"><span class="ic" data-icon="home"></span>Inicio</a>
+    <a class="nav-item" href="#/conexiones" data-page="conexiones"><span class="ic" data-icon="plug"></span>Conexiones<span class="badge" id="nav-conn">0/4</span></a>
+    <a class="nav-item" href="#/actividad" data-page="actividad"><span class="ic" data-icon="chat"></span>Chat y actividad</a>
+  </nav>
+  <nav class="nav-group" style="--g:#9b8cff"><h6><i></i>Lo que se escucha</h6>
+    <a class="nav-item" href="#/voz" data-page="voz"><span class="ic" data-icon="mic"></span>Voz del chat</a>
+    <a class="nav-item" href="#/musica" data-page="musica"><span class="ic" data-icon="music"></span>Música<span class="badge" id="nav-queue" hidden>0</span></a>
+  </nav>
+  <nav class="nav-group" style="--g:#9b8cff"><h6><i></i>Lo que se ve</h6>
+    <a class="nav-item" href="#/alertas" data-page="alertas"><span class="ic" data-icon="bell"></span>Alertas</a>
+    <a class="nav-item" href="#/metas" data-page="metas"><span class="ic" data-icon="target"></span>Metas</a>
+    <a class="nav-item" href="#/overlays" data-page="overlays"><span class="ic" data-icon="layers"></span>Overlays para OBS</a>
+  </nav>
+  <nav class="nav-group" style="--g:#ff8fb5"><h6><i></i>Tus números</h6>
+    <a class="nav-item" href="#/estadisticas" data-page="estadisticas"><span class="ic" data-icon="chart"></span>Estadísticas</a>
+  </nav>
+  <nav class="nav-group" style="--g:#ffb23e"><h6><i></i>Sistema</h6>
+    <a class="nav-item" href="#/ajustes" data-page="ajustes"><span class="ic" data-icon="gear"></span>Ajustes</a>
+    <a class="nav-item" href="#/ayuda" data-page="ayuda"><span class="ic" data-icon="help"></span>Ayuda</a>
+  </nav>
+
+  <div class="side-foot">
+    <div class="steps" id="steps" style="--g:#ffb23e">
+      <div class="hd"><span class="guide" data-avatar="samy" data-size="40"></span><div><b>Primeros pasos</b><small id="steps-count">0 de 4 · con Samy</small></div><button class="x" id="steps-hide" title="Ocultar">✕</button></div>
+      <div class="bar"><i id="steps-bar" style="width:0%"></i></div>
+      <div id="steps-list"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===================== Barra superior ===================== -->
+<header class="topbar">
+  <button class="pchip" id="chip-kick" data-go-page="conexiones"><span class="pl" style="background:#53fc18">K</span><span class="who">Kick</span><span class="st"></span></button>
+  <button class="pchip" id="chip-starvios" data-go-page="conexiones"><span class="pl" style="background:#69d9ff">S</span><span class="who">Starvios</span><span class="st"></span></button>
+  <button class="pchip" id="chip-twitch" data-go-page="conexiones"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><span class="who">Twitch</span><span class="st"></span></button>
+  <button class="pchip" id="chip-tiktok" data-go-page="conexiones"><span class="pl" style="background:#ff5d8f">T</span><span class="who">TikTok</span><span class="st"></span></button>
+  <div class="search">
+    <input id="search" placeholder="Busca algo o pregúntale a Samy…" autocomplete="off" aria-label="Buscar">
+    <kbd>Ctrl K</kbd>
+    <div class="search-results" id="search-results" hidden></div>
+  </div>
+  <button class="btn small" id="events-btn" title="Eventos desde que abriste la app">Eventos<span class="count" id="events-count">0</span></button>
+  <div class="menu-wrap">
+    <button class="btn small" id="sim-btn" aria-haspopup="true">▶ Simular</button>
+    <div class="menu" id="sim-menu" hidden>
+      <h6>TikTok</h6>
+      <button data-sim="follow">♥ Follow</button>
+      <button data-sim="gift">🎁 Regalo</button>
+      <button data-sim="gift" data-body='{"user":{"id":"rosalinda","name":"Rosalinda"},"amount":1,"extra":{"giftName":"Quiéreme","count":1,"currency":"diamantes"}}'>💗 Quiéreme</button>
+      <button data-sim="sub">★ Suscripción</button>
+      <button data-sim="like">👍 Likes</button>
+      <button data-sim="share">↗ Compartido</button>
+      <h6>Chat</h6>
+      <button data-sim="chat" data-body='{"platform":"kick","user":{"id":"espectador","name":"Espectador"},"message":"Hola, saludos desde Kick"}'>💬 Mensaje en Kick</button>
+      <button data-sim="chat" data-body='{"platform":"starvios","user":{"id":"estrella","name":"Estrella"},"message":"Hola desde Starvios"}'>💬 Mensaje en Starvios</button>
+      <button data-sim="chat" data-body='{"platform":"twitch","user":{"id":"morado","name":"Morado"},"message":"Hola desde Twitch"}'>💬 Mensaje en Twitch</button>
+      <button data-sim="chat" data-body='{"platform":"kick","user":{"id":"dj_fan","name":"DJ_Fan"},"message":"!play la bicicleta carlos vives"}'>♪ !play en Kick</button>
+    </div>
+  </div>
+</header>
+<div id="update-banner" class="update-banner" hidden></div>
+
+<!-- ===================== Pantallas ===================== -->
+<div class="content" id="content">
+
+<!-- ---------- Inicio (Samy) ---------- -->
+<section class="page" id="page-inicio" data-page="inicio" hidden>
+  <section id="welcome" class="welcome" hidden>
+    <div>
+      <h2>¡Hola! Somos Samy y Troya</h2>
+      <p>Somos tus guías principales: Samy te conecta y te ayuda a encontrar todo, y Troya es la voz de tu stream. Nos acompañan Ñoño, que pone la música, y Juana, que lleva las metas y las cuentas.</p>
+      <p class="tip">💬 <b>Toca a cualquiera de nosotros</b> para preguntarnos dónde está algo o cómo funciona.</p>
+    </div>
+    <ul class="crew">
+      <li><span data-avatar="samy" data-size="110"></span><b>Samy</b><small>Conexiones y ayuda</small></li>
+      <li><span data-avatar="troya" data-size="110"></span><b>Troya</b><small>Voz y alertas</small></li>
+      <li><span data-avatar="nono" data-size="110"></span><b>Ñoño</b><small>Música</small></li>
+      <li><span data-avatar="juana" data-size="110"></span><b>Juana</b><small>Metas y números</small></li>
+    </ul>
+    <button class="btn primary" id="welcome-done">¡Empecemos!</button>
+  </section>
+  <div class="ph"><div class="t"><small>Tu directo</small><h1>Inicio</h1><p>Todo lo importante de un vistazo. Configura una vez y minimiza tranquilo.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy"></p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="cols home">
+    <div class="card rspan2"><div class="row space"><h3 class="card-title">En vivo</h3><a class="btn small ghost" href="#/actividad">Ver todo</a></div><ul class="log short" id="home-feed"><li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li></ul></div>
+    <div class="card" style="--g:#9b8cff"><span class="mini-host guide" data-avatar="troya" data-size="mini"></span><h3 class="card-title">Voz del chat</h3><div id="home-voice"></div></div>
+    <div class="card" style="--g:#4fd1c5"><span class="mini-host guide" data-avatar="nono" data-size="mini"></span><h3 class="card-title">Música</h3><div id="home-music"></div></div>
+    <div class="card" style="--g:#ff8fb5"><span class="mini-host guide" data-avatar="juana" data-size="mini"></span><h3 class="card-title">Este directo</h3><div id="home-stats"></div></div>
+    <div class="card"><h3 class="card-title">Atajos</h3><div class="shortcuts">
+      <a class="btn small" href="#/overlays">Copiar overlays</a>
+      <button class="btn small" data-sim-quick="follow">Probar alerta</button>
+      <button class="btn small" id="home-skip-voice">Saltar voz</button>
+      <button class="btn small" id="home-end-session">Terminar sesión</button>
+    </div></div>
+  </div>
+</section>
+
+<!-- ---------- Conexiones (Samy) ---------- -->
+<section class="page" id="page-conexiones" data-page="conexiones" hidden>
+  <div class="ph"><div class="t"><small>Tu directo</small><h1>Conexiones</h1><p><b>Escuchar</b> trae el chat y los regalos a la app. <b>Escribir</b> deja que Satronho Bot responda en tu chat.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy"></p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+
+  <div class="conn-bar">
+    <span class="seg conn-tabs" id="conn-tabs" role="tablist" aria-label="Qué quieres hacer">
+      <button type="button" role="tab" data-conn-tab="listen" aria-pressed="true"><span class="ic" data-icon="ear"></span> Escuchar</button>
+      <button type="button" role="tab" data-conn-tab="write" aria-pressed="false"><span class="ic" data-icon="send"></span> Escribir</button>
+    </span>
+    <details class="conn-pick" id="conn-pick"><summary>Plataformas que uso</summary>
+      <div class="conn-pick-list">
+        <label class="check"><input type="checkbox" data-show="kick"> <span class="pl mini" style="background:#53fc18">K</span> Kick</label>
+        <label class="check"><input type="checkbox" data-show="starvios"> <span class="pl mini" style="background:#69d9ff">S</span> Starvios</label>
+        <label class="check"><input type="checkbox" data-show="twitch"> <span class="pl mini" style="background:#9146ff;color:#fff">Tw</span> Twitch</label>
+        <label class="check"><input type="checkbox" data-show="tiktok"> <span class="pl mini" style="background:#ff5d8f">T</span> TikTok LIVE</label>
+        <p class="hint">Las que desmarques se esconden del panel y no se conectan solas. Puedes volver a mostrarlas cuando quieras.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- Escuchar -->
+  <div class="cols c2 conn-pane" id="card-conexiones" data-conn-pane="listen">
+    <div class="platform" data-platform="kick">
+      <div class="phead"><span class="pl" style="background:#53fc18">K</span><b>Kick</b><span class="pstate">Desconectado</span></div>
+      <p class="uses">Chat → voz · Música con !play</p>
+      <label class="field" style="margin-top:0"><span>Tu canal de Kick (donde transmites)</span></label>
+      <div class="row"><input data-field="channel" placeholder="tu_canal" autocomplete="off"><button class="btn primary" data-act="connect">Conectar</button></div>
+      <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
+    </div>
+    <div class="platform" data-platform="starvios">
+      <div class="phead"><span class="pl" style="background:#69d9ff">S</span><b>Starvios</b><span class="pstate">Desconectado</span></div>
+      <p class="uses">Chat → voz · Música con !play</p>
+      <div class="row"><input data-field="channel" placeholder="nombre_del_canal" autocomplete="off"><button class="btn primary" data-act="connect">Conectar</button></div>
+      <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
+    </div>
+    <div class="platform" data-platform="twitch">
+      <div class="phead"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><b>Twitch</b><span class="pstate">Desconectado</span></div>
+      <p class="uses">Chat → voz · Música con !play</p>
+      <div class="row"><input data-field="channel" placeholder="tu_usuario" autocomplete="off"><button class="btn primary" data-act="connect">Conectar</button></div>
+      <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
+    </div>
+    <div class="platform" data-platform="tiktok">
+      <div class="phead"><span class="pl" style="background:#ff5d8f">T</span><b>TikTok LIVE</b><span class="pstate">Desconectado</span></div>
+      <p class="uses">Alertas · Metas · Estadísticas · Voz de quien envía Quiéreme</p>
+      <div class="row"><input data-field="channel" placeholder="@tu_usuario" autocomplete="off"><button class="btn primary" data-act="connect">Conectar</button></div>
+      <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
+      <details><summary>Avanzado</summary>
+        <label class="field"><span>Clave de Euler Stream (opcional, conexión más estable)</span><input data-field="signApiKey" type="password" autocomplete="off"></label>
+      </details>
+    </div>
+  </div>
+
+  <!-- Escribir -->
+  <div class="cols c2 conn-pane" data-conn-pane="write" hidden>
+    <div class="platform write" data-platform-write="kick">
+      <div class="phead"><span class="pl" style="background:#53fc18">K</span><b>Kick</b><span class="pstate on" id="kick-write-state"></span></div>
+      <p class="uses">Responde a los pedidos de música · Mensaje de prueba</p>
+      <div id="kickbot"><div id="kickbot-body"><p class="hint">Cargando…</p></div></div>
+    </div>
+    <div class="platform write soon" data-platform-write="starvios">
+      <div class="phead"><span class="pl" style="background:#69d9ff">S</span><b>Starvios</b><span class="pstate">Pronto</span></div>
+      <p class="hint">Podrás iniciar sesión en una ventana de la app, con tu cuenta o con una cuenta aparte para el bot.</p>
+    </div>
+    <div class="platform write soon" data-platform-write="tiktok">
+      <div class="phead"><span class="pl" style="background:#ff5d8f">T</span><b>TikTok LIVE</b><span class="pstate">Pronto · opcional</span></div>
+      <p class="hint">TikTok no tiene una forma oficial de escribir en el chat. Cuando llegue será opcional y te recomendaremos usar una cuenta aparte.</p>
+    </div>
+    <div class="platform write soon" data-platform-write="twitch">
+      <div class="phead"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><b>Twitch</b><span class="pstate">No disponible</span></div>
+      <p class="hint">Por ahora Satronho Bot solo lee el chat de Twitch.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Chat y actividad (Samy) ---------- -->
+<section class="page" id="page-actividad" data-page="actividad" hidden>
+  <div class="ph"><div class="t"><small>Tu directo</small><h1>Chat y actividad</h1><p>Todo lo que llega a tu directo, con 🔊 si Troya lo leyó o 🔇 y el motivo si no.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Puedes simular mensajes para probar sin estar en vivo, incluso <code>!play</code>.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="card" id="card-actividad">
+    <form id="sim" class="sim">
+      <select name="platform"><option value="kick">Kick</option><option value="starvios">Starvios</option><option value="twitch">Twitch</option><option value="tiktok">TikTok</option></select>
+      <input name="user" placeholder="Usuario" value="Espectador">
+      <input name="message" placeholder="Simula un mensaje del chat (prueba !play, !skip, !quitar)">
+      <button class="btn">Enviar</button>
+    </form>
+    <ul id="log" class="log tall"><li class="empty">Aún no hay actividad.</li></ul>
+  </div>
+</section>
+
+<!-- ---------- Voz del chat (Troya) ---------- -->
+<section class="page" id="page-voz" data-page="voz" hidden>
+  <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Voz del chat</h1><p>Troya lee tu chat con voces neuronales que corren en tu PC.</p></div>
+    <div class="host" style="--g:#9b8cff"><p class="bubble" data-bubble="troya"></p><span class="guide" data-avatar="troya" data-size="hero"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="voz">
+    <button data-tab="voces">Voces</button><button data-tab="quien">Quién se lee</button><button data-tab="filtros">Filtros y límites</button><button data-tab="especiales">Espectadores especiales</button><button data-tab="probar">Probar</button>
+  </div>
+  <div id="card-voz" style="--g:#9b8cff">
+    <div class="tabpanel" data-tabpanel="voces">
+      <div class="cols c2">
+        <div class="card"><div class="row space"><h3 class="card-title">Motor y voces neuronales</h3><label class="switch big" style="margin:0"><input type="checkbox" data-tts="enabled"><span></span> Voz activada</label></div>
+          <div id="engine" class="engine"></div></div>
+        <div style="display:grid;gap:16px">
+          <div class="card"><h3 class="card-title">Voz de cada espectador</h3>
+            <label class="field"><span>Cómo reparto las voces</span>
+              <select data-tts="voiceMode"><option value="perViewer">Una voz fija para cada espectador</option><option value="random">Una voz al azar en cada mensaje</option><option value="single">Todos con la voz principal</option></select></label>
+            <label class="switch"><input type="checkbox" data-tts="toneVariants"><span></span> Variar el tono (grave, normal y aguda) para tener el triple de voces</label>
+            <label class="switch"><input type="checkbox" data-tts="useWindowsVoices"><span></span> Sumar las voces de Windows en español</label>
+            <label class="switch"><input type="checkbox" data-tts="useOnlineVoices"><span></span> Sumar voces en línea de Microsoft: una femenina y una masculina por país de Latinoamérica</label>
+            <p class="hint" style="margin:-4px 0 6px 48px">Colombia, México, Argentina, Chile, Perú, Venezuela y más. Necesitan internet y no son un servicio oficial: si fallan, uso la voz de Windows.</p>
+            <div id="voice-pool" class="pool"></div></div>
+          <div class="card"><h3 class="card-title">Escuchar</h3>
+            <form id="tts-say" class="row"><input id="tts-say-text" placeholder="Escribe algo para probar la voz…"><button class="btn primary">Probar</button></form>
+            <div class="two mt">
+              <label class="field"><span>Velocidad <b id="rate-val"></b></span><input type="range" min="0.6" max="1.8" step="0.05" data-tts="rate"></label>
+              <label class="field"><span>Volumen <b id="vol-val"></b></span><input type="range" min="0" max="1" step="0.05" data-tts="volume"></label>
+            </div>
+            <div class="row space mt"><span class="hint" id="tts-queue">En cola: 0</span><button type="button" class="btn small" id="tts-skip">Saltar mensaje</button></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tabpanel" data-tabpanel="quien" hidden>
+      <div class="cols c2">
+        <div class="card"><h3 class="card-title">Qué leo</h3>
+          <label class="switch"><input type="checkbox" data-tts="read.kick"><span></span> Todo el chat de Kick</label>
+          <label class="switch"><input type="checkbox" data-tts="read.starvios"><span></span> Todo el chat de Starvios</label>
+          <label class="switch"><input type="checkbox" data-tts="read.twitch"><span></span> Todo el chat de Twitch</label>
+          <label class="switch"><input type="checkbox" data-tts="read.tiktok"><span></span> Chat de TikTok</label>
+          <label class="switch"><input type="checkbox" data-tts="sayName"><span></span> Decir el nombre («Fulano dice…»)</label>
+          <label class="switch"><input type="checkbox" data-tts="skipCommands"><span></span> No leer comandos (mensajes que empiezan con !)</label>
+          <label class="switch"><input type="checkbox" data-tts="readMusicNotices"><span></span> Leer en voz alta los avisos de la música</label></div>
+        <div class="card"><h3 class="card-title">TikTok: solo quien envía un regalo</h3>
+          <label class="switch"><input type="checkbox" data-tts="tiktokGate.enabled"><span></span> Solo leer a quien envió el regalo</label>
+          <div class="two">
+            <label class="field"><span>Regalo (nombres separados por coma)</span><input data-tts="tiktokGate.giftNames" data-list="comma"></label>
+            <label class="field"><span>El permiso dura</span><select data-tts="tiktokGate.hours" data-num><option value="3">3 horas</option><option value="12">12 horas</option><option value="24">24 horas</option><option value="168">7 días</option><option value="0">Siempre</option></select></label>
+          </div>
+          <div class="row space mt"><span class="hint">Con permiso de voz:</span><button type="button" class="btn small ghost" id="allowed-clear">Quitar a todos</button></div>
+          <ul id="allowed-list" class="mini-list"></ul></div>
+      </div>
+    </div>
+    <div class="tabpanel" data-tabpanel="filtros" hidden>
+      <div class="cols c2">
+        <div class="card"><h3 class="card-title">Filtros</h3>
+          <label class="switch"><input type="checkbox" data-tts="filterProfanity"><span></span> Filtro de groserías (las cambio por «piip»)</label>
+          <label class="switch" id="tricks-row"><input type="checkbox" data-tts="filterTricks"><span></span> Detectar trucos: T0NT0, t o n t o, toooonto…</label>
+          <label class="switch"><input type="checkbox" data-tts="stripNumbers"><span></span> No leer números</label>
+          <label class="field"><span>Palabras prohibidas (una por línea)</span><textarea data-tts="bannedWords" data-list="lines" rows="8"></textarea></label></div>
+        <div class="card"><h3 class="card-title" id="tts-limits">Límites</h3>
+          <label class="field"><span>Espera entre mensajes de una persona (segundos)</span><input type="number" min="0" max="120" data-tts="cooldownSec"></label>
+          <label class="field"><span>Descartar mensajes que esperan más de (segundos)</span><input type="number" min="10" max="600" data-tts="expireSec"></label>
+          <label class="switch"><input type="checkbox" data-tts="antiSpam"><span></span> Anti-spam: no repetir el mismo mensaje de una persona</label></div>
+      </div>
+    </div>
+    <div class="tabpanel" data-tabpanel="especiales" hidden>
+      <div class="card"><h3 class="card-title">Espectadores especiales</h3>
+        <p class="hint">Dale a alguien su propia voz y un nombre para leer, o silencia a quien moleste. «Siempre leer» también salta el filtro del regalo en TikTok. Aquí también puedes darle una voz en <b>inglés</b> o <b>francés</b> (descárgalas en Voces).</p>
+        <form id="special-form" class="special-form">
+          <select name="platform"><option value="kick">Kick</option><option value="starvios">Starvios</option><option value="twitch">Twitch</option><option value="tiktok">TikTok</option></select>
+          <input name="user" placeholder="Usuario (como sale en el chat)" required>
+          <input name="spokenName" placeholder="Nombre para leer (opcional)">
+          <select name="voice" id="special-voice"></select>
+          <select name="action"><option value="allow">Siempre leer</option><option value="mute">Silenciar</option></select>
+          <button class="btn primary">Añadir</button>
+        </form>
+        <ul id="special-list" class="mini-list mt"></ul></div>
+    </div>
+    <div class="tabpanel" data-tabpanel="probar" hidden>
+      <div class="cols c2">
+        <div class="card"><h3 class="card-title">Probar filtros</h3>
+          <p class="hint">Escribe un mensaje y Troya te dice si lo leería, cómo y con qué voz.</p>
+          <form id="tts-check" class="check-form">
+            <select name="platform"><option value="kick">Kick</option><option value="starvios">Starvios</option><option value="twitch">Twitch</option><option value="tiktok">TikTok</option></select>
+            <input name="user" placeholder="Usuario" value="Prueba">
+            <input name="message" placeholder="Escribe un mensaje…">
+            <button class="btn">Revisar</button>
+          </form>
+          <p id="tts-check-result" class="check-result" hidden></p></div>
+        <div class="card"><h3 class="card-title">Voz de respaldo</h3>
+          <label class="field"><span>Si Piper no está listo, uso esta voz de Windows</span><select id="tts-windows-voice" data-tts="windowsVoice"></select></label></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Música (Ñoño) ---------- -->
+<section class="page" id="page-musica" data-page="musica" hidden>
+  <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Música</h1><p>Tu chat pide canciones con <code>!play</code> o <code>!temita</code>; Ñoño las pone en orden.</p></div>
+    <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono"></p><span class="guide" data-avatar="nono" data-size="hero"></span></div></div>
+  <div class="cols c3" id="card-musica" style="--g:#4fd1c5">
+    <div class="card"><h3 class="card-title">Sonando ahora</h3>
+      <div class="player"><div id="yt-player"></div></div>
+      <p class="hint" id="player-note"></p>
+      <div id="now" class="now"></div>
+      <div class="row wrap"><button class="btn" id="music-pause">⏸ Pausar</button><button class="btn" id="music-skip">⏭ Saltar</button></div>
+      <label class="field"><span>Volumen de la música</span><input type="range" min="0" max="100" id="music-volume"></label>
+      <label class="switch"><input type="checkbox" id="music-enabled"><span></span> Peticiones abiertas</label></div>
+    <div class="card"><div class="row space"><h3 class="card-title">A continuación <span id="queue-count"></span></h3><button class="btn small ghost" id="music-clear">Vaciar</button></div>
+      <ul id="music-queue" class="queue"></ul>
+      <form id="music-add" class="row"><input id="music-add-q" placeholder="Añadir canción o enlace de YouTube…"><button class="btn">Añadir</button></form></div>
+    <div class="card"><h3 class="card-title">Comandos del chat</h3>
+      <div class="cmds">
+        <div><code>!play</code> <code>!temita</code><span>+ canción o enlace: pide una canción</span></div>
+        <div><code>!skip</code><span>salta la que suena, solo si la pidió él</span></div>
+        <div><code>!quitar</code><span>saca de la cola su última canción</span></div>
+      </div>
+      <details open><summary>Ajustes de música</summary>
+        <div class="checks"><label class="switch"><input type="checkbox" data-music="platforms.kick"><span></span> Kick</label><label class="switch"><input type="checkbox" data-music="platforms.starvios"><span></span> Starvios</label><label class="switch"><input type="checkbox" data-music="platforms.twitch"><span></span> Twitch</label><label class="switch"><input type="checkbox" data-music="platforms.tiktok"><span></span> TikTok</label></div>
+        <div class="two"><label class="field"><span>Canciones por persona</span><input type="number" min="1" max="10" data-music="maxPerUser"></label><label class="field"><span>Duración máxima (min)</span><input type="number" min="1" max="60" data-music="maxDurationMin"></label></div>
+      </details></div>
+  </div>
+</section>
+
+<!-- ---------- Alertas (Troya) ---------- -->
+<section class="page" id="page-alertas" data-page="alertas" hidden>
+  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Alertas</h1><p>Lo que aparece en pantalla cuando alguien te sigue o te regala algo en TikTok.</p></div>
+    <div class="host" style="--g:#9b8cff"><p class="bubble" data-bubble="troya" data-static><b>Troya:</b> Activa las que quieras y pruébalas. Para verlas en el stream, pon el overlay de alertas en OBS.</p><span class="guide" data-avatar="troya" data-size="hero"></span></div></div>
+  <div class="cols c2" id="card-alertas" style="--g:#9b8cff">
+    <div class="card span2"><h3 class="card-title">Qué alertas salen</h3>
+      <div class="alert-rows tests">
+        <div class="alert-row" style="--c:#8b7bff"><span class="ico">♥</span><span><b>Nuevo seguidor</b><small>Cuando alguien te sigue</small></span><button class="btn small" data-sim-quick="follow">Probar</button><label class="switch"><input type="checkbox" data-alert="follow"><span></span></label></div>
+        <div class="alert-row" style="--c:#ff5d8f"><span class="ico">🎁</span><span><b>Regalo</b><small>Cualquier regalo, con su imagen y cantidad</small></span><button class="btn small" data-sim-quick="gift">Probar</button><label class="switch"><input type="checkbox" data-alert="gift"><span></span></label></div>
+        <div class="alert-row" style="--c:#ffb23e"><span class="ico">★</span><span><b>Suscripción</b><small>Subs y meses acumulados</small></span><button class="btn small" data-sim-quick="sub">Probar</button><label class="switch"><input type="checkbox" data-alert="sub"><span></span></label></div>
+        <div class="alert-row" style="--c:#4fd1c5"><span class="ico">👍</span><span><b>Likes</b><small>Cada tanda de likes (puede ser mucho)</small></span><button class="btn small" data-sim-quick="like">Probar</button><label class="switch"><input type="checkbox" data-alert="like"><span></span></label></div>
+        <div class="alert-row" style="--c:#5ab0ff"><span class="ico">↗</span><span><b>Compartido</b><small>Cuando alguien comparte tu LIVE</small></span><button class="btn small" data-sim-quick="share">Probar</button><label class="switch"><input type="checkbox" data-alert="share"><span></span></label></div>
+      </div></div>
+    <div class="card"><h3 class="card-title">Ajustes</h3>
+      <label class="field"><span>Cuánto dura cada alerta (segundos)</span><input type="number" min="2" max="20" id="alert-duration"></label>
+      <label class="field"><span>Regalos: solo si valen al menos (diamantes)</span><input type="number" min="0" id="alert-mingift"></label></div>
+    <div class="card"><h3 class="card-title">En OBS</h3><p class="hint">Copia la URL del overlay de alertas en <b>Overlays para OBS</b> y ponla como Fuente de navegador (800 × 300).</p><a class="btn small mt" href="#/overlays">Ir a Overlays</a></div>
+  </div>
+</section>
+
+<!-- ---------- Metas (Juana) ---------- -->
+<section class="page" id="page-metas" data-page="metas" hidden>
+  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Metas</h1><p>Barras de progreso para tu stream: diamantes, seguidores, likes…</p></div>
+    <div class="host" style="--g:#ff8fb5"><p class="bubble" data-bubble="juana"></p><span class="guide" data-avatar="juana" data-size="hero"></span></div></div>
+  <div class="card" style="--g:#ff8fb5">
+    <div id="goal-list" class="goals"></div>
+    <form id="goal-form" class="row wrap mt">
+      <input name="title" placeholder="Nombre de la meta" required>
+      <select name="type"><option value="gift">Diamantes</option><option value="follow">Seguidores</option><option value="like">Likes</option><option value="sub">Suscripciones</option><option value="share">Compartidos</option></select>
+      <input name="target" type="number" min="1" value="100" class="num">
+      <button class="btn primary">Añadir meta</button>
+    </form>
+  </div>
+</section>
+
+<!-- ---------- Overlays (Samy) ---------- -->
+<section class="page" id="page-overlays" data-page="overlays" hidden>
+  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Overlays para OBS</h1><p>Copia la URL y en OBS: Fuentes → + → Navegador. Funciona igual en Streamlabs y TikTok LIVE Studio.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Aquí cambias también cómo se ven: tipografía, color, tamaño y fondo. La vista previa se actualiza al instante.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="cols" style="grid-template-columns:minmax(0,1fr) 320px">
+    <div id="overlay-list" class="ov-grid urls"></div>
+    <div class="card" id="ov-style"><h3 class="card-title">Estilo de los overlays</h3>
+      <label class="field"><span>Tipografía</span><select data-ov="font"></select></label>
+      <label class="field"><span>Color principal</span><span class="row"><input type="color" data-ov="accent"><span class="swatches" id="ov-swatches"></span></span></label>
+      <label class="field"><span>Colores de las alertas</span><select data-ov="alertColors"><option value="type">Un color por tipo (seguidor, regalo…)</option><option value="accent">Todas con el color principal</option></select></label>
+      <label class="field"><span>Color del texto</span><input type="color" data-ov="text"></label>
+      <label class="field"><span>Fondo de las tarjetas</span><select data-ov="card"><option value="solid">Sólido</option><option value="glass">Translúcido</option><option value="none">Sin fondo (solo texto con sombra)</option></select></label>
+      <label class="field"><span>Esquinas</span><select data-ov="corners"><option value="round">Redondeadas</option><option value="soft">Suaves</option><option value="square">Rectas</option></select></label>
+      <label class="field"><span>Tamaño <b id="ov-scale-val"></b></span><input type="range" min="0.7" max="1.6" step="0.05" data-ov="scale"></label>
+      <label class="switch"><input type="checkbox" data-ov="sound"><span></span> Sonido en las alertas</label>
+      <button class="btn small ghost mt" id="ov-reset">Volver al estilo Satronho</button></div>
+  </div>
+</section>
+
+<!-- ---------- Estadísticas (Juana) ---------- -->
+<section class="page" id="page-estadisticas" data-page="estadisticas" hidden>
+  <div class="ph"><div class="t"><small>Tus números</small><h1>Estadísticas</h1><p>Cada directo guardado en tu PC: lo que te regalaron, quién habló más y cómo fue la actividad.</p></div>
+    <div class="host" style="--g:#ff8fb5"><p class="bubble" data-bubble="juana" data-static><b>Juana:</b> Elige un directo arriba para compararlo con el anterior, o «Totales de siempre» para ver a tus fans de siempre.</p><span class="guide" data-avatar="juana" data-size="hero"></span></div></div>
+  <div class="card" id="card-stats" style="--g:#ff8fb5">
+    <div class="row wrap stats-bar"><select id="stats-session" aria-label="Directo a mostrar"></select><button class="btn ghost" id="stats-end">Terminar sesión</button></div>
+    <p class="hint" id="stats-headline"></p>
+    <div id="stats-session-view">
+      <div class="tiles" id="stats-tiles"></div>
+      <p class="hint" id="stats-compare"></p>
+      <div class="chart-head"><h3 id="chart-title">Mensajes por minuto</h3>
+        <div class="seg" id="stats-metric" role="group" aria-label="Qué mostrar">
+          <button data-metric="chat" aria-pressed="true">Mensajes</button><button data-metric="interactions" aria-pressed="false">Interacciones</button><button data-metric="diamonds" aria-pressed="false">Diamantes</button><button data-metric="viewers" aria-pressed="false">Espectadores</button>
+        </div></div>
+      <div class="chart" id="stats-chart"></div>
+      <details><summary>Ver como tabla</summary><div id="stats-table" class="table-wrap"></div></details>
+    </div>
+    <div class="tops" id="stats-tops"></div>
+  </div>
+</section>
+
+<!-- ---------- Ajustes (Samy) ---------- -->
+<section class="page" id="page-ajustes" data-page="ajustes" hidden>
+  <div class="ph"><div class="t"><small>Sistema</small><h1>Ajustes</h1><p>Haz que Satronho Bot se vea y se comporte a tu gusto.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Los cambios de apariencia se ven al instante y solo cambian la app; el estilo de los overlays está en Overlays para OBS.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="ajustes"><button data-tab="apariencia">Apariencia</button><button data-tab="app">App</button><button data-tab="acerca">Acerca de</button></div>
+  <div class="tabpanel" data-tabpanel="apariencia">
+    <div class="cols c2">
+      <div class="card"><h3 class="card-title">Tema</h3><div class="theme-cards" id="theme-cards"></div>
+        <h3>Color de acento</h3><div class="row wrap"><div class="swatches" id="accent-swatches"></div><input type="color" id="accent-custom" title="Otro color"></div></div>
+      <div class="card"><h3 class="card-title">Tipografía</h3><div class="font-cards" id="font-cards"></div>
+        <div class="two mt">
+          <label class="field"><span>Tamaño de letra</span><span class="seg" id="size-seg"><button data-size-opt="s">Pequeña</button><button data-size-opt="m">Normal</button><button data-size-opt="l">Grande</button></span></label>
+          <label class="field"><span>Esquinas</span><span class="seg" id="corners-seg"><button data-corners-opt="redondas">Redondas</button><button data-corners-opt="suaves">Suaves</button><button data-corners-opt="rectas">Rectas</button></span></label>
+        </div>
+        <button class="btn small ghost mt" id="appearance-reset">Volver al estilo Satronho</button></div>
+    </div>
+  </div>
+  <div class="tabpanel" data-tabpanel="app" hidden>
+    <div class="cols c2">
+      <div class="card"><h3 class="card-title">Guías</h3>
+        <label class="switch"><input type="checkbox" id="guides-toggle"><span></span> Mostrar a Samy, Troya, Ñoño y Juana</label>
+        <button class="btn small mt" id="welcome-again">Ver otra vez la bienvenida</button>
+        <button class="btn small mt" id="steps-again">Mostrar «Primeros pasos»</button></div>
+      <div class="card"><h3 class="card-title">Ventana</h3>
+        <label class="switch"><input type="checkbox" id="tray-toggle"><span></span> Al minimizar, esconder la app junto al reloj de Windows</label>
+        <p class="hint">Satronho Bot nunca se abre sola: solo cuando tú la abres.</p></div>
+      <div class="card span2"><h3 class="card-title">Actualizaciones</h3>
+        <p class="hint">Al abrir y cada 6 horas reviso si hay una versión nueva. Si instalaste con el instalador, la descargo sola y te muestro «Reiniciar y actualizar»; con el .zip portable te aviso y te llevo a descargarla.</p>
+        <label class="switch"><input type="checkbox" id="update-auto"><span></span> Descargar sola la versión nueva (si está instalada)</label>
+        <details><summary>Avanzado</summary><label class="field"><span>Repositorio de GitHub donde se publican las versiones (vacío = el de Satronho Bot)</span><input id="update-feed" placeholder="https://github.com/usuario/satronho-bot"></label></details>
+        <button class="btn small" id="update-check">Buscar actualización ahora</button></div>
+    </div>
+  </div>
+  <div class="tabpanel" data-tabpanel="acerca" hidden>
+    <div class="card"><h3 class="card-title">Satronho Bot <span id="foot-version"></span></h3>
+      <p>© 2026 RiddsSatronho. Todos los derechos reservados.</p>
+      <p class="hint">Con Samy, Troya, Ñoño y Juana 🐾. Voces neuronales por Piper; componentes de terceros listados en NOTICE.md.</p></div>
+  </div>
+</section>
+
+<!-- ---------- Ayuda (Samy) ---------- -->
+<section class="page" id="page-ayuda" data-page="ayuda" hidden>
+  <div class="ph"><div class="t"><small>Sistema</small><h1>Ayuda</h1><p>Pregúntale a cualquiera de los guías o elige una pregunta.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> ¿No encuentras algo? Escríbelo arriba en el buscador o tócame y pregúntame.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="help-guides" id="help-guides"></div>
+</section>
+
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

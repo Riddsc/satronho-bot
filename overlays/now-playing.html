@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Satronho · Sonando ahora</title>
+<meta name="author" content="RiddsSatronho">
+<!-- Overlay para OBS: Fuente de navegador de 700x140.
+     Muestra la canción que suena, quién la pidió y los avisos de la cola.
+     Parámetros: ?color=%234fd1c5 · ?notices=0 (sin avisos) · ?scale=1.2 -->
+<link rel="stylesheet" href="base.css">
+<style>
+  :root { --accent: #4fd1c5; }
+  body { padding: 12px; }
+  .wrap { transform: scale(var(--scale)); transform-origin: 0 0; }
+  .card {
+    display: flex; align-items: center; gap: 16px; padding: 12px 18px 12px 12px;
+    background: var(--bg); border-radius: calc(18px * var(--r)); border: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+    box-shadow: 0 10px 30px rgba(0,0,0,.4); max-width: 660px;
+    transition: opacity .4s, transform .4s;
+  }
+  .card.hidden { opacity: 0; transform: translateY(16px); }
+  .art { width: 96px; height: 54px; border-radius: calc(10px * var(--r)); object-fit: cover; flex: none; background: #000; }
+  .art.fake { background: linear-gradient(135deg, var(--accent), #241a3d); }
+  .eq { display: flex; gap: 3px; align-items: flex-end; height: 20px; flex: none; }
+  .eq i { width: 4px; background: var(--accent); border-radius: 2px; animation: eq .9s ease-in-out infinite; }
+  .eq i:nth-child(2) { animation-delay: -.3s; } .eq i:nth-child(3) { animation-delay: -.6s; }
+  .paused .eq i { animation-play-state: paused; }
+  @keyframes eq { 0%, 100% { height: 5px; } 50% { height: 20px; } }
+  .info { min-width: 0; flex: 1; }
+  .label { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 800; }
+  .title { font-size: 22px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .by { font-size: 15px; font-weight: 600; }
+  .notice { margin-top: 8px; font-size: 15px; font-weight: 700; background: var(--bg); padding: 6px 12px; border-radius: calc(10px * var(--r)); display: inline-block; transition: opacity .4s; }
+  .notice.hidden { opacity: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card surface hidden" id="card">
+  <img class="art" id="art" alt="">
+  <div class="info">
+    <div class="label">Sonando ahora</div>
+    <div class="title" id="title"></div>
+    <div class="by muted" id="by"></div>
+  </div>
+  <div class="eq"><i></i><i></i><i></i></div>
+</div>
+<div class="notice surface hidden" id="notice"></div>
+</div>
+
+<script type="module">
+  import { connectSatronho, param } from './client.js';
+  import { applyOverlayStyle, listenPreview, isPreview } from './style.js';
+
+  const showNotices = param('notices', '1') !== '0';
+  const $ = (id) => document.getElementById(id);
+
+  function render(m) {
+    const c = m?.current;
+    $('card').classList.toggle('hidden', !c);
+    $('card').classList.toggle('paused', Boolean(m?.paused));
+    if (!c) return;
+    $('art').classList.toggle('fake', !c.thumbnail);
+    if (c.thumbnail) $('art').src = c.thumbnail; else $('art').removeAttribute('src');
+    $('title').textContent = c.title;
+    const next = m.queue?.length ? ` · ${m.queue.length} en cola` : '';
+    $('by').textContent = `Pedida por ${c.requester}${next}`;
+  }
+
+  let timer;
+  function notice(n) {
+    if (!showNotices) return;
+    $('notice').textContent = n.text;
+    $('notice').classList.remove('hidden');
+    clearTimeout(timer);
+    timer = setTimeout(() => $('notice').classList.add('hidden'), 6000);
+  }
+
+  listenPreview();
+  applyOverlayStyle({});
+  const DEMO = { current: { title: 'La canción que pidió tu chat', requester: 'DJ_Fan' }, queue: [1, 2], paused: false };
+
+  connectSatronho((kind, payload) => {
+    if (kind === 'hello') {
+      applyOverlayStyle(payload.overlayStyle);
+      render(isPreview ? (payload.music?.current ? payload.music : DEMO) : payload.music);
+    }
+    if (kind === 'overlay-style') applyOverlayStyle(payload);
+    if (kind === 'music') render(isPreview && !payload.current ? DEMO : payload);
+    if (kind === 'music-notice' && !isPreview) notice(payload);
+  });
+</script>
+</body>
+</html>
