@@ -125,7 +125,7 @@ const KB = [
   {
     guide: 'samy', q: '¿Cómo cambio la foto de un guía?',
     keys: ['foto', 'imagen', 'cara', 'dibujo', 'avatar', 'guia', 'guias', 'mascota', 'mascotas', 'ocultar', 'samy', 'troya', 'juana', 'ñoño'],
-    answer: 'Tócanos y abajo en esta ventana tienes <b>Cambiar foto</b> o <b>Volver al dibujo</b>. Si prefieres el panel limpio, en <b>Ajustes → App</b> puedes ocultarnos (Samy y Troya seguiremos abajo a la derecha por si nos necesitas).',
+    answer: 'Tócanos y abajo en esta ventana tienes <b>Cambiar foto</b> o <b>Volver al dibujo</b>. Si prefieres el panel limpio, en <b>Ajustes → App</b> puedes ocultarnos (abajo a la derecha seguiremos a mano por si nos necesitas).',
   },
   {
     guide: 'samy', q: '¿Cómo instalo o abro la app?',

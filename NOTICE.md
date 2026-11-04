@@ -19,4 +19,8 @@ Piper y sus voces no vienen dentro de Satronho Bot: se descargan en el PC del us
 
 ## Logos de las plataformas
 
-Los logos de Kick, Starvios y TikTok que se ven en el panel son marcas de sus dueños. Satronho Bot los usa solo para que identifiques cada plataforma y no tiene relación oficial con ninguna de ellas.
+Los logos de Kick, Starvios, TikTok y Twitch que se ven en el panel son marcas de sus dueños. Satronho Bot los usa solo para que identifiques cada plataforma y no tiene relación oficial con ninguna de ellas.
+
+## Catálogo de regalos de TikTok
+
+`src/data/tiktok-gifts.json` lista los regalos de TikTok (número, nombre y valor en monedas) tal como los publica la lista pública de TikTok (`webcast.tiktok.com/webcast/gift/list`), según la recopilación de agosto de 2026 del proyecto `WaGi-Coding/tiktok-gift-ids`. Las imágenes no vienen dentro de la app: se piden a TikTok la primera vez que se muestran y quedan guardadas en el PC del usuario. Los nombres e imágenes de los regalos son de TikTok.

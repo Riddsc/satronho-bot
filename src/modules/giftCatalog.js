@@ -12,6 +12,14 @@ const crypto = require('crypto');
 
 const PLATFORMS = ['tiktok', 'kick', 'starvios'];
 
+// Regalos de TikTok incluidos de serie (lista pública de TikTok). Lo que se
+// importa desde tu LIVE o te llega en directo manda sobre esto (nombres en
+// tu idioma, regalos de comunidad o de tu región).
+let BUILTIN = [];
+try {
+  BUILTIN = require('../data/tiktok-gifts.json').gifts || [];
+} catch { /* sin catálogo incluido */ }
+
 function createGiftCatalog({ dataDir, broadcast = () => {}, fetchFn = fetch }) {
   const file = path.join(dataDir, 'gift-catalog.json');
   const imgDir = path.join(dataDir, 'gift-img');
@@ -74,9 +82,15 @@ function createGiftCatalog({ dataDir, broadcast = () => {}, fetchFn = fetch }) {
     return f;
   }
 
-  const list = (kind, platform) => Object.values(data[kind][platform] || {}).sort((a, b) => (a.value || 0) - (b.value || 0) || String(a.name).localeCompare(String(b.name)));
+  function list(kind, platform) {
+    const mine = data[kind][platform] || {};
+    const all = new Map();
+    if (kind === 'gifts' && platform === 'tiktok') for (const g of BUILTIN) all.set(g.id, { ...g, builtin: true });
+    for (const g of Object.values(mine)) all.set(g.id, { ...(all.get(g.id) || {}), ...g, builtin: false, mine: true });
+    return [...all.values()].sort((a, b) => (a.value || 0) - (b.value || 0) || String(a.name).localeCompare(String(b.name)));
+  }
   function summary() {
-    return Object.fromEntries(PLATFORMS.map((p) => [p, { gifts: Object.keys(data.gifts[p]).length, stickers: Object.keys(data.stickers[p]).length, importedAt: data.importedAt[p] || 0 }]));
+    return Object.fromEntries(PLATFORMS.map((p) => [p, { gifts: list('gifts', p).length, mine: Object.keys(data.gifts[p]).length, stickers: Object.keys(data.stickers[p]).length, importedAt: data.importedAt[p] || 0 }]));
   }
 
   return { merge, onEvent, list, summary, imagePath };

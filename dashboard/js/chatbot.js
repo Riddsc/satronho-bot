@@ -37,7 +37,7 @@ function renderWhere() {
     else if (!acc) { state = 'Falta autorizar una cuenta'; cls = 'warn'; }
     else if (!live) { state = `Escribiré como @${esc(acc)} cuando conectes el canal`; cls = 'wait'; }
     else { state = `Escribiendo como @${esc(acc)}`; cls = 'ok'; }
-    const logo = p === 'twitch' ? '<span class="pl" style="background:#9146ff;color:#fff">Tw</span>' : `<span class="pl plogo" data-logo="${p}" aria-hidden="true"></span>`;
+    const logo = p === 'twitch' ? '<span class="pl plogo" data-logo="twitch" aria-hidden="true"></span>' : `<span class="pl plogo" data-logo="${p}" aria-hidden="true"></span>`;
     return `<div class="cb-row ${cls} ${canWrite ? '' : 'no'}">${logo}<span><b>${PLAT[p]}</b><small>${state}</small></span><i class="dot"></i></div>`;
   }).join('');
   renderSendTargets();

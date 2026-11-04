@@ -14,7 +14,7 @@ export const GUIDES = {
   nono: { name: 'Ñoño', role: 'Música', color: '#4fd1c5', lead: false },
   juana: { name: 'Juana', role: 'Metas y estadísticas', color: '#ff8fb5', lead: false },
   // MechaRidds: Ridds en versión androide, el creador de la app. Lleva el Chat Bot.
-  mecha: { name: 'MechaRidds', role: 'Chat Bot, comandos y novedades', color: '#74d14c', lead: false },
+  mecha: { name: 'MechaRidds', role: 'Chat Bot, comunidad y novedades', color: '#74d14c', lead: false },
 };
 
 export function avatarSVG(id) {

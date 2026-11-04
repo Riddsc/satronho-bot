@@ -1,5 +1,56 @@
 [
   {
+    "version": "0.14.0",
+    "date": "2026-11-04",
+    "title": "Galería de overlays con editor en vivo",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Overlays para OBS es ahora una galería: 18 overlays por categoría (metas y contadores, regalos y apoyo, chat y comunidad, música y pantallas del directo), cada una con su guía."
+      },
+      {
+        "type": "nuevo",
+        "text": "Al tocar un overlay se abre su editor: vista previa grande con datos de ejemplo o con tus datos reales, fondo de cuadros, URL para copiar y el tamaño exacto para OBS."
+      },
+      {
+        "type": "nuevo",
+        "text": "Todo personalizable: eliges qué se muestra (en Metas: nombre, ícono, lo que llevas, el objetivo, el porcentaje, «Faltan N»), el diseño (barra, anillo, pastel, tarjeta o solo la cifra) y, si quieres, un tema, color, letra y tamaño solo para ese overlay."
+      },
+      {
+        "type": "nuevo",
+        "text": "Nuevos overlays: contadores (muertes, jefes… con comandos del chat o regalos), cuenta regresiva que alarga tu público, tiempo en directo, espectadores, seguidores, ranking, el más generoso, últimos regalos, regalo destacado, mejor regalo, lluvia de regalos, chat en pantalla, actividad, cintillo, cola de música y pantallas de empezamos, vuelvo y se acabó."
+      },
+      {
+        "type": "nuevo",
+        "text": "Fija tus overlays con la estrella: salen en el menú de la izquierda, debajo de Overlays, para abrirlos a un clic. También puedes duplicar uno para tener dos con estilos distintos."
+      },
+      {
+        "type": "nuevo",
+        "text": "Todos los regalos de TikTok vienen incluidos con su imagen, ID y valor. «Importar desde mi TikTok» (mejor en directo) suma los de comunidad o los que falten."
+      },
+      {
+        "type": "mejora",
+        "text": "Editor de alertas rediseñado en tres pasos, con la vitrina de regalos por valor (detallitos, bonitos, grandes y épicos), una frase que resume la alerta y vista previa al lado."
+      },
+      {
+        "type": "mejora",
+        "text": "Las cuentas que no usas se pueden ocultar de la barra de arriba (y vuelven con el botón «+»)."
+      },
+      {
+        "type": "mejora",
+        "text": "Bienvenida con todos: Samy, Troya, Ñoño y Juana, y MechaRidds, que ahora también guía el chat y la comunidad en pantalla."
+      },
+      {
+        "type": "mejora",
+        "text": "Logo de Twitch en toda la app."
+      },
+      {
+        "type": "arreglo",
+        "text": "«Importar regalos» ya no falla cuando no estás en directo."
+      }
+    ]
+  },
+  {
     "version": "0.13.0",
     "date": "2026-11-04",
     "title": "Alertas propias, permisos de música, podio y tu perfil",

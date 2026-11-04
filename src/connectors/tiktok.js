@@ -204,15 +204,23 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
     }
   }
 
-  // Pide el catálogo sin estar en vivo (si TikTok lo permite).
+  // Catálogo de regalos. En LIVE: el de tu sala (incluye los de comunidad y
+  // los de tu región). Sin LIVE: la lista general de TikTok.
   async function fetchGifts(channelName) {
+    if (conn?.availableGifts) return normalizeGifts(conn.availableGifts);
     const { TikTokLiveConnection } = await loadLib();
     const user = cleanChannel(channelName || base.channel);
-    if (!user) throw new Error('Falta tu usuario de TikTok');
-    if (conn?.availableGifts) return normalizeGifts(conn.availableGifts);
     const { signApiKey } = getSettings();
-    const c = new TikTokLiveConnection(user, { signApiKey: signApiKey || undefined });
-    return normalizeGifts(await c.fetchAvailableGifts());
+    const c = new TikTokLiveConnection(user || 'tiktok', { signApiKey: signApiKey || undefined });
+    if (user) {
+      try {
+        await c.fetchRoomId(user);
+        const room = normalizeGifts(await c.fetchAvailableGifts());
+        if (room.length) return room;
+      } catch { /* no está en LIVE: vamos con la lista general */ }
+    }
+    const res = await c.webClient.getJsonObjectFromWebcastApi('gift/list/', { ...c.webClient.clientParams }, false);
+    return normalizeGifts(res?.data?.gifts || res?.data || []);
   }
 
   async function connect(channelName) {

@@ -21,6 +21,7 @@ const { createMsOnlineEngine } = require('./tts/msonline');
 const { createGiftCatalog } = require('./modules/giftCatalog');
 const { createAlertRules } = require('./modules/alertRules');
 const { createLeaderboard } = require('./modules/leaderboard');
+const { createLive } = require('./modules/live');
 const { createYoutubeResolver } = require('./music/youtube');
 const { createKickConnector } = require('./connectors/kick');
 const { createTiktokConnector } = require('./connectors/tiktok');
@@ -105,6 +106,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const catalog = createGiftCatalog({ dataDir, broadcast: (...a) => broadcast(...a), fetchFn });
   const alertRules = createAlertRules({ store });
   const podium = createLeaderboard({ broadcast: (...a) => broadcast(...a) });
+  const live = createLive({ store, broadcast: (...a) => broadcast(...a) });
   const connectors = {
     tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }) }),
     kick: createKickConnector(deps),
@@ -181,7 +183,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
 
   musicRef = music;
-  bus.on('viewers', (v) => stats.onViewers(v));
+  bus.on('viewers', (v) => { stats.onViewers(v); live.onViewers(v); });
   bus.on('stream-end', (x) => {
     stats.end('fin del LIVE de TikTok');
     podium.reset();
@@ -197,6 +199,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
 
     catalog.onEvent(e);
     podium.handleEvent(e);
+    live.handleEvent(e);
     // Alertas propias primero: si alguna es «solo la suya», la de serie no sale.
     const matched = alertRules.match(e);
     const exclusive = matched.some((m) => m.rule.exclusive !== false);
@@ -315,6 +318,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           recent: recent.slice(0, 80),
           ttsLog: tts.recentLog(),
           podium: podium.snapshot(),
+          live: live.snapshot(),
+          widgets: store.get('widgets'),
           music: music.snapshot(),
           engine: engine.state(),
           allowed: tts.allowedList(),
@@ -381,6 +386,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const { goals: _g, ttsAllowed: _a, secrets: _s, ...rest } = req.body || {};
     const config = publicConfig(store.update(rest));
     if (rest.overlayStyle) broadcast('overlay-style', config.overlayStyle);
+    if (rest.widgets) broadcast('widgets', store.get('widgets'));
     if (rest.window) hooks.onWindowConfig?.(config.window);
     if (rest.hotkeys) {
       hotkeysStatus = hooks.onHotkeys?.(store.get('hotkeys')) || hotkeysStatus;
@@ -491,6 +497,22 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   app.get('/api/stats/overview', (_req, res) => ok(res, { sessions: stats.overview(), usdPerDiamond: store.get('stats')?.usdPerDiamond }));
   app.post('/api/stats/end', (_req, res) => { podium.reset(); ok(res, { session: stats.end('manual') }); });
   app.post('/api/podium/reset', (_req, res) => { podium.reset(); ok(res, {}); });
+  // Overlays: datos en vivo, contadores, cuenta regresiva y borrar un overlay.
+  app.get('/api/live', (_req, res) => ok(res, { live: live.snapshot() }));
+  app.post('/api/live/reset', (_req, res) => { live.reset(); podium.reset(); ok(res, {}); });
+  app.post('/api/live/countdown', (req, res) => { live.countdown(String(req.body?.action || ''), req.body?.value); ok(res, { live: live.snapshot() }); });
+  app.post('/api/live/counters', (req, res) => { live.saveCounters(req.body?.counters); ok(res, { counters: store.get('counters') }); });
+  app.post('/api/live/counter/:id', (req, res) => {
+    const c = live.counter(req.params.id, { delta: req.body?.delta, set: req.body?.set });
+    return c ? ok(res, { counter: c }) : fail(res, 'Ese contador no existe');
+  });
+  app.delete('/api/widgets/:id', (req, res) => {
+    const all = { ...(store.get('widgets') || {}) };
+    delete all[req.params.id];
+    store.set('widgets', all);
+    broadcast('widgets', all);
+    ok(res, {});
+  });
 
   app.get('/api/tts/allowed',(_req, res) => ok(res, { allowed: tts.allowedList() }));
   app.delete('/api/tts/allowed/:id', (req, res) => {
@@ -736,9 +758,9 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       const gifts = await connectors.tiktok.fetchGifts(store.get('platforms').tiktok?.channel);
       if (!gifts.length) return fail(res, 'TikTok no devolvió regalos. Prueba de nuevo cuando estés en LIVE.');
       catalog.merge('gifts', 'tiktok', gifts, { replace: true });
-      ok(res, { count: gifts.length, summary: catalog.summary() });
+      ok(res, { count: gifts.length, live: status.tiktok?.state === 'connected', summary: catalog.summary() });
     } catch (err) {
-      fail(res, `No pude traer el catálogo de TikTok: ${String(err.message || err).slice(0, 140)}. Si no estás en LIVE, se importa solo al conectar.`);
+      fail(res, `No pude hablar con TikTok (${String(err.message || err).slice(0, 120)}). Tienes igual los ${catalog.summary().tiktok.gifts} regalos de serie; vuelve a intentarlo estando en LIVE.`);
     }
   });
   app.get('/gift-img', async (req, res) => {
