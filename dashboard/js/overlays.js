@@ -16,7 +16,7 @@ function items() {
     { name: 'Alertas de TikTok', path: '/overlays/alerts.html', w: 800, h: 300, note: 'Seguidores, regalos, subs…' },
     { name: 'Sonando ahora', path: '/overlays/now-playing.html', w: 700, h: 140, note: 'La canción y quién la pidió' },
   ];
-  for (const g of goals) list.push({ name: `Meta · ${g.title}`, path: `/overlays/goal.html?id=${encodeURIComponent(g.id)}`, w: 700, h: 140, note: 'Barra de progreso' });
+  for (const g of goals) list.push({ name: /^meta\b/i.test(g.title) ? g.title : `Meta: ${g.title}`, path: `/overlays/goal.html?id=${encodeURIComponent(g.id)}`, w: 700, h: 140, note: 'Barra de progreso' });
   return list.map((it) => ({ ...it, url: `${base}${it.path}` }));
 }
 

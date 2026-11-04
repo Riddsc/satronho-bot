@@ -19,6 +19,8 @@ const ICONS = {
   layers: '<path d="m12 4 9 4.5-9 4.5-9-4.5z"/><path d="m3 13 9 4.5 9-4.5"/>',
   chart: '<path d="M4 20h16"/><path d="M7 16v-5M12 16V7M17 16v-8"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+  terminal: '<rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="m7 10 3 2.5L7 15M12.5 15H17"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/>',
 };
 
@@ -31,14 +33,16 @@ const PAGES = {
   alertas: { title: 'Alertas', guide: 'troya', words: 'alertas seguidor regalo suscripción likes compartir' },
   metas: { title: 'Metas', guide: 'juana', words: 'metas objetivo barra progreso diamantes' },
   overlays: { title: 'Overlays para OBS', guide: 'samy', words: 'obs overlay url fuente navegador estilo streamlabs' },
+  comandos: { title: 'Comandos del chat', guide: 'samy', words: 'comandos comando respuesta redes discord bot chat alias espera moderadores' },
+  automaticos: { title: 'Mensajes automáticos', guide: 'samy', words: 'mensajes automáticos temporizador timer cada minutos anuncio recordatorio' },
   estadisticas: { title: 'Estadísticas', guide: 'juana', words: 'estadísticas números gané diamantes tops historial gráfica' },
-  ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones' },
+  ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones atajos teclado teclas' },
   ayuda: { title: 'Ayuda', guide: 'samy', words: 'ayuda preguntas guías' },
 };
 
 const TAB_NAMES = {
   voz: { voces: 'Voces', quien: 'Quién se lee', filtros: 'Filtros y límites', especiales: 'Espectadores especiales', probar: 'Probar' },
-  ajustes: { apariencia: 'Apariencia', app: 'App', acerca: 'Acerca de' },
+  ajustes: { apariencia: 'Apariencia', app: 'App', atajos: 'Atajos de teclado', acerca: 'Acerca de' },
 };
 
 let current = '';

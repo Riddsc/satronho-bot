@@ -22,6 +22,10 @@
     <a class="nav-item" href="#/conexiones" data-page="conexiones"><span class="ic" data-icon="plug"></span>Conexiones<span class="badge" id="nav-conn">0/4</span></a>
     <a class="nav-item" href="#/actividad" data-page="actividad"><span class="ic" data-icon="chat"></span>Chat y actividad</a>
   </nav>
+  <nav class="nav-group" style="--g:#ffb23e"><h6><i></i>Tu bot en el chat</h6>
+    <a class="nav-item" href="#/comandos" data-page="comandos"><span class="ic" data-icon="terminal"></span>Comandos del chat</a>
+    <a class="nav-item" href="#/automaticos" data-page="automaticos"><span class="ic" data-icon="clock"></span>Mensajes automáticos</a>
+  </nav>
   <nav class="nav-group" style="--g:#9b8cff"><h6><i></i>Lo que se escucha</h6>
     <a class="nav-item" href="#/voz" data-page="voz"><span class="ic" data-icon="mic"></span>Voz del chat</a>
     <a class="nav-item" href="#/musica" data-page="musica"><span class="ic" data-icon="music"></span>Música<span class="badge" id="nav-queue" hidden>0</span></a>
@@ -50,10 +54,10 @@
 
 <!-- ===================== Barra superior ===================== -->
 <header class="topbar">
-  <button class="pchip" id="chip-kick" data-go-page="conexiones"><span class="pl" style="background:#53fc18">K</span><span class="who">Kick</span><span class="st"></span></button>
-  <button class="pchip" id="chip-starvios" data-go-page="conexiones"><span class="pl" style="background:#69d9ff">S</span><span class="who">Starvios</span><span class="st"></span></button>
+  <button class="pchip" id="chip-kick" data-go-page="conexiones"><span class="pl plogo" data-logo="kick" aria-hidden="true"></span><span class="who">Kick</span><span class="st"></span></button>
+  <button class="pchip" id="chip-starvios" data-go-page="conexiones"><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span><span class="who">Starvios</span><span class="st"></span></button>
   <button class="pchip" id="chip-twitch" data-go-page="conexiones"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><span class="who">Twitch</span><span class="st"></span></button>
-  <button class="pchip" id="chip-tiktok" data-go-page="conexiones"><span class="pl" style="background:#ff5d8f">T</span><span class="who">TikTok</span><span class="st"></span></button>
+  <button class="pchip" id="chip-tiktok" data-go-page="conexiones"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span><span class="who">TikTok</span><span class="st"></span></button>
   <div class="search">
     <input id="search" placeholder="Busca algo o pregúntale a Samy…" autocomplete="off" aria-label="Buscar">
     <kbd>Ctrl K</kbd>
@@ -127,10 +131,10 @@
     </span>
     <details class="conn-pick" id="conn-pick"><summary>Plataformas que uso</summary>
       <div class="conn-pick-list">
-        <label class="check"><input type="checkbox" data-show="kick"> <span class="pl mini" style="background:#53fc18">K</span> Kick</label>
-        <label class="check"><input type="checkbox" data-show="starvios"> <span class="pl mini" style="background:#69d9ff">S</span> Starvios</label>
+        <label class="check"><input type="checkbox" data-show="kick"> <span class="pl mini plogo" data-logo="kick" aria-hidden="true"></span> Kick</label>
+        <label class="check"><input type="checkbox" data-show="starvios"> <span class="pl mini plogo" data-logo="starvios" aria-hidden="true"></span> Starvios</label>
         <label class="check"><input type="checkbox" data-show="twitch"> <span class="pl mini" style="background:#9146ff;color:#fff">Tw</span> Twitch</label>
-        <label class="check"><input type="checkbox" data-show="tiktok"> <span class="pl mini" style="background:#ff5d8f">T</span> TikTok LIVE</label>
+        <label class="check"><input type="checkbox" data-show="tiktok"> <span class="pl mini plogo" data-logo="tiktok" aria-hidden="true"></span> TikTok LIVE</label>
         <p class="hint">Las que desmarques se esconden del panel y no se conectan solas. Puedes volver a mostrarlas cuando quieras.</p>
       </div>
     </details>
@@ -139,14 +143,14 @@
   <!-- Escuchar -->
   <div class="cols c2 conn-pane" id="card-conexiones" data-conn-pane="listen">
     <div class="platform" data-platform="kick">
-      <div class="phead"><span class="pl" style="background:#53fc18">K</span><b>Kick</b><span class="pstate">Desconectado</span></div>
+      <div class="phead"><span class="pl plogo" data-logo="kick" aria-hidden="true"></span><b>Kick</b><span class="pstate">Desconectado</span></div>
       <p class="uses">Chat → voz · Música con !play</p>
       <label class="field" style="margin-top:0"><span>Tu canal de Kick (donde transmites)</span></label>
       <div class="row"><input data-field="channel" placeholder="tu_canal" autocomplete="off"><button class="btn primary" data-act="connect">Conectar</button></div>
       <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
     </div>
     <div class="platform" data-platform="starvios">
-      <div class="phead"><span class="pl" style="background:#69d9ff">S</span><b>Starvios</b><span class="pstate">Desconectado</span></div>
+      <div class="phead"><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span><b>Starvios</b><span class="pstate">Desconectado</span></div>
       <p class="uses">Chat → voz · Música con !play</p>
       <div class="row"><input data-field="channel" placeholder="nombre_del_canal" autocomplete="off"><button class="btn primary" data-act="connect">Conectar</button></div>
       <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
@@ -158,7 +162,7 @@
       <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
     </div>
     <div class="platform" data-platform="tiktok">
-      <div class="phead"><span class="pl" style="background:#ff5d8f">T</span><b>TikTok LIVE</b><span class="pstate">Desconectado</span></div>
+      <div class="phead"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span><b>TikTok LIVE</b><span class="pstate">Desconectado</span></div>
       <p class="uses">Alertas · Metas · Estadísticas · Voz de quien envía Quiéreme</p>
       <div class="row"><input data-field="channel" placeholder="@tu_usuario" autocomplete="off"><button class="btn primary" data-act="connect">Conectar</button></div>
       <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
@@ -171,17 +175,17 @@
   <!-- Escribir -->
   <div class="cols c2 conn-pane" data-conn-pane="write" hidden>
     <div class="platform write" data-platform-write="kick">
-      <div class="phead"><span class="pl" style="background:#53fc18">K</span><b>Kick</b><span class="pstate on" id="kick-write-state"></span></div>
+      <div class="phead"><span class="pl plogo" data-logo="kick" aria-hidden="true"></span><b>Kick</b><span class="pstate on" id="kick-write-state"></span></div>
       <p class="uses">Responde a los pedidos de música · Mensaje de prueba</p>
       <div id="kickbot"><div id="kickbot-body"><p class="hint">Cargando…</p></div></div>
     </div>
     <div class="platform write" data-platform-write="starvios">
-      <div class="phead"><span class="pl" style="background:#69d9ff">S</span><b>Starvios</b><span class="pstate" id="starvios-write-state"></span></div>
+      <div class="phead"><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span><b>Starvios</b><span class="pstate" id="starvios-write-state"></span></div>
       <p class="uses">Responde a los pedidos de música · Mensaje de prueba</p>
       <div id="starviosbot"><div id="starviosbot-body"><p class="hint">Cargando…</p></div></div>
     </div>
     <div class="platform write soon" data-platform-write="tiktok">
-      <div class="phead"><span class="pl" style="background:#ff5d8f">T</span><b>TikTok LIVE</b><span class="pstate">Más adelante</span></div>
+      <div class="phead"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span><b>TikTok LIVE</b><span class="pstate">Más adelante</span></div>
       <p class="hint">TikTok no tiene una forma oficial de escribir en el chat. Por ahora Satronho Bot solo lo escucha: alertas, metas, estadísticas y voz.</p>
     </div>
     <div class="platform write soon" data-platform-write="twitch">
@@ -224,8 +228,7 @@
               <select data-tts="voiceMode"><option value="perViewer">Una voz fija para cada espectador</option><option value="random">Una voz al azar en cada mensaje</option><option value="single">Todos con la voz principal</option></select></label>
             <label class="switch"><input type="checkbox" data-tts="toneVariants"><span></span> Variar el tono (grave, normal y aguda) para tener el triple de voces</label>
             <label class="switch"><input type="checkbox" data-tts="useWindowsVoices"><span></span> Sumar las voces de Windows en español</label>
-            <label class="switch"><input type="checkbox" data-tts="useOnlineVoices"><span></span> Sumar voces en línea de Microsoft: una femenina y una masculina por país de Latinoamérica</label>
-            <p class="hint" style="margin:-4px 0 6px 48px">Colombia, México, Argentina, Chile, Perú, Venezuela y más. Necesitan internet y no son un servicio oficial: si fallan, uso la voz de Windows.</p>
+            <p class="hint">Las voces de Latinoamérica (Colombia y más) están abajo, en su propia tarjeta.</p>
             <div id="voice-pool" class="pool"></div></div>
           <div class="card"><h3 class="card-title">Escuchar</h3>
             <form id="tts-say" class="row"><input id="tts-say-text" placeholder="Escribe algo para probar la voz…"><button class="btn primary">Probar</button></form>
@@ -235,6 +238,12 @@
             </div>
             <div class="row space mt"><span class="hint" id="tts-queue">En cola: 0</span><button type="button" class="btn small" id="tts-skip">Saltar mensaje</button></div></div>
         </div>
+      </div>
+      <div class="card mt" id="online-voices" style="--g:#9b8cff">
+        <div class="row space"><h3 class="card-title">Voces de Latinoamérica</h3>
+          <label class="switch" style="margin:0"><input type="checkbox" data-tts="useOnlineVoices"><span></span> Sumarlas todas al reparto</label></div>
+        <p class="hint">Una voz femenina y una masculina por país, con su acento. Pulsa ▶ para oírla y ★ para que sea tu <b>voz principal</b>. Necesitan internet y son de Microsoft (no es un servicio oficial para apps): si fallan, uso la voz de Windows.</p>
+        <div class="ov-voices" id="ov-voices"></div>
       </div>
     </div>
     <div class="tabpanel" data-tabpanel="quien" hidden>
@@ -255,6 +264,16 @@
           </div>
           <div class="row space mt"><span class="hint">Con permiso de voz:</span><button type="button" class="btn small ghost" id="allowed-clear">Quitar a todos</button></div>
           <ul id="allowed-list" class="mini-list"></ul></div>
+        <div class="card span2" id="tts-bots"><h3 class="card-title">Bots del chat</h3>
+          <p class="hint">Los mensajes de bots como BotRix, Nightbot o StreamElements no se leen. En <b>Chat y actividad</b> verás 🔇 «es un bot».</p>
+          <div class="two">
+            <div>
+              <label class="switch"><input type="checkbox" data-tts="ignoreBots"><span></span> No leer a los bots</label>
+              <label class="switch"><input type="checkbox" data-tts="ignoreBotSuffix"><span></span> Tampoco a nombres que terminan en «bot»</label>
+              <p class="hint">Si un espectador real tiene un nombre así, ponlo en «Siempre leer» en <b>Espectadores especiales</b>.</p>
+            </div>
+            <label class="field"><span>Otros bots que no quieres oír (uno por línea)</span><textarea data-tts="botNames" data-list="lines" rows="4" placeholder="mi_bot&#10;otro_bot"></textarea></label>
+          </div></div>
       </div>
     </div>
     <div class="tabpanel" data-tabpanel="filtros" hidden>
@@ -316,7 +335,7 @@
     <div class="card"><div class="row space"><h3 class="card-title">A continuación <span id="queue-count"></span></h3><button class="btn small ghost" id="music-clear">Vaciar</button></div>
       <ul id="music-queue" class="queue"></ul>
       <form id="music-add" class="row"><input id="music-add-q" placeholder="Añadir canción o enlace de YouTube…"><button class="btn">Añadir</button></form></div>
-    <div class="card"><h3 class="card-title">Comandos del chat</h3>
+    <div class="card"><h3 class="card-title">Comandos de música</h3>
       <div class="cmds">
         <div><code>!play</code> <code>!temita</code><span>+ canción o enlace: pide una canción</span></div>
         <div><code>!skip</code><span>salta la que suena, solo si la pidió él</span></div>
@@ -326,6 +345,48 @@
         <div class="checks"><label class="switch"><input type="checkbox" data-music="platforms.kick"><span></span> Kick</label><label class="switch"><input type="checkbox" data-music="platforms.starvios"><span></span> Starvios</label><label class="switch"><input type="checkbox" data-music="platforms.twitch"><span></span> Twitch</label><label class="switch"><input type="checkbox" data-music="platforms.tiktok"><span></span> TikTok</label></div>
         <div class="two"><label class="field"><span>Canciones por persona</span><input type="number" min="1" max="10" data-music="maxPerUser"></label><label class="field"><span>Duración máxima (min)</span><input type="number" min="1" max="60" data-music="maxDurationMin"></label></div>
       </details></div>
+  </div>
+</section>
+
+<!-- ---------- Comandos del chat (Samy) ---------- -->
+<section class="page" id="page-comandos" data-page="comandos" hidden>
+  <div class="ph"><div class="t"><small>Tu bot en el chat</small><h1>Comandos del chat</h1><p>Crea tus propios comandos: alguien escribe <code>!redes</code> y el bot responde en el chat.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Respondo en Kick y Starvios. En Twitch y TikTok todavía no puedo escribir, pero Troya puede decir la respuesta en voz alta.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="cols cmd-layout" id="card-comandos">
+    <div class="card"><div class="row space"><h3 class="card-title">Tus comandos</h3><button type="button" class="btn small primary" id="cmd-new">Nuevo comando</button></div>
+      <div id="cmd-list" class="cmd-list"></div></div>
+    <div class="cmd-side">
+      <div class="card" id="cmd-try"><h3 class="card-title">Probar</h3>
+        <p class="hint">Escribe un mensaje como si fueras un espectador. No se envía nada al chat.</p>
+        <form class="row" id="cmd-try-form"><input id="cmd-try-text" placeholder="!redes" autocomplete="off"><button class="btn">Probar</button></form>
+        <label class="check mt"><input type="checkbox" id="cmd-try-mod"> Como moderador</label>
+        <p class="cmd-try-out" id="cmd-try-out" aria-live="polite"></p></div>
+      <div class="card"><h3 class="card-title">Lo que puedes poner en la respuesta</h3>
+        <dl class="vars">
+          <dt>{usuario}</dt><dd>quien escribió el comando</dd>
+          <dt>{mensaje}</dt><dd>lo que escribió después del comando</dd>
+          <dt>{1} {2}…</dt><dd>cada palabra que escribió después</dd>
+          <dt>{canal}</dt><dd>tu canal</dd>
+          <dt>{plataforma}</dt><dd>Kick, Starvios, Twitch o TikTok</dd>
+          <dt>{cancion}</dt><dd>la canción que suena</dd>
+          <dt>{cola}</dt><dd>cuántas canciones hay en cola</dd>
+          <dt>{usos}</dt><dd>cuántas veces se ha usado</dd>
+          <dt>{comandos}</dt><dd>la lista de tus comandos</dd>
+          <dt>{azar:1-100}</dt><dd>un número al azar</dd>
+          <dt>{hora}</dt><dd>la hora de tu PC</dd>
+        </dl>
+        <p class="hint"><code>!play</code>, <code>!temita</code>, <code>!skip</code> y <code>!quitar</code> son de la música y no se pueden usar.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- Mensajes automáticos (Samy) ---------- -->
+<section class="page" id="page-automaticos" data-page="automaticos" hidden>
+  <div class="ph"><div class="t"><small>Tu bot en el chat</small><h1>Mensajes automáticos</h1><p>El bot escribe un mensaje cada cierto tiempo, solo mientras estás conectado y si el chat está activo.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Si el chat está callado, espero: así no hablo solo. Escribo en Kick y Starvios.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="card" id="card-automaticos">
+    <div class="row space"><label class="switch big" style="margin:0"><input type="checkbox" id="timers-on"><span></span> Mensajes automáticos activados</label><button type="button" class="btn small primary" id="timer-new">Nuevo mensaje</button></div>
+    <div id="timer-list" class="cmd-list mt"></div>
   </div>
 </section>
 
@@ -404,7 +465,7 @@
 <section class="page" id="page-ajustes" data-page="ajustes" hidden>
   <div class="ph"><div class="t"><small>Sistema</small><h1>Ajustes</h1><p>Haz que Satronho Bot se vea y se comporte a tu gusto.</p></div>
     <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Los cambios de apariencia se ven al instante y solo cambian la app; el estilo de los overlays está en Overlays para OBS.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
-  <div class="tabs" role="tablist" data-tabs="ajustes"><button data-tab="apariencia">Apariencia</button><button data-tab="app">App</button><button data-tab="acerca">Acerca de</button></div>
+  <div class="tabs" role="tablist" data-tabs="ajustes"><button data-tab="apariencia">Apariencia</button><button data-tab="app">App</button><button data-tab="atajos">Atajos de teclado</button><button data-tab="acerca">Acerca de</button></div>
   <div class="tabpanel" data-tabpanel="apariencia">
     <div class="cols c2">
       <div class="card"><h3 class="card-title">Tema</h3><div class="theme-cards" id="theme-cards"></div>
@@ -431,6 +492,14 @@
         <label class="switch"><input type="checkbox" id="update-auto"><span></span> Descargar sola la versión nueva (si está instalada)</label>
         <details><summary>Avanzado</summary><label class="field"><span>Repositorio de GitHub donde se publican las versiones (vacío = el de Satronho Bot)</span><input id="update-feed" placeholder="https://github.com/usuario/satronho-bot"></label></details>
         <button class="btn small" id="update-check">Buscar actualización ahora</button></div>
+    </div>
+  </div>
+  <div class="tabpanel" data-tabpanel="atajos" hidden>
+    <div class="card" id="hotkeys-card">
+      <div class="row space"><label class="switch big" style="margin:0"><input type="checkbox" id="hotkeys-on"><span></span> Atajos de teclado activados</label></div>
+      <p class="hint">Funcionan aunque estés en OBS o en un juego. Para cambiar uno, pulsa su tecla y luego la combinación nueva (por ejemplo Ctrl + Alt + S). Si otro programa ya usa esa combinación, te aviso.</p>
+      <div id="hotkeys-list" class="hk-list"></div>
+      <p class="hint" id="hotkeys-web" hidden>Los atajos solo funcionan en la app de escritorio.</p>
     </div>
   </div>
   <div class="tabpanel" data-tabpanel="acerca" hidden>

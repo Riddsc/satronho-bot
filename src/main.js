@@ -19,7 +19,7 @@ try {
 }
 
 const path = require('path');
-const { app, BrowserWindow, shell, dialog, net, Tray, Menu, nativeImage, safeStorage, session } = require('electron');
+const { app, BrowserWindow, shell, dialog, net, Tray, Menu, nativeImage, safeStorage, session, globalShortcut } = require('electron');
 const { Store } = require('./store');
 const { createServer } = require('./server');
 
@@ -233,8 +233,40 @@ function openLoginWindow(platform, account) {
 // Al quitar una cuenta se borra su sesión de esa ventana, así la próxima vez
 // se puede entrar con otra cuenta.
 function clearLogin(platform, account) {
-  if (!LOGIN_SITES[platform]) return;
-  session.fromPartition(`persist:${platform}-${account}`).clearStorageData().catch(() => {});
+  if (!LOGIN_SITES[platform] && platform !== 'kick') return;
+  return session.fromPartition(`persist:${platform}-${account}`).clearStorageData().catch(() => {});
+}
+
+// ---------- Atajos de teclado globales ----------
+// Funcionan aunque la ventana esté escondida, en OBS o en un juego.
+// Devuelve los que Windows no dejó usar (porque otro programa ya los tiene).
+const HOTKEY_ACTIONS = ['skipVoice', 'toggleVoice', 'musicSkip', 'musicPause', 'testAlert', 'showApp'];
+function toAccelerator(k) {
+  return String(k || '').replace(/\bCtrl\b/g, 'CommandOrControl').replace(/\s+/g, '');
+}
+function applyHotkeys(cfg = {}) {
+  globalShortcut.unregisterAll();
+  const failed = [];
+  if (!cfg.enabled) return { failed, enabled: false };
+  const used = new Set();
+  for (const action of HOTKEY_ACTIONS) {
+    const key = cfg.keys?.[action];
+    if (!key) continue;
+    const acc = toAccelerator(key);
+    if (used.has(acc)) {
+      failed.push({ action, key, reason: 'repetido' });
+      continue;
+    }
+    used.add(acc);
+    let okReg = false;
+    try {
+      okReg = globalShortcut.register(acc, () => (action === 'showApp' ? showWindow() : server?.hotkey(action)));
+    } catch {
+      okReg = false;
+    }
+    if (!okReg) failed.push({ action, key, reason: 'ocupado' });
+  }
+  return { failed, enabled: true };
 }
 
 // Una sola instancia: si el usuario abre la app dos veces, enfocamos la primera.
@@ -257,6 +289,7 @@ if (!app.requestSingleInstanceLock()) {
       hooks: { applyUpdate, checkForUpdates: () => checkForUpdates(store), onWindowConfig: applyWindowConfig,
         openAuthWindow,
         openLogin: openLoginWindow,
+        onHotkeys: applyHotkeys,
         clearLogin,
         // Cifrado de Windows (DPAPI) para el Client Secret y los permisos de Kick.
         vault: safeStorage.isEncryptionAvailable()
@@ -279,6 +312,8 @@ if (!app.requestSingleInstanceLock()) {
       app.quit();
       return;
     }
+    server.setHotkeysStatus(applyHotkeys(store.get('hotkeys')));
+    app.on('will-quit', () => globalShortcut.unregisterAll());
 
     win = new BrowserWindow({
       width: 1240,

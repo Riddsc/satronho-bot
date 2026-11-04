@@ -35,6 +35,8 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
       type: 'chat',
       user: { id: d.sender.id || d.sender.username, name: d.sender.username },
       message: d.content || '',
+      // Insignias de Kick (broadcaster, moderator, bot…): sirven para no leer bots.
+      extra: { badges: (d.sender.identity?.badges || []).map((b) => String(b.type || b.text || '').toLowerCase()).filter(Boolean) },
     });
   }
 

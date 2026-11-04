@@ -58,6 +58,11 @@ const DEFAULTS = {
     bannedWords: DEFAULT_BANNED,
     stripNumbers: false, // no leer números (ni los escondidos en palabras)
     antiSpam: true, // no repetir el mismo mensaje de la misma persona
+    // Bots del chat (BotRix, Nightbot…): no se leen. botNames suma nombres propios.
+    mainVoice: '', // voz principal elegida a mano (vacío = la de Piper); p. ej. 'ms:es-CO-SalomeNeural'
+    ignoreBots: true,
+    ignoreBotSuffix: true, // también cualquier nombre que termine en «bot»
+    botNames: [],
     cooldownSec: 0, // espera mínima entre mensajes leídos de una persona
     expireSec: 60, // los mensajes más viejos que esto ya no se leen
     maxLength: 200,
@@ -90,6 +95,19 @@ const DEFAULTS = {
   appearance: { theme: 'noche', accent: '#ffb23e', font: 'bricolage-grotesque', size: 'm', corners: 'redondas' },
   // Cómo se ven los overlays en OBS.
   overlayStyle: { font: 'bricolage-grotesque', accent: '#ffb23e', text: '#ffffff', card: 'solid', corners: 'round', scale: 1, sound: true, alertColors: 'type' },
+  // Atajos de teclado globales (funcionan aunque estés en OBS o en un juego).
+  // Apagados al principio para no chocar con los atajos de otros programas.
+  hotkeys: {
+    enabled: false,
+    keys: {
+      skipVoice: 'Ctrl+Alt+S',
+      toggleVoice: 'Ctrl+Alt+V',
+      musicSkip: 'Ctrl+Alt+N',
+      musicPause: 'Ctrl+Alt+P',
+      testAlert: 'Ctrl+Alt+A',
+      showApp: 'Ctrl+Alt+B',
+    },
+  },
   // Ventana: nunca se abre sola. Opcionalmente se esconde junto al reloj al minimizar.
   window: { minimizeToTray: false },
   ttsAllowed: {}, // usuarios de TikTok que enviaron el regalo: { id: { name, ts } }
@@ -117,6 +135,18 @@ const DEFAULTS = {
     photos: {}, // { samy: 'samy.png', ... }
     steps: {}, // primeros pasos hechos a mano: { overlay: true, test: true }
     stepsHidden: false,
+  },
+  // Comandos del chat (ver modules/commands.js).
+  commands: [
+    { id: 'ejemplo-comandos', name: 'comandos', aliases: ['ayuda'], response: 'Comandos: {comandos} · Pide música con !play canción', permission: 'all', cooldownSec: 20, userCooldownSec: 0, speak: false, enabled: true, uses: 0, platforms: { kick: true, starvios: true, twitch: true, tiktok: true } },
+    { id: 'ejemplo-redes', name: 'redes', aliases: [], response: '¡Sígueme en mis redes! (Cambia este texto en Comandos del chat)', permission: 'all', cooldownSec: 30, userCooldownSec: 0, speak: false, enabled: false, uses: 0, platforms: { kick: true, starvios: true, twitch: true, tiktok: true } },
+  ],
+  // Mensajes automáticos: cada X minutos, si hubo al menos N mensajes en el chat.
+  timers: {
+    enabled: true,
+    items: [
+      { id: 'ejemplo-musica', text: '🎵 ¿Quieres escuchar algo? Pide tu canción con !play nombre', everyMin: 20, minChat: 10, enabled: false, platforms: { kick: true, starvios: true } },
+    ],
   },
   goals: [
     { id: 'seguidores', title: 'Meta de seguidores', type: 'follow', platform: 'all', countBy: 'events', current: 0, target: 50 },

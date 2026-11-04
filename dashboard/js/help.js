@@ -41,6 +41,24 @@ const KB = [
     go: '#starviosbot',
   },
   {
+    guide: 'troya', q: '¿Cómo hago que no lea a los bots?',
+    keys: ['bot', 'bots', 'botrix', 'nightbot', 'streamelements', 'no leer', 'silenciar bot'],
+    answer: 'En <b>Voz del chat → Quién se lee</b>, en <b>Bots del chat</b>, deja activado «No leer a los bots». Ya conozco a BotRix, Nightbot, StreamElements y otros, y también callo a quien se llame «…bot». Si un bot tuyo tiene otro nombre, escríbelo en la lista.',
+    go: '#tts-bots',
+  },
+  {
+    guide: 'samy', q: '¿Cómo creo un comando como !redes?',
+    keys: ['comando', 'comandos', 'redes', 'discord', '!', 'respuesta', 'crear comando'],
+    answer: 'En <b>Comandos del chat</b> pulsa <b>Nuevo comando</b>, escribe el nombre (sin !) y la respuesta. Puedes usar {usuario}, {mensaje} y más. Respondo en Kick y Starvios; en Twitch y TikTok Troya puede decirlo en voz alta. Pruébalo en la tarjeta <b>Probar</b>.',
+    go: '#card-comandos',
+  },
+  {
+    guide: 'samy', q: '¿Cómo pongo un mensaje que se repita cada X minutos?',
+    keys: ['automático', 'automaticos', 'cada', 'minutos', 'repetir', 'temporizador', 'timer', 'anuncio'],
+    answer: 'En <b>Mensajes automáticos</b> pulsa <b>Nuevo mensaje</b>, escribe el texto y cada cuántos minutos. Si pones un mínimo de mensajes, espero a que el chat hable para no escribir solo.',
+    go: '#card-automaticos',
+  },
+  {
     guide: 'samy', q: '¿Cómo escondo las plataformas que no uso?',
     keys: ['esconder', 'ocultar', 'quitar plataforma', 'no uso', 'plataformas que uso', 'twitch', 'starvios'],
     answer: 'En <b>Conexiones</b>, abre <b>Plataformas que uso</b> y desmarca las que no usas. Se esconden del panel y no se conectan solas. Puedes volver a marcarlas cuando quieras.',

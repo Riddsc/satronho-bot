@@ -25,6 +25,7 @@ const { createStarviosConnector } = require('./connectors/starvios');
 const { createTwitchConnector } = require('./connectors/twitch');
 const { createKickChat } = require('./connectors/kickChat');
 const { createStarviosChat } = require('./connectors/starviosChat');
+const { createCommands } = require('./modules/commands');
 
 const ROOT = path.join(__dirname, '..');
 const PLATFORMS = ['tiktok', 'kick', 'starvios', 'twitch'];
@@ -113,6 +114,16 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   // Quién escribe en cada plataforma.
   const writers = { kick: kickChat, starvios: starviosChat };
   const tts = createTts({ store, broadcast, engine, online });
+  // music se crea más abajo; los comandos lo consultan al responder.
+  let musicRef = null;
+  const commands = createCommands({
+    store,
+    writers,
+    getStatus: () => status,
+    getMusic: () => musicRef?.snapshot(),
+    speak: (text) => tts.speak(text),
+    broadcast,
+  });
   const stats = createStats({ store, dataDir, broadcast });
   const music = createMusic({
     store,
@@ -133,6 +144,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     onSong: () => stats.onSong(),
   });
 
+  musicRef = music;
   bus.on('viewers', (v) => stats.onViewers(v));
   bus.on('stream-end', () => stats.end('fin del LIVE de TikTok'));
 
@@ -154,6 +166,15 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     goals.handleEvent(e);
     // Lo que escribe la propia app (con la cuenta aparte o con la tuya) no se lee en voz alta.
     const fromBot = e.type === 'chat' && Boolean(writers[e.platform]?.isOwnMessage(e.user?.name, e.message));
+    // Comandos propios (!redes…) y conteo para los mensajes automáticos.
+    if (!fromBot && e.type === 'chat') {
+      commands.onChat(e);
+      try {
+        commands.handle(e);
+      } catch {
+        /* un comando roto no debe tumbar el chat */
+      }
+    }
     const decision = fromBot ? { read: false, reason: 'lo escribió Satronho Bot' } : tts.handleEvent(e);
     if (decision) {
       // El panel marca cada mensaje con 🔊 o 🔇 y el motivo.
@@ -219,6 +240,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           onlineVoices: online.voices(),
           kickbot: kickChat.status(),
           starviosbot: starviosChat.status(),
+          commands: commands.list(),
+          timers: commands.timers(),
           app: { window: store.get('window') },
         },
       })
@@ -273,6 +296,10 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const config = publicConfig(store.update(rest));
     if (rest.overlayStyle) broadcast('overlay-style', config.overlayStyle);
     if (rest.window) hooks.onWindowConfig?.(config.window);
+    if (rest.hotkeys) {
+      hotkeysStatus = hooks.onHotkeys?.(store.get('hotkeys')) || hotkeysStatus;
+      broadcast('hotkeys-status', hotkeysStatus);
+    }
     ok(res, { config });
   });
 
@@ -354,7 +381,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   app.post('/api/tts/say', (req, res) => {
     const text = String(req.body?.text || '').slice(0, 300);
     if (!text.trim()) return fail(res, 'Texto vacío');
-    tts.speak(text, { user: 'Prueba' });
+    const voice = typeof req.body?.voice === 'string' ? req.body.voice.slice(0, 80) : undefined;
+    tts.speak(text, { user: 'Prueba', voice });
     ok(res);
   });
   app.get('/tts-audio/:file', (req, res) => {
@@ -415,9 +443,11 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     kickChat.forgetOwnApp();
     ok(res, { kickbot: kickChat.status() });
   });
-  app.post('/api/kickbot/authorize', (req, res) => {
+  app.post('/api/kickbot/authorize', async (req, res) => {
     try {
       const account = req.body?.account === 'bot' ? 'bot' : 'me';
+      // «Usar otra cuenta»: borrar la sesión de kick.com de esa ventana antes de abrirla.
+      if (req.body?.fresh) await hooks.clearLogin?.('kick', account);
       const url = kickChat.authUrl(account);
       const external = Boolean(req.body?.external);
       // En la app de escritorio se abre una ventanita propia para cada cuenta,
@@ -429,7 +459,9 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     }
   });
   app.post('/api/kickbot/logout', (req, res) => {
-    kickChat.logout(req.body?.account === 'bot' ? 'bot' : 'me');
+    const account = req.body?.account === 'bot' ? 'bot' : 'me';
+    kickChat.logout(account);
+    hooks.clearLogin?.('kick', account); // la próxima vez se puede entrar con otra cuenta
     ok(res, { kickbot: kickChat.status() });
   });
   app.post('/api/kickbot/test', (_req, res) => {
@@ -449,11 +481,39 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     }
   });
 
+  // ---- Comandos del chat ----
+  const wrap = (fn) => (req, res) => {
+    try {
+      ok(res, fn(req));
+    } catch (err) {
+      fail(res, err);
+    }
+  };
+  app.get('/api/commands', (_req, res) => ok(res, { commands: commands.list() }));
+  app.post('/api/commands', wrap((req) => ({ command: commands.create(req.body || {}) })));
+  app.patch('/api/commands/:id', wrap((req) => ({ command: commands.update(req.params.id, req.body || {}) })));
+  app.delete('/api/commands/:id', wrap((req) => (commands.remove(req.params.id), {})));
+  // Probar: ¿qué respondería a este mensaje? (no escribe en el chat)
+  app.post('/api/commands/try', wrap((req) => {
+    const b = req.body || {};
+    const e = { type: 'chat', platform: b.platform || 'kick', user: { id: 'prueba', name: b.user || 'Espectador' }, message: String(b.message || ''), extra: { badges: b.mod ? ['moderator'] : [] } };
+    return { result: commands.handle(e, { dryRun: true }) };
+  }));
+  // ---- Mensajes automáticos ----
+  app.get('/api/timers', (_req, res) => ok(res, { timers: commands.timers() }));
+  app.post('/api/timers', wrap((req) => ({ timer: commands.createTimer(req.body || {}) })));
+  app.patch('/api/timers/:id', wrap((req) => ({ timer: commands.updateTimer(req.params.id, req.body || {}) })));
+  app.delete('/api/timers/:id', wrap((req) => (commands.removeTimer(req.params.id), {})));
+  app.post('/api/timers/enabled', wrap((req) => (commands.setTimersEnabled(req.body?.enabled), { timers: commands.timers() })));
+  app.post('/api/timers/:id/send', wrap((req) => ({ sent: commands.sendNow(req.params.id) })));
+
   // ---- Satronho Bot en el chat de Starvios ----
   app.get('/api/starviosbot', (_req, res) => ok(res, { starviosbot: starviosChat.status() }));
   app.post('/api/starviosbot/login', async (req, res) => {
     try {
-      const r = await starviosChat.login(req.body?.account);
+      const account = req.body?.account === 'bot' ? 'bot' : 'me';
+      if (req.body?.fresh) await hooks.clearLogin?.('starvios', account);
+      const r = await starviosChat.login(account);
       ok(res, { ...r, starviosbot: starviosChat.status() });
     } catch (err) {
       fail(res, err);
@@ -545,13 +605,32 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     await new Promise((r) => httpServer.close(r));
   }
 
+  // ---- Atajos de teclado (los registra main.js con globalShortcut) ----
+  let hotkeysStatus = { failed: [] };
+  app.get('/api/hotkeys', (_req, res) => ok(res, { status: hotkeysStatus, available: Boolean(hooks.onHotkeys) }));
+  function hotkey(action) {
+    switch (action) {
+      case 'musicSkip': music.skip(); break;
+      case 'musicPause': music.setPaused(!music.snapshot().paused); break;
+      case 'testAlert': bus.emit('event', makeEvent({ ...SAMPLE.follow, type: 'follow', test: true })); break;
+      // La voz suena en el panel: él salta el mensaje o apaga/enciende la voz.
+      case 'skipVoice':
+      case 'toggleVoice': broadcast('hotkey', { action }); break;
+      default: break;
+    }
+  }
+  function setHotkeysStatus(st) {
+    hotkeysStatus = st || { failed: [] };
+    broadcast('hotkeys-status', hotkeysStatus);
+  }
+
   // Para avisos que vienen de fuera del servidor (p. ej. actualizaciones).
   function notify(kind, payload) {
     if (kind === 'update') lastUpdate = payload;
     broadcast(kind, payload);
   }
 
-  return { start, stop, notify };
+  return { start, stop, notify, hotkey, setHotkeysStatus };
 }
 
 module.exports = { createServer, PLATFORMS };
