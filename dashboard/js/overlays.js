@@ -22,6 +22,13 @@ const THEMES = [
   { id: 'arcade', name: 'Arcade', desc: 'Bloques y letras de máquina', set: { font: 'jetbrains-mono', accent: '#53fc18', text: '#ffffff', card: 'solid', corners: 'square' }, bg: '#0c0b1d', fg: '#ffffff', bd: '#53fc18', hard: true },
   { id: 'dulce', name: 'Dulce', desc: 'Pastel y burbujas', set: { font: 'fredoka', accent: '#ff7ab8', text: '#4a2142', card: 'solid', corners: 'round' }, bg: '#ffeaf4', fg: '#4a2142', bd: '#ffb6d9' },
   { id: 'minimal', name: 'Minimal', desc: 'Solo texto y una línea', set: { font: 'inter', accent: '#ffffff', text: '#ffffff', card: 'none', corners: 'square' }, bg: 'transparent', fg: '#ffffff', bd: '#ffffff', line: true },
+  // Los de los guías, cada uno con su personalidad.
+  { id: 'samy', name: 'Samy', desc: 'Crema y caramelo, con huellitas', guide: 'samy', set: { font: 'baloo-2', accent: '#ff9a1f', text: '#5a2e12', card: 'solid', corners: 'round' }, bg: '#fff3e2', fg: '#5a2e12', bd: '#ffb23e' },
+  { id: 'troya', name: 'Troya', desc: 'Violeta de realeza con filo dorado', guide: 'troya', set: { font: 'poppins', accent: '#b9a8ff', text: '#ffffff', card: 'solid', corners: 'soft' }, bg: '#2c1a5c', fg: '#ffffff', bd: '#f4c95d' },
+  { id: 'nono', name: 'Ñoño', desc: 'Aguamarina musical y redondito', guide: 'nono', set: { font: 'fredoka', accent: '#4fd1c5', text: '#e9fffb', card: 'solid', corners: 'round' }, bg: '#0a2c2a', fg: '#e9fffb', bd: '#4fd1c5' },
+  { id: 'juana', name: 'Juana', desc: 'Rosa antiguo, fino y coqueto', guide: 'juana', set: { font: 'comfortaa', accent: '#ff8fb5', text: '#ffeef6', card: 'solid', corners: 'soft' }, bg: '#2b1623', fg: '#ffeef6', bd: '#ff8fb5' },
+  { id: 'mecha', name: 'MechaRidds', desc: 'Pantalla de androide: verde Hulk y ojo violeta', guide: 'mecha', set: { font: 'jetbrains-mono', accent: '#74d14c', text: '#e8ffe0', card: 'solid', corners: 'square' }, bg: '#051209', fg: '#e8ffe0', bd: '#74d14c' },
+  { id: 'colonizadora', name: 'Colonizadora', desc: 'Rosa chicle, lila, brillos y corazoncitos', set: { font: 'baloo-2', accent: '#ff3d9a', text: '#7a1650', card: 'solid', corners: 'round' }, bg: 'linear-gradient(135deg,#ffd1e8,#e8d2ff)', fg: '#7a1650', bd: '#ff6fb5' },
 ];
 const TYPE_NAMES = { follow: 'Seguidores', sub: 'Suscripciones', gift: 'Monedas', like: 'Likes', share: 'Compartidos' };
 // Lo que dice cada guía en el editor de su categoría.
@@ -119,15 +126,75 @@ function fitAll(root) {
 }
 
 // ---------- Menú: fijados ----------
+// Menú de la izquierda: los fijados siempre a la vista y, con la flechita
+// de «Overlays para OBS», el desplegable con todas las categorías.
+const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
+function navLink(id) {
+  const w = widgetOf(id);
+  const on = editing?.id === id && currentPage() === 'overlays';
+  return `<a class="nav-item nav-pin ${on ? 'on' : ''}" href="#/overlays/${encodeURIComponent(id)}" title="${esc(nameOf(id, w))}"><span class="ic">${KINDS[w.kind].icon}</span>${esc(nameOf(id, w))}</a>`;
+}
 function renderNavPins() {
   const box = $('#nav-pins');
   if (!box) return;
+  const open = lsGet('satronho.navOverlays', false);
+  const item = $('.nav-item[data-page="overlays"]');
+  if (item && !item.querySelector('.nav-caret')) item.insertAdjacentHTML('beforeend', '<span class="nav-caret" role="button" tabindex="0" title="Ver todos los overlays" aria-label="Ver todos los overlays">▾</span>');
+  item?.classList.toggle('open', open);
+  // Siempre justo debajo de «Overlays para OBS», aunque cambies el orden del menú.
+  if (item && item.nextElementSibling !== box) item.after(box);
   const list = pins.filter((id) => widgetOf(id));
-  box.hidden = !list.length;
-  box.innerHTML = list.map((id) => {
-    const w = widgetOf(id);
-    return `<a class="nav-item nav-pin ${editing?.id === id && currentPage() === 'overlays' ? 'on' : ''}" href="#/overlays/${encodeURIComponent(id)}" title="${esc(nameOf(id, w))}"><span class="ic">${KINDS[w.kind].icon}</span>${esc(nameOf(id, w))}</a>`;
-  }).join('');
+  const openCats = lsGet('satronho.navOverlayCats', []);
+  const tree = open
+    ? `<a class="nav-item nav-pin" href="#/overlays/galeria"><span class="ic">▦</span>Ver la galería</a>${CATEGORIES.map((c) => {
+      const ids = allIds().filter((id) => KINDS[widgetOf(id).kind].cat === c.id);
+      const isOpen = openCats.includes(c.id);
+      return `<div class="nav-cat ${isOpen ? 'open' : ''}" style="--g:${GUIDES[c.guide].color}"><button type="button" class="nav-cat-btn" data-navcat="${c.id}" aria-expanded="${isOpen}"><i></i>${esc(c.name)}<small>${ids.length}</small><span>▸</span></button>${isOpen ? `<div class="nav-cat-list">${ids.map(navLink).join('')}${c.id === 'regalos' ? '<a class="nav-item nav-pin" href="#/alertas"><span class="ic">🔔</span>Alertas</a>' : ''}</div>` : ''}</div>`;
+    }).join('')}`
+    : '';
+  box.hidden = !list.length && !open;
+  box.innerHTML = `${list.length ? `<div class="nav-pinned">${list.map(navLink).join('')}</div>` : ''}${tree}`;
+}
+// Cada apartado con algo que se puede poner en OBS lleva botones a su overlay.
+const SECTION_OVERLAYS = {
+  metas: ['goals', 'counters', 'countdown'],
+  musica: ['nowplaying', 'queue'],
+  actividad: ['chat', 'activity', 'viewers'],
+  alertas: ['giftspot', 'lastgifts', 'giftrain', 'bestgift'],
+  estadisticas: ['ranking', 'mvp', 'uptime'],
+  chatbot: ['ticker', 'chat'],
+  inicio: ['goals', 'chat', 'nowplaying', 'screens'],
+};
+function renderSectionLinks() {
+  for (const [page, kinds] of Object.entries(SECTION_OVERLAYS)) {
+    const t = $(`#page-${page} .ph .t`);
+    if (!t) continue;
+    let box = t.querySelector('.ov-jump');
+    if (!box) { box = document.createElement('div'); box.className = 'ov-jump'; t.append(box); }
+    box.innerHTML = `<span>En OBS:</span>${kinds.map((k) => `<a class="ov-jump-btn" href="#/overlays/${k}" style="--g:${GUIDES[catOf(k).guide].color}"><i>${KINDS[k].icon}</i>${esc(KINDS[k].name)}</a>`).join('')}<a class="ov-jump-btn more" href="#/overlays/galeria">Todos ›</a>`;
+  }
+}
+function initNavTree() {
+  document.addEventListener('click', (ev) => {
+    const caret = ev.target.closest('.nav-caret');
+    if (caret) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      lsSet('satronho.navOverlays', !lsGet('satronho.navOverlays', false));
+      return renderNavPins();
+    }
+    const cat = ev.target.closest('[data-navcat]');
+    if (cat) {
+      const list = new Set(lsGet('satronho.navOverlayCats', []));
+      if (list.has(cat.dataset.navcat)) list.delete(cat.dataset.navcat); else list.add(cat.dataset.navcat);
+      lsSet('satronho.navOverlayCats', [...list]);
+      renderNavPins();
+    }
+  }, true);
+  document.addEventListener('keydown', (ev) => {
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.closest?.('.nav-caret')) { ev.preventDefault(); ev.target.click(); }
+  });
 }
 function togglePin(id) {
   pins = pins.includes(id) ? pins.filter((x) => x !== id) : [...pins, id];
@@ -313,7 +380,7 @@ function countersHTML() {
         <button type="button" class="btn small ghost" data-cstep="-1">−</button><b class="ove-cval">${c.value || 0}</b><button type="button" class="btn small ghost" data-cstep="1">+</button>
         <button type="button" class="btn small ghost" data-creset title="Volver a cero">↺</button><button type="button" class="btn small ghost danger" data-cdel title="Eliminar">✕</button></div>
       <div class="ove-cmore"><label>Comando <span class="ove-cmd">!<input data-c="command" value="${esc(c.command || '')}" maxlength="20"></span></label>
-        <label>Regalo <input data-c="gift" value="${esc(c.gift || '')}" placeholder="Rosa" maxlength="40"></label>
+        <label>Regalo <input data-c="gift" list="dl-gifts" value="${esc(c.gift || '')}" placeholder="Rosa" maxlength="40"></label>
         <label>Suma <input type="number" data-c="step" value="${c.step || 1}" min="1"></label>
         <label>Tope <input type="number" data-c="goal" value="${c.goal || ''}" min="0" placeholder="—"></label>
         <label class="switch"><input type="checkbox" data-c="anyone" ${c.anyone ? 'checked' : ''}><span></span> <em class="sw-t">Cualquiera puede usar el comando</em></label></div>
@@ -533,7 +600,7 @@ function setStyle(patch) {
 }
 function renderThemes() {
   $('#ov-themes').innerHTML = THEMES.map((t) => `<button type="button" class="ov-theme" data-theme-pick="${t.id}" title="${esc(t.desc)}">
-    <span class="ov-tprev" style="--tb:${t.bg};--tf:${t.fg};--td:${t.bd};font-family:'${esc(FONTS.find((f) => f.id === t.set.font)?.family || 'inherit')}'" data-k="${t.glow ? 'glow' : t.dashed ? 'dashed' : t.hard ? 'hard' : t.line ? 'line' : ''}"><i>♥</i><b>Rosalinda</b></span>
+    <span class="ov-tprev" style="--tb:${t.bg};--tf:${t.fg};--td:${t.bd};font-family:'${esc(FONTS.find((f) => f.id === t.set.font)?.family || 'inherit')}'" data-k="${t.glow ? 'glow' : t.dashed ? 'dashed' : t.hard ? 'hard' : t.line ? 'line' : /gradient/.test(t.bg) ? 'grad' : ''}">${t.guide ? `<span class="ov-tguide">${avatarHTML(t.guide, 'xs')}</span>` : `<i>${t.id === 'colonizadora' ? '♡' : '♥'}</i>`}<b>Rosalinda</b></span>
     <span class="ov-tname">${esc(t.name)}</span></button>`).join('');
 }
 
@@ -642,6 +709,8 @@ export function initOverlays(cfg) {
   ove.addEventListener('change', onEditorChange);
   ove.addEventListener('submit', onEditorSubmit);
 
+  initNavTree();
+  renderSectionLinks();
   window.addEventListener('hashchange', route);
   window.addEventListener('resize', () => fitAll($('#page-overlays')));
   onPageChange((p) => {

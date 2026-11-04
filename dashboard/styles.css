@@ -1598,3 +1598,36 @@ kbd { font: 700 .82em var(--font); padding: 3px 8px; border-radius: 6px; backgro
 .ovg-team .avatar { width: 40px; height: 40px; margin-left: -10px; box-shadow: 0 0 0 3px var(--panel); }
 .ovg-team span:first-child .avatar { margin-left: 0; }
 .pp-head.pp-solo { display: block; } .pp-head.pp-solo small { display: block; white-space: normal; }
+/* Barra rápida: ocultar desde la propia barra y volver con la pestañita */
+.qr-hide { font-size: 13px; font-weight: 800; color: var(--muted); }
+.qr-hide:hover { color: var(--bad); }
+.qrail-tab { position: fixed; right: 0; top: 46%; z-index: 70; display: grid; justify-items: center; gap: 2px; padding: 10px 6px 8px 8px; border: 1px solid var(--edge); border-right: 0; border-radius: 14px 0 0 14px; background: color-mix(in srgb, var(--panel) 94%, transparent); color: var(--muted); cursor: pointer; box-shadow: var(--lift); transition: padding .15s, color .15s; }
+.qrail-tab:hover { color: var(--ink); padding-right: 10px; }
+.qrail-tab span { font-weight: 900; line-height: 1; }
+.qrail-tab[hidden] { display: none; }
+.ov-tprev[data-k="grad"] { background-image: var(--tb); }
+.ov-tguide .avatar { width: 26px; height: 26px; border-width: 2px; }
+.ov-themes { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; }
+/* Menú: desplegable de Overlays */
+.nav-item[data-page="overlays"] { position: relative; }
+.nav-caret { margin-left: auto; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 6px; font-size: 12px; color: var(--muted); transition: transform .15s, background .15s; }
+.nav-caret:hover { background: color-mix(in srgb, var(--ink) 10%, transparent); color: var(--ink); }
+.nav-item.open .nav-caret { transform: rotate(180deg); }
+.nav-pinned { display: grid; gap: 1px; padding-bottom: 4px; margin-bottom: 4px; border-bottom: 1px dashed var(--line); }
+.nav-cat-btn { width: 100%; display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: none; border: 0; border-radius: 8px; color: var(--muted); font: inherit; font-size: .86em; font-weight: 700; cursor: pointer; text-align: left; }
+.nav-cat-btn:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.nav-cat-btn i { width: 8px; height: 8px; border-radius: 50%; background: var(--g); flex: none; }
+.nav-cat-btn small { margin-left: auto; font-size: 11px; opacity: .7; }
+.nav-cat-btn span { font-size: 10px; transition: transform .15s; }
+.nav-cat.open .nav-cat-btn span { transform: rotate(90deg); }
+.nav-cat-list { display: grid; gap: 1px; padding-left: 10px; }
+@media (min-width: 720px) {
+  body.rail .side:not(:hover):not(:focus-within):not(.peek) .nav-cat, body.rail .side:not(:hover):not(:focus-within):not(.peek) .nav-caret { display: none; }
+}
+/* Botones «En OBS» de cada apartado */
+.ov-jump { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.ov-jump > span { font-size: .8em; font-weight: 800; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-right: 2px; }
+.ov-jump-btn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px 4px 5px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--g) 40%, var(--line)); background: color-mix(in srgb, var(--g) 9%, transparent); color: var(--ink); font-size: .84em; font-weight: 700; text-decoration: none; transition: background .12s, transform .12s; }
+.ov-jump-btn i { font-style: normal; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--g) 22%, transparent); font-size: 12px; }
+.ov-jump-btn:hover { background: color-mix(in srgb, var(--g) 20%, transparent); transform: translateY(-1px); }
+.ov-jump-btn.more { padding-left: 11px; color: var(--muted); --g: var(--muted); }

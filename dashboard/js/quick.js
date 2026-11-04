@@ -217,12 +217,26 @@ function renderRail() {
   document.body.classList.toggle('has-rail', mode === 'fixed');
   el.hidden = mode === 'off';
   el.className = `qrail ${mode}`;
+  // Pestañita en el borde para volver a mostrar la barra cuando está oculta.
+  let tab = $('#qrail-tab');
+  if (!tab) {
+    tab = document.createElement('button');
+    tab.type = 'button';
+    tab.id = 'qrail-tab';
+    tab.className = 'qrail-tab';
+    tab.title = 'Mostrar la barra rápida';
+    tab.setAttribute('aria-label', 'Mostrar la barra rápida');
+    tab.innerHTML = `${iconSVG('dock', 16)}<span>‹</span>`;
+    tab.addEventListener('click', () => setRailMode(rail().lastMode && rail().lastMode !== 'off' ? rail().lastMode : 'fixed'));
+    document.body.append(tab);
+  }
+  tab.hidden = mode !== 'off';
   const btns = (r.buttons?.length ? r.buttons : Object.keys(ACTIONS)).filter((k) => ACTIONS[k]);
   el.innerHTML = `${mode === 'floating' ? '<span class="qr-grip" title="Arrastra para mover">⠿</span>' : ''}${btns.map((k) => {
     const a = ACTIONS[k];
     const on = a.on ? a.on() : null;
     return `<button type="button" class="qr-btn ${on === false ? 'off' : on ? 'on' : ''}" data-q="${k}" aria-label="${esc(val(a.name))}" data-tip="${esc(val(a.name))}">${iconSVG(val(a.icon), 19)}${a.badge?.() ? '<i class="qr-dot"></i>' : ''}</button>`;
-  }).join('')}<span class="qr-sp"></span><button type="button" class="qr-btn qr-edit" data-q="__edit" data-tip="Elegir botones" aria-label="Elegir botones">${iconSVG('gear', 17)}</button>`;
+  }).join('')}<span class="qr-sp"></span><button type="button" class="qr-btn qr-edit" data-q="__mode" data-tip="${mode === 'floating' ? 'Fijarla a la derecha' : 'Hacerla flotante'}" aria-label="${mode === 'floating' ? 'Fijarla a la derecha' : 'Hacerla flotante'}">${iconSVG(mode === 'floating' ? 'dock' : 'move', 17)}</button><button type="button" class="qr-btn qr-edit" data-q="__edit" data-tip="Elegir botones" aria-label="Elegir botones">${iconSVG('gear', 17)}</button><button type="button" class="qr-btn qr-edit qr-hide" data-q="__hide" data-tip="Ocultar la barra (vuelve con la pestañita del borde)" aria-label="Ocultar la barra">✕</button>`;
   if (mode === 'floating') {
     const x = r.x ?? innerWidth - 80;
     const y = r.y ?? 120;
@@ -234,8 +248,10 @@ function renderRail() {
   }
 }
 function setRailMode(mode) {
+  const prev = rail().mode || 'fixed';
+  if (mode === 'off' && prev !== 'off') rail().lastMode = prev;
   rail().mode = mode;
-  saveConfig({ profile: { rail: { mode } } });
+  saveConfig({ profile: { rail: { mode, lastMode: rail().lastMode || 'fixed' } } });
   renderRail();
   renderProfile();
 }
@@ -244,6 +260,8 @@ function initRail() {
   el.addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-q]');
     if (!b) return;
+    if (b.dataset.q === '__hide') { setRailMode('off'); guideToast('samy', 'Barra oculta. La traes de vuelta con la pestañita del borde derecho.'); return; }
+    if (b.dataset.q === '__mode') { setRailMode(rail().mode === 'floating' ? 'fixed' : 'floating'); return; }
     if (b.dataset.q === '__edit') { showPage('perfil'); setTimeout(() => $('#pf-rail')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80); return; }
     ACTIONS[b.dataset.q]?.run();
     setTimeout(renderRail, 250);

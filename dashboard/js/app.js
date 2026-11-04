@@ -14,6 +14,7 @@ import { initStats, onStats, onStatsHistory } from './stats.js';
 import { initHelp, setHelpContext, openHelp, _test as helpKb } from './help.js';
 import { initNav, countEvent, setStepFacts, onPageChange } from './nav.js';
 import { initAppearance, applyAppearance } from './appearance.js';
+import { setAlertOverlays, setAlertSoundEnabled, onAlert, onAlertControl } from './alertSound.js';
 import { initOverlays, setOverlayGoals, setOverlayLive, setOverlayWidgets } from './overlays.js';
 import { initKickbot, renderKickbot } from './kickbot.js';
 import { initAlerts } from './alerts.js';
@@ -373,6 +374,8 @@ async function init() {
           p.goals.forEach((g) => goals.set(g.id, g));
           renderGoals();
           setOverlayLive(p.live);
+          setAlertOverlays(p.alertOverlays);
+          setAlertSoundEnabled(p.overlayStyle?.sound);
           Object.values(p.status || {}).forEach(renderStatus);
           resetChat();
           $('#home-feed').innerHTML = '<li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li>';
@@ -423,6 +426,10 @@ async function init() {
         case 'goal': goals.set(p.id, p); renderGoals(); break;
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;
         case 'live': setOverlayLive(p); break;
+        case 'alert': onAlert(p); break;
+        case 'alert-overlays': setAlertOverlays(p.count); break;
+        case 'alert-control': onAlertControl(p); break;
+        case 'overlay-style': setAlertSoundEnabled(p?.sound); break;
         case 'widgets': setOverlayWidgets(p); break;
         case 'goal-complete': sayFor('juana', `¡Cumpliste la meta «${esc(p.title)}»! 🎉`, 9000, 'ok'); break;
         case 'status': renderStatus(p); onChatbotStatus(p); break;

@@ -348,7 +348,11 @@ export function applyMenuPrefs(cfg) {
     const items = $$('.nav-item[data-page]', group);
     for (const a of items) a.hidden = hidden.has(a.dataset.page);
     const pos = (a) => { const i = order.indexOf(a.dataset.page); return i < 0 ? 999 + items.indexOf(a) : i; };
-    for (const a of [...items].sort((x, y) => pos(x) - pos(y))) group.append(a);
+    for (const a of [...items].sort((x, y) => pos(x) - pos(y))) {
+      group.append(a);
+      // Los overlays fijados y su desplegable van pegados a «Overlays para OBS».
+      if (a.dataset.page === 'overlays' && $('#nav-pins')) a.after($('#nav-pins'));
+    }
     group.hidden = items.every((a) => a.hidden);
   }
 }
