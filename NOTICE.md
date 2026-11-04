@@ -10,6 +10,8 @@ Satronho Bot (© 2026 RiddsSatronho) usa estos componentes, cada uno bajo su pro
 | youtubei.js | Búsqueda de canciones en YouTube | MIT |
 | adm-zip | Descomprimir el motor de voz | MIT |
 | Velopack | Portable y actualizaciones automáticas | MIT |
+| edge-tts 7.3.1 (rany2/edge-tts), portado en `src/tts/msGec.js` | Firma que piden las voces en línea de Microsoft | LGPL-3.0 (texto en `licenses/`). Solo ese archivo está bajo LGPL; puedes cambiarlo o reemplazarlo |
+| flag-icons 7.6.0 (lipis/flag-icons) | Banderas de «Elegir voz» (`dashboard/img/flags/`) | MIT |
 | Piper (descargado al instalar la voz) | Motor de voz neuronal | MIT; incluye eSpeak NG (GPL-3.0) como programa aparte |
 | Voces de Piper (descargadas por el usuario) | Voces en español | Cada voz tiene su licencia en su MODEL_CARD de Hugging Face |
 

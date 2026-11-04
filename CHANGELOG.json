@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.11.0",
+    "date": "2026-11-04",
+    "title": "Voces arregladas y MechaRidds renovado",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Voces de Latinoamérica (Salomé, Gonzalo y las demás): Microsoft cambió la forma de conectarse y la app ya usa la nueva."
+      },
+      {
+        "type": "arreglo",
+        "text": "Si una voz falla, ya no suena siempre la misma voz de hombre: se usa una voz de Windows del mismo género y del país más cercano, y Troya te avisa qué pasó."
+      },
+      {
+        "type": "mejora",
+        "text": "Elegir voz: banderas de cada país, si la voz es de mujer o de hombre, filtro por género, la marca «En uso» y un aviso en las voces que no respondieron hace poco. Las voces de Windows repetidas se muestran una sola vez."
+      },
+      {
+        "type": "mejora",
+        "text": "MechaRidds más mecatrónico: un ojo mecánico violeta y el otro café, media mandíbula de metal, articulaciones, antena y luces en verde Hulk, y la piel un tono más clara."
+      },
+      {
+        "type": "mejora",
+        "text": "Menú compacto más limpio: los grupos se separan con líneas finas en vez de puntos de colores."
+      }
+    ]
+  },
+  {
     "version": "0.10.0",
     "date": "2026-11-04",
     "title": "Música renovada, menú compacto y elegir voz",

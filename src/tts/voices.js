@@ -29,6 +29,7 @@ function voice(locale, name, quality, label, extra = {}) {
     model: `${BASE}/${lang}/${locale}/${name}/${quality}/${id}.onnx`,
     config: `${BASE}/${lang}/${locale}/${name}/${quality}/${id}.onnx.json`,
     speakers: extra.speakers || 1,
+    speakerGenders: extra.speakerGenders || [],
   };
 }
 
@@ -53,7 +54,7 @@ const VOICES = [
   voice('en_GB', 'northern_english_male', 'medium', 'Northern · Reino Unido', { gender: 'm' }),
   // ----- Francés: 2 femeninas y 2 masculinas (UPMC trae Jessica y Pierre) -----
   voice('fr_FR', 'siwis', 'medium', 'Siwis · Francia', { gender: 'f' }),
-  voice('fr_FR', 'upmc', 'medium', 'UPMC · Francia (Jessica y Pierre)', { speakers: 2 }),
+  voice('fr_FR', 'upmc', 'medium', 'UPMC · Francia (Jessica y Pierre)', { speakers: 2, speakerGenders: ['f', 'm'] }),
   voice('fr_FR', 'tom', 'medium', 'Tom · Francia', { gender: 'm' }),
   voice('fr_FR', 'gilles', 'low', 'Gilles · Francia', { gender: 'm' }),
 ];
