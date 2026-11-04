@@ -15,6 +15,22 @@
 // ("🔊 leído" o "🔇 no se lee: ...") y en la prueba de filtros.
 
 const { sanitize, normalizeName } = require('../tts/textFilter');
+const { MS_VOICES } = require('../tts/msonline');
+const { VOICES: PIPER_VOICES } = require('../tts/voices');
+
+// Datos de una voz (nombre, género, idioma y país) para que, si falla, el
+// panel la sustituya por una voz de Windows parecida y no por cualquiera.
+function describeVoice(base) {
+  if (base.startsWith('ms:')) {
+    const v = MS_VOICES.find((x) => x.id === base.slice(3));
+    return v ? { name: v.name, gender: v.gender, lang: 'es', locale: v.locale } : null;
+  }
+  const [id, speaker] = base.split('#');
+  const v = PIPER_VOICES.find((x) => x.id === id);
+  if (!v) return null;
+  const gender = v.gender || v.speakerGenders?.[Number(speaker) || 0] || '';
+  return { name: v.label.split(' · ')[0], gender, lang: v.lang, locale: id.slice(0, 5).replace('_', '-') };
+}
 
 // Hash estable (FNV-1a + mezcla final) para que cada espectador reciba
 // siempre la misma voz y las voces se repartan parejo.
@@ -207,7 +223,10 @@ function createTts({ store, broadcast, engine, online = null }) {
         const file = await online.synth(text, { voiceId: base.slice(3), rate: synthRate });
         item.audioUrl = `/tts-audio/${file}`;
       } catch (err) {
-        item.error = err.message; // sin internet: el panel lo lee con la voz de Windows
+        // Sin internet o Microsoft rechazó: el panel usa una voz de Windows
+        // del mismo género e idioma, y avisa.
+        item.error = err.message;
+        item.wanted = describeVoice(base);
       }
     } else if (base) {
       if (inFlight >= c.maxQueue) return;
@@ -217,7 +236,8 @@ function createTts({ store, broadcast, engine, online = null }) {
         const file = await engine.synth(text, { voiceId, speaker: Number(speaker) || 0, rate: synthRate });
         item.audioUrl = `/tts-audio/${file}`;
       } catch (err) {
-        item.error = err.message; // el panel lo leerá con la voz de Windows
+        item.error = err.message; // el panel lo leerá con una voz de Windows parecida
+        item.wanted = describeVoice(base);
       } finally {
         inFlight -= 1;
       }

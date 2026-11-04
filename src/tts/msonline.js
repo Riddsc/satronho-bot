@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
+const { secMsGecV2 } = require('./msGec');
 
 // Una femenina y una masculina por país (lo que ofrece Microsoft).
 const RAW = [
@@ -45,7 +46,8 @@ const MS_VOICES = RAW.map(([locale, country, name, gender]) => ({
 }));
 
 const TOKEN = '6A5AA1D4EAFF4E9FB37E23D68491D6F4';
-const CHROMIUM = '130.0.2849.68';
+// Versión de Edge que se presenta (la misma que edge-tts 7.3.1).
+const CHROMIUM = '143.0.3650.75';
 const WSS = 'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1';
 
 const escXml = (s) => String(s).replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
@@ -54,24 +56,23 @@ function createMsOnlineEngine({ outDir }) {
   let skewSec = 0; // corrección si el reloj del PC está desfasado
   let failures = 0;
 
-  // Firma que pide el servicio: SHA-256 de (tiempo de Windows redondeado a 5 min + token).
-  function secGec() {
-    let ticks = Math.floor(Date.now() / 1000 + skewSec) + 11644473600;
-    ticks -= ticks % 300;
-    const str = `${BigInt(ticks) * 10000000n}${TOKEN}`;
-    return crypto.createHash('sha256').update(str, 'ascii').digest('hex').toUpperCase();
-  }
+  // Firma que pide el servicio (v2, cambia cada 5 minutos). Ver msGec.js.
+  const secGec = () => secMsGecV2(Date.now() / 1000 + skewSec, TOKEN);
+  const muid = () => crypto.randomBytes(16).toString('hex').toUpperCase();
 
   function once(voiceId, text, rate) {
     return new Promise((resolve, reject) => {
-      const url = `${WSS}?TrustedClientToken=${TOKEN}&Sec-MS-GEC=${secGec()}&Sec-MS-GEC-Version=1-${CHROMIUM}&ConnectionId=${crypto.randomUUID().replace(/-/g, '')}`;
+      const url = `${WSS}?TrustedClientToken=${TOKEN}&Sec-MS-GEC=${secGec()}&Sec-MS-GEC-Version=2-${CHROMIUM}&ConnectionId=${crypto.randomUUID().replace(/-/g, '')}`;
       const ws = new WebSocket(url, {
         headers: {
           Origin: 'chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold',
           'User-Agent': `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROMIUM.split('.')[0]}.0.0.0 Safari/537.36 Edg/${CHROMIUM.split('.')[0]}.0.0.0`,
           Pragma: 'no-cache',
           'Cache-Control': 'no-cache',
+          'Accept-Language': 'en-US,en;q=0.9',
+          Cookie: `muid=${muid()};`,
         },
+        perMessageDeflate: true,
       });
       const chunks = [];
       const timer = setTimeout(() => { ws.terminate(); reject(new Error('Las voces en línea tardaron demasiado')); }, 15000);

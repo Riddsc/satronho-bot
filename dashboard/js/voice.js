@@ -3,6 +3,7 @@
 
 import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES } from './util.js';
 import { setBubble, sayFor, setMood, guideToast } from './guides.js';
+import { bestWindowsVoice, cleanName, genderOf, windowsVoices } from './winvoices.js';
 
 let config;
 let engine = null;
@@ -68,7 +69,12 @@ function playNext() {
   } else {
     const u = new SpeechSynthesisUtterance(item.text);
     const voices = speechSynthesis.getVoices();
-    const v = voices.find((x) => x.name === (item.windowsVoice || config.tts.windowsVoice)) || voices.find((x) => x.lang.toLowerCase().startsWith('es'));
+    // Voz de Windows pedida por nombre; si la voz original falló, la más
+    // parecida (mismo género y país); si no, la de respaldo elegida.
+    const v = (item.windowsVoice && voices.find((x) => x.name === item.windowsVoice))
+      || (item.wanted && bestWindowsVoice(item.wanted))
+      || voices.find((x) => x.name === config.tts.windowsVoice)
+      || bestWindowsVoice({ lang: 'es' });
     if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'es-ES';
     u.rate = Number(config.tts.rate || 1);
     u.pitch = Math.max(0, Math.min(2, tone.pitch * pitch));
@@ -512,8 +518,28 @@ export function initVoice(cfg) {
   });
 }
 
+// Voces que fallaron hace poco: «Elegir voz» las marca con ⚠.
+const failing = new Map(); // clave de voz -> { ts, reason }
+const lastWarn = new Map();
+const GENDER_WORD = { f: 'mujer', m: 'hombre' };
+
 export function onTtsItem(item) {
-  if (item.error) console.warn('Piper:', item.error);
+  const base = String(item.voice || '').split('~')[0];
+  if (item.error && base) {
+    failing.set(base, { ts: Date.now(), reason: item.error });
+    const sub = bestWindowsVoice(item.wanted || { lang: 'es' });
+    const who = item.wanted?.name || 'La voz elegida';
+    // Un aviso por voz cada 2 minutos, para no llenar la pantalla.
+    if (Date.now() - (lastWarn.get(base) || 0) > 120000) {
+      lastWarn.set(base, Date.now());
+      const g = GENDER_WORD[genderOf(sub?.name || '')];
+      guideToast('troya', `${esc(who)} no respondió (${esc(item.error)}). Lo leí con ${esc(sub ? cleanName(sub.name) : 'la voz de Windows')}${g ? `, también ${g}` : ''}.`);
+    }
+    if ($('#vp-modal') && !$('#vp-modal').hidden) renderPicker();
+  } else if (base && failing.has(base)) {
+    failing.delete(base);
+    if ($('#vp-modal') && !$('#vp-modal').hidden) renderPicker();
+  }
   enqueueTts(item);
 }
 
@@ -532,7 +558,13 @@ const countryName = (cc) => {
     return cc;
   }
 };
-const vp = { cat: 'all', lang: 'all', q: '' };
+const vp = { cat: 'all', lang: 'all', gender: 'all', q: '' };
+
+// Banderas SVG (flag-icons, MIT): Windows no dibuja las banderas emoji.
+const FLAGS = new Set('AR AT AU BE BO BR CA CH CL CN CO CR CU DE DK DO EC ES FI FR GB GT HK HN IE IN IT JP KR MX NI NL NO NZ PA PE PL PR PT PY RU SE SV TR TW US UY VE ZA'.split(' '));
+const flagHtml = (cc) => (FLAGS.has(String(cc || '').toUpperCase())
+  ? `<img class="vp-flagimg" src="img/flags/${String(cc).toLowerCase()}.svg" alt="" loading="lazy">`
+  : `<span class="vp-flag">${esc(cc || '··')}</span>`);
 
 function pickerVoices() {
   const out = [];
@@ -542,15 +574,17 @@ function pickerVoices() {
     const n = v.installed ? v.speakers : 1;
     for (let i = 0; i < n; i++) {
       const key = `${v.id}#${i}`;
-      out.push({ key, cat: 'piper', lang, cc, installed: v.installed, id: v.id, name: v.installed ? voiceLabel(key).split(' · ')[0] : v.label.split(' · ')[0], detail: v.installed ? voiceLabel(key).split(' · ').slice(1).join(' · ') : `${GENDER_SHORT[v.gender] || ''}${v.size ? ` · ${v.size}` : ''} · sin descargar`, src: 'En tu PC · sin internet' });
+      const gender = v.gender || v.speakerGenders?.[i] || '';
+      out.push({ key, cat: 'piper', gender, lang, cc, installed: v.installed, id: v.id, name: v.installed ? voiceLabel(key).split(' · ')[0] : v.label.split(' · ')[0], detail: v.installed ? voiceLabel(key).split(' · ').slice(1).join(' · ') : `${GENDER_SHORT[v.gender] || ''}${v.size ? ` · ${v.size}` : ''} · sin descargar`, src: 'En tu PC · sin internet' });
     }
   }
   for (const v of onlineVoices) {
-    out.push({ key: v.key, cat: 'online', lang: 'es', cc: v.locale.split('-')[1], installed: true, name: v.name, detail: `${GENDER_SHORT[v.gender]} · en línea`, src: 'Latinoamérica · necesita internet' });
+    out.push({ key: v.key, cat: 'online', gender: v.gender, lang: 'es', cc: v.locale.split('-')[1], installed: true, name: v.name, detail: `${GENDER_SHORT[v.gender]} · en línea`, src: 'Latinoamérica · necesita internet' });
   }
-  for (const v of speechSynthesis.getVoices()) {
+  for (const v of windowsVoices()) {
     const [lang, cc = ''] = v.lang.split(/[-_]/);
-    out.push({ key: `win:${v.name}`, cat: 'win', lang: lang.toLowerCase(), cc: cc.toUpperCase(), installed: true, name: v.name.replace(/^Microsoft /, '').replace(/ - .*$/, '').replace(/ Online.*$/, ''), detail: 'Voz de Windows', src: 'Windows · siempre disponible' });
+    const gender = genderOf(v.name);
+    out.push({ key: `win:${v.name}`, cat: 'win', gender, lang: lang.toLowerCase(), cc: cc.toUpperCase(), installed: true, name: cleanName(v.name), detail: `${GENDER_SHORT[gender] ? `${GENDER_SHORT[gender]} · ` : ''}de Windows`, src: 'Windows · siempre disponible' });
   }
   return out;
 }
@@ -563,7 +597,7 @@ function renderCurrentVoice() {
   const v = pickerVoices().find((x) => x.key === key);
   $('#vp-cur-name').textContent = v ? v.name : 'Sin voz elegida';
   $('#vp-cur-src').textContent = v ? `${v.cc ? `${countryName(v.cc)} · ` : ''}${v.src}` : 'Descarga una voz o elige una de Latinoamérica o de Windows';
-  $('#vp-cur-flag').textContent = v?.cc || '♪';
+  $('#vp-cur-flag').innerHTML = v?.cc ? flagHtml(v.cc) : '♪';
 }
 
 function renderPicker() {
@@ -574,8 +608,10 @@ function renderPicker() {
   const langs = [...new Set(inCat.map((v) => v.lang))];
   if (vp.lang !== 'all' && !langs.includes(vp.lang)) vp.lang = 'all';
   $('#vp-langs').innerHTML = [['all', 'Todos'], ...langs.map((l) => [l, LANG_NAME[l] || l.toUpperCase()])].map(([id, name]) => `<label class="chip-check"><input type="radio" name="vp-lang" value="${id}" ${vp.lang === id ? 'checked' : ''}><span>${name} <small>${id === 'all' ? inCat.length : inCat.filter((v) => v.lang === id).length}</small></span></label>`).join('');
+  const inLang = inCat.filter((v) => vp.lang === 'all' || v.lang === vp.lang);
+  $('#vp-genders').innerHTML = [['all', 'Todas'], ['f', '♀ Mujer'], ['m', '♂ Hombre']].map(([id, name]) => `<label class="chip-check"><input type="radio" name="vp-gender" value="${id}" ${vp.gender === id ? 'checked' : ''}><span>${name} <small>${id === 'all' ? inLang.length : inLang.filter((v) => v.gender === id).length}</small></span></label>`).join('');
   const q = vp.q.toLowerCase();
-  const list = inCat.filter((v) => (vp.lang === 'all' || v.lang === vp.lang) && (!q || `${v.name} ${countryName(v.cc)} ${v.detail}`.toLowerCase().includes(q)));
+  const list = inLang.filter((v) => (vp.gender === 'all' || v.gender === vp.gender) && (!q || `${v.name} ${countryName(v.cc)} ${v.detail}`.toLowerCase().includes(q)));
   const groups = new Map();
   for (const v of list) {
     const g = `${LANG_NAME[v.lang] || v.lang.toUpperCase()}${v.cc ? ` (${countryName(v.cc)})` : ''}`;
@@ -583,9 +619,11 @@ function renderPicker() {
     groups.get(g).push(v);
   }
   const main = currentMain();
-  $('#vp-list').innerHTML = [...groups].map(([g, vs]) => `<h4><span class="vp-flag">${esc(vs[0].cc || '··')}</span>${esc(g)} <small>${vs.length}</small></h4>
-    ${vs.map((v) => `<div class="vp-item ${v.key === main ? 'on' : ''} ${v.installed ? '' : 'off'}" data-vp="${esc(v.key)}">
-      <button type="button" class="vp-pick" ${v.installed ? '' : 'disabled'}><b>${esc(v.name)}</b><small>${esc(v.detail)}</small></button>
+  const fail = (key) => { const f = failing.get(key); return f && Date.now() - f.ts < 15 * 60e3 ? f : null; };
+  $('#vp-list').innerHTML = [...groups].map(([g, vs]) => `<h4>${flagHtml(vs[0].cc)}${esc(g)} <small>${vs.length}</small></h4>
+    ${vs.map((v) => `<div class="vp-item ${v.key === main ? 'on' : ''} ${v.installed ? '' : 'off'} ${fail(v.key) ? 'bad' : ''}" data-vp="${esc(v.key)}">
+      <span class="vp-g ${v.gender || 'x'}" aria-hidden="true">${v.gender === 'f' ? '♀' : v.gender === 'm' ? '♂' : '·'}</span>
+      <button type="button" class="vp-pick" ${v.installed ? '' : 'disabled'}><b>${esc(v.name)}${v.key === main ? ' <em class="vp-tag">En uso</em>' : ''}</b><small>${esc(v.detail)}${fail(v.key) ? ` · <span class="vp-warn" title="${esc(fail(v.key).reason)}">⚠ no respondió hace poco</span>` : ''}</small></button>
       ${v.installed ? `<button type="button" class="vp-play" data-vp-play="${esc(v.key)}" aria-label="Escuchar ${esc(v.name)}">▶</button>` : `<button type="button" class="btn small" data-vp-dl="${esc(v.id)}">Descargar</button>`}
     </div>`).join('')}`).join('') || '<p class="hint">No hay voces con ese filtro.</p>';
   $('#vp-count').textContent = `${list.length} voces`;
@@ -623,6 +661,7 @@ function initPicker() {
     if (b) { vp.cat = b.dataset.vpCat; renderPicker(); }
   });
   $('#vp-langs').addEventListener('change', (ev) => { vp.lang = ev.target.value; renderPicker(); });
+  $('#vp-genders').addEventListener('change', (ev) => { vp.gender = ev.target.value; renderPicker(); });
   $('#vp-q').addEventListener('input', (ev) => { vp.q = ev.target.value; renderPicker(); });
   $('#vp-list').addEventListener('click', async (ev) => {
     const play = ev.target.closest('[data-vp-play]');
