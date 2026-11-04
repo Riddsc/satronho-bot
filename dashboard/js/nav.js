@@ -37,7 +37,7 @@ const ICONS = {
 const PAGES = {
   inicio: { title: 'Inicio', guide: 'samy', words: 'resumen inicio principal en vivo' },
   conexiones: { title: 'Conexiones', guide: 'samy', words: 'conectar tiktok kick starvios usuario canal cuenta bot' },
-  actividad: { title: 'Chat y actividad', guide: 'samy', words: 'chat actividad registro mensajes eventos simular' },
+  actividad: { title: 'Chat en vivo', guide: 'samy', words: 'chat en vivo actividad registro mensajes eventos simular regalos insignias silenciar' },
   voz: { title: 'Voz del chat', guide: 'troya', words: 'voz voces tts leer piper filtro groserías quiéreme' },
   musica: { title: 'Música', guide: 'nono', words: 'música canción cola play temita skip quitar youtube' },
   alertas: { title: 'Alertas', guide: 'troya', words: 'alertas seguidor regalo suscripción likes compartir' },

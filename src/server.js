@@ -250,7 +250,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           clientId: ws.clientId,
           goals: goals.list(),
           status,
-          recent: recent.slice(0, 30),
+          recent: recent.slice(0, 80),
+          ttsLog: tts.recentLog(),
           music: music.snapshot(),
           engine: engine.state(),
           allowed: tts.allowedList(),
@@ -404,7 +405,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const text = String(req.body?.text || '').slice(0, 300);
     if (!text.trim()) return fail(res, 'Texto vacío');
     const voice = typeof req.body?.voice === 'string' ? req.body.voice.slice(0, 80) : undefined;
-    tts.speak(text, { user: 'Prueba', voice });
+    const num = (v, lo, hi) => (Number(v) ? Math.min(hi, Math.max(lo, Number(v))) : undefined);
+    tts.speak(text, { user: 'Prueba', voice, rate: num(req.body?.rate, 0.3, 3), pitch: num(req.body?.pitch, 0.6, 1.6) });
     ok(res);
   });
   app.get('/tts-audio/:file', (req, res) => {
@@ -551,6 +553,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     if (store.get('chatBot')?.enabled === false) return fail(res, 'El Chat Bot está apagado');
     const wanted = Array.isArray(req.body?.platforms) ? req.body.platforms : Object.keys(writers);
     const sent = wanted.filter((p) => writers[p]?.say(text, 'manual'));
+    if (sent.length && store.get('tts').readBot?.manual) tts.speak(text);
     if (!sent.length) return fail(res, 'No pude escribir: conecta la plataforma en Escuchar y autoriza una cuenta en Escribir');
     ok(res, { sent });
   });

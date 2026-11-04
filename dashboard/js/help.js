@@ -113,13 +113,13 @@ const KB = [
   {
     guide: 'samy', q: '¿Dónde veo lo que está pasando en el chat?',
     keys: ['actividad', 'registro', 'mensajes', 'chat', 'eventos', 'log', 'pasando', 'ver'],
-    answer: 'En <b>Chat y actividad</b> ves todo lo que llega: chat, regalos, follows… Cada mensaje lleva 🔊 si Troya lo leyó o 🔇 con el motivo si no. Ahí mismo puedes <b>simular un mensaje</b> para probar sin estar en directo.',
+    answer: 'En <b>Chat en vivo</b> ves todo lo que llega: chat, regalos, follows… Cada mensaje lleva 🔊 si Troya lo leyó o 🔇 con el motivo si no. Ahí mismo puedes <b>simular un mensaje</b> para probar sin estar en directo.',
     go: '#card-actividad',
   },
   {
     guide: 'samy', q: '¿Cómo pruebo sin estar en directo?',
     keys: ['probar', 'simular', 'prueba', 'test', 'ensayar', 'practicar', 'directo', 'vivo'],
-    answer: 'Tienes dos formas: los botones <b>Probar</b> de <b>Alertas</b> lanzan follows, regalos o un Quiéreme falsos, y en <b>Chat y actividad</b> (o con <b>▶ Simular</b> arriba) puedes simular cualquier mensaje del chat, incluso <code>!play</code>.',
+    answer: 'Tienes dos formas: los botones <b>Probar</b> de <b>Alertas</b> lanzan follows, regalos o un Quiéreme falsos, y en <b>Chat en vivo</b> (o con <b>▶ Simular</b> arriba) puedes simular cualquier mensaje del chat, incluso <code>!play</code>.',
     go: '#sim',
   },
   {

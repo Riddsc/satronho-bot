@@ -20,7 +20,7 @@
   <nav class="nav-group" style="--g:#ffb23e"><h6><i></i>Tu directo</h6>
     <a class="nav-item" href="#/inicio" data-page="inicio"><span class="ic" data-icon="home"></span>Inicio</a>
     <a class="nav-item" href="#/conexiones" data-page="conexiones"><span class="ic" data-icon="plug"></span>Conexiones<span class="badge" id="nav-conn">0/4</span></a>
-    <a class="nav-item" href="#/actividad" data-page="actividad"><span class="ic" data-icon="chat"></span>Chat y actividad</a>
+    <a class="nav-item" href="#/actividad" data-page="actividad"><span class="ic" data-icon="chat"></span>Chat en vivo</a>
   </nav>
   <nav class="nav-group" style="--g:#5fd0ff"><h6><i></i>Tu bot</h6>
     <a class="nav-item" href="#/chatbot" data-page="chatbot"><span class="ic mecha-ic" data-mecha-icon></span>Chat Bot</a>
@@ -198,18 +198,49 @@
   </div>
 </section>
 
-<!-- ---------- Chat y actividad (Samy) ---------- -->
+<!-- ---------- Chat en vivo (Samy) ---------- -->
 <section class="page" id="page-actividad" data-page="actividad" hidden>
-  <div class="ph"><div class="t"><small>Tu directo</small><h1>Chat y actividad</h1><p>Todo lo que llega a tu directo, con 🔊 si Troya lo leyó o 🔇 y el motivo si no.</p></div>
-    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Puedes simular mensajes para probar sin estar en vivo, incluso <code>!play</code>.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
-  <div class="card" id="card-actividad">
-    <form id="sim" class="sim">
-      <select name="platform"><option value="kick">Kick</option><option value="starvios">Starvios</option><option value="twitch">Twitch</option><option value="tiktok">TikTok</option></select>
-      <input name="user" placeholder="Usuario" value="Espectador">
-      <input name="message" placeholder="Simula un mensaje del chat (prueba !play, !skip, !quitar)">
-      <button class="btn">Enviar</button>
-    </form>
-    <ul id="log" class="log tall"><li class="empty">Aún no hay actividad.</li></ul>
+  <div class="ph"><div class="t"><small>Tu directo</small><h1>Chat en vivo</h1><p>Todas tus plataformas en un solo chat, con 🔊 si Troya lo leyó o 🔇 y el motivo si no.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Pasa el ratón por un mensaje para leerlo ya, silenciar a esa persona o darle su propia voz.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="lc-layout" id="lc-layout">
+    <div class="card lc-main">
+      <div class="lc-bar">
+        <div class="seg lc-tabs" id="lc-tabs"></div>
+        <div class="mz-search-form lc-search"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="lc-q" placeholder="Buscar en el chat…" autocomplete="off"></div>
+        <button type="button" class="btn small ghost" id="lc-order"></button>
+        <button type="button" class="btn small ghost" id="lc-clear" title="Vaciar lo que se ve (no borra nada del directo)">Vaciar</button>
+        <button type="button" class="btn small" id="lc-panel-btn" aria-pressed="true" title="Ajustes del chat">⚙ Ajustes</button>
+      </div>
+      <div class="lc-feeds" id="lc-feeds"></div>
+      <button type="button" class="lc-paused" id="lc-paused" hidden>Pausado mientras lees · volver a lo último ↓</button>
+      <form id="sim" class="sim lc-sim">
+        <select name="platform"><option value="kick">Kick</option><option value="starvios">Starvios</option><option value="twitch">Twitch</option><option value="tiktok">TikTok</option></select>
+        <input name="user" placeholder="Usuario" value="Espectador">
+        <input name="message" placeholder="Prueba un mensaje sin estar en vivo (también !play, !skip…)">
+        <button class="btn">Enviar</button>
+      </form>
+    </div>
+    <aside class="card lc-gifts" id="lc-gifts" style="--g:#ffb23e">
+      <div class="row space"><h3 class="card-title">🎁 Regalos</h3><small class="hint" id="lc-gift-count"></small></div>
+      <p class="lc-gift-total" id="lc-gift-total"></p>
+      <ul class="lc-gift-list" id="lc-gift-list"></ul>
+    </aside>
+    <aside class="card lc-panel" id="lc-panel">
+      <h3 class="card-title">Ajustes del chat</h3>
+      <h5>Plataformas</h5>
+      <label class="switch"><input type="checkbox" data-lcp="platforms.tiktok"><span></span> <em class="sw-t">TikTok</em></label><label class="switch"><input type="checkbox" data-lcp="platforms.kick"><span></span> <em class="sw-t">Kick</em></label><label class="switch"><input type="checkbox" data-lcp="platforms.twitch"><span></span> <em class="sw-t">Twitch</em></label><label class="switch"><input type="checkbox" data-lcp="platforms.starvios"><span></span> <em class="sw-t">Starvios</em></label>
+      <label class="switch"><input type="checkbox" data-lcp="split"><span></span> <em class="sw-t">Una columna por plataforma<small>En vez de todo mezclado</small></em></label>
+      <h5>Menos ruido</h5>
+      <label class="switch"><input type="checkbox" data-lcp="hideCommands"><span></span> <em class="sw-t">Ocultar comandos<small>Mensajes que empiezan con !</small></em></label>
+      <label class="switch"><input type="checkbox" data-lcp="hideBots"><span></span> <em class="sw-t">Ocultar bots<small>BotRix, Nightbot y parecidos</small></em></label>
+      <label class="switch"><input type="checkbox" data-lcp="hideMuted"><span></span> <em class="sw-t">Ocultar lo que Troya no lee</em></label>
+      <label class="switch"><input type="checkbox" data-lcp="showEvents"><span></span> <em class="sw-t">Mostrar seguidores, suscripciones y compartidos</em></label>
+      <h5>Regalos</h5>
+      <label class="switch"><input type="checkbox" data-lcp="giftsColumn"><span></span> <em class="sw-t">Columna de regalos<small>Con el total de cada moneda</small></em></label>
+      <label class="switch"><input type="checkbox" data-lcp="giftsInline"><span></span> <em class="sw-t">También dentro del chat</em></label>
+      <label class="field"><span>Valor mínimo para mostrarlos</span><input type="number" min="0" step="1" data-lcp="minGift"></label>
+      <p class="hint">Estos ajustes se guardan en este PC.</p>
+    </aside>
   </div>
 </section>
 
@@ -261,7 +292,7 @@
           <label class="switch"><input type="checkbox" data-tts="read.tiktok"><span></span> Chat de TikTok</label>
           <label class="switch"><input type="checkbox" data-tts="sayName"><span></span> Decir el nombre («Fulano dice…»)</label>
           <label class="switch"><input type="checkbox" data-tts="skipCommands"><span></span> No leer comandos (mensajes que empiezan con !)</label>
-          <label class="switch"><input type="checkbox" data-tts="readMusicNotices"><span></span> Leer en voz alta los avisos de la música</label></div>
+</div>
         <div class="card"><h3 class="card-title">«Quiéreme» en TikTok</h3>
           <p class="hint">Quien te manda este regalo queda anotado aquí para siempre. Sirve para las reglas de TikTok que lo piden.</p>
           <div class="two">
@@ -301,7 +332,7 @@
             </section>
           </div></div>
         <div class="card span2" id="tts-bots"><h3 class="card-title">Bots del chat</h3>
-          <p class="hint">Los mensajes de bots como BotRix, Nightbot o StreamElements no se leen. En <b>Chat y actividad</b> verás 🔇 «es un bot».</p>
+          <p class="hint">Los mensajes de bots como BotRix, Nightbot o StreamElements no se leen. En <b>Chat en vivo</b> verás 🔇 «es un bot».</p>
           <div class="two">
             <div>
               <label class="switch"><input type="checkbox" data-tts="ignoreBots"><span></span> No leer a los bots</label>
@@ -314,29 +345,56 @@
     </div>
     <div class="tabpanel" data-tabpanel="filtros" hidden>
       <div class="cols c2">
-        <div class="card"><h3 class="card-title">Filtros</h3>
-          <label class="switch"><input type="checkbox" data-tts="filterProfanity"><span></span> Filtro de groserías (las cambio por «piip»)</label>
+        <div class="card"><h3 class="card-title">Limpieza del texto</h3>
+          <p class="hint">Los emojis y emotes nunca se leen. Esto es lo demás:</p>
+          <label class="field"><span>Enlaces</span><select data-tts="links"><option value="say">Decir «enlace»</option><option value="remove">Quitarlos sin decir nada</option></select></label>
+          <label class="switch"><input type="checkbox" data-tts="stripNumbers"><span></span> No leer números (tampoco los escondidos, como «s3x0»)</label>
+          <label class="switch"><input type="checkbox" data-tts="stripMentions"><span></span> Quitar las @menciones del mensaje</label>
+          <label class="switch"><input type="checkbox" data-tts="skipMentions"><span></span> No leer respuestas (mensajes que empiezan con @alguien)</label>
+          <label class="switch"><input type="checkbox" data-tts="skipHost"><span></span> No leer lo que escribes tú desde tu cuenta</label></div>
+        <div class="card" id="tts-shield"><h3 class="card-title">Escudo anti-trampas</h3>
+          <p class="hint">Atrapa a quien intenta colar groserías con letras de otros idiomas o símbolos. Una palabra que mezcla letras normales con cirílicas o griegas («hоla» con una o rusa) siempre se trata como trampa.</p>
+          <span class="field-label">Alfabetos que usa tu comunidad</span>
+          <div class="row wrap chips" id="tts-scripts"><label class="chip-check"><input type="checkbox" data-script="latin"><span>Latino</span></label><label class="chip-check"><input type="checkbox" data-script="cyrillic"><span>Cirílico</span></label><label class="chip-check"><input type="checkbox" data-script="greek"><span>Griego</span></label><label class="chip-check"><input type="checkbox" data-script="arabic"><span>Árabe</span></label><label class="chip-check"><input type="checkbox" data-script="hebrew"><span>Hebreo</span></label><label class="chip-check"><input type="checkbox" data-script="han"><span>Chino</span></label><label class="chip-check"><input type="checkbox" data-script="kana"><span>Japonés</span></label><label class="chip-check"><input type="checkbox" data-script="hangul"><span>Coreano</span></label><label class="chip-check"><input type="checkbox" data-script="thai"><span>Tailandés</span></label><label class="chip-check"><input type="checkbox" data-script="devanagari"><span>Hindi</span></label></div>
+          <span class="field-label mt">Si llega una palabra en otro alfabeto</span>
+          <label class="who-opt"><input type="radio" name="tts-other" value="skip" data-tts="otherScripts"><span><b>No leer el mensaje</b><small>Lo más seguro</small></span></label>
+          <label class="who-opt"><input type="radio" name="tts-other" value="strip" data-tts="otherScripts"><span><b>Quitar esas palabras</b><small>Leo el resto del mensaje</small></span></label>
+          <label class="who-opt"><input type="radio" name="tts-other" value="keep" data-tts="otherScripts"><span><b>Leerlas igual</b><small>Sin escudo de alfabetos</small></span></label>
+          <label class="switch mt"><input type="checkbox" data-tts="oddSymbols"><span></span> Quitar símbolos raros (∑ ⇒ ♠ ¤…) y no leer mensajes hechos casi solo de ellos</label></div>
+        <div class="card"><h3 class="card-title">Groserías</h3>
+          <label class="switch"><input type="checkbox" data-tts="filterProfanity"><span></span> Cambiarlas por «piip»</label>
           <label class="switch" id="tricks-row"><input type="checkbox" data-tts="filterTricks"><span></span> Detectar trucos: T0NT0, t o n t o, toooonto…</label>
-          <label class="switch"><input type="checkbox" data-tts="stripNumbers"><span></span> No leer números</label>
           <label class="field"><span>Palabras prohibidas (una por línea)</span><textarea data-tts="bannedWords" data-list="lines" rows="8"></textarea></label></div>
-        <div class="card"><h3 class="card-title" id="tts-limits">Límites</h3>
-          <label class="field"><span>Espera entre mensajes de una persona (segundos)</span><input type="number" min="0" max="120" data-tts="cooldownSec"></label>
-          <label class="field"><span>Descartar mensajes que esperan más de (segundos)</span><input type="number" min="10" max="600" data-tts="expireSec"></label>
-          <label class="switch"><input type="checkbox" data-tts="antiSpam"><span></span> Anti-spam: no repetir el mismo mensaje de una persona</label></div>
+        <div style="display:grid;gap:16px;align-content:start">
+          <div class="card"><h3 class="card-title" id="tts-limits">Límites</h3>
+            <div class="two">
+              <label class="field"><span>Espera entre mensajes de una persona (s)</span><input type="number" min="0" max="120" data-tts="cooldownSec"></label>
+              <label class="field"><span>Largo máximo del mensaje (letras)</span><input type="number" min="40" max="500" step="10" data-tts="maxLength"></label>
+              <label class="field"><span>Descartar si esperan más de (s)</span><input type="number" min="10" max="600" data-tts="expireSec"></label>
+              <label class="field"><span>Máximo en cola</span><input type="number" min="3" max="60" data-tts="maxQueue"></label>
+            </div>
+            <label class="switch"><input type="checkbox" data-tts="antiSpam"><span></span> No repetir el mismo mensaje de una persona</label></div>
+          <div class="card" style="--g:#74d14c"><h3 class="card-title">Lo que escribe tu bot</h3>
+            <p class="hint">Lo que MechaRidds escribe en el chat no se lee dos veces. Aquí eliges qué sí quieres oír:</p>
+            <label class="switch"><input type="checkbox" data-tts="readBot.commands"><span></span> Respuestas a comandos (las que tengan «leer en voz» activado)</label>
+            <label class="switch"><input type="checkbox" data-tts="readMusicNotices"><span></span> Avisos de la música (qué canción pidieron)</label>
+            <label class="switch"><input type="checkbox" data-tts="readBot.timers"><span></span> Mensajes automáticos</label>
+            <label class="switch"><input type="checkbox" data-tts="readBot.manual"><span></span> Lo que escribes a mano desde el Chat Bot</label></div>
+        </div>
       </div>
     </div>
     <div class="tabpanel" data-tabpanel="especiales" hidden>
-      <div class="card"><h3 class="card-title">Espectadores especiales</h3>
-        <p class="hint">Dale a alguien su propia voz y un nombre para leer, o silencia a quien moleste. «Siempre leer» también salta el filtro del regalo en TikTok. Aquí también puedes darle una voz en <b>inglés</b> o <b>francés</b> (descárgalas en Voces).</p>
-        <form id="special-form" class="special-form">
-          <select name="platform"><option value="kick">Kick</option><option value="starvios">Starvios</option><option value="twitch">Twitch</option><option value="tiktok">TikTok</option></select>
-          <input name="user" placeholder="Usuario (como sale en el chat)" required>
-          <input name="spokenName" placeholder="Nombre para leer (opcional)">
-          <select name="voice" id="special-voice"></select>
-          <select name="action"><option value="allow">Siempre leer</option><option value="mute">Silenciar</option></select>
-          <button class="btn primary">Añadir</button>
-        </form>
-        <ul id="special-list" class="mini-list mt"></ul></div>
+      <div class="card" id="sp-card">
+        <div class="row space"><div><h3 class="card-title">Espectadores especiales</h3>
+          <p class="hint">Dale a alguien su propia voz, velocidad, tono y un nombre para leer, o silencia a quien moleste. Esto manda sobre «Quién puede hablar». También puedes añadirlos desde <b>Chat en vivo</b> con un clic.</p></div>
+          <button type="button" class="btn primary" id="sp-add">＋ Añadir persona</button></div>
+        <div class="sp-bar">
+          <div class="mz-search-form"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="sp-q" placeholder="Busca por nombre o por cómo se lee…" autocomplete="off"></div>
+          <div class="seg" id="sp-plat"></div>
+          <div class="seg" id="sp-state"></div>
+        </div>
+        <ul id="sp-list" class="sp-list"></ul>
+      </div>
     </div>
     <div class="tabpanel" data-tabpanel="probar" hidden>
       <div class="cols c2">
@@ -350,7 +408,11 @@
           </form>
           <p id="tts-check-result" class="check-result" hidden></p></div>
         <div class="card"><h3 class="card-title">Voz de respaldo</h3>
-          <label class="field"><span>Si Piper no está listo, uso esta voz de Windows</span><select id="tts-windows-voice" data-tts="windowsVoice"></select></label></div>
+          <label class="field"><span>Si una voz falla y no sé su género, uso esta voz de Windows</span><select id="tts-windows-voice" data-tts="windowsVoice"></select></label></div>
+        <div class="card span2"><div class="row space"><h3 class="card-title">Registro de voz</h3>
+            <div class="row tight"><label class="switch small" style="margin:0"><input type="checkbox" id="ttslog-muted-only"><span></span> Solo lo que no se leyó</label><button type="button" class="btn small ghost" id="ttslog-clear">Limpiar</button></div></div>
+          <p class="hint">Lo que Troya leyó, con qué voz, y lo que no leyó con su motivo.</p>
+          <ol id="tts-log" class="ttslog"><li class="empty">Todavía no hay nada.</li></ol></div>
       </div>
     </div>
   </div>
@@ -660,7 +722,7 @@
         <div class="vp-list" id="vp-list"></div>
       </div>
     </div>
-    <div class="vp-foot"><span class="hint" id="vp-count"></span><span class="hint" id="vp-sel"></span></div>
+    <div class="vp-foot"><span class="hint" id="vp-count"></span><button type="button" class="btn small ghost" id="vp-default" hidden>Usar su voz de siempre</button><span class="hint" id="vp-sel"></span></div>
   </div>
 </div>
 <div class="news-modal" id="news-modal" hidden role="dialog" aria-modal="true" aria-labelledby="news-modal-title">

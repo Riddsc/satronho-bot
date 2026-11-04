@@ -88,9 +88,56 @@ function censor(text, cfg) {
   return out.join(' ');
 }
 
+// Alfabetos que se pueden elegir en «Escudo anti-trampas».
+const SCRIPTS = {
+  latin: /\p{Script=Latin}/u,
+  cyrillic: /\p{Script=Cyrillic}/u,
+  greek: /\p{Script=Greek}/u,
+  arabic: /\p{Script=Arabic}/u,
+  hebrew: /\p{Script=Hebrew}/u,
+  han: /\p{Script=Han}/u,
+  kana: /[\p{Script=Hiragana}\p{Script=Katakana}]/u,
+  hangul: /\p{Script=Hangul}/u,
+  thai: /\p{Script=Thai}/u,
+  devanagari: /\p{Script=Devanagari}/u,
+};
+const scriptsOf = (word) => Object.keys(SCRIPTS).filter((k) => SCRIPTS[k].test(word));
+// Símbolos raros: matemáticos, monedas, flechas, cajas, braille y parecidos.
+const ODD_SYMBOLS_RE = /[\p{Sm}\p{Sc}\p{So}\u2190-\u21FF\u2500-\u257F\u2580-\u259F\u25A0-\u25FF\u2800-\u28FF¤¦§¨©®°±¶·¸¹²³¼½¾×÷]/gu;
+
+// Revisa el mensaje antes de limpiarlo. Devuelve { skip: motivo } si no
+// se debe leer, o { text } con lo que queda.
+function screen(text, cfg = {}) {
+  let out = String(text || '');
+  if (cfg.skipMentions && /^\s*@\S/.test(out)) return { skip: 'es una respuesta a otra persona' };
+  if (cfg.stripMentions) out = out.replace(/(^|\s)@[\w.\-]+/gu, ' ');
+  const allowed = new Set(cfg.scripts?.length ? cfg.scripts : ['latin']);
+  const mode = cfg.otherScripts || 'skip';
+  if (mode !== 'keep') {
+    const words = out.split(/\s+/);
+    const foreign = words.filter((w) => {
+      const sc = scriptsOf(w);
+      // Mezclar latinas con cirílicas o griegas en la misma palabra es un truco.
+      if (sc.includes('latin') && (sc.includes('cyrillic') || sc.includes('greek'))) return true;
+      return sc.some((k) => !allowed.has(k));
+    });
+    if (foreign.length) {
+      if (mode === 'skip') return { skip: 'usa letras de otro alfabeto' };
+      out = words.filter((w) => !foreign.includes(w)).join(' ');
+    }
+  }
+  if (cfg.oddSymbols) {
+    const letters = (out.match(/\p{L}/gu) || []).length;
+    const odd = (out.match(ODD_SYMBOLS_RE) || []).length;
+    if (odd >= 3 && odd > letters) return { skip: 'casi todo son símbolos' };
+    out = out.replace(ODD_SYMBOLS_RE, ' ');
+  }
+  return { text: out };
+}
+
 function sanitize(text, cfg = {}) {
   let out = String(text || '')
-    .replace(LINK_RE, ' enlace ')
+    .replace(LINK_RE, cfg.links === 'remove' ? ' ' : ' enlace ')
     .replace(KICK_EMOTE_RE, ' ')
     .replace(COLON_EMOTE_RE, ' ')
     .replace(EMOJI_RE, ' ')
@@ -110,4 +157,4 @@ function sanitize(text, cfg = {}) {
 // Normaliza nombres de regalos para compararlos ("Quiéreme" == "quiereme").
 const normalizeName = (s) => lettersOnly(basic(s || ''));
 
-module.exports = { sanitize, normalizeName, isBanned, buildMatcher };
+module.exports = { sanitize, screen, normalizeName, isBanned, buildMatcher };

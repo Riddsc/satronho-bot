@@ -146,7 +146,7 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     store.set('commands', list().map((c) => (c.id === cmd.id ? { ...c, uses: cmd.uses } : c)));
     const writer = writers[e.platform];
     const wrote = writer ? writer.say(text, 'comando') : false;
-    if (cmd.speak) speak?.(text);
+    if (cmd.speak && store.get('tts').readBot?.commands !== false) speak?.(text);
     broadcast('command-used', { name: cmd.name, user: e.user?.name, platform: e.platform, text, wrote, ts: now });
     return { ran: true, text, wrote, command: cmd.name };
   }
@@ -208,6 +208,7 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
       if (status[p]?.state !== 'connected') continue;
       if (writers[p]?.say(item.text, 'automatico')) sent.push(p);
     }
+    if (sent.length && store.get('tts').readBot?.timers) speak?.(item.text);
     return sent;
   }
 

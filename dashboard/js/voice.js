@@ -293,35 +293,151 @@ function renderPool() {
     <div class="row mt"><button type="button" class="btn small ghost" data-pool-all="1">Marcar todas</button><button type="button" class="btn small ghost" data-pool-all="0">Solo la principal</button></div>`;
 }
 
-function renderSpecial() {
-  const list = config.tts.special || [];
-  const el = $('#special-list');
-  el.innerHTML = list.length
-    ? list
-        .map((s, i) => {
-          const [plat, user] = s.key.split(':');
-          const what = s.action === 'mute' ? '🔇 silenciado' : `🔊 siempre${s.voice ? ` · ${esc(voiceLabel(s.voice))}` : ''}`;
-          return `<li><span><b>${esc(user)}</b> <small>${esc(PLATFORM_NAMES[plat] || plat)}${s.spokenName ? ` · se lee «${esc(s.spokenName)}»` : ''} · ${what}</small></span><button class="btn small ghost" data-special-del="${i}" title="Quitar">✕</button></li>`;
-        })
-        .join('')
-    : '<li class="empty">Ninguno todavía.</li>';
-  const sel = $('#special-voice');
-  const all = withTones(baseKeys(false));
-  const bySource = new Map();
-  for (const k of all) {
-    const src = sourceOf(k);
-    if (!bySource.has(src)) bySource.set(src, []);
-    bySource.get(src).push(k);
-  }
-  sel.innerHTML = `<option value="">Voz: la que le toque</option>${[...bySource]
-    .map(([src, ks]) => `<optgroup label="${esc(src)}">${ks.map((k) => `<option value="${esc(k)}">${esc(voiceLabel(k))}</option>`).join('')}</optgroup>`)
-    .join('')}`;
+// ---------- Espectadores especiales (lista visual) ----------
+// Cada uno: { key: 'kick:usuario' | '*:usuario', name, avatar, spokenName,
+//             voice, rate, pitch, action: 'allow' | 'mute' }
+const sp = { q: '', plat: 'all', state: 'all', editing: '' };
+const PLATS = [['all', 'Todas'], ['tiktok', 'TikTok'], ['kick', 'Kick'], ['twitch', 'Twitch'], ['starvios', 'Starvios'], ['*', 'Cualquiera']];
+const AV_COLORS = ['#ff8fb5', '#9b8cff', '#74d14c', '#ffb23e', '#5fb8ff', '#ff7a59', '#c084fc', '#2dd4bf'];
+export function avatarHtml(name, avatar, color = '') {
+  const n = String(name || '?').replace(/^@/, '');
+  let h = 0;
+  for (const ch of n) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  const bg = color || AV_COLORS[h % AV_COLORS.length];
+  const letter = esc([...n.normalize('NFKC').replace(/[^\p{L}\p{N}]/gu, '')][0]?.toUpperCase() || '?');
+  return avatar
+    ? `<span class="av"><img src="${esc(avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'${letter}'}));"></span>`
+    : `<span class="av" style="--avc:${esc(bg)}"><b>${letter}</b></span>`;
 }
+const voiceChip = (key) => {
+  if (!key) return '<span class="vp-flag">··</span><span>Su voz de siempre</span>';
+  const v = pickerVoices().find((x) => x.key === key.split('~')[0]);
+  return `${flagHtml(v?.cc)}<span>${esc(v?.name || voiceLabel(key).split(' · ')[0])}</span>`;
+};
 
+function renderSpecial() {
+  const el = $('#sp-list');
+  if (!el) return;
+  const list = config.tts.special || [];
+  const count = (fn) => list.filter(fn).length;
+  $('#sp-plat').innerHTML = PLATS.map(([id, n]) => `<button type="button" data-sp-plat="${id}" aria-pressed="${sp.plat === id}">${n}${id === 'all' ? '' : ` <small>${count((x) => x.key.split(':')[0] === id)}</small>`}</button>`).join('');
+  $('#sp-state').innerHTML = [['all', 'Todos'], ['voice', 'Con voz'], ['mute', 'Silenciados']].map(([id, n]) => `<button type="button" data-sp-state="${id}" aria-pressed="${sp.state === id}">${n}</button>`).join('');
+  const q = sp.q.toLowerCase();
+  const rows = list.map((x, i) => ({ x, i })).filter(({ x }) => {
+    const [p, who] = x.key.split(':');
+    if (sp.plat !== 'all' && p !== sp.plat) return false;
+    if (sp.state === 'mute' && x.action !== 'mute') return false;
+    if (sp.state === 'voice' && x.action === 'mute') return false;
+    return !q || `${who} ${x.name || ''} ${x.spokenName || ''}`.toLowerCase().includes(q);
+  });
+  if (!rows.length) {
+    el.innerHTML = `<li class="sp-empty">${list.length ? 'Nadie con ese filtro.' : 'Nadie todavía. Pulsa «Añadir persona» o hazlo desde Chat en vivo.'}</li>`;
+    return;
+  }
+  el.innerHTML = rows.map(({ x, i }) => {
+    const [p, who] = x.key.split(':');
+    const muted = x.action === 'mute';
+    const plOpts = PLATS.slice(1).map(([id, n]) => `<option value="${id}" ${p === id ? 'selected' : ''}>${n}</option>`).join('');
+    return `<li class="sp-row ${muted ? 'muted' : ''}" data-sp="${i}">
+      ${avatarHtml(x.name || who, x.avatar)}
+      <div class="sp-who"><b>${esc(x.name || who)}</b><small>@${esc(who)}</small></div>
+      <select class="sp-p" data-sp-field="platform" aria-label="Plataforma">${plOpts}</select>
+      <input class="sp-spoken" data-sp-field="spokenName" value="${esc(x.spokenName || '')}" placeholder="Nombre para leer" ${muted ? 'disabled' : ''}>
+      <button type="button" class="sp-voice" data-sp-voice ${muted ? 'disabled' : ''}>${voiceChip(x.voice)}<i>▾</i></button>
+      <label class="sp-num"><span>Vel.</span><input type="number" step="0.05" min="0.6" max="1.8" data-sp-field="rate" value="${x.rate || ''}" placeholder="—" ${muted ? 'disabled' : ''}></label>
+      <label class="sp-num"><span>Tono</span><input type="number" step="0.05" min="0.6" max="1.6" data-sp-field="pitch" value="${x.pitch || ''}" placeholder="—" ${muted ? 'disabled' : ''}></label>
+      <button type="button" class="sp-state ${muted ? 'mute' : 'ok'}" data-sp-toggle>${muted ? '🔇 Silenciado' : '🔊 Con voz'}</button>
+      <button type="button" class="sp-play" data-sp-play title="Escuchar" ${muted ? 'disabled' : ''}>▶</button>
+      <button type="button" class="sp-del" data-sp-del title="Quitar">✕</button>
+    </li>`;
+  }).join('');
+}
 function saveSpecial(list) {
   config.tts.special = list;
   saveConfig({ tts: { special: list } });
   renderSpecial();
+}
+// Añade o cambia a alguien (también desde Chat en vivo).
+export function upsertSpecial(entry) {
+  const list = [...(config.tts.special || [])];
+  const i = list.findIndex((x) => x.key === entry.key);
+  if (i >= 0) list[i] = { ...list[i], ...entry };
+  else list.unshift({ spokenName: '', voice: '', action: 'allow', ...entry });
+  saveSpecial(list);
+}
+export const specialFor = (platform, user) => {
+  const ids = [user?.id, user?.name].filter(Boolean).map((x) => String(x).toLowerCase());
+  return (config.tts.special || []).find((s) => {
+    const [p, who] = s.key.split(':');
+    return (p === platform || p === '*') && ids.includes(String(who).toLowerCase());
+  });
+};
+
+function initSpecial() {
+  const el = $('#sp-list');
+  if (!el) return;
+  const rowOf = (ev) => Number(ev.target.closest('[data-sp]')?.dataset.sp);
+  const update = (i, patch) => {
+    const list = [...(config.tts.special || [])];
+    if (!list[i]) return;
+    list[i] = { ...list[i], ...patch };
+    config.tts.special = list;
+    saveConfig({ tts: { special: list } });
+  };
+  $('#sp-q').addEventListener('input', (ev) => { sp.q = ev.target.value; renderSpecial(); });
+  $('#sp-plat').addEventListener('click', (ev) => { const b = ev.target.closest('[data-sp-plat]'); if (b) { sp.plat = b.dataset.spPlat; renderSpecial(); } });
+  $('#sp-state').addEventListener('click', (ev) => { const b = ev.target.closest('[data-sp-state]'); if (b) { sp.state = b.dataset.spState; renderSpecial(); } });
+  $('#sp-add').addEventListener('click', () => {
+    const who = prompt('¿Cómo se llama en el chat? (sin @)');
+    const user = String(who || '').trim().replace(/^@/, '');
+    if (!user) return;
+    const plat = sp.plat !== 'all' ? sp.plat : '*';
+    upsertSpecial({ key: `${plat}:${user.toLowerCase()}`, name: user });
+    sayFor('troya', `Anotado: <b>${esc(user)}</b>. Ahora elige su voz, su velocidad o su tono.`, 5000, 'ok');
+  });
+  el.addEventListener('change', (ev) => {
+    const i = rowOf(ev);
+    const f = ev.target.dataset.spField;
+    if (!f || Number.isNaN(i)) return;
+    const list = config.tts.special || [];
+    if (f === 'platform') {
+      const who = list[i].key.split(':')[1];
+      update(i, { key: `${ev.target.value}:${who}` });
+      return renderSpecial();
+    }
+    if (f === 'rate' || f === 'pitch') {
+      const v = Number(ev.target.value);
+      const [lo, hi] = f === 'rate' ? [0.6, 1.8] : [0.6, 1.6];
+      return update(i, { [f]: v ? Math.min(hi, Math.max(lo, v)) : undefined });
+    }
+    update(i, { [f]: ev.target.value.trim() });
+  });
+  el.addEventListener('click', (ev) => {
+    const i = rowOf(ev);
+    if (Number.isNaN(i)) return;
+    const list = [...(config.tts.special || [])];
+    const x = list[i];
+    if (ev.target.closest('[data-sp-del]')) {
+      list.splice(i, 1);
+      return saveSpecial(list);
+    }
+    if (ev.target.closest('[data-sp-toggle]')) {
+      list[i] = { ...x, action: x.action === 'mute' ? 'allow' : 'mute' };
+      return saveSpecial(list);
+    }
+    if (ev.target.closest('[data-sp-play]')) {
+      const name = x.spokenName || x.name || x.key.split(':')[1];
+      return api('POST', '/api/tts/say', { text: `${name} dice: hola, así suena mi voz en tu directo.`, voice: x.voice || undefined, rate: x.rate, pitch: x.pitch }).catch((e) => toast(e.message));
+    }
+    if (ev.target.closest('[data-sp-voice]')) {
+      openVoicePicker({
+        current: x.voice || '',
+        title: `Voz de ${x.name || x.key.split(':')[1]}`,
+        allowDefault: true,
+        onPick: (key) => { update(i, { voice: key }); renderSpecial(); },
+      });
+    }
+  });
 }
 
 export function updateTroya() {
@@ -372,6 +488,44 @@ function fillForm() {
   showLevels();
   $('#tricks-row').classList.toggle('disabled', !t.filterProfanity);
   showWho();
+  fillScripts();
+}
+
+// Escudo anti-trampas: alfabetos permitidos (casillas).
+function fillScripts() {
+  const on = new Set(config.tts.scripts?.length ? config.tts.scripts : ['latin']);
+  for (const el of $$('[data-script]')) el.checked = on.has(el.dataset.script);
+}
+
+// ---------- Registro de voz ----------
+const ttsLog = [];
+const VOICE_SHORT = (key) => {
+  if (!key) return '';
+  try { return voiceLabel(key).split(' · ')[0]; } catch { return key; }
+};
+function logRow(x) {
+  const voice = x.read ? VOICE_SHORT(x.voice) : '';
+  return `<li class="${x.read ? 'ok' : 'no'}"><time>${timeOf(x.ts)}</time><span class="plat ${esc(x.platform)}">${esc(PLATFORM_NAMES[x.platform] || x.platform || '')}</span><b>${esc(x.user)}</b>${voice ? `<em>${esc(voice)}</em>` : ''}<span class="t">${esc(x.text)}</span><span class="r">${x.read ? '🔊' : `🔇 ${esc(x.reason)}`}</span></li>`;
+}
+function renderTtsLog() {
+  const el = $('#tts-log');
+  if (!el) return;
+  const only = $('#ttslog-muted-only')?.checked;
+  const list = ttsLog.filter((x) => !only || !x.read);
+  el.innerHTML = list.length ? list.slice(0, 150).map(logRow).join('') : '<li class="empty">Todavía no hay nada.</li>';
+}
+export function setTtsLog(list) {
+  ttsLog.splice(0, ttsLog.length, ...(list || []));
+  renderTtsLog();
+}
+export function addTtsLog(x) {
+  ttsLog.unshift(x);
+  ttsLog.length = Math.min(ttsLog.length, 300);
+  const el = $('#tts-log');
+  if (!el || ($('#ttslog-muted-only')?.checked && x.read)) return;
+  el.querySelector('.empty')?.remove();
+  el.insertAdjacentHTML('afterbegin', logRow(x));
+  while (el.children.length > 150) el.lastChild.remove();
 }
 
 // «Quién puede hablar»: el nivel del equipo solo se ve con las reglas de equipo.
@@ -491,25 +645,7 @@ export function initVoice(cfg) {
   });
   for (const k of ['voiceMode', 'toneVariants', 'useWindowsVoices', 'useOnlineVoices']) $(`[data-tts="${k}"]`).addEventListener('change', () => { renderPool(); renderSpecial(); });
 
-  $('#special-form').addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const f = Object.fromEntries(new FormData(ev.target));
-    const user = f.user.trim().replace(/^@/, '').toLowerCase();
-    if (!user) return;
-    const key = `${f.platform}:${user}`;
-    const list = (config.tts.special || []).filter((s) => s.key !== key);
-    list.push({ key, spokenName: f.spokenName.trim(), voice: f.voice, action: f.action });
-    saveSpecial(list);
-    ev.target.reset();
-    sayFor('troya', `Anotado: <b>${esc(user)}</b> ${f.action === 'mute' ? 'queda silenciado' : 'siempre tendrá voz'}.`, 5000, 'ok');
-  });
-  $('#special-list').addEventListener('click', (ev) => {
-    const i = ev.target.closest('[data-special-del]')?.dataset.specialDel;
-    if (i === undefined) return;
-    const list = [...(config.tts.special || [])];
-    list.splice(Number(i), 1);
-    saveSpecial(list);
-  });
+  initSpecial();
 
   $('#tts-check').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -533,6 +669,15 @@ export function initVoice(cfg) {
     const id = ev.target.closest('[data-revoke]')?.dataset.revoke;
     if (id) api('DELETE', `/api/tts/allowed/${encodeURIComponent(id)}`).catch((e) => toast(e.message));
   });
+  $('#tts-scripts')?.addEventListener('change', () => {
+    const list = $$('[data-script]').filter((el) => el.checked).map((el) => el.dataset.script);
+    if (!list.length) { fillScripts(); return toast('Deja al menos un alfabeto marcado.'); }
+    config.tts.scripts = list;
+    saveConfig({ tts: { scripts: list } });
+  });
+  $('#ttslog-muted-only')?.addEventListener('change', renderTtsLog);
+  $('#ttslog-clear')?.addEventListener('click', () => { ttsLog.length = 0; renderTtsLog(); });
+
   $('#allowed-clear').addEventListener('click', () => {
     if (confirm('¿Quitar el permiso de voz a todos?')) api('DELETE', '/api/tts/allowed').catch((e) => toast(e.message));
   });
@@ -610,6 +755,17 @@ function pickerVoices() {
 }
 
 const currentMain = () => config.tts.mainVoice || `${config.tts.piperVoice}#${Number(config.tts.speaker) || 0}`;
+// La ventana también elige la voz de un espectador especial (vpTarget).
+let vpTarget = null;
+export function openVoicePicker(target) {
+  vpTarget = target;
+  const modal = $('#vp-modal');
+  $('#vp-title').textContent = target.title || 'Elegir voz';
+  $('#vp-default').hidden = !target.allowDefault;
+  modal.hidden = false;
+  renderPicker();
+  $('#vp-q').focus();
+}
 
 function renderCurrentVoice() {
   if (!$('#vp-cur-name')) return;
@@ -648,6 +804,7 @@ function renderPicker() {
     </div>`).join('')}`).join('') || '<p class="hint">No hay voces con ese filtro.</p>';
   $('#vp-count').textContent = `${list.length} voces`;
   const cur = all.find((v) => v.key === main);
+  if (vpTarget) { $('#vp-sel').innerHTML = cur ? `Para esta persona: <b>${esc(cur.name)}</b>` : 'Usa su voz de siempre'; return; }
   $('#vp-sel').innerHTML = cur ? `Elegida: <b>${esc(cur.name)}</b>${cur.cc ? ` · ${esc(countryName(cur.cc))}` : ''}` : '';
 }
 
@@ -670,8 +827,9 @@ function chooseVoice(key) {
 function initPicker() {
   const modal = $('#vp-modal');
   if (!modal) return;
-  const open = () => { modal.hidden = false; renderPicker(); $('#vp-q').focus(); };
-  const close = () => { modal.hidden = true; };
+  const open = () => { vpTarget = null; $('#vp-title').textContent = 'Elegir voz'; $('#vp-default').hidden = true; modal.hidden = false; renderPicker(); $('#vp-q').focus(); };
+  const close = () => { modal.hidden = true; vpTarget = null; };
+  $('#vp-default').addEventListener('click', () => { vpTarget?.onPick(''); close(); });
   $('#vp-open').addEventListener('click', open);
   $('#vp-close').addEventListener('click', close);
   modal.addEventListener('click', (ev) => { if (ev.target === modal) close(); });
@@ -698,7 +856,10 @@ function initPicker() {
       return api('POST', `/api/tts/install-voice/${dl.dataset.vpDl}`).catch((e) => toast(e.message));
     }
     const pick = ev.target.closest('.vp-pick');
-    if (pick && !pick.disabled) chooseVoice(pick.closest('[data-vp]').dataset.vp);
+    if (pick && !pick.disabled) {
+      const key = pick.closest('[data-vp]').dataset.vp;
+      if (vpTarget) { vpTarget.onPick(key); close(); } else chooseVoice(key);
+    }
   });
   renderCurrentVoice();
 }
