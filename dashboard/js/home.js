@@ -1,7 +1,7 @@
 // Inicio: lo importante de un vistazo (feed en vivo, voz, música y el directo).
 
 import { $, api, esc, toast, timeOf, PLATFORM_NAMES } from './util.js';
-import { skipTts, ttsStatus } from './voice.js';
+import { skipTts, ttsStatus, mainVoiceName } from './voice.js';
 import { sayFor } from './guides.js';
 
 const LABEL = { follow: 'te sigue', sub: 'se suscribió', like: 'dio likes', share: 'compartió el LIVE' };
@@ -32,7 +32,7 @@ export function homeVoice(config, engine) {
   const q = ttsStatus();
   $('#home-voice').innerHTML = `<div class="kpis">
       <div class="kpi"><span>Estado</span><b>${t.enabled ? 'Activa' : 'Apagada'}</b><em>${q.queue} en cola${q.speaking ? ' · hablando' : ''}</em></div>
-      <div class="kpi"><span>Voz principal</span><b style="font-size:1.05em">${esc(v ? v.label : 'Sin voz descargada')}</b><em>${installed} ${installed === 1 ? 'voz descargada' : 'voces descargadas'}</em></div>
+      <div class="kpi"><span>Voz principal</span><b style="font-size:1.05em">${esc(mainVoiceName() || (v ? v.label : 'Sin voz elegida'))}</b><em>${installed} ${installed === 1 ? 'voz descargada' : 'voces descargadas'}</em></div>
     </div>
     <p class="hint">TikTok: ${esc({ all: 'lee a todos', followers: 'quienes te siguen', subs: 'suscriptores', team: 'tu equipo', 'team-gift': `tu equipo con ${t.tiktokGate.giftNames[0] || 'Quiéreme'}`, gift: `quien envía ${t.tiktokGate.giftNames[0] || 'Quiéreme'}`, mods: 'moderadores' }[t.who?.tiktok?.mode || 'all'] || 'lee a todos')} · ${t.filterProfanity ? 'filtro activo' : 'sin filtro'}</p>
     <a class="btn small ghost mt" href="#/voz">Abrir Voz del chat</a>`;

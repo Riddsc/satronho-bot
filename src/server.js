@@ -190,6 +190,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     bus.emit('event', makeEvent({ platform: x?.platform || 'tiktok', type: 'live-end', user: { id: 'tu', name: 'Tu directo' } }));
   });
 
+  const alertOverlays = new Set();
   const recent = [];
   bus.on('event', (e) => {
     if (e.type !== 'join') recent.unshift(e);
@@ -313,6 +314,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
         kind: 'hello',
         payload: {
           clientId: ws.clientId,
+          alertOverlays: alertOverlays.size,
           goals: goals.list(),
           status,
           recent: recent.slice(0, 80),
@@ -346,8 +348,11 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       }
       // La ventana que quiere reproducir la música se presenta así.
       if (m.kind === 'player-hello') music.setPlayer(ws.clientId);
+      // Overlays de alertas con sonido abiertos (en OBS o en el navegador).
+      if (m.kind === 'alerts-hello' && !alertOverlays.has(ws.clientId)) { alertOverlays.add(ws.clientId); broadcast('alert-overlays', { count: alertOverlays.size }); }
     });
     ws.on('close', () => {
+      if (alertOverlays.delete(ws.clientId)) broadcast('alert-overlays', { count: alertOverlays.size });
       if (music.snapshot().playerId === ws.clientId) music.setPlayer(null);
     });
   });

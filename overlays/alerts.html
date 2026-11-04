@@ -174,8 +174,11 @@
   });
 
   applyOverlayStyle({});
-  connectSatronho((kind, payload) => {
-    if (kind === 'hello') applyOverlayStyle(payload.overlayStyle);
+  // Si este overlay suena, la app no repite el sonido (si no hay ninguno abierto, suena en la app).
+  let conn = null;
+  const announce = () => { if (!isPreview && param('sound', '1') !== '0') conn?.send({ kind: 'alerts-hello' }); };
+  conn = connectSatronho((kind, payload) => {
+    if (kind === 'hello') { applyOverlayStyle(payload.overlayStyle); announce(); }
     if (kind === 'overlay-style') applyOverlayStyle(payload);
     if (kind === 'alert' && !isPreview) enqueue(payload);
     // Desde la barra derecha de la app: cortar la que suena o vaciar la cola.

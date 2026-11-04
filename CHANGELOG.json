@@ -1,5 +1,40 @@
 [
   {
+    "version": "0.15.0",
+    "date": "2026-11-04",
+    "title": "Temas de los guías, alertas que siempre suenan y más atajos",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Seis temas nuevos para los overlays: Samy (crema y caramelo, con huellitas), Troya (violeta con filo dorado), Ñoño (aguamarina musical), Juana (rosa antiguo y coqueto), MechaRidds (pantalla de androide verde con su ojo violeta) y Colonizadora, rosa chicle y lila, con brillos y corazoncitos."
+      },
+      {
+        "type": "nuevo",
+        "text": "Overlays para OBS se despliega en el menú de la izquierda con la flechita: la galería y todas las categorías con sus overlays, además de los fijados."
+      },
+      {
+        "type": "nuevo",
+        "text": "Cada apartado con algo para OBS (Metas, Música, Chat en vivo, Alertas, Estadísticas y Chat Bot) tiene botones «En OBS» que llevan directo a su overlay."
+      },
+      {
+        "type": "nuevo",
+        "text": "La barra rápida se oculta desde la propia barra (✕) y vuelve con la pestañita del borde derecho. También cambia entre fija y flotante desde ahí."
+      },
+      {
+        "type": "mejora",
+        "text": "Las alertas siempre suenan: si no tienes el overlay de alertas abierto en OBS, el sonido sale en la app. Si está abierto, suena solo ahí, sin repetirse."
+      },
+      {
+        "type": "mejora",
+        "text": "Al elegir regalos para una alerta salen todos, sin recortar, y se pueden seguir buscando. Donde escribes un regalo (Voz del chat, contadores) aparecen sugerencias con todos los nombres."
+      },
+      {
+        "type": "arreglo",
+        "text": "Inicio ya muestra la voz principal que elegiste (en línea, de Windows o de tu PC) y se actualiza al cambiarla."
+      }
+    ]
+  },
+  {
     "version": "0.14.0",
     "date": "2026-11-04",
     "title": "Galería de overlays con editor en vivo",

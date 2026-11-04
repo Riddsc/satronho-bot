@@ -17,6 +17,12 @@ export const skipTts = () => playing?.stop();
 export const ttsStatus = () => ({ queue: queue.length, speaking: Boolean(playing) });
 let onQueue = () => {};
 export const onTtsQueue = (fn) => { onQueue = fn; };
+// Nombre de la voz principal de verdad (Piper, en línea o Windows), para Inicio.
+export function mainVoiceName() {
+  const key = currentMain();
+  const v = pickerVoices().find((x) => x.key === key);
+  return v ? `${v.name}${v.cc ? ` · ${countryName(v.cc)}` : ''}` : '';
+}
 
 // Volumen: hasta 100 % con el reproductor normal; por encima se amplifica
 // con WebAudio (puede distorsionar en los extremos).
@@ -208,6 +214,7 @@ function initOnline() {
       config.tts.mainVoice = key;
       saveConfig({ tts: { mainVoice: key } });
       renderOnline();
+      onQueue?.();
       if (key) {
         const v = onlineVoices.find((x) => x.key === key);
         guideToast('troya', `Ahora tu voz principal es ${esc(v?.name || '')} (${esc(v?.country || '')}). Necesita internet; si falla, uso la de Windows.`);
@@ -613,8 +620,10 @@ export function initVoice(cfg) {
       if (t.dataset.voiceUse) {
         config.tts.piperVoice = t.dataset.voiceUse;
         config.tts.speaker = 0;
-        saveConfig({ tts: { piperVoice: t.dataset.voiceUse, speaker: 0, piperVoiceChosen: true } });
+        config.tts.mainVoice = '';
+        saveConfig({ tts: { piperVoice: t.dataset.voiceUse, speaker: 0, mainVoice: '', piperVoiceChosen: true } });
         renderEngine(engine);
+        onQueue?.();
         sayFor('troya', '¡Voz cambiada! Pulsa <i>Probar</i> para escucharla.');
       }
     } catch (e) {
@@ -822,6 +831,7 @@ function chooseVoice(key) {
   renderPicker();
   renderCurrentVoice();
   renderOnline?.();
+  onQueue?.();
 }
 
 function initPicker() {

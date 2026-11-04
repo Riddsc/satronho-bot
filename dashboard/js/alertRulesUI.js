@@ -53,10 +53,19 @@ async function loadCatalog(p) {
     const r = await api('GET', `/api/gifts/${p}`);
     catalogs[p] = r;
     updateImportBadge(r.summary);
+    if (p === 'tiktok') fillGiftList(r.gifts || []);
   } catch {
     catalogs[p] ??= { gifts: [], stickers: [] };
   }
   return catalogs[p];
+}
+// Lista con todos los regalos para los campos de texto donde se escribe un
+// regalo (Voz del chat, contadores, «¿No está?»): sugiere mientras escribes.
+function fillGiftList(gifts) {
+  let dl = document.getElementById('dl-gifts');
+  if (!dl) { dl = document.createElement('datalist'); dl.id = 'dl-gifts'; document.body.append(dl); }
+  const names = [...new Set(gifts.flatMap((g) => [g.name, g.nameEn]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  dl.innerHTML = names.map((n) => `<option value="${esc(n)}"></option>`).join('');
 }
 function updateImportBadge(sum) {
   const n = sum?.tiktok?.gifts || 0;
@@ -66,6 +75,7 @@ function updateImportBadge(sum) {
 export function onCatalogChange(sum) {
   updateImportBadge(sum);
   for (const p of Object.keys(catalogs)) delete catalogs[p];
+  loadCatalog('tiktok');
 }
 
 // ---------- Lista ----------
@@ -180,14 +190,14 @@ async function renderPicker() {
     body = tiers.map((t) => {
       const gs = items.filter((g) => t.test(Number(g.value) || 0) && match(g));
       if (!gs.length) return '';
-      const LIMIT = q ? 120 : 48;
-      return `<section class="vt-shelf"><h6><span>${t.icon}</span>${t.name} <small>${t.desc} · ${gs.length}</small></h6><div class="vt-grid">${gs.slice(0, LIMIT).map((g) => giftCard(g, chosen.has(String(g.id)), true)).join('')}</div>${gs.length > LIMIT ? `<p class="hint">Y ${gs.length - LIMIT} más: búscalos por nombre.</p>` : ''}</section>`;
+      // Todos los regalos, sin recortar (las imágenes cargan a medida que bajas).
+      return `<section class="vt-shelf"><h6><span>${t.icon}</span>${t.name} <small>${t.desc} · ${gs.length}</small></h6><div class="vt-grid">${gs.map((g) => giftCard(g, chosen.has(String(g.id)), true)).join('')}</div></section>`;
     }).join('') || '<p class="hint vt-empty">Nada con esa búsqueda.</p>';
   } else {
     body = `<div class="vt-grid">${items.filter(match).map((g) => giftCard(g, chosen.has(String(g.id)), false)).join('')}</div>`;
   }
   box.innerHTML = `${head}<div class="vt-shelves">${body}</div>
-    ${isGift ? `<label class="field mt"><span>¿No está? Escribe el nombre como sale en tu directo (separados por coma)</span><input id="ar-giftnames" value="${esc((draft.giftNames || []).filter((n) => !items.some((g) => g.name === n)).join(', '))}" placeholder="Rosa, Quiéreme…"></label>` : ''}`;
+    ${isGift ? `<label class="field mt"><span>¿No está? Escribe el nombre como sale en tu directo (separados por coma)</span><input id="ar-giftnames" list="dl-gifts" value="${esc((draft.giftNames || []).filter((n) => !items.some((g) => g.name === n)).join(', '))}" placeholder="Rosa, Quiéreme…"></label>` : ''}`;
   const qi = $('#ar-pick-q');
   if (qi) qi.addEventListener('input', (ev) => { pick.q = ev.target.value; const pos = ev.target.selectionStart; renderPicker().then(() => { const n = $('#ar-pick-q'); n.focus(); n.setSelectionRange(pos, pos); }); });
   renderSummary();
