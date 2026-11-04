@@ -95,7 +95,7 @@ function nodeFor(e) {
     sp?.action === 'mute' ? 'is-silenced' : ''].filter(Boolean).join(' ');
   const color = e.extra?.color || '';
   const name = esc(e.user?.name || 'Anónimo');
-  const tts = d ? (d.read ? '<span class="lc-tts ok" title="Troya lo leyó">🔊</span>' : `<span class="lc-tts no" title="No se leyó: ${esc(d.reason)}">🔇 <small>${esc(d.reason)}</small></span>`) : '';
+  const tts = d ? (d.read ? '<span class="lc-tts ok" title="Se leyó en voz alta">🔊</span>' : `<span class="lc-tts no" title="No se leyó: ${esc(d.reason)}">🔇 <small>${esc(d.reason)}</small></span>`) : '';
   if (e.type === 'chat') {
     li.innerHTML = `<span class="lc-avw">${avatarHtml(e.user?.name, e.user?.avatar, color)}${LOGO(e.platform)}</span>
       <div class="lc-body"><div class="lc-meta">${badgesHtml(e)}<b class="lc-name" ${color ? `style="color:${esc(color)}"` : ''}>${name}</b>${sp?.voice || sp?.spokenName ? '<i class="bd voz" title="Tiene voz propia">🎙</i>' : ''}<time>${timeOf(e.ts)}</time>${e.test ? '<small class="lc-test">prueba</small>' : ''}${tts}</div>
@@ -310,7 +310,7 @@ export function initLiveChat() {
     } else if (btn.dataset.lc === 'mute') {
       const muted = sp?.action === 'mute';
       upsertSpecial({ key: sp?.key || key, name: e.user?.name, avatar: e.user?.avatar || '', action: muted ? 'allow' : 'mute' });
-      sayFor('samy', muted ? `<b>${esc(e.user?.name)}</b> vuelve a tener voz.` : `Listo, Troya ya no lee a <b>${esc(e.user?.name)}</b>. Lo puedes cambiar en Voz del chat → Espectadores especiales.`, 5000, 'ok');
+      sayFor('samy', muted ? `<b>${esc(e.user?.name)}</b> vuelve a tener voz.` : `Listo, <b>${esc(e.user?.name)}</b> queda sin voz. Lo cambias en Voz del chat → Espectadores especiales.`, 5000, 'ok');
       renderFeeds();
     } else if (btn.dataset.lc === 'voice') {
       upsertSpecial({ key: sp?.key || key, name: e.user?.name, avatar: e.user?.avatar || '', action: 'allow' });
