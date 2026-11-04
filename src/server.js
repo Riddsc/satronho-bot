@@ -753,6 +753,32 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     }
   });
 
+  // Cortar la alerta que suena o vaciar la cola del overlay (barra derecha).
+  app.post('/api/alerts/control', (req, res) => {
+    const action = ['skip', 'clear'].includes(req.body?.action) ? req.body.action : 'skip';
+    broadcast('alert-control', { action });
+    ok(res, {});
+  });
+
+  // Tu foto de perfil.
+  const profileDir = path.join(dataDir, 'profile');
+  fs.mkdirSync(profileDir, { recursive: true });
+  app.use('/profile-photo', express.static(profileDir, { maxAge: 0 }));
+  app.post('/api/profile/photo', express.raw({ type: Object.keys(PHOTO_TYPES), limit: '6mb' }), (req, res) => {
+    const ext = PHOTO_TYPES[req.headers['content-type']];
+    if (!ext || !Buffer.isBuffer(req.body) || !req.body.length) return fail(res, 'Usa una imagen PNG, JPG, WEBP o GIF');
+    for (const f of fs.readdirSync(profileDir)) fs.rmSync(path.join(profileDir, f));
+    const file = `yo.${ext}`;
+    fs.writeFileSync(path.join(profileDir, file), req.body);
+    store.update({ profile: { photo: `/profile-photo/${file}?v=${Date.now()}` } });
+    ok(res, { photo: store.get('profile').photo });
+  });
+  app.delete('/api/profile/photo', (_req, res) => {
+    for (const f of fs.readdirSync(profileDir)) fs.rmSync(path.join(profileDir, f));
+    store.update({ profile: { photo: '' } });
+    ok(res, {});
+  });
+
   // Fotos de los guías (opcional: si no hay foto se usa su dibujo).
   const photosDir = path.join(dataDir, 'guides');
   fs.mkdirSync(photosDir, { recursive: true });

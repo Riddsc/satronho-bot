@@ -145,6 +145,20 @@ const DEFAULTS = {
   },
   // Ventana: nunca se abre sola. Opcionalmente se esconde junto al reloj al minimizar.
   window: { minimizeToTray: false },
+  // Tu perfil: cómo te llaman las guías, tu foto, el menú y la barra derecha.
+  profile: {
+    name: '',
+    photo: '',
+    greet: true,
+    menuHidden: [],
+    menuOrder: [],
+    rail: {
+      mode: 'fixed', // fixed (pegada a la derecha) · floating (la mueves) · off
+      buttons: ['voice', 'skipVoice', 'music', 'musicSkip', 'requests', 'alertsSkip', 'alertsMute', 'podiumReset', 'chat', 'news', 'report'],
+      x: null,
+      y: null,
+    },
+  },
   // Alertas propias: reglas por regalo, sticker, rango de monedas, likes… (alertRules.js)
   alertRules: [],
   ttsAllowed: {}, // usuarios de TikTok que enviaron el regalo: { id: { name, ts } }

@@ -55,10 +55,13 @@
 
 <!-- ===================== Barra superior ===================== -->
 <header class="topbar">
-  <button class="pchip" id="chip-kick" data-go-page="conexiones"><span class="pl plogo" data-logo="kick" aria-hidden="true"></span><span class="who">Kick</span><span class="st"></span></button>
-  <button class="pchip" id="chip-starvios" data-go-page="conexiones"><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span><span class="who">Starvios</span><span class="st"></span></button>
-  <button class="pchip" id="chip-twitch" data-go-page="conexiones"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><span class="who">Twitch</span><span class="st"></span></button>
-  <button class="pchip" id="chip-tiktok" data-go-page="conexiones"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span><span class="who">TikTok</span><span class="st"></span></button>
+  <div class="pchips" id="pchips">
+  <button class="pchip" id="chip-kick" data-pchip="kick" aria-haspopup="true"><span class="pl plogo" data-logo="kick" aria-hidden="true"></span><span class="who">Kick</span><span class="st"></span></button>
+  <button class="pchip" id="chip-starvios" data-pchip="starvios" aria-haspopup="true"><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span><span class="who">Starvios</span><span class="st"></span></button>
+  <button class="pchip" id="chip-twitch" data-pchip="twitch" aria-haspopup="true"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><span class="who">Twitch</span><span class="st"></span></button>
+  <button class="pchip" id="chip-tiktok" data-pchip="tiktok" aria-haspopup="true"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span><span class="who">TikTok</span><span class="st"></span></button>
+  <button type="button" class="pchips-fold" id="pchips-fold" title="Encoger las cuentas" aria-pressed="false">«</button>
+  </div>
   <div class="search">
     <input id="search" placeholder="Busca algo o pregúntale a Samy…" autocomplete="off" aria-label="Buscar">
     <kbd>Ctrl K</kbd>
@@ -85,7 +88,19 @@
       <button data-sim="chat" data-body='{"platform":"kick","user":{"id":"dj_fan","name":"DJ_Fan"},"message":"!play la bicicleta carlos vives"}'>♪ !play en Kick</button>
     </div>
   </div>
+  <div class="menu-wrap me-wrap">
+    <button type="button" class="me-btn" id="me-btn" aria-haspopup="true"><span class="me-av" id="me-av"></span><span class="me-name" id="me-name">Tu perfil</span><span class="me-caret">▾</span></button>
+    <div class="menu me-menu" id="me-menu" hidden>
+      <a href="#/perfil" data-me-close><span class="ic" data-icon="user"></span>Tu perfil</a>
+      <a href="#/ajustes" data-me-close><span class="ic" data-icon="gear"></span>Ajustes</a>
+      <a href="#/novedades" data-me-close><span class="ic" data-icon="spark"></span>Novedades</a>
+      <a href="#/ayuda/reportar" data-me-close><span class="ic" data-icon="flag"></span>Reportar un problema</a>
+      <button type="button" id="me-rail"><span class="ic" data-icon="dock"></span><span>Barra rápida</span></button>
+    </div>
+  </div>
 </header>
+<div class="pchip-pop" id="pchip-pop" hidden role="dialog"></div>
+<aside class="qrail" id="qrail" hidden aria-label="Botones rápidos"></aside>
 <div id="update-banner" class="update-banner" hidden></div>
 
 <!-- ===================== Pantallas ===================== -->
@@ -107,7 +122,7 @@
     </ul>
     <button class="btn primary" id="welcome-done">¡Empecemos!</button>
   </section>
-  <div class="ph"><div class="t"><small>Tu directo</small><h1>Inicio</h1><p>Todo lo importante de un vistazo. Configura una vez y minimiza tranquilo.</p></div>
+  <div class="ph"><div class="t"><small>Tu directo</small><h1 id="home-title">Inicio</h1><p>Todo lo importante de un vistazo. Configura una vez y minimiza tranquilo.</p></div>
     <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy"></p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
   <div class="cols home">
     <div class="card rspan2"><div class="row space"><h3 class="card-title">En vivo</h3><a class="btn small ghost" href="#/actividad">Ver todo</a></div><ul class="log short" id="home-feed"><li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li></ul></div>
@@ -753,6 +768,30 @@
   <div class="ph"><div class="t"><small>Sistema</small><h1>Novedades</h1><p>Qué trae cada versión de Satronho Bot. La app se actualiza sola.</p></div>
     <div class="host" style="--g:#5fd0ff"><p class="bubble" data-bubble="mecha" data-static><b>MechaRidds:</b> Cada vez que Ridds publica una versión, te cuento aquí qué cambió.</p><span class="guide" data-avatar="mecha" data-size="hero"></span></div></div>
   <div class="news-list" id="news-list"></div>
+</section>
+
+<!-- ---------- Tu perfil (Samy) ---------- -->
+<section class="page" id="page-perfil" data-page="perfil" hidden>
+  <div class="ph"><div class="t"><small>Sistema</small><h1>Tu perfil</h1><p>Cómo te llaman las guías, tus cuentas, el orden del menú y tu barra de botones rápidos.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Todo lo de aquí es solo tuyo y se guarda en tu PC. Lo que muevas se ve al instante.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="cols c2" style="--g:#ffb23e">
+    <div class="card pf-me"><h3 class="card-title">Tú</h3>
+      <div class="pf-photo"><span class="pf-av" id="pf-av"></span>
+        <div class="row"><button type="button" class="btn small" id="pf-photo-btn">Cambiar foto</button><button type="button" class="btn small ghost" id="pf-photo-del">Quitar</button><input type="file" id="pf-photo-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div></div>
+      <label class="field"><span>Tu nombre (así te llaman las guías)</span><input id="pf-name" placeholder="Ridds" maxlength="40"></label>
+      <label class="switch"><input type="checkbox" id="pf-greet"><span></span> Saludarme por mi nombre en Inicio</label>
+      <h4 class="pf-h">Tus cuentas</h4>
+      <div class="pf-accounts" id="pf-accounts"></div>
+      <a class="btn small ghost mt" href="#/conexiones">Ir a Conexiones</a></div>
+    <div class="card"><h3 class="card-title">Tu menú</h3>
+      <p class="hint">Oculta lo que no uses y ordena cada grupo con las flechas. Siempre puedes llegar a todo con el buscador (Ctrl K).</p>
+      <div class="pf-menu" id="pf-menu"></div>
+      <button type="button" class="btn small ghost mt" id="pf-menu-reset">Volver al orden de siempre</button></div>
+    <div class="card span2"><div class="row space"><h3 class="card-title">Barra rápida</h3>
+        <div class="seg" id="pf-rail-mode"><button type="button" data-rail-mode="fixed">Fija a la derecha</button><button type="button" data-rail-mode="floating">Flotante</button><button type="button" data-rail-mode="off">Apagada</button></div></div>
+      <p class="hint">Botones a un clic para el directo. Marca los que quieres y ordénalos. La flotante la mueves arrastrando su asa ⠿.</p>
+      <div class="pf-rail" id="pf-rail"></div></div>
+  </div>
 </section>
 
 <!-- ---------- Ayuda (Samy) ---------- -->

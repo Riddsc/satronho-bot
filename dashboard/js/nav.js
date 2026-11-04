@@ -32,7 +32,22 @@ const ICONS = {
   trash: '<path d="M5 7h14M10 7V5h4v2M7 7l1 12.5h8L17 7"/>',
   volume: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/>',
+  user: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>',
+  'mic-off': '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/><path d="M4 4l16 16"/>',
+  stop: '<rect x="6" y="6" width="12" height="12" rx="2.5"/>',
+  reset: '<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4 4v4.5h4.5"/>',
+  flag: '<path d="M5.5 21V4.5"/><path d="M5.5 4.5h11l-2 4 2 4h-11"/>',
+  door: '<path d="M14 4.5H6.5v15H14"/><path d="M10.5 12h10M17 8.5l3.5 3.5-3.5 3.5"/>',
+  filter: '<path d="M4 5.5h16l-6 7.5v5l-4 2v-7z"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  move: '<path d="M12 3v18M3 12h18"/><path d="m9 6 3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/>',
+  dock: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M15.5 4.5v15"/>',
+  trophy: '<path d="M8 4.5h8v5a4 4 0 0 1-8 0z"/><path d="M8 6.5H5a3 3 0 0 0 3 3.5M16 6.5h3a3 3 0 0 1-3 3.5"/><path d="M12 13.5v3M8.5 20h7M9.5 16.5h5V20h-5z"/>',
+  skipSong: '<path d="M9 18V7l7-1.5"/><circle cx="6.5" cy="18" r="2.5"/><path d="m16 11 4 3-4 3z" fill="currentColor"/>',
+  news: '<path d="M5 4.5h11v15H6.5A1.5 1.5 0 0 1 5 18z"/><path d="M16 8.5h3v9.5a1.5 1.5 0 0 1-3 0M8 8h5M8 11.5h5M8 15h3"/>',
+  bellOff: '<path d="M6 16.5V11a6 6 0 0 1 9.5-4.9M18 11v5.5l1.5 1.5h-12"/><path d="M10 20.5a2 2 0 0 0 4 0M4 4l16 16"/>',
 };
+export const iconSVG = (name, size = 18) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 
 const PAGES = {
   inicio: { title: 'Inicio', guide: 'samy', words: 'resumen inicio principal en vivo' },
@@ -47,6 +62,7 @@ const PAGES = {
   estadisticas: { title: 'Estadísticas', guide: 'juana', words: 'estadísticas números gané diamantes tops historial gráfica' },
   ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones atajos teclado teclas' },
   novedades: { title: 'Novedades', guide: 'mecha', words: 'novedades cambios versión actualización qué hay de nuevo changelog notas' },
+  perfil: { title: 'Tu perfil', guide: 'samy', words: 'perfil nombre foto cuentas menú ordenar ocultar barra derecha botones rápidos saludo' },
   ayuda: { title: 'Ayuda', guide: 'samy', words: 'ayuda preguntas guías reportar error problema falla bug idea sugerencia soporte discord' },
 };
 
@@ -323,8 +339,23 @@ function initSidebar(cfg) {
   apply();
 }
 
+// Tu perfil: secciones del menú ocultas y en qué orden van.
+export function applyMenuPrefs(cfg) {
+  const p = cfg.profile || {};
+  const hidden = new Set(p.menuHidden || []);
+  const order = p.menuOrder || [];
+  for (const group of $$('.side .nav-group')) {
+    const items = $$('.nav-item[data-page]', group);
+    for (const a of items) a.hidden = hidden.has(a.dataset.page);
+    const pos = (a) => { const i = order.indexOf(a.dataset.page); return i < 0 ? 999 + items.indexOf(a) : i; };
+    for (const a of [...items].sort((x, y) => pos(x) - pos(y))) group.append(a);
+    group.hidden = items.every((a) => a.hidden);
+  }
+}
+
 export function initNav(cfg) {
   initSidebar(cfg);
+  applyMenuPrefs(cfg);
   config = cfg;
   for (const el of $$('[data-icon]')) {
     el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[el.dataset.icon] || ''}</svg>`;
