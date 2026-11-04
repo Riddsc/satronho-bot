@@ -44,6 +44,7 @@
   </nav>
 
   <div class="side-foot">
+    <button type="button" class="side-pin" id="side-pin" aria-pressed="false" title="Dejar el menú abierto"><span class="ic" data-icon="pin"></span><span class="lbl">Dejar el menú abierto</span></button>
     <div class="steps" id="steps" style="--g:#ffb23e">
       <div class="hd"><span class="guide" data-avatar="samy" data-size="40"></span><div><b>Primeros pasos</b><small id="steps-count">0 de 4 · con Samy</small></div><button class="x" id="steps-hide" title="Ocultar">✕</button></div>
       <div class="bar"><i id="steps-bar" style="width:0%"></i></div>
@@ -93,7 +94,7 @@
   <section id="welcome" class="welcome" hidden>
     <div>
       <h2>¡Hola! Somos Samy y Troya</h2>
-      <p>Somos tus guías principales: Samy te conecta y te ayuda a encontrar todo, y Troya es la voz de tu stream. Nos acompañan Ñoño, que pone la música, Juana, que lleva las metas y las cuentas, y MechaRidds, la versión androide de Ridds, que lleva el Chat Bot.</p>
+      <p>Somos tus guías principales: Samy te conecta y te ayuda a encontrar todo, y Troya es la voz de tu stream. Nos acompañan Ñoño, que pone la música, y Juana, que lleva las metas y las cuentas.</p>
       <p class="tip">💬 <b>Toca a cualquiera de nosotros</b> para preguntarnos dónde está algo o cómo funciona.</p>
     </div>
     <ul class="crew">
@@ -101,7 +102,6 @@
       <li><span data-avatar="troya" data-size="110"></span><b>Troya</b><small>Voz y alertas</small></li>
       <li><span data-avatar="nono" data-size="110"></span><b>Ñoño</b><small>Música</small></li>
       <li><span data-avatar="juana" data-size="110"></span><b>Juana</b><small>Metas y números</small></li>
-      <li><span data-avatar="mecha" data-size="70"></span><b>MechaRidds</b><small>Chat Bot</small></li>
     </ul>
     <button class="btn primary" id="welcome-done">¡Empecemos!</button>
   </section>
@@ -233,12 +233,15 @@
             <label class="switch"><input type="checkbox" data-tts="useWindowsVoices"><span></span> Sumar las voces de Windows en español</label>
             <p class="hint">Las voces de Latinoamérica (Colombia y más) están abajo, en su propia tarjeta.</p>
             <div id="voice-pool" class="pool"></div></div>
-          <div class="card"><h3 class="card-title">Escuchar</h3>
+          <div class="card"><h3 class="card-title">Voz principal</h3>
+            <div class="vp-current"><span class="vp-flag" id="vp-cur-flag"></span><span><b id="vp-cur-name">—</b><small id="vp-cur-src"></small></span><button type="button" class="btn small primary" id="vp-open">Cambiar voz</button></div>
             <form id="tts-say" class="row"><input id="tts-say-text" placeholder="Escribe algo para probar la voz…"><button class="btn primary">Probar</button></form>
-            <div class="two mt">
+            <div class="three mt">
               <label class="field"><span>Velocidad <b id="rate-val"></b></span><input type="range" min="0.6" max="1.8" step="0.05" data-tts="rate"></label>
-              <label class="field"><span>Volumen <b id="vol-val"></b></span><input type="range" min="0" max="1" step="0.05" data-tts="volume"></label>
+              <label class="field"><span>Tono <b id="pitch-val"></b></span><input type="range" min="0.6" max="1.6" step="0.05" data-tts="pitch"></label>
+              <label class="field"><span>Volumen <b id="vol-val"></b></span><input type="range" min="0" max="2" step="0.05" data-tts="volume"></label>
             </div>
+            <p class="hint warn-line" id="vol-warn" hidden>Por encima de 100 % la voz se amplifica y puede distorsionar.</p>
             <div class="row space mt"><span class="hint" id="tts-queue">En cola: 0</span><button type="button" class="btn small" id="tts-skip">Saltar mensaje</button></div></div>
         </div>
       </div>
@@ -327,27 +330,65 @@
 <section class="page" id="page-musica" data-page="musica" hidden>
   <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Música</h1><p>Tu chat pide canciones con <code>!play</code> o <code>!temita</code>; Ñoño las pone en orden.</p></div>
     <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono"></p><span class="guide" data-avatar="nono" data-size="hero"></span></div></div>
-  <div class="cols c3" id="card-musica" style="--g:#4fd1c5">
-    <div class="card"><h3 class="card-title">Sonando ahora</h3>
-      <div class="player"><div id="yt-player"></div></div>
-      <p class="hint" id="player-note"></p>
-      <div id="now" class="now"></div>
-      <div class="row wrap"><button class="btn" id="music-pause">⏸ Pausar</button><button class="btn" id="music-skip">⏭ Saltar</button></div>
-      <label class="field"><span>Volumen de la música</span><input type="range" min="0" max="100" id="music-volume"></label>
-      <label class="switch"><input type="checkbox" id="music-enabled"><span></span> Peticiones abiertas</label></div>
-    <div class="card"><div class="row space"><h3 class="card-title">A continuación <span id="queue-count"></span></h3><button class="btn small ghost" id="music-clear">Vaciar</button></div>
-      <ul id="music-queue" class="queue"></ul>
-      <form id="music-add" class="row"><input id="music-add-q" placeholder="Añadir canción o enlace de YouTube…"><button class="btn">Añadir</button></form></div>
-    <div class="card"><h3 class="card-title">Comandos de música</h3>
-      <div class="cmds">
-        <div><code>!play</code> <code>!temita</code><span>+ canción o enlace: pide una canción</span></div>
-        <div><code>!skip</code><span>salta la que suena, solo si la pidió él</span></div>
-        <div><code>!quitar</code><span>saca de la cola su última canción</span></div>
+  <div class="mz" id="card-musica" style="--g:#4fd1c5">
+    <!-- Sonando ahora -->
+    <div class="card mz-now">
+      <div class="mz-video" id="mz-video"><div class="player"><div id="yt-player"></div></div></div>
+      <div class="mz-now-info">
+        <div id="now" class="now"></div>
+        <div class="mz-progress" id="mz-progress" aria-hidden="true"><span id="mz-time">0:00</span><i><b id="mz-bar"></b></i><span id="mz-dur">0:00</span></div>
+        <div class="mz-controls">
+          <button class="btn icon-round primary" id="music-pause" title="Pausar" aria-label="Pausar"><span class="ic" data-icon="pause"></span></button>
+          <button class="btn icon-round" id="music-skip" title="Siguiente canción" aria-label="Siguiente canción"><span class="ic" data-icon="next"></span></button>
+          <label class="mz-vol" title="Volumen de la música"><span class="ic" data-icon="volume" aria-hidden="true"></span><input type="range" min="0" max="100" id="music-volume" aria-label="Volumen de la música"></label>
+          <span class="mz-spacer"></span>
+          <button class="btn small ghost" id="mz-video-toggle" aria-pressed="true">Ocultar video</button>
+          <label class="switch" style="margin:0"><input type="checkbox" id="music-enabled"><span></span> Peticiones abiertas</label>
+        </div>
+        <p class="hint" id="player-note"></p>
       </div>
-      <details open><summary>Ajustes de música</summary>
-        <div class="checks"><label class="switch"><input type="checkbox" data-music="platforms.kick"><span></span> Kick</label><label class="switch"><input type="checkbox" data-music="platforms.starvios"><span></span> Starvios</label><label class="switch"><input type="checkbox" data-music="platforms.twitch"><span></span> Twitch</label><label class="switch"><input type="checkbox" data-music="platforms.tiktok"><span></span> TikTok</label></div>
-        <div class="two"><label class="field"><span>Canciones por persona</span><input type="number" min="1" max="10" data-music="maxPerUser"></label><label class="field"><span>Duración máxima (min)</span><input type="number" min="1" max="60" data-music="maxDurationMin"></label></div>
-      </details></div>
+    </div>
+
+    <div class="mz-cols">
+      <!-- Buscar / añadir -->
+      <div class="card mz-search">
+        <h3 class="card-title">Buscar y añadir</h3>
+        <form id="music-add" class="mz-search-form"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="music-add-q" placeholder="Busca una canción o pega un enlace de YouTube…" autocomplete="off"></form>
+        <ul class="mz-results" id="mz-results"><li class="empty">Busca algo para ver resultados. Pulsa <b>+</b> para añadirlo a la cola.</li></ul>
+      </div>
+
+      <!-- Cola e historial -->
+      <div class="card mz-queue">
+        <div class="mz-qhead">
+          <span class="seg" role="tablist"><button type="button" data-mzq="next" aria-pressed="true">A continuación <span id="queue-count"></span></button><button type="button" data-mzq="history" aria-pressed="false">Historial</button></span>
+          <span class="row tight">
+            <button type="button" class="btn small ghost" id="mz-shuffle" title="Mezclar la cola" aria-label="Mezclar la cola"><span class="ic" data-icon="shuffle"></span></button>
+            <button type="button" class="btn small ghost" id="mz-save" title="Guardar la cola como lista" aria-label="Guardar la cola como lista"><span class="ic" data-icon="save"></span></button>
+            <button type="button" class="btn small ghost" id="music-clear" title="Vaciar la cola" aria-label="Vaciar la cola"><span class="ic" data-icon="trash"></span></button>
+          </span>
+        </div>
+        <ul id="music-queue" class="queue mz-list"></ul>
+        <ul id="mz-history" class="queue mz-list" hidden></ul>
+      </div>
+
+      <!-- Listas, actividad y ajustes -->
+      <div class="mz-side">
+        <div class="card"><div class="row space"><h3 class="card-title">Listas de reproducción</h3><button type="button" class="btn small ghost" id="mz-import">Importar de YouTube</button></div>
+          <form id="mz-import-form" class="row mt" hidden><input id="mz-import-url" placeholder="Enlace de la lista (con list=…)"><button class="btn small">Importar</button></form>
+          <ul class="mz-pls" id="mz-pls"></ul></div>
+        <div class="card"><h3 class="card-title">Actividad de música</h3>
+          <ul class="mz-activity" id="mz-activity"><li class="empty">Sin actividad todavía.</li></ul></div>
+        <div class="card"><details><summary>Comandos y ajustes de música</summary>
+          <div class="cmds mt">
+            <div><code>!play</code> <code>!temita</code><span>+ canción o enlace: pide una canción</span></div>
+            <div><code>!skip</code><span>salta la que suena, solo si la pidió él</span></div>
+            <div><code>!quitar</code><span>saca de la cola su última canción</span></div>
+          </div>
+          <div class="checks mt"><label class="switch"><input type="checkbox" data-music="platforms.kick"><span></span> Kick</label><label class="switch"><input type="checkbox" data-music="platforms.starvios"><span></span> Starvios</label><label class="switch"><input type="checkbox" data-music="platforms.twitch"><span></span> Twitch</label><label class="switch"><input type="checkbox" data-music="platforms.tiktok"><span></span> TikTok</label></div>
+          <div class="two"><label class="field"><span>Canciones por persona</span><input type="number" min="1" max="10" data-music="maxPerUser"></label><label class="field"><span>Duración máxima (min)</span><input type="number" min="1" max="60" data-music="maxDurationMin"></label></div>
+        </details></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -578,6 +619,20 @@
 </div>
 
 <div id="toast" class="toast" role="status"></div>
+<div class="vp-modal" id="vp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="vp-title">
+  <div class="vp-card">
+    <div class="vp-head"><h2 id="vp-title">Elegir voz</h2><button type="button" class="btn small ghost" id="vp-close" aria-label="Cerrar">✕</button></div>
+    <div class="vp-body">
+      <nav class="vp-cats" id="vp-cats"></nav>
+      <div class="vp-main">
+        <div class="mz-search-form"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="vp-q" placeholder="Buscar por nombre o país…" autocomplete="off"></div>
+        <div class="row wrap chips" id="vp-langs"></div>
+        <div class="vp-list" id="vp-list"></div>
+      </div>
+    </div>
+    <div class="vp-foot"><span class="hint" id="vp-count"></span><span class="hint" id="vp-sel"></span></div>
+  </div>
+</div>
 <div class="news-modal" id="news-modal" hidden role="dialog" aria-modal="true" aria-labelledby="news-modal-title">
   <div class="news-card">
     <div class="news-bust" id="news-bust" aria-hidden="true"></div>

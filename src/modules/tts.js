@@ -115,7 +115,8 @@ function createTts({ store, broadcast, engine, online = null }) {
   // Las voces en línea se pueden usar una a una (voz principal o especial)
   // aunque no estén sumadas al reparto.
   const isOnline = (k) => Boolean(online) && String(k).startsWith('ms:') && online.voices().some((v) => v.key === String(k).split('~')[0]);
-  const isUsable = (k) => isOnline(k) || anyKeys().includes(k);
+  // Una voz de Windows elegida a mano siempre se puede usar (la lee el panel).
+  const isUsable = (k) => isOnline(k) || String(k).startsWith('win:') || anyKeys().includes(k);
 
   function pool() {
     const all = allKeys();
@@ -191,14 +192,19 @@ function createTts({ store, broadcast, engine, online = null }) {
       rate: c.rate,
       windowsVoice: c.windowsVoice,
       tone: '',
+      // Tono: el panel reproduce más rápido o más lento (sube o baja el tono)
+      // y aquí generamos la voz al revés de rápida, así la velocidad final
+      // queda igual y solo cambia el tono.
+      pitch: Math.max(0.6, Math.min(1.6, Number(c.pitch) || 1)),
     };
+    const synthRate = Math.max(0.3, Math.min(3, (Number(c.rate) || 1) / item.pitch));
     const [base, tone = ''] = String(voice || '').split('~');
     item.tone = tone;
     if (base.startsWith('win:')) {
       item.windowsVoice = base.slice(4); // la lee el panel con esa voz de Windows
     } else if (base.startsWith('ms:')) {
       try {
-        const file = await online.synth(text, { voiceId: base.slice(3), rate: c.rate });
+        const file = await online.synth(text, { voiceId: base.slice(3), rate: synthRate });
         item.audioUrl = `/tts-audio/${file}`;
       } catch (err) {
         item.error = err.message; // sin internet: el panel lo lee con la voz de Windows
@@ -208,7 +214,7 @@ function createTts({ store, broadcast, engine, online = null }) {
       inFlight += 1;
       try {
         const [voiceId, speaker] = base.split('#');
-        const file = await engine.synth(text, { voiceId, speaker: Number(speaker) || 0, rate: c.rate });
+        const file = await engine.synth(text, { voiceId, speaker: Number(speaker) || 0, rate: synthRate });
         item.audioUrl = `/tts-audio/${file}`;
       } catch (err) {
         item.error = err.message; // el panel lo leerá con la voz de Windows

@@ -145,6 +145,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     broadcast,
   });
   const stats = createStats({ store, dataDir, broadcast });
+  const resolver = customResolver || createYoutubeResolver({ fetch: fetchFn });
   const music = createMusic({
     store,
     broadcast(kind, payload) {
@@ -160,7 +161,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
         }
       }
     },
-    resolver: customResolver || createYoutubeResolver({ fetch: fetchFn }),
+    resolver,
     onSong: () => stats.onSong(),
   });
 
@@ -436,6 +437,10 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
 
   // Música
   app.get('/api/music', (_req, res) => ok(res, { music: music.snapshot() }));
+  // Buscador del panel: varios resultados de YouTube.
+  app.get('/api/music/search', safe(async (req, res) => {
+    ok(res, { results: await resolver.search(String(req.query.q || '').slice(0, 200)) });
+  }));
   app.post('/api/music/:action', safe(async (req, res) => {
     const b = req.body || {};
     switch (req.params.action) {
@@ -449,6 +454,18 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       case 'enabled': music.setEnabled(b.enabled); break;
       case 'ended': music.ended(b.id); break;
       case 'error': music.failed(b.id, b.code); break;
+      case 'shuffle': music.shuffle(); break;
+      case 'move': music.move(b.id, b.to); break;
+      case 'add-songs': return ok(res, { added: music.addSongs(Array.isArray(b.songs) ? b.songs.slice(0, 200) : []) });
+      case 'clear-history': music.clearHistory(); break;
+      case 'save-playlist': return ok(res, { playlist: music.savePlaylist(b.name) });
+      case 'load-playlist': return ok(res, { added: music.loadPlaylist(b.id, Boolean(b.shuffle)) });
+      case 'rename-playlist': music.renamePlaylist(b.id, b.name); break;
+      case 'delete-playlist': music.deletePlaylist(b.id); break;
+      case 'import-playlist': {
+        const r = await resolver.playlist(String(b.url || ''));
+        return ok(res, { playlist: music.addPlaylist(r.title, r.songs) });
+      }
       default: return fail(res, 'Acción desconocida', 404);
     }
     ok(res);

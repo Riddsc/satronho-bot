@@ -17,6 +17,26 @@ export const ttsStatus = () => ({ queue: queue.length, speaking: Boolean(playing
 let onQueue = () => {};
 export const onTtsQueue = (fn) => { onQueue = fn; };
 
+// Volumen: hasta 100 % con el reproductor normal; por encima se amplifica
+// con WebAudio (puede distorsionar en los extremos).
+let audioCtx = null;
+function setVolume(audio, vol) {
+  if (vol <= 1) {
+    audio.volume = Math.max(0, vol);
+    return;
+  }
+  try {
+    audioCtx ??= new AudioContext();
+    const src = audioCtx.createMediaElementSource(audio);
+    const gain = audioCtx.createGain();
+    gain.gain.value = Math.min(2, vol);
+    src.connect(gain).connect(audioCtx.destination);
+    audio.volume = 1;
+  } catch {
+    audio.volume = 1;
+  }
+}
+
 // ---------- Cola de reproducción ----------
 function updateQueueLabel() {
   $('#tts-queue').textContent = `En cola: ${queue.length}${playing ? ' · hablando' : ''}`;
@@ -34,12 +54,14 @@ function playNext() {
     if (playing?.item === item) playNext();
   };
   const tone = TONES[item.tone] || TONES[''];
+  const pitch = Number(item.pitch) || 1;
   if (item.audioUrl) {
     const audio = new Audio(item.audioUrl);
-    audio.volume = Math.max(0, Math.min(1, Number(config.tts.volume ?? 1)));
-    // Tono grave/agudo: cambiamos la velocidad sin conservar el tono.
+    setVolume(audio, Number(config.tts.volume ?? 1));
+    // Tono: cambiamos la velocidad de reproducción sin conservar el tono.
+    // El servidor ya generó la voz más lenta o más rápida para compensar.
     audio.preservesPitch = false;
-    audio.playbackRate = tone.rate;
+    audio.playbackRate = tone.rate * pitch;
     audio.onended = audio.onerror = done;
     playing = { item, stop: () => { audio.pause(); done(); } };
     audio.play().catch(done);
@@ -49,8 +71,8 @@ function playNext() {
     const v = voices.find((x) => x.name === (item.windowsVoice || config.tts.windowsVoice)) || voices.find((x) => x.lang.toLowerCase().startsWith('es'));
     if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'es-ES';
     u.rate = Number(config.tts.rate || 1);
-    u.pitch = tone.pitch;
-    u.volume = Number(config.tts.volume ?? 1);
+    u.pitch = Math.max(0, Math.min(2, tone.pitch * pitch));
+    u.volume = Math.min(1, Number(config.tts.volume ?? 1));
     u.onend = u.onerror = done;
     playing = { item, stop: () => { speechSynthesis.cancel(); done(); } };
     speechSynthesis.speak(u);
@@ -68,6 +90,10 @@ export function enqueueTts(item) {
 // ---------- Motor y voces ----------
 export function renderEngine(state) {
   engine = state;
+  queueMicrotask(() => {
+    renderCurrentVoice();
+    if ($('#vp-modal') && !$('#vp-modal').hidden) renderPicker();
+  });
   const box = $('#engine');
   const busy = state.busy;
   const selected = config.tts.piperVoice;
@@ -135,6 +161,7 @@ export function setOnlineVoices(list) {
   renderPool();
   renderSpecial();
   renderOnline();
+  renderCurrentVoice();
 }
 
 // Tarjeta «Voces de Latinoamérica»: por país, escuchar y elegir como principal.
@@ -325,9 +352,17 @@ function fillForm() {
     else if (Array.isArray(v)) el.value = el.tagName === 'TEXTAREA' ? v.join('\n') : v.join(', ');
     else el.value = v ?? '';
   }
+  showLevels();
+  $('#tricks-row').classList.toggle('disabled', !t.filterProfanity);
+}
+
+function showLevels() {
+  const t = config.tts;
   $('#rate-val').textContent = `${t.rate}×`;
   $('#vol-val').textContent = `${Math.round(t.volume * 100)}%`;
-  $('#tricks-row').classList.toggle('disabled', !t.filterProfanity);
+  const p = Number(t.pitch) || 1;
+  $('#pitch-val').textContent = p === 1 ? 'normal' : p < 1 ? `más grave (${Math.round(p * 100)}%)` : `más aguda (${Math.round(p * 100)}%)`;
+  $('#vol-warn').hidden = !(t.volume > 1);
 }
 
 function readField(el) {
@@ -360,6 +395,7 @@ export function initVoice(cfg) {
   fillForm();
   populateWindowsVoices();
   initOnline();
+  initPicker();
   speechSynthesis.onvoiceschanged = populateWindowsVoices;
 
   for (const el of $$('[data-tts]')) {
@@ -373,8 +409,7 @@ export function initVoice(cfg) {
       for (const p of path.slice(0, -1)) target = target[p];
       target[path.at(-1)] = value;
       saveConfig({ tts: partial });
-      $('#rate-val').textContent = `${config.tts.rate}×`;
-      $('#vol-val').textContent = `${Math.round(config.tts.volume * 100)}%`;
+      showLevels();
       $('#tricks-row').classList.toggle('disabled', !config.tts.filterProfanity);
       updateTroya();
     });
@@ -483,3 +518,129 @@ export function onTtsItem(item) {
 }
 
 export { PLATFORM_NAMES };
+
+// ---------- Elegir voz (ventana) ----------
+// Categorías: en tu PC (Piper), Latinoamérica (en línea) y Windows.
+// Buscador, filtro de idioma, el país de cada voz y ▶ para escucharla.
+const LANG_NAME = { es: 'Español', en: 'Inglés', fr: 'Francés', pt: 'Portugués', it: 'Italiano', de: 'Alemán' };
+let regionNames = null;
+const countryName = (cc) => {
+  try {
+    regionNames ??= new Intl.DisplayNames(['es'], { type: 'region' });
+    return regionNames.of(cc) || cc;
+  } catch {
+    return cc;
+  }
+};
+const vp = { cat: 'all', lang: 'all', q: '' };
+
+function pickerVoices() {
+  const out = [];
+  for (const v of engine?.voices || []) {
+    const cc = (v.id.split('_')[1] || '').split('-')[0].toUpperCase();
+    const lang = v.lang || v.id.slice(0, 2);
+    const n = v.installed ? v.speakers : 1;
+    for (let i = 0; i < n; i++) {
+      const key = `${v.id}#${i}`;
+      out.push({ key, cat: 'piper', lang, cc, installed: v.installed, id: v.id, name: v.installed ? voiceLabel(key).split(' · ')[0] : v.label.split(' · ')[0], detail: v.installed ? voiceLabel(key).split(' · ').slice(1).join(' · ') : `${GENDER_SHORT[v.gender] || ''}${v.size ? ` · ${v.size}` : ''} · sin descargar`, src: 'En tu PC · sin internet' });
+    }
+  }
+  for (const v of onlineVoices) {
+    out.push({ key: v.key, cat: 'online', lang: 'es', cc: v.locale.split('-')[1], installed: true, name: v.name, detail: `${GENDER_SHORT[v.gender]} · en línea`, src: 'Latinoamérica · necesita internet' });
+  }
+  for (const v of speechSynthesis.getVoices()) {
+    const [lang, cc = ''] = v.lang.split(/[-_]/);
+    out.push({ key: `win:${v.name}`, cat: 'win', lang: lang.toLowerCase(), cc: cc.toUpperCase(), installed: true, name: v.name.replace(/^Microsoft /, '').replace(/ - .*$/, '').replace(/ Online.*$/, ''), detail: 'Voz de Windows', src: 'Windows · siempre disponible' });
+  }
+  return out;
+}
+
+const currentMain = () => config.tts.mainVoice || `${config.tts.piperVoice}#${Number(config.tts.speaker) || 0}`;
+
+function renderCurrentVoice() {
+  if (!$('#vp-cur-name')) return;
+  const key = currentMain();
+  const v = pickerVoices().find((x) => x.key === key);
+  $('#vp-cur-name').textContent = v ? v.name : 'Sin voz elegida';
+  $('#vp-cur-src').textContent = v ? `${v.cc ? `${countryName(v.cc)} · ` : ''}${v.src}` : 'Descarga una voz o elige una de Latinoamérica o de Windows';
+  $('#vp-cur-flag').textContent = v?.cc || '♪';
+}
+
+function renderPicker() {
+  const all = pickerVoices();
+  const cats = [['all', 'Todas'], ['piper', 'En tu PC'], ['online', 'Latinoamérica'], ['win', 'Windows']];
+  $('#vp-cats').innerHTML = cats.map(([id, name]) => `<button type="button" data-vp-cat="${id}" aria-pressed="${vp.cat === id}"><span>${name}</span><small>${all.filter((v) => id === 'all' || v.cat === id).length}</small></button>`).join('');
+  const inCat = all.filter((v) => vp.cat === 'all' || v.cat === vp.cat);
+  const langs = [...new Set(inCat.map((v) => v.lang))];
+  if (vp.lang !== 'all' && !langs.includes(vp.lang)) vp.lang = 'all';
+  $('#vp-langs').innerHTML = [['all', 'Todos'], ...langs.map((l) => [l, LANG_NAME[l] || l.toUpperCase()])].map(([id, name]) => `<label class="chip-check"><input type="radio" name="vp-lang" value="${id}" ${vp.lang === id ? 'checked' : ''}><span>${name} <small>${id === 'all' ? inCat.length : inCat.filter((v) => v.lang === id).length}</small></span></label>`).join('');
+  const q = vp.q.toLowerCase();
+  const list = inCat.filter((v) => (vp.lang === 'all' || v.lang === vp.lang) && (!q || `${v.name} ${countryName(v.cc)} ${v.detail}`.toLowerCase().includes(q)));
+  const groups = new Map();
+  for (const v of list) {
+    const g = `${LANG_NAME[v.lang] || v.lang.toUpperCase()}${v.cc ? ` (${countryName(v.cc)})` : ''}`;
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push(v);
+  }
+  const main = currentMain();
+  $('#vp-list').innerHTML = [...groups].map(([g, vs]) => `<h4><span class="vp-flag">${esc(vs[0].cc || '··')}</span>${esc(g)} <small>${vs.length}</small></h4>
+    ${vs.map((v) => `<div class="vp-item ${v.key === main ? 'on' : ''} ${v.installed ? '' : 'off'}" data-vp="${esc(v.key)}">
+      <button type="button" class="vp-pick" ${v.installed ? '' : 'disabled'}><b>${esc(v.name)}</b><small>${esc(v.detail)}</small></button>
+      ${v.installed ? `<button type="button" class="vp-play" data-vp-play="${esc(v.key)}" aria-label="Escuchar ${esc(v.name)}">▶</button>` : `<button type="button" class="btn small" data-vp-dl="${esc(v.id)}">Descargar</button>`}
+    </div>`).join('')}`).join('') || '<p class="hint">No hay voces con ese filtro.</p>';
+  $('#vp-count').textContent = `${list.length} voces`;
+  const cur = all.find((v) => v.key === main);
+  $('#vp-sel').innerHTML = cur ? `Elegida: <b>${esc(cur.name)}</b>${cur.cc ? ` · ${esc(countryName(cur.cc))}` : ''}` : '';
+}
+
+function chooseVoice(key) {
+  if (/^[a-z]{2}_[A-Z]{2}-/.test(key)) {
+    const [id, n] = key.split('#');
+    config.tts.piperVoice = id;
+    config.tts.speaker = Number(n) || 0;
+    config.tts.mainVoice = '';
+    saveConfig({ tts: { piperVoice: id, speaker: Number(n) || 0, mainVoice: '', piperVoiceChosen: true } });
+  } else {
+    config.tts.mainVoice = key;
+    saveConfig({ tts: { mainVoice: key } });
+  }
+  renderPicker();
+  renderCurrentVoice();
+  renderOnline?.();
+}
+
+function initPicker() {
+  const modal = $('#vp-modal');
+  if (!modal) return;
+  const open = () => { modal.hidden = false; renderPicker(); $('#vp-q').focus(); };
+  const close = () => { modal.hidden = true; };
+  $('#vp-open').addEventListener('click', open);
+  $('#vp-close').addEventListener('click', close);
+  modal.addEventListener('click', (ev) => { if (ev.target === modal) close(); });
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !modal.hidden) close(); });
+  $('#vp-cats').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-vp-cat]');
+    if (b) { vp.cat = b.dataset.vpCat; renderPicker(); }
+  });
+  $('#vp-langs').addEventListener('change', (ev) => { vp.lang = ev.target.value; renderPicker(); });
+  $('#vp-q').addEventListener('input', (ev) => { vp.q = ev.target.value; renderPicker(); });
+  $('#vp-list').addEventListener('click', async (ev) => {
+    const play = ev.target.closest('[data-vp-play]');
+    if (play) {
+      const key = play.dataset.vpPlay;
+      const v = pickerVoices().find((x) => x.key === key);
+      const text = v?.lang === 'en' ? `Hi, I am ${v.name}. This is how your chat would sound.` : v?.lang === 'fr' ? `Bonjour, je suis ${v.name}.` : `Hola, soy ${v?.name || 'una voz'}. Así sonaría tu chat.`;
+      return api('POST', '/api/tts/say', { text, voice: key }).catch((e) => toast(e.message));
+    }
+    const dl = ev.target.closest('[data-vp-dl]');
+    if (dl) {
+      dl.disabled = true;
+      dl.textContent = 'Descargando…';
+      return api('POST', `/api/tts/install-voice/${dl.dataset.vpDl}`).catch((e) => toast(e.message));
+    }
+    const pick = ev.target.closest('.vp-pick');
+    if (pick && !pick.disabled) chooseVoice(pick.closest('[data-vp]').dataset.vp);
+  });
+  renderCurrentVoice();
+}
+export { initPicker, renderCurrentVoice, renderPicker };

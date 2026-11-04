@@ -22,6 +22,15 @@ const ICONS = {
   terminal: '<rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="m7 10 3 2.5L7 15M12.5 15H17"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><path d="m12 8 1.4 2.6L16 12l-2.6 1.4L12 16l-1.4-2.6L8 12l2.6-1.4z"/>',
+  pin: '<path d="M4 6h16M4 12h10M4 18h16"/><path d="m17 9 3 3-3 3"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>',
+  pause: '<rect x="7" y="5.5" width="3.6" height="13" rx="1" fill="currentColor" stroke="none"/><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" fill="currentColor" stroke="none"/>',
+  next: '<path d="M6 5.5v13l9-6.5z" fill="currentColor" stroke="none"/><rect x="16" y="5.5" width="2.6" height="13" rx="1" fill="currentColor" stroke="none"/>',
+  shuffle: '<path d="M4 7h3.5c4 0 5 10 9 10H20M4 17h3.5c1.6 0 2.7-1.6 3.6-3.6M14 9.6c.9-1.4 1.9-2.6 3.5-2.6H20"/><path d="m18 5 2 2-2 2M18 15l2 2-2 2"/>',
+  save: '<path d="M5 4.5h11l3 3V19.5H5z"/><path d="M8 4.5v5h7v-5M8 19.5v-6h8v6"/>',
+  trash: '<path d="M5 7h14M10 7V5h4v2M7 7l1 12.5h8L17 7"/>',
+  volume: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/>',
 };
 
@@ -274,7 +283,48 @@ function initSteps() {
 }
 
 // ---------- Arranque ----------
+// Menú lateral: compacto (solo iconos; se despliega al pasar el ratón o
+// al tocarlo) o abierto siempre. Se guarda en Apariencia.
+function initSidebar(cfg) {
+  const btn = $('#side-pin');
+  const side = $('.side');
+  const apply = () => {
+    const open = cfg.appearance?.sidebar === 'open';
+    document.body.classList.toggle('rail', !open);
+    btn.setAttribute('aria-pressed', String(open));
+    btn.title = open ? 'Volver al menú compacto' : 'Dejar el menú abierto';
+    btn.querySelector('.lbl').textContent = open ? 'Menú compacto' : 'Dejar el menú abierto';
+  };
+  btn.addEventListener('click', () => {
+    const open = cfg.appearance?.sidebar !== 'open';
+    cfg.appearance = { ...cfg.appearance, sidebar: open ? 'open' : 'compact' };
+    saveConfig({ appearance: { sidebar: cfg.appearance.sidebar } });
+    side.classList.remove('peek');
+    apply();
+  });
+  // En pantallas táctiles no hay «pasar el ratón»: un toque lo despliega
+  // y tocar fuera (o elegir una sección) lo vuelve a cerrar.
+  let touch = false;
+  side.addEventListener('pointerdown', (ev) => { touch = ev.pointerType === 'touch'; });
+  side.addEventListener('click', (ev) => {
+    if (!touch || !document.body.classList.contains('rail')) return;
+    if (!side.classList.contains('peek')) {
+      // Primer toque: solo despliega el menú.
+      side.classList.add('peek');
+      ev.preventDefault();
+      ev.stopPropagation();
+    } else if (ev.target.closest('a.nav-item')) {
+      setTimeout(() => side.classList.remove('peek'), 50);
+    }
+  }, true);
+  document.addEventListener('pointerdown', (ev) => {
+    if (!side.contains(ev.target)) side.classList.remove('peek');
+  });
+  apply();
+}
+
 export function initNav(cfg) {
+  initSidebar(cfg);
   config = cfg;
   for (const el of $$('[data-icon]')) {
     el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[el.dataset.icon] || ''}</svg>`;

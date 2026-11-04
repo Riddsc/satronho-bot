@@ -61,6 +61,7 @@ const DEFAULTS = {
     stripNumbers: false, // no leer números (ni los escondidos en palabras)
     antiSpam: true, // no repetir el mismo mensaje de la misma persona
     // Bots del chat (BotRix, Nightbot…): no se leen. botNames suma nombres propios.
+    pitch: 1, // tono de la voz (0.6 grave – 1.6 aguda); no cambia la velocidad
     mainVoice: '', // voz principal elegida a mano (vacío = la de Piper); p. ej. 'ms:es-CO-SalomeNeural'
     ignoreBots: true,
     ignoreBotSuffix: true, // también cualquier nombre que termine en «bot»
@@ -95,7 +96,8 @@ const DEFAULTS = {
   secrets: { kick: {}, starvios: {} },
   windowsVoices: [], // nombres de las voces de Windows en español (los manda el panel)
   // Cómo se ve el panel (solo en tu PC).
-  appearance: { theme: 'noche', accent: '#ffb23e', font: 'bricolage-grotesque', size: 'm', corners: 'redondas' },
+  // sidebar: 'compact' (solo iconos; se despliega al pasar el ratón) o 'open'.
+  appearance: { theme: 'noche', accent: '#ffb23e', font: 'bricolage-grotesque', size: 'm', corners: 'redondas', sidebar: 'compact' },
   // Cómo se ven los overlays en OBS.
   overlayStyle: { font: 'bricolage-grotesque', accent: '#ffb23e', text: '#ffffff', card: 'solid', corners: 'round', scale: 1, sound: true, alertColors: 'type' },
   // Atajos de teclado globales (funcionan aunque estés en OBS o en un juego).
@@ -122,6 +124,7 @@ const DEFAULTS = {
     maxQueue: 30,
     volume: 60,
   },
+  musicPlaylists: [], // listas guardadas: { id, name, songs: [{ videoId, title, author, durationSec, thumbnail }] }
   stats: {
     idleMinutes: 30, // sin actividad este tiempo = el directo terminó
     usdPerDiamond: 0.005, // estimado de lo que recibe el creador por diamante
