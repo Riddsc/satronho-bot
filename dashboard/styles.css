@@ -1283,3 +1283,17 @@ kbd { font: 700 .82em var(--font); padding: 3px 8px; border-radius: 6px; backgro
 .ar-pick-bar .mz-search-form input { flex: 1; min-width: 0; height: 38px; }
 .ar-side .row.tight { flex-wrap: nowrap; } .ar-side .row.tight select { flex: 1; min-width: 0; }
 .ar-pick-bar .ic:empty::before { content: '⌕'; color: var(--muted); font-size: 16px; }
+.who-box h4 .who-read { margin: 0 0 0 auto; }
+.who-box:has(.who-read input:not(:checked)) > :not(h4) { opacity: .4; pointer-events: none; }
+.who-gift { margin: 10px 8px 0; padding-top: 8px; border-top: 1px dashed var(--edge); }
+.who-gift summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--muted); }
+.who-gift[open] summary { color: var(--ink); margin-bottom: 8px; }
+
+/* ---------- Música: permisos y comandos (0.13) ---------- */
+.mcmds { display: grid; gap: 6px; }
+.mcmd { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(150px, 1fr); gap: 10px; align-items: center; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--edge); background: color-mix(in srgb, var(--panel-2) 55%, transparent); }
+.mcmd .switch { margin: 0; }
+.mcmd b { display: block; font-size: 13.5px; } .mcmd small { color: var(--muted); font-size: 12px; }
+.mcmd input.mcmd-names { height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--edge); background: var(--well); color: var(--g); font: 600 13px ui-monospace, Consolas, monospace; }
+.mcmd.off { opacity: .55; }
+.mcopy .who-opt { margin-bottom: 4px; }

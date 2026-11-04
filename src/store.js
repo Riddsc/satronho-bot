@@ -150,6 +150,23 @@ const DEFAULTS = {
     maxDurationMin: 10,
     maxQueue: 30,
     volume: 60,
+    cooldownSec: 30, // espera entre pedidos de una misma persona
+    // Quién puede pedir en cada plataforma (mismos modos que la voz).
+    who: { tiktok: { mode: 'all', teamMinLevel: 1 }, kick: { mode: 'all' }, twitch: { mode: 'all' }, starvios: { mode: 'all' } },
+    // Comandos: nombres (sin «!») y si están activos.
+    commands: {
+      play: { names: ['play', 'temita'], enabled: true },
+      skip: { names: ['skip'], enabled: true },
+      remove: { names: ['quitar'], enabled: true },
+      queue: { names: ['cola'], enabled: true },
+      now: { names: ['sonando', 'cancion'], enabled: true },
+      mine: { names: ['mia'], enabled: true },
+      vote: { names: ['votar'], enabled: true },
+    },
+    voteSkip: { enabled: true, needed: 3 },
+    modsSkip: true, // tú y tus moderadores saltan cualquiera sin votar
+    // Derechos de autor: off · avoid (evita videos oficiales de sellos) · free (solo música libre)
+    copyright: 'avoid',
   },
   musicPlaylists: [], // listas guardadas: { id, name, songs: [{ videoId, title, author, durationSec, thumbnail }] }
   stats: {

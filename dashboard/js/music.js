@@ -169,9 +169,9 @@ function render() {
 function updateNono() {
   const on = Object.entries(config.music.platforms).filter(([, v]) => v).map(([k]) => PLATFORM_NAMES[k]);
   if (!state.enabled) return setBubble('nono', 'Las peticiones están cerradas. Actívalas cuando quieras que el chat ponga música.');
-  if (!on.length) return setBubble('nono', 'No escucho ninguna plataforma. Elige en <b>Comandos y ajustes</b> dónde pueden pedir música.');
+  if (!on.length) return setBubble('nono', 'No escucho ninguna plataforma. Elige en <b>Permisos y comandos</b> dónde pueden pedir música.');
   if (state.current) return setBubble('nono', `Suena «${esc(state.current.title)}». ${state.queue.length ? `Quedan ${state.queue.length} en cola.` : 'La cola está vacía.'}`);
-  setBubble('nono', `En ${on.join(' y ')} escriben <code>!play</code> o <code>!temita</code> y la canción. También puedes buscar aquí y poner tus listas.`);
+  setBubble('nono', `En ${new Intl.ListFormat('es', { type: 'conjunction' }).format(on)} escriben <code>!play</code> o <code>!temita</code> y la canción. También puedes buscar aquí y poner tus listas.`);
 }
 
 export function onMusic(s) {
@@ -336,6 +336,56 @@ export function initMusic(cfg, { clientId, sendWs }) {
       updateNono();
     });
   }
+  initMusicPermissions();
   render();
   renderActivity();
+}
+
+// ---------- Permisos y comandos ----------
+const DEFAULT_CMDS = { play: ['play', 'temita'], skip: ['skip'], remove: ['quitar'], queue: ['cola'], now: ['sonando', 'cancion'], mine: ['mia'], vote: ['votar'] };
+function initMusicPermissions() {
+  const m = config.music;
+  m.who ??= {};
+  m.commands ??= {};
+  const fillWho = () => {
+    for (const el of $$('[data-mwho]')) el.checked = (m.who[el.dataset.mwho]?.mode || 'all') === el.value;
+    const lv = $('[data-mlevel]');
+    if (lv) { lv.hidden = !['team', 'team-gift'].includes(m.who.tiktok?.mode); $('[data-mlevel-in]').value = m.who.tiktok?.teamMinLevel || 1; }
+    for (const el of $$('[data-mcopy]')) el.checked = (m.copyright || 'avoid') === el.value;
+  };
+  fillWho();
+  for (const row of $$('[data-mcmd]')) {
+    const k = row.dataset.mcmd;
+    const c = m.commands[k] || {};
+    row.querySelector('[data-mcmd-on]').checked = c.enabled !== false;
+    row.querySelector('[data-mcmd-names]').value = (c.names?.length ? c.names : DEFAULT_CMDS[k]).map((n) => `!${n}`).join(', ');
+    row.classList.toggle('off', c.enabled === false);
+  }
+  const page = $('[data-tabpanel="permisos"]');
+  if (!page) return;
+  page.addEventListener('change', (ev) => {
+    const el = ev.target;
+    if (el.dataset.mwho) {
+      const pl = el.dataset.mwho;
+      m.who[pl] = { ...(m.who[pl] || {}), mode: el.value };
+      saveConfig({ music: { who: { [pl]: { mode: el.value } } } });
+      fillWho();
+    } else if (el.matches('[data-mlevel-in]')) {
+      const v = Math.max(1, Number(el.value) || 1);
+      m.who.tiktok = { ...(m.who.tiktok || {}), teamMinLevel: v };
+      saveConfig({ music: { who: { tiktok: { teamMinLevel: v } } } });
+    } else if (el.matches('[data-mcopy]')) {
+      m.copyright = el.value;
+      saveConfig({ music: { copyright: el.value } });
+      sayFor('nono', { avoid: 'Listo: evito los videos oficiales de sellos.', free: 'Solo pondré música libre de derechos.', off: 'Pongo lo que pidan. Ojo con los reclamos por derechos de autor.' }[el.value], 5000, el.value === 'off' ? 'warn' : 'ok');
+    } else if (el.closest('[data-mcmd]')) {
+      const row = el.closest('[data-mcmd]');
+      const k = row.dataset.mcmd;
+      const names = row.querySelector('[data-mcmd-names]').value.split(',').map((x) => x.trim().replace(/^!/, '').toLowerCase()).filter(Boolean);
+      const enabled = row.querySelector('[data-mcmd-on]').checked;
+      m.commands[k] = { names: names.length ? names : DEFAULT_CMDS[k], enabled };
+      row.classList.toggle('off', !enabled);
+      saveConfig({ music: { commands: { [k]: m.commands[k] } } });
+    }
+  });
 }

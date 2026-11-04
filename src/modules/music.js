@@ -1,22 +1,23 @@
-// Música pedida por el chat.
+// Música pedida por el chat (Ñoño).
 //
-// Comandos (en Kick, Starvios y Twitch, sin importar mayúsculas):
-//   !play <canción o enlace>    pide una canción
-//   !temita <canción o enlace>  lo mismo
-//   !skip                       salta la canción que suena, SOLO si la pidió él
-//   !quitar                     quita de la cola su última canción pedida
-//                               (si su canción ya está sonando, la salta)
-//
-// El streamer controla todo desde el panel: pausar, saltar cualquiera,
-// quitar cualquiera, vaciar la cola, volumen y añadir canciones.
-// No podemos responder en el chat (la conexión es de solo lectura), así
-// que los avisos salen en el panel y en el overlay "Sonando ahora".
+// Comandos (los nombres se cambian en Música → Permisos y comandos):
+//   !play / !temita <canción o enlace>  pide una canción
+//   !skip      salta la que suena si la pidió él (tú y tus moderadores: cualquiera)
+//   !quitar    quita de la cola su última canción
+//   !cola      dice qué suena y qué sigue
+//   !sonando   dice qué suena y quién la pidió
+//   !mia       dice en qué puesto va su canción
+//   !votar     vota para saltar la que suena; con N votos se salta
+// Quién puede pedir se elige por plataforma (mismos roles que la voz).
+// Los avisos salen en el panel, en el overlay y, con el Chat Bot, en el chat.
 
-const PLAY = new Set(['play', 'temita']);
-const SKIP = new Set(['skip']);
-const REMOVE = new Set(['quitar']);
+const { whoReason } = require('./roles');
 
-const strip = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const DEFAULT_CMDS = {
+  play: ['play', 'temita'], skip: ['skip'], remove: ['quitar'], queue: ['cola'], now: ['sonando', 'cancion'], mine: ['mia'], vote: ['votar'],
+};
+
+const strip = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
   let current = null;
@@ -28,6 +29,20 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
   const pending = new Map(); // búsquedas en curso por usuario
 
   const cfg = () => store.get('music');
+  const lastAsk = new Map(); // persona -> ts del último pedido
+  let votes = new Set(); // quién votó para saltar la que suena
+  // Alias de cada comando (sin «!», en minúsculas y sin tildes).
+  function cmdOf(word) {
+    const cmds = cfg().commands || {};
+    for (const [k, def] of Object.entries(DEFAULT_CMDS)) {
+      const c = cmds[k] || {};
+      if (c.enabled === false) continue;
+      const names = (c.names?.length ? c.names : def).map((n) => strip(String(n).replace(/^!/, '')));
+      if (names.includes(word)) return k;
+    }
+    return '';
+  }
+  const fmt = (sec) => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
   const keyOf = (user, platform) => `${platform}:${user.id}`;
 
   const playlists = () => store.get('musicPlaylists') || [];
@@ -48,6 +63,7 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
     }
     current = queue.shift() || null;
     paused = false;
+    votes = new Set();
     if (current) onSong(current);
     publish();
   }
@@ -66,11 +82,17 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
       return notice(`${user.name} ya tiene ${mine} canción(es) pedidas (máximo ${c.maxPerUser})`, 'warn', user.name, platform);
     }
     if (queue.length >= c.maxQueue) return notice('La cola está llena', 'warn', user.name, platform);
+    const wait = Number(c.cooldownSec) || 0;
+    if (key !== 'panel:streamer' && wait && Date.now() - (lastAsk.get(key) || 0) < wait * 1000) {
+      const left = Math.ceil((wait * 1000 - (Date.now() - lastAsk.get(key))) / 1000);
+      return notice(`${user.name}: espera ${left} s para pedir otra`, 'warn', user.name, platform);
+    }
+    lastAsk.set(key, Date.now());
 
     pending.set(key, (pending.get(key) || 0) + 1);
     broadcast('music-notice', { text: `Buscando «${query.slice(0, 60)}» para ${user.name}…`, kind: 'busy', user: user.name, platform, ts: Date.now() });
     try {
-      const song = await resolver.resolve(query, { maxDurationSec: c.maxDurationMin * 60 });
+      const song = await resolver.resolve(query, { maxDurationSec: c.maxDurationMin * 60, copyright: c.copyright || 'avoid' });
       if (current?.videoId === song.videoId || queue.some((s) => s.videoId === song.videoId)) {
         return notice(`«${song.title}» ya está en la cola`, 'warn', user.name, platform);
       }
@@ -89,12 +111,12 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
     }
   }
 
-  function skipOwn(user, platform) {
+  function skipOwn(user, platform, isMod) {
     if (!current) return;
-    if (current.requesterKey !== keyOf(user, platform)) {
-      return notice(`${user.name}: solo puedes saltar tu propia canción`, 'warn', user.name, platform);
+    if (!isMod && current.requesterKey !== keyOf(user, platform)) {
+      return notice(`${user.name}: solo puedes saltar tu propia canción (o vota con !${(cfg().commands?.vote?.names || DEFAULT_CMDS.vote)[0]})`, 'warn', user.name, platform);
     }
-    notice(`${user.name} saltó su canción`, 'info', user.name, platform);
+    notice(isMod && current.requesterKey !== keyOf(user, platform) ? `${user.name} saltó «${current.title}»` : `${user.name} saltó su canción`, 'info', user.name, platform);
     playNext();
   }
 
@@ -114,15 +136,61 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
     notice(`${user.name}: no tienes canciones en la cola`, 'warn', user.name, platform);
   }
 
+  function sayQueue(user, platform) {
+    if (!current && !queue.length) return notice('No suena nada. Pide una con !play', 'info', user.name, platform);
+    const next = queue.slice(0, 3).map((s, i) => `${i + 1}) ${s.title.slice(0, 40)} (${s.requester})`).join(' · ');
+    notice(`Sonando: ${current ? current.title.slice(0, 50) : '—'}${next ? ` · Siguen: ${next}` : ''}${queue.length > 3 ? ` · y ${queue.length - 3} más` : ''}`, 'info', user.name, platform);
+  }
+  function sayNow(user, platform) {
+    if (!current) return notice('No suena nada ahora mismo', 'info', user.name, platform);
+    notice(`Sonando: «${current.title}» de ${current.author || '—'}, la pidió ${current.requester} · youtu.be/${current.videoId}`, 'info', user.name, platform);
+  }
+  function sayMine(user, platform) {
+    const key = keyOf(user, platform);
+    if (current?.requesterKey === key) return notice(`${user.name}: ¡tu canción está sonando!`, 'ok', user.name, platform);
+    const i = queue.findIndex((s) => s.requesterKey === key);
+    if (i < 0) return notice(`${user.name}: no tienes canciones en la cola`, 'info', user.name, platform);
+    const wait = (current ? Math.max(0, (current.durationSec || 0) - 0) : 0) + queue.slice(0, i).reduce((a, s) => a + (s.durationSec || 0), 0);
+    notice(`${user.name}: «${queue[i].title.slice(0, 50)}» va de ${i + 1} en la cola (en unos ${Math.max(1, Math.round(wait / 60))} min)`, 'info', user.name, platform);
+  }
+  function vote(user, platform, isMod) {
+    if (!current) return;
+    const c = cfg();
+    if (c.voteSkip?.enabled === false) return;
+    if (isMod) { notice(`${user.name} saltó «${current.title}»`, 'info', user.name, platform); return playNext(); }
+    const key = keyOf(user, platform);
+    if (votes.has(key)) return;
+    votes.add(key);
+    const need = Math.max(2, Number(c.voteSkip?.needed) || 3);
+    if (votes.size >= need) {
+      notice(`El chat votó y se saltó «${current.title}»`, 'info', user.name, platform);
+      return playNext();
+    }
+    notice(`${user.name} votó para saltar (${votes.size}/${need})`, 'info', user.name, platform);
+  }
+
   function handleEvent(e) {
     if (e.type !== 'chat') return;
-    if (!cfg().platforms[e.platform]) return;
+    const c = cfg();
+    if (!c.platforms[e.platform]) return;
     const m = e.message.trim().match(/^!(\S+)\s*([\s\S]*)$/);
     if (!m) return;
-    const cmd = strip(m[1]);
-    if (PLAY.has(cmd)) request(e.user, e.platform, m[2]);
-    else if (SKIP.has(cmd)) skipOwn(e.user, e.platform);
-    else if (REMOVE.has(cmd)) removeOwn(e.user, e.platform);
+    const cmd = cmdOf(strip(m[1]));
+    if (!cmd) return;
+    // Quién puede usar la música en esta plataforma (las consultas son libres).
+    if (['play', 'skip', 'remove', 'vote'].includes(cmd)) {
+      const rule = c.who?.[e.platform] || {};
+      const why = whoReason(e, rule.mode || 'all', { teamMinLevel: rule.teamMinLevel, sentGift: Boolean(store.get('ttsAllowed')?.[e.user.id]), giftName: store.get('tts')?.tiktokGate?.giftNames?.[0] });
+      if (why) return notice(`${e.user.name}: no puedes pedir música (${why})`, 'warn', e.user.name, e.platform);
+    }
+    const isMod = !whoReason(e, 'mods');
+    if (cmd === 'play') request(e.user, e.platform, m[2]);
+    else if (cmd === 'skip') skipOwn(e.user, e.platform, isMod && c.modsSkip !== false);
+    else if (cmd === 'remove') removeOwn(e.user, e.platform);
+    else if (cmd === 'queue') sayQueue(e.user, e.platform);
+    else if (cmd === 'now') sayNow(e.user, e.platform);
+    else if (cmd === 'mine') sayMine(e.user, e.platform);
+    else if (cmd === 'vote') vote(e.user, e.platform, isMod && c.modsSkip !== false);
   }
 
   // ---------- Controles del streamer ----------

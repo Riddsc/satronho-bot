@@ -202,8 +202,8 @@
 
 <!-- ---------- Chat en vivo (Samy) ---------- -->
 <section class="page" id="page-actividad" data-page="actividad" hidden>
-  <div class="ph"><div class="t"><small>Tu directo</small><h1>Chat en vivo</h1><p>Todas tus plataformas en un solo chat, con 🔊 si Troya lo leyó o 🔇 y el motivo si no.</p></div>
-    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Pasa el ratón por un mensaje para leerlo ya, silenciar a esa persona o darle su propia voz.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
+  <div class="ph"><div class="t"><small>Tu directo</small><h1>Chat en vivo</h1><p>Todas tus plataformas en un solo chat, con 🔊 si se leyó en voz alta o 🔇 y el motivo si no.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Aquí llega todo tu directo. Pasa el ratón por un mensaje para leerlo en voz alta, quitarle la voz a esa persona o darle una voz propia.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
   <div class="lc-layout" id="lc-layout">
     <div class="card lc-main">
       <div class="lc-bar">
@@ -235,7 +235,7 @@
       <h5>Menos ruido</h5>
       <label class="switch"><input type="checkbox" data-lcp="hideCommands"><span></span> <em class="sw-t">Ocultar comandos<small>Mensajes que empiezan con !</small></em></label>
       <label class="switch"><input type="checkbox" data-lcp="hideBots"><span></span> <em class="sw-t">Ocultar bots<small>BotRix, Nightbot y parecidos</small></em></label>
-      <label class="switch"><input type="checkbox" data-lcp="hideMuted"><span></span> <em class="sw-t">Ocultar lo que Troya no lee</em></label>
+      <label class="switch"><input type="checkbox" data-lcp="hideMuted"><span></span> <em class="sw-t">Ocultar los mensajes sin voz<small>Los que no se leen en voz alta</small></em></label>
       <label class="switch"><input type="checkbox" data-lcp="showEvents"><span></span> <em class="sw-t">Mostrar seguidores, suscripciones y compartidos</em></label>
       <label class="switch"><input type="checkbox" data-lcp="showStickers"><span></span> <em class="sw-t">Mostrar stickers</em></label>
       <label class="switch"><input type="checkbox" data-lcp="showJoins"><span></span> <em class="sw-t">Mostrar quién llega<small>Puede ser mucho en directos grandes</small></em></label>
@@ -289,26 +289,10 @@
     </div>
     <div class="tabpanel" data-tabpanel="quien" hidden>
       <div class="cols c2">
-        <div class="card"><h3 class="card-title">Qué leo</h3>
-          <label class="switch"><input type="checkbox" data-tts="read.kick"><span></span> Todo el chat de Kick</label>
-          <label class="switch"><input type="checkbox" data-tts="read.starvios"><span></span> Todo el chat de Starvios</label>
-          <label class="switch"><input type="checkbox" data-tts="read.twitch"><span></span> Todo el chat de Twitch</label>
-          <label class="switch"><input type="checkbox" data-tts="read.tiktok"><span></span> Chat de TikTok</label>
-          <label class="switch"><input type="checkbox" data-tts="sayName"><span></span> Decir el nombre («Fulano dice…»)</label>
-          <label class="switch"><input type="checkbox" data-tts="skipCommands"><span></span> No leer comandos (mensajes que empiezan con !)</label>
-</div>
-        <div class="card"><h3 class="card-title">«Quiéreme» en TikTok</h3>
-          <p class="hint">Quien te manda este regalo queda anotado aquí para siempre. Sirve para las reglas de TikTok que lo piden.</p>
-          <div class="two">
-            <label class="field"><span>Regalo (nombres separados por coma)</span><input data-tts="tiktokGate.giftNames" data-list="comma"></label>
-            <label class="field"><span>Con «Solo quien mandó Quiéreme», el permiso dura</span><select data-tts="tiktokGate.hours" data-num><option value="3">3 horas</option><option value="12">12 horas</option><option value="24">24 horas</option><option value="168">7 días</option><option value="0">Siempre</option></select></label>
-          </div>
-          <div class="row space mt"><span class="hint">Ya te mandaron Quiéreme:</span><button type="button" class="btn small ghost" id="allowed-clear">Borrar la lista</button></div>
-          <ul id="allowed-list" class="mini-list"></ul></div>
         <div class="card span2" id="tts-who"><h3 class="card-title">Quién puede hablar</h3>
-          <p class="hint">Elige a quién leo en cada plataforma. Tú y tus moderadores siempre pasan, y lo que pongas en <b>Espectadores especiales</b> manda sobre estas reglas.</p>
+          <p class="hint">Enciende el chat que quieres que lea y elige a quién. Tú y tus moderadores siempre pasan, y lo que pongas en <b>Espectadores especiales</b> manda sobre estas reglas.</p>
           <div class="who-grid">
-            <section class="who-box" data-who="tiktok"><h4><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span>TikTok</h4>
+            <section class="who-box" data-who="tiktok"><h4><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span>TikTok<label class="switch who-read" title="Leer este chat"><input type="checkbox" data-tts="read.tiktok"><span></span></label></h4>
               <label class="who-opt"><input type="radio" name="who-tiktok" value="all" data-tts="who.tiktok.mode"><span><b>Todos</b></span></label>
               <label class="who-opt"><input type="radio" name="who-tiktok" value="followers" data-tts="who.tiktok.mode"><span><b>Quienes te siguen</b></span></label>
               <label class="who-opt"><input type="radio" name="who-tiktok" value="subs" data-tts="who.tiktok.mode"><span><b>Suscriptores</b></span></label>
@@ -317,20 +301,26 @@
               <label class="who-opt"><input type="radio" name="who-tiktok" value="gift" data-tts="who.tiktok.mode"><span><b>Solo quien mandó Quiéreme</b><small>El permiso dura lo que elijas en «Quiéreme en TikTok»</small></span></label>
               <label class="who-opt"><input type="radio" name="who-tiktok" value="mods" data-tts="who.tiktok.mode"><span><b>Solo moderadores</b></span></label>
               <label class="field who-level"><span>Nivel mínimo en tu equipo</span><input type="number" min="1" max="50" step="1" data-tts="who.tiktok.teamMinLevel" data-num></label>
+              <details class="who-gift"><summary>Regalo «Quiéreme» y quién ya lo mandó</summary>
+                <label class="field"><span>Nombres del regalo (separados por coma)</span><input data-tts="tiktokGate.giftNames" data-list="comma"></label>
+                <label class="field who-hours"><span>Con «Solo quien mandó Quiéreme», el permiso dura</span><select data-tts="tiktokGate.hours" data-num><option value="3">3 horas</option><option value="12">12 horas</option><option value="24">24 horas</option><option value="168">7 días</option><option value="0">Siempre</option></select></label>
+                <div class="row space mt"><span class="hint">Ya te lo mandaron:</span><button type="button" class="btn small ghost" id="allowed-clear">Borrar la lista</button></div>
+                <ul id="allowed-list" class="mini-list"></ul>
+              </details>
             </section>
-            <section class="who-box" data-who="kick"><h4><span class="pl plogo" data-logo="kick" aria-hidden="true"></span>Kick</h4>
+            <section class="who-box" data-who="kick"><h4><span class="pl plogo" data-logo="kick" aria-hidden="true"></span>Kick<label class="switch who-read" title="Leer este chat"><input type="checkbox" data-tts="read.kick"><span></span></label></h4>
               <label class="who-opt"><input type="radio" name="who-kick" value="all" data-tts="who.kick.mode"><span><b>Todos</b></span></label>
               <label class="who-opt"><input type="radio" name="who-kick" value="subs" data-tts="who.kick.mode"><span><b>Suscriptores</b><small>También VIP, OG y fundadores</small></span></label>
               <label class="who-opt"><input type="radio" name="who-kick" value="vip" data-tts="who.kick.mode"><span><b>VIP</b></span></label>
               <label class="who-opt"><input type="radio" name="who-kick" value="mods" data-tts="who.kick.mode"><span><b>Solo moderadores</b></span></label>
             </section>
-            <section class="who-box" data-who="twitch"><h4><span class="pl" style="background:#9146ff;color:#fff" aria-hidden="true">Tw</span>Twitch</h4>
+            <section class="who-box" data-who="twitch"><h4><span class="pl" style="background:#9146ff;color:#fff" aria-hidden="true">Tw</span>Twitch<label class="switch who-read" title="Leer este chat"><input type="checkbox" data-tts="read.twitch"><span></span></label></h4>
               <label class="who-opt"><input type="radio" name="who-twitch" value="all" data-tts="who.twitch.mode"><span><b>Todos</b></span></label>
               <label class="who-opt"><input type="radio" name="who-twitch" value="subs" data-tts="who.twitch.mode"><span><b>Suscriptores</b><small>También VIP y fundadores</small></span></label>
               <label class="who-opt"><input type="radio" name="who-twitch" value="vip" data-tts="who.twitch.mode"><span><b>VIP</b></span></label>
               <label class="who-opt"><input type="radio" name="who-twitch" value="mods" data-tts="who.twitch.mode"><span><b>Solo moderadores</b></span></label>
             </section>
-            <section class="who-box" data-who="starvios"><h4><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span>Starvios</h4>
+            <section class="who-box" data-who="starvios"><h4><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span>Starvios<label class="switch who-read" title="Leer este chat"><input type="checkbox" data-tts="read.starvios"><span></span></label></h4>
               <label class="who-opt"><input type="radio" name="who-starvios" value="all" data-tts="who.starvios.mode"><span><b>Todos</b></span></label>
               <p class="hint">Starvios todavía no le dice a la app quién es suscriptor o moderador, así que aquí leo a todos.</p>
             </section>
@@ -351,6 +341,8 @@
       <div class="cols c2">
         <div class="card"><h3 class="card-title">Limpieza del texto</h3>
           <p class="hint">Los emojis y emotes nunca se leen. Esto es lo demás:</p>
+          <label class="switch"><input type="checkbox" data-tts="sayName"><span></span> Decir el nombre («Fulano dice…»)</label>
+          <label class="switch"><input type="checkbox" data-tts="skipCommands"><span></span> No leer comandos (mensajes que empiezan con !)</label>
           <label class="field"><span>Enlaces</span><select data-tts="links"><option value="say">Decir «enlace»</option><option value="remove">Quitarlos sin decir nada</option></select></label>
           <label class="switch"><input type="checkbox" data-tts="stripNumbers"><span></span> No leer números (tampoco los escondidos, como «s3x0»)</label>
           <label class="switch"><input type="checkbox" data-tts="stripMentions"><span></span> Quitar las @menciones del mensaje</label>
@@ -426,6 +418,8 @@
 <section class="page" id="page-musica" data-page="musica" hidden>
   <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Música</h1><p>Tu chat pide canciones con <code>!play</code> o <code>!temita</code>; Ñoño las pone en orden.</p></div>
     <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono"></p><span class="guide" data-avatar="nono" data-size="hero"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="musica"><button data-tab="consola">Consola</button><button data-tab="permisos">Permisos y comandos</button></div>
+  <div class="tabpanel" data-tabpanel="consola">
   <div class="mz" id="card-musica" style="--g:#4fd1c5">
     <!-- Sonando ahora -->
     <div class="card mz-now">
@@ -474,15 +468,38 @@
           <ul class="mz-pls" id="mz-pls"></ul></div>
         <div class="card"><h3 class="card-title">Actividad de música</h3>
           <ul class="mz-activity" id="mz-activity"><li class="empty">Sin actividad todavía.</li></ul></div>
-        <div class="card"><details><summary>Comandos y ajustes de música</summary>
-          <div class="cmds mt">
-            <div><code>!play</code> <code>!temita</code><span>+ canción o enlace: pide una canción</span></div>
-            <div><code>!skip</code><span>salta la que suena, solo si la pidió él</span></div>
-            <div><code>!quitar</code><span>saca de la cola su última canción</span></div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="tabpanel" data-tabpanel="permisos" hidden style="--g:#4fd1c5">
+    <div class="card"><div class="row space"><h3 class="card-title">Quién puede pedir música</h3><label class="switch big" style="margin:0"><input type="checkbox" data-music="enabled"><span></span> Pedidos abiertos</label></div>
+      <p class="hint">Enciende cada plataforma y elige quién pide. Tú y tus moderadores siempre pueden. Las consultas (<code>!cola</code>, <code>!sonando</code>, <code>!mia</code>) son para todos.</p>
+      <div class="who-grid">
+        <section class="who-box" data-mbox="tiktok"><h4><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span>TikTok<label class="switch who-read" title="Pedidos en TikTok"><input type="checkbox" data-music="platforms.tiktok"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-tiktok" value="all" data-mwho="tiktok"><span><b>Todos</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="followers" data-mwho="tiktok"><span><b>Quienes te siguen</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="subs" data-mwho="tiktok"><span><b>Suscriptores</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="team" data-mwho="tiktok"><span><b>Miembros de tu equipo</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="team-gift" data-mwho="tiktok"><span><b>Miembros de tu equipo que ya te mandaron Quiéreme</b></span></label><label class="who-opt"><input type="radio" name="mwho-tiktok" value="mods" data-mwho="tiktok"><span><b>Solo moderadores</b></span></label><label class="field who-level" data-mlevel><span>Nivel mínimo en tu equipo</span><input type="number" min="1" max="50" data-mlevel-in></label></section>
+        <section class="who-box" data-mbox="kick"><h4><span class="pl plogo" data-logo="kick" aria-hidden="true"></span>Kick<label class="switch who-read" title="Pedidos en Kick"><input type="checkbox" data-music="platforms.kick"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-kick" value="all" data-mwho="kick"><span><b>Todos</b></span></label><label class="who-opt"><input type="radio" name="mwho-kick" value="subs" data-mwho="kick"><span><b>Suscriptores</b><small>También VIP, OG y fundadores</small></span></label><label class="who-opt"><input type="radio" name="mwho-kick" value="vip" data-mwho="kick"><span><b>VIP</b></span></label><label class="who-opt"><input type="radio" name="mwho-kick" value="mods" data-mwho="kick"><span><b>Solo moderadores</b></span></label></section>
+        <section class="who-box" data-mbox="twitch"><h4><span class="pl" style="background:#9146ff;color:#fff" aria-hidden="true">Tw</span>Twitch<label class="switch who-read" title="Pedidos en Twitch"><input type="checkbox" data-music="platforms.twitch"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-twitch" value="all" data-mwho="twitch"><span><b>Todos</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="subs" data-mwho="twitch"><span><b>Suscriptores</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="vip" data-mwho="twitch"><span><b>VIP</b></span></label><label class="who-opt"><input type="radio" name="mwho-twitch" value="mods" data-mwho="twitch"><span><b>Solo moderadores</b></span></label></section>
+        <section class="who-box" data-mbox="starvios"><h4><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span>Starvios<label class="switch who-read" title="Pedidos en Starvios"><input type="checkbox" data-music="platforms.starvios"><span></span></label></h4><label class="who-opt"><input type="radio" name="mwho-starvios" value="all" data-mwho="starvios"><span><b>Todos</b></span></label><p class="hint">Starvios no le dice a la app quién es quién: aquí pide todo el mundo.</p></section>
+      </div></div>
+    <div class="cols c2">
+      <div class="card"><h3 class="card-title">Comandos</h3>
+        <p class="hint">Cambia los nombres a tu gusto (sin «!», separados por coma) o apaga los que no quieras. MechaRidds responde en el chat si el Chat Bot está activo.</p>
+        <div class="mcmds" id="mcmds"><div class="mcmd" data-mcmd="play"><label class="switch"><input type="checkbox" data-mcmd-on><span></span></label><div><b>Pedir una canción</b><small>+ canción o enlace</small></div><input class="mcmd-names" data-mcmd-names placeholder="nombres separados por coma"></div><div class="mcmd" data-mcmd="skip"><label class="switch"><input type="checkbox" data-mcmd-on><span></span></label><div><b>Saltar</b><small>la suya; tú y tus moderadores, cualquiera</small></div><input class="mcmd-names" data-mcmd-names placeholder="nombres separados por coma"></div><div class="mcmd" data-mcmd="remove"><label class="switch"><input type="checkbox" data-mcmd-on><span></span></label><div><b>Quitar</b><small>saca su última canción de la cola</small></div><input class="mcmd-names" data-mcmd-names placeholder="nombres separados por coma"></div><div class="mcmd" data-mcmd="queue"><label class="switch"><input type="checkbox" data-mcmd-on><span></span></label><div><b>Ver la cola</b><small>qué suena y qué sigue</small></div><input class="mcmd-names" data-mcmd-names placeholder="nombres separados por coma"></div><div class="mcmd" data-mcmd="now"><label class="switch"><input type="checkbox" data-mcmd-on><span></span></label><div><b>Qué suena</b><small>título, artista y quién la pidió</small></div><input class="mcmd-names" data-mcmd-names placeholder="nombres separados por coma"></div><div class="mcmd" data-mcmd="mine"><label class="switch"><input type="checkbox" data-mcmd-on><span></span></label><div><b>Mi canción</b><small>en qué puesto va la suya</small></div><input class="mcmd-names" data-mcmd-names placeholder="nombres separados por coma"></div><div class="mcmd" data-mcmd="vote"><label class="switch"><input type="checkbox" data-mcmd-on><span></span></label><div><b>Votar para saltar</b><small>con varios votos se salta</small></div><input class="mcmd-names" data-mcmd-names placeholder="nombres separados por coma"></div></div></div>
+      <div style="display:grid;gap:16px;align-content:start">
+        <div class="card"><h3 class="card-title">Límites</h3>
+          <div class="two">
+            <label class="field"><span>Canciones en cola por persona</span><input type="number" min="1" max="10" data-music="maxPerUser"></label>
+            <label class="field"><span>Duración máxima (min)</span><input type="number" min="1" max="60" data-music="maxDurationMin"></label>
+            <label class="field"><span>Espera entre pedidos (s)</span><input type="number" min="0" max="900" step="5" data-music="cooldownSec"></label>
+            <label class="field"><span>Máximo en la cola</span><input type="number" min="5" max="200" data-music="maxQueue"></label>
+            <label class="field"><span>Votos para saltar</span><input type="number" min="2" max="50" data-music="voteSkip.needed"></label>
           </div>
-          <div class="checks mt"><label class="switch"><input type="checkbox" data-music="platforms.kick"><span></span> Kick</label><label class="switch"><input type="checkbox" data-music="platforms.starvios"><span></span> Starvios</label><label class="switch"><input type="checkbox" data-music="platforms.twitch"><span></span> Twitch</label><label class="switch"><input type="checkbox" data-music="platforms.tiktok"><span></span> TikTok</label></div>
-          <div class="two"><label class="field"><span>Canciones por persona</span><input type="number" min="1" max="10" data-music="maxPerUser"></label><label class="field"><span>Duración máxima (min)</span><input type="number" min="1" max="60" data-music="maxDurationMin"></label></div>
-        </details></div>
+          <label class="switch"><input type="checkbox" data-music="modsSkip"><span></span> Tú y tus moderadores saltan cualquier canción sin votar</label></div>
+        <div class="card mcopy"><h3 class="card-title">Derechos de autor</h3>
+          <p class="hint">Kick, TikTok y YouTube pueden silenciar o reclamar tu directo si suena música con derechos. Elige cuánto riesgo quieres correr.</p>
+          <label class="who-opt"><input type="radio" name="mcopy" value="avoid" data-mcopy><span><b>Evitar videos oficiales</b><small>Recomendado. Salta los de sellos (VEVO, «Topic», «Official Video»), que son los más vigilados. Baja el riesgo, pero no lo quita.</small></span></label>
+          <label class="who-opt"><input type="radio" name="mcopy" value="free" data-mcopy><span><b>Solo música libre</b><small>Busca versiones sin derechos (NCS, StreamBeats, «no copyright»). Lo más seguro, con menos variedad.</small></span></label>
+          <label class="who-opt"><input type="radio" name="mcopy" value="off" data-mcopy><span><b>Apagado</b><small>Pide lo que quieran. El riesgo de silencio o reclamo corre por tu cuenta.</small></span></label></div>
       </div>
     </div>
   </div>
