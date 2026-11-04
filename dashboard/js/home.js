@@ -30,7 +30,7 @@ export function homeVoice(config, engine) {
       <div class="kpi"><span>Estado</span><b>${t.enabled ? 'Activa' : 'Apagada'}</b><em>${q.queue} en cola${q.speaking ? ' · hablando' : ''}</em></div>
       <div class="kpi"><span>Voz principal</span><b style="font-size:1.05em">${esc(v ? v.label : 'Sin voz descargada')}</b><em>${installed} ${installed === 1 ? 'voz descargada' : 'voces descargadas'}</em></div>
     </div>
-    <p class="hint">${t.tiktokGate.enabled ? `TikTok: solo quien envía ${esc(t.tiktokGate.giftNames[0] || 'Quiéreme')}` : 'TikTok: lee a todos'} · ${t.filterProfanity ? 'filtro activo' : 'sin filtro'}</p>
+    <p class="hint">TikTok: ${esc({ all: 'lee a todos', followers: 'quienes te siguen', subs: 'suscriptores', team: 'tu equipo', 'team-gift': `tu equipo con ${t.tiktokGate.giftNames[0] || 'Quiéreme'}`, gift: `quien envía ${t.tiktokGate.giftNames[0] || 'Quiéreme'}`, mods: 'moderadores' }[t.who?.tiktok?.mode || 'all'] || 'lee a todos')} · ${t.filterProfanity ? 'filtro activo' : 'sin filtro'}</p>
     <a class="btn small ghost mt" href="#/voz">Abrir Voz del chat</a>`;
 }
 

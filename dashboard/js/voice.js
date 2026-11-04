@@ -331,15 +331,25 @@ export function updateTroya() {
   if (engine.busy) return setBubble('troya', `Estoy descargando ${esc(engine.busy.label)}… ya casi tengo voz nueva.`);
   if (!engine.installed) return setBubble('troya', 'Primero instala el motor de voz y luego descarga una voz en español. Se descarga una sola vez y después funciona sin internet.');
   if (!ready) return setBubble('troya', 'El motor ya está. Ahora descarga una voz (te recomiendo <b>Claude · México</b>) y pulsa <i>Usar</i>.');
-  const tiktok = config.tts.tiktokGate.enabled ? `en TikTok solo a quien te mande un <b>${gift}</b>` : 'en TikTok leo a todos';
-  setBubble('troya', `Leo todo el chat de Kick, Starvios y Twitch, y ${tiktok}. ${config.tts.filterProfanity ? 'Cambio las groserías por «piip».' : 'El filtro de groserías está apagado.'}`);
+  const mode = config.tts.who?.tiktok?.mode || 'all';
+  const tiktok = {
+    all: 'en TikTok leo a todos',
+    followers: 'en TikTok, a quienes te siguen',
+    subs: 'en TikTok, a tus suscriptores',
+    team: 'en TikTok, a los Miembros de tu equipo',
+    'team-gift': `en TikTok, a los Miembros de tu equipo que ya te mandaron <b>${gift}</b>`,
+    gift: `en TikTok, solo a quien te mande un <b>${gift}</b>`,
+    mods: 'en TikTok, solo a tus moderadores',
+  }[mode] || 'en TikTok leo a todos';
+  const others = ['kick', 'starvios', 'twitch'].every((p) => (config.tts.who?.[p]?.mode || 'all') === 'all') ? 'Leo todo el chat de Kick, Starvios y Twitch' : 'Leo el chat de Kick, Starvios y Twitch con tus reglas';
+  setBubble('troya', `${others}, y ${tiktok}. ${config.tts.filterProfanity ? 'Cambio las groserías por «piip».' : 'El filtro de groserías está apagado.'}`);
 }
 
 // ---------- Permisos de TikTok ----------
 export function renderAllowed(list) {
   const el = $('#allowed-list');
   if (!list.length) {
-    el.innerHTML = `<li class="empty">Nadie todavía. Cuando alguien envíe el regalo, aparecerá aquí.</li>`;
+    el.innerHTML = `<li class="empty">Nadie todavía. Cuando alguien te mande el regalo, aparecerá aquí.</li>`;
     return;
   }
   el.innerHTML = list
@@ -355,11 +365,20 @@ function fillForm() {
     let v = t;
     for (const p of path) v = v?.[p];
     if (el.type === 'checkbox') el.checked = Boolean(v);
+    else if (el.type === 'radio') el.checked = el.value === String(v ?? '');
     else if (Array.isArray(v)) el.value = el.tagName === 'TEXTAREA' ? v.join('\n') : v.join(', ');
     else el.value = v ?? '';
   }
   showLevels();
   $('#tricks-row').classList.toggle('disabled', !t.filterProfanity);
+  showWho();
+}
+
+// «Quién puede hablar»: el nivel del equipo solo se ve con las reglas de equipo.
+function showWho() {
+  const mode = config.tts.who?.tiktok?.mode || 'all';
+  const lvl = $('.who-level');
+  if (lvl) lvl.hidden = !['team', 'team-gift'].includes(mode);
 }
 
 function showLevels() {
@@ -417,6 +436,7 @@ export function initVoice(cfg) {
       saveConfig({ tts: partial });
       showLevels();
       $('#tricks-row').classList.toggle('disabled', !config.tts.filterProfanity);
+      showWho();
       updateTroya();
     });
   }

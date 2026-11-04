@@ -58,7 +58,9 @@ function createTts({ store, broadcast, engine, online = null }) {
 
   // ---------- Permisos de TikTok ----------
   function allowedList() {
-    const hours = Number(cfg().tiktokGate.hours) || 0;
+    // Las horas solo cuentan con la regla «Solo quien mandó Quiéreme»;
+    // en las demás, quien lo mandó queda en la lista para siempre.
+    const hours = cfg().who?.tiktok?.mode === 'gift' ? Number(cfg().tiktokGate.hours) || 0 : 0;
     const now = Date.now();
     return Object.entries(store.get('ttsAllowed'))
       .filter(([, v]) => !hours || now - v.ts < hours * 3600e3)
@@ -83,6 +85,45 @@ function createTts({ store, broadcast, engine, online = null }) {
   function isGateGift(e) {
     const names = cfg().tiktokGate.giftNames.map(normalizeName).filter(Boolean);
     return names.includes(normalizeName(e.extra?.giftName));
+  }
+
+  // ---------- Quién puede hablar (por plataforma) ----------
+  // Devuelve el motivo para no leer, o '' si puede hablar.
+  // Tú y tus moderadores siempre pasan.
+  const hasBadge = (e, re) => (e.extra?.badges || []).some((b) => re.test(b));
+  function notAllowedReason(e) {
+    const rule = cfg().who?.[e.platform] || { mode: 'all' };
+    const mode = rule.mode || 'all';
+    if (mode === 'all') return '';
+    const gift = cfg().tiktokGate.giftNames[0] || 'Quiéreme';
+    if (e.platform === 'tiktok') {
+      const r = e.extra?.roles || {};
+      if (r.host || r.mod) return '';
+      const minLevel = Math.max(1, Number(rule.teamMinLevel) || 1);
+      const inTeam = (r.team || 0) >= minLevel;
+      const sentGiftEver = Boolean(store.get('ttsAllowed')[e.user.id]);
+      const teamText = minLevel > 1 ? `Miembro de tu equipo nivel ${minLevel}+` : 'Miembro de tu equipo';
+      switch (mode) {
+        case 'followers': return r.follower || r.sub || r.team ? '' : 'no te sigue';
+        case 'subs': return r.sub ? '' : 'no es suscriptor';
+        case 'team': return inTeam ? '' : `no es ${teamText}`;
+        case 'team-gift':
+          if (!inTeam) return `no es ${teamText}`;
+          return sentGiftEver ? '' : `no te ha enviado ${gift}`;
+        case 'gift': return isAllowed(e.user) ? '' : `no ha enviado ${gift}`;
+        case 'mods': return 'solo leo a moderadores';
+        default: return '';
+      }
+    }
+    // Kick y Twitch traen insignias; Starvios no, así que ahí se lee a todos.
+    if (e.platform === 'starvios') return '';
+    const isMod = hasBadge(e, /^(moderator|broadcaster|owner)$/);
+    const isVip = isMod || hasBadge(e, /^vip$/);
+    const isSub = isVip || hasBadge(e, /^(subscriber|founder|og|sub_gifter)$/);
+    if (mode === 'subs') return isSub ? '' : 'no es suscriptor';
+    if (mode === 'vip') return isVip ? '' : 'no es VIP';
+    if (mode === 'mods') return isMod ? '' : 'solo leo a moderadores';
+    return '';
   }
 
   // ---------- Bots del chat ----------
@@ -165,8 +206,9 @@ function createTts({ store, broadcast, engine, online = null }) {
     if (special?.action === 'mute') return no('espectador silenciado');
     if (isBot(e)) return no('es un bot');
     if (c.skipCommands && e.message.trim().startsWith('!')) return no('es un comando');
-    if (e.platform === 'tiktok' && c.tiktokGate.enabled && special?.action !== 'allow' && !isAllowed(e.user)) {
-      return no(`no ha enviado ${c.tiktokGate.giftNames[0] || 'el regalo'}`);
+    if (special?.action !== 'allow') {
+      const why = notAllowedReason(e);
+      if (why) return no(why);
     }
 
     const key = keyOf(e.platform, e.user);

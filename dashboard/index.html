@@ -178,7 +178,7 @@
       </div>
     </article>
     <article class="platform pcard" data-platform="tiktok">
-      <div class="pcard-head"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span><div><b>TikTok LIVE</b><small>Alertas · Metas · Estadísticas · Voz de quien envía Quiéreme</small></div><span class="pstate">Desconectado</span></div>
+      <div class="pcard-head"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span><div><b>TikTok LIVE</b><small>Alertas · Metas · Estadísticas · Voz de tu equipo</small></div><span class="pstate">Desconectado</span></div>
       <div class="pcols">
       <div class="pcol">
         <h4>Escuchar</h4>
@@ -262,14 +262,44 @@
           <label class="switch"><input type="checkbox" data-tts="sayName"><span></span> Decir el nombre («Fulano dice…»)</label>
           <label class="switch"><input type="checkbox" data-tts="skipCommands"><span></span> No leer comandos (mensajes que empiezan con !)</label>
           <label class="switch"><input type="checkbox" data-tts="readMusicNotices"><span></span> Leer en voz alta los avisos de la música</label></div>
-        <div class="card"><h3 class="card-title">TikTok: solo quien envía un regalo</h3>
-          <label class="switch"><input type="checkbox" data-tts="tiktokGate.enabled"><span></span> Solo leer a quien envió el regalo</label>
+        <div class="card"><h3 class="card-title">«Quiéreme» en TikTok</h3>
+          <p class="hint">Quien te manda este regalo queda anotado aquí para siempre. Sirve para las reglas de TikTok que lo piden.</p>
           <div class="two">
             <label class="field"><span>Regalo (nombres separados por coma)</span><input data-tts="tiktokGate.giftNames" data-list="comma"></label>
-            <label class="field"><span>El permiso dura</span><select data-tts="tiktokGate.hours" data-num><option value="3">3 horas</option><option value="12">12 horas</option><option value="24">24 horas</option><option value="168">7 días</option><option value="0">Siempre</option></select></label>
+            <label class="field"><span>Con «Solo quien mandó Quiéreme», el permiso dura</span><select data-tts="tiktokGate.hours" data-num><option value="3">3 horas</option><option value="12">12 horas</option><option value="24">24 horas</option><option value="168">7 días</option><option value="0">Siempre</option></select></label>
           </div>
-          <div class="row space mt"><span class="hint">Con permiso de voz:</span><button type="button" class="btn small ghost" id="allowed-clear">Quitar a todos</button></div>
+          <div class="row space mt"><span class="hint">Ya te mandaron Quiéreme:</span><button type="button" class="btn small ghost" id="allowed-clear">Borrar la lista</button></div>
           <ul id="allowed-list" class="mini-list"></ul></div>
+        <div class="card span2" id="tts-who"><h3 class="card-title">Quién puede hablar</h3>
+          <p class="hint">Elige a quién leo en cada plataforma. Tú y tus moderadores siempre pasan, y lo que pongas en <b>Espectadores especiales</b> manda sobre estas reglas.</p>
+          <div class="who-grid">
+            <section class="who-box" data-who="tiktok"><h4><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span>TikTok</h4>
+              <label class="who-opt"><input type="radio" name="who-tiktok" value="all" data-tts="who.tiktok.mode"><span><b>Todos</b></span></label>
+              <label class="who-opt"><input type="radio" name="who-tiktok" value="followers" data-tts="who.tiktok.mode"><span><b>Quienes te siguen</b></span></label>
+              <label class="who-opt"><input type="radio" name="who-tiktok" value="subs" data-tts="who.tiktok.mode"><span><b>Suscriptores</b></span></label>
+              <label class="who-opt"><input type="radio" name="who-tiktok" value="team" data-tts="who.tiktok.mode"><span><b>Miembros de tu equipo</b><small>Llevan la insignia de tu equipo (club de fans)</small></span></label>
+              <label class="who-opt"><input type="radio" name="who-tiktok" value="team-gift" data-tts="who.tiktok.mode"><span><b>Miembros de tu equipo que ya te mandaron Quiéreme</b><small>Recomendado: una vez que lo mandan, quedan para siempre</small></span></label>
+              <label class="who-opt"><input type="radio" name="who-tiktok" value="gift" data-tts="who.tiktok.mode"><span><b>Solo quien mandó Quiéreme</b><small>El permiso dura lo que elijas en «Quiéreme en TikTok»</small></span></label>
+              <label class="who-opt"><input type="radio" name="who-tiktok" value="mods" data-tts="who.tiktok.mode"><span><b>Solo moderadores</b></span></label>
+              <label class="field who-level"><span>Nivel mínimo en tu equipo</span><input type="number" min="1" max="50" step="1" data-tts="who.tiktok.teamMinLevel" data-num></label>
+            </section>
+            <section class="who-box" data-who="kick"><h4><span class="pl plogo" data-logo="kick" aria-hidden="true"></span>Kick</h4>
+              <label class="who-opt"><input type="radio" name="who-kick" value="all" data-tts="who.kick.mode"><span><b>Todos</b></span></label>
+              <label class="who-opt"><input type="radio" name="who-kick" value="subs" data-tts="who.kick.mode"><span><b>Suscriptores</b><small>También VIP, OG y fundadores</small></span></label>
+              <label class="who-opt"><input type="radio" name="who-kick" value="vip" data-tts="who.kick.mode"><span><b>VIP</b></span></label>
+              <label class="who-opt"><input type="radio" name="who-kick" value="mods" data-tts="who.kick.mode"><span><b>Solo moderadores</b></span></label>
+            </section>
+            <section class="who-box" data-who="twitch"><h4><span class="pl" style="background:#9146ff;color:#fff" aria-hidden="true">Tw</span>Twitch</h4>
+              <label class="who-opt"><input type="radio" name="who-twitch" value="all" data-tts="who.twitch.mode"><span><b>Todos</b></span></label>
+              <label class="who-opt"><input type="radio" name="who-twitch" value="subs" data-tts="who.twitch.mode"><span><b>Suscriptores</b><small>También VIP y fundadores</small></span></label>
+              <label class="who-opt"><input type="radio" name="who-twitch" value="vip" data-tts="who.twitch.mode"><span><b>VIP</b></span></label>
+              <label class="who-opt"><input type="radio" name="who-twitch" value="mods" data-tts="who.twitch.mode"><span><b>Solo moderadores</b></span></label>
+            </section>
+            <section class="who-box" data-who="starvios"><h4><span class="pl plogo" data-logo="starvios" aria-hidden="true"></span>Starvios</h4>
+              <label class="who-opt"><input type="radio" name="who-starvios" value="all" data-tts="who.starvios.mode"><span><b>Todos</b></span></label>
+              <p class="hint">Starvios todavía no le dice a la app quién es suscriptor o moderador, así que aquí leo a todos.</p>
+            </section>
+          </div></div>
         <div class="card span2" id="tts-bots"><h3 class="card-title">Bots del chat</h3>
           <p class="hint">Los mensajes de bots como BotRix, Nightbot o StreamElements no se leen. En <b>Chat y actividad</b> verás 🔇 «es un bot».</p>
           <div class="two">
