@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.12.0",
+    "date": "2026-11-04",
+    "title": "Chat en vivo, quién puede hablar y estadísticas nuevas",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Chat en vivo: todas tus plataformas en un solo chat, con pestañas y contador, o una columna por plataforma. Se ven las insignias de moderador, suscriptor, VIP y el nivel en tu equipo de TikTok."
+      },
+      {
+        "type": "nuevo",
+        "text": "Pasa el ratón por un mensaje para leerlo ya, silenciar a esa persona o darle su propia voz. Al lado, una columna de regalos con el total de cada moneda."
+      },
+      {
+        "type": "nuevo",
+        "text": "Voz → Quién puede hablar: una regla para cada plataforma. En TikTok, por defecto, leo a los Miembros de tu equipo que ya te mandaron Quiéreme, una vez y para siempre."
+      },
+      {
+        "type": "nuevo",
+        "text": "Espectadores especiales en lista: foto, plataforma, nombre para leer, su voz con bandera, y su propia velocidad y tono."
+      },
+      {
+        "type": "nuevo",
+        "text": "Escudo anti-trampas: eliges los alfabetos que usa tu comunidad y qué hacer con los demás. También quita los símbolos raros."
+      },
+      {
+        "type": "nuevo",
+        "text": "Registro de voz en Voz → Probar: qué leyó Troya, con qué voz, y qué no leyó y por qué."
+      },
+      {
+        "type": "nuevo",
+        "text": "Estadísticas → Resumen: tus directos por periodo y plataforma, con el cambio frente al periodo anterior, una gráfica directo a directo, el perfil de tu último directo, regalos más enviados, quienes más te regalan y comparar dos directos."
+      },
+      {
+        "type": "mejora",
+        "text": "Eliges qué cosas que escribe tu bot se leen en voz alta: respuestas a comandos, avisos de música, mensajes automáticos o lo que escribes a mano."
+      },
+      {
+        "type": "arreglo",
+        "text": "En Kick, Twitch y Starvios, un espectador especial anotado por su nombre no se reconocía. Ya funciona."
+      }
+    ]
+  },
+  {
     "version": "0.11.0",
     "date": "2026-11-04",
     "title": "Voces arregladas y MechaRidds renovado",

@@ -206,7 +206,10 @@ class Store {
     this.data = deepMerge(DEFAULTS, saved);
     // 0.12: el filtro «solo quien envió Quiéreme» pasa a ser una regla de
     // «Quién puede hablar». Si lo tenías apagado, TikTok queda en «Todos».
-    if (saved.tts && !saved.tts.who && saved.tts.tiktokGate?.enabled === false) this.data.tts.who.tiktok.mode = 'all';
+    if (saved.tts && !saved.tts.who && saved.tts.tiktokGate?.enabled === false) {
+      const who = this.data.tts.who;
+      this.data.tts = { ...this.data.tts, who: { ...who, tiktok: { ...who.tiktok, mode: 'all' } } };
+    }
     this.saveTimer = null;
   }
 

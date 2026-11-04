@@ -425,6 +425,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     return s ? ok(res, { session: s }) : fail(res, 'Sesión no encontrada', 404);
   });
   app.get('/api/stats/all-time', (_req, res) => ok(res, { tops: stats.allTimeTops() }));
+  app.get('/api/stats/overview', (_req, res) => ok(res, { sessions: stats.overview(), usdPerDiamond: store.get('stats')?.usdPerDiamond }));
   app.post('/api/stats/end', (_req, res) => ok(res, { session: stats.end('manual') }));
 
   app.get('/api/tts/allowed',(_req, res) => ok(res, { allowed: tts.allowedList() }));

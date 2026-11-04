@@ -91,14 +91,22 @@ function createStats({ store, dataDir, broadcast }) {
       songs: s.songs,
       ttsRead: s.ttsRead,
       timeline: s.timeline,
+      // Por plataforma: mensajes, diamantes y personas que hablaron.
+      byPlatform: Object.values(s.users).reduce((acc, u) => {
+        const b = (acc[u.platform] ??= { messages: 0, diamonds: 0, chatters: 0 });
+        b.messages += u.messages || 0;
+        b.diamonds += u.diamonds || 0;
+        if (u.messages > 0) b.chatters += 1;
+        return acc;
+      }, {}),
       tops: {
-        gifters: top(s.users, 'diamonds'),
+        gifters: top(s.users, 'diamonds', 15),
         chatters: top(s.users, 'messages'),
         likers: top(s.users, 'likes'),
         gifts: Object.entries(s.gifts)
           .map(([name, g]) => ({ name, value: g.count, diamonds: g.diamonds }))
           .sort((a, b) => b.value - a.value)
-          .slice(0, 5),
+          .slice(0, 30),
       },
     };
   }
@@ -237,6 +245,14 @@ function createStats({ store, dataDir, broadcast }) {
     return history.map(({ timeline, tops, ...rest }) => rest);
   }
 
+  // Todos los directos con sus tops (sin la línea de tiempo) para el Resumen.
+  function overview() {
+    const list = history.map(({ timeline, ...rest }) => rest);
+    const now = summary(current);
+    if (now) { const { timeline, ...rest } = now; list.unshift(rest); }
+    return list;
+  }
+
   function getSession(id) {
     if (current && current.id === id) return summary(current);
     return history.find((h) => h.id === id) || null;
@@ -269,6 +285,7 @@ function createStats({ store, dataDir, broadcast }) {
     end,
     current: () => summary(current),
     listHistory,
+    overview,
     getSession,
     allTimeTops,
     stop,

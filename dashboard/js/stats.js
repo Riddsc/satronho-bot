@@ -3,6 +3,7 @@
 
 import { $, api, esc, toast, PLATFORM_NAMES } from './util.js';
 import { sayFor } from './guides.js';
+import { initOverview, refreshOverview } from './statsOverview.js';
 
 let live = null; // resumen del directo en curso (o null)
 let history = []; // resúmenes guardados (sin línea de tiempo)
@@ -231,8 +232,17 @@ export function onStats(summary) {
 
 export function onStatsHistory(list) {
   history = list;
+  refreshOverview();
   renderSelect();
   if (selected !== 'live') show();
+}
+
+// Abre un directo en «Directo por directo» (desde el Resumen).
+export function openSession(id) {
+  selected = id;
+  renderSelect();
+  location.hash = '#/estadisticas/directo';
+  show().catch((e) => toast(e.message));
 }
 
 export function initStats({ stats, statsHistory }) {
@@ -257,4 +267,5 @@ export function initStats({ stats, statsHistory }) {
     if (session) sayFor('juana', `Guardé tu directo: ${compact(session.diamonds)} diamantes y ${compact(session.counts.chat)} mensajes. ¡Buen trabajo!`, 9000, 'ok');
   });
   show().catch(() => {});
+  initOverview({ open: openSession });
 }

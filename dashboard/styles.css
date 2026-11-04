@@ -1146,3 +1146,65 @@ kbd { font: 700 .82em var(--font); padding: 3px 8px; border-radius: 6px; backgro
 .lc-feeds.split .lc-text { font-size: 13.5px; }
 .lc-feeds.split .lc-event { grid-template-columns: 20px minmax(0, 1fr); padding: 5px 7px; font-size: 12.5px; }
 .lc-feeds.split .lc-event time { display: none; }
+
+/* ---------- Estadísticas → Resumen (0.12) ---------- */
+.ov-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.ov-bar .seg button { display: inline-flex; align-items: center; gap: 6px; }
+.ov-bar .seg .pl { width: 15px; height: 15px; border-radius: 4px; font-size: 7px; display: inline-grid; place-items: center; font-weight: 800; }
+.ov-dates { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.ov-dates input { height: 34px; padding: 0 9px; border-radius: 8px; border: 1px solid var(--edge); background: var(--well); color: var(--ink); font: inherit; color-scheme: dark; }
+.ov-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.ov-tile { position: relative; display: grid; gap: 2px; align-content: start; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--edge); background: linear-gradient(160deg, color-mix(in srgb, var(--g) 10%, var(--panel)), var(--panel)); }
+.ov-ic { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: color-mix(in srgb, var(--g) 16%, transparent); font-size: 15px; }
+.ov-tile .t-value { font-size: 1.75em; font-weight: 800; }
+.ov-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: 14px; margin-top: 4px; }
+.ov-grid .span2 { grid-column: 1 / -1; }
+.ov-chartcard .chart-head { margin-top: 0; }
+.ov-chart { min-height: 250px; }
+.ov-chart .g { stroke: var(--line); stroke-width: 1; }
+.ov-chart .yl { fill: var(--muted); font: 11px var(--font); text-anchor: end; }
+.ov-chart .xl { fill: var(--muted); font: 11px var(--font); text-anchor: middle; }
+.ov-chart .ln { fill: none; stroke: var(--g); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.ov-chart .dot { fill: var(--panel-2); stroke: var(--g); stroke-width: 2.5; cursor: pointer; }
+.ov-chart .dot:hover { fill: var(--g); r: 6; }
+.ov-chart .chart-tip { white-space: normal; text-align: left; transform: none; font-weight: 500; line-height: 1.35; max-width: 220px; }
+.ov-radar { display: grid; place-items: center; }
+.ov-radar svg { width: min(260px, 100%); height: auto; overflow: visible; }
+.ov-radar .rg { fill: none; stroke: var(--line); stroke-width: 1; }
+.ov-radar .rl { fill: var(--muted); font: 10.5px var(--font); text-anchor: middle; }
+.ov-radar .typ { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.ov-radar .mine { fill: color-mix(in srgb, var(--g) 28%, transparent); stroke: var(--g); stroke-width: 2; }
+.ov-radar-key { display: flex; align-items: center; gap: 6px; justify-content: center; }
+.ov-radar-key .k { display: inline-block; width: 14px; height: 3px; border-radius: 2px; }
+.ov-radar-key .k.mine { background: var(--g); } .ov-radar-key .k.typ { background: var(--muted); margin-left: 10px; }
+.ov-radar-legend { list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; font-size: 12.5px; }
+.ov-radar-legend li { display: flex; align-items: baseline; gap: 6px; }
+.ov-radar-legend span { color: var(--muted); flex: 1; }
+.ov-radar-legend small.up { color: var(--ok); } .ov-radar-legend small.down { color: #ff8a95; }
+.ov-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: r; }
+.ov-bars li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 8px; counter-increment: r; font-size: 13.5px; }
+.ov-bars .who { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ov-bars .who::before { content: counter(r); color: var(--muted); font-weight: 800; width: 16px; }
+.ov-bars .who .pl { width: 15px; height: 15px; border-radius: 4px; font-size: 7px; flex: none; display: inline-grid; place-items: center; font-weight: 800; }
+.ov-bars .val { font-weight: 800; font-variant-numeric: tabular-nums; }
+.ov-bars .val small, .ov-bars .sub { color: var(--muted); font-weight: 500; font-size: 11.5px; }
+.ov-bars .mini { grid-column: 1 / -1; height: 6px; border-radius: 6px; background: var(--well); overflow: hidden; }
+.ov-bars .mini i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, color-mix(in srgb, var(--g) 70%, #fff 0%), var(--g)); }
+.ov-bars .sub { grid-column: 1 / -1; margin-top: -2px; }
+#ov-table { max-height: 460px; }
+.ov-table th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; position: sticky; top: 0; background: var(--panel); }
+.ov-table td { padding: 8px 10px; vertical-align: middle; }
+.ov-table td small { display: block; color: var(--muted); font-size: 11.5px; }
+.ov-table tbody tr { cursor: pointer; }
+.ov-table tbody tr:hover { background: color-mix(in srgb, var(--g) 8%, transparent); }
+.ov-table td.go { color: var(--muted); font-size: 18px; }
+.ov-table input { accent-color: var(--g); width: 16px; height: 16px; }
+.ov-logos { white-space: nowrap; } .ov-logos .pl { width: 18px; height: 18px; border-radius: 5px; font-size: 8px; display: inline-grid; place-items: center; margin-right: 3px; font-weight: 800; }
+.ov-table .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff4d6a; box-shadow: 0 0 8px #ff4d6a; vertical-align: 1px; }
+.ov-compare { margin: 10px 0; background: color-mix(in srgb, var(--g) 6%, var(--panel-2)); }
+.ov-cmp { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ov-cmp th, .ov-cmp td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+.ov-cmp tbody th { color: var(--muted); font-weight: 600; }
+@media (max-width: 1200px) { .ov-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } .ov-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .ov-tiles { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 860px) { .side { min-width: 0; max-width: 100vw; } html, body { overflow-x: hidden; } .seg { max-width: 100%; } }
