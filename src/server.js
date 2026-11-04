@@ -18,6 +18,8 @@ const { createMusic } = require('./modules/music');
 const { createStats } = require('./modules/stats');
 const { createPiperEngine } = require('./tts/piper');
 const { createMsOnlineEngine } = require('./tts/msonline');
+const { createGiftCatalog } = require('./modules/giftCatalog');
+const { createAlertRules } = require('./modules/alertRules');
 const { createYoutubeResolver } = require('./music/youtube');
 const { createKickConnector } = require('./connectors/kick');
 const { createTiktokConnector } = require('./connectors/tiktok');
@@ -42,6 +44,11 @@ const SAMPLE = {
   gift: { platform: 'tiktok', user: { id: 'rosalinda', name: 'Rosalinda' }, amount: 5, extra: { giftName: 'Rosa', count: 5, currency: 'diamantes' } },
   like: { platform: 'tiktok', user: { id: 'corazones', name: 'Corazones' }, amount: 15 },
   share: { platform: 'tiktok', user: { id: 'compartidor', name: 'Compartidor' } },
+  sticker: { platform: 'tiktok', user: { id: 'stickerfan', name: 'StickerFan' }, extra: { stickerId: 'demo', stickerName: 'Sticker' } },
+  join: { platform: 'tiktok', user: { id: 'visita', name: 'Visita' } },
+  superfan: { platform: 'tiktok', user: { id: 'superfan', name: 'SuperFan' } },
+  'live-start': { platform: 'tiktok', user: { id: 'tu', name: 'Tu directo' } },
+  'live-end': { platform: 'tiktok', user: { id: 'tu', name: 'Tu directo' } },
   chat: { platform: 'kick', user: { id: 'espectador', name: 'Espectador' }, amount: 0, message: 'Hola, saludos desde Colombia' },
 };
 
@@ -85,13 +92,19 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   // ---- Conectores ----
   const status = {};
   function onStatus(s) {
+    // TikTok conectado = estás en LIVE: dispara «Empieza el directo».
+    if (s.platform === 'tiktok' && s.state === 'connected' && status.tiktok?.state !== 'connected') {
+      setTimeout(() => bus.emit('event', makeEvent({ platform: 'tiktok', type: 'live-start', user: { id: 'tu', name: 'Tu directo' } })), 0);
+    }
     status[s.platform] = s;
     if (s.state === 'error' || (s.state === 'connecting' && s.detail)) logbook.add('conexión', `${s.platform}: ${s.state} ${s.detail || ''}`);
     broadcast('status', s);
   }
   const deps = { bus, onStatus, fetch: fetchFn };
+  const catalog = createGiftCatalog({ dataDir, broadcast: (...a) => broadcast(...a), fetchFn });
+  const alertRules = createAlertRules({ store });
   const connectors = {
-    tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok }),
+    tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }) }),
     kick: createKickConnector(deps),
     twitch: createTwitchConnector(deps),
     starvios: createStarviosConnector(deps),
@@ -167,22 +180,36 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
 
   musicRef = music;
   bus.on('viewers', (v) => stats.onViewers(v));
-  bus.on('stream-end', () => stats.end('fin del LIVE de TikTok'));
+  bus.on('stream-end', (x) => {
+    stats.end('fin del LIVE de TikTok');
+    bus.emit('event', makeEvent({ platform: x?.platform || 'tiktok', type: 'live-end', user: { id: 'tu', name: 'Tu directo' } }));
+  });
 
   const recent = [];
   bus.on('event', (e) => {
-    recent.unshift(e);
+    if (e.type !== 'join') recent.unshift(e);
     recent.length = Math.min(recent.length, 100);
     broadcast('event', e);
     stats.handleEvent(e);
 
-    // Alertas y metas: solo TikTok emite follows, regalos, etc.
+    catalog.onEvent(e);
+    // Alertas propias primero: si alguna es «solo la suya», la de serie no sale.
+    const matched = alertRules.match(e);
+    const exclusive = matched.some((m) => m.rule.exclusive !== false);
     const alerts = store.get('alerts');
     const bigEnough = e.type !== 'gift' || e.amount >= (alerts.minGift || 0);
-    if (e.type !== 'chat' && alerts.enabled[e.type] !== false && bigEnough) {
+    const hasDefault = Boolean(alerts.types?.[e.type]);
+    if (hasDefault && !exclusive && alerts.enabled[e.type] === true && bigEnough) {
       const a = alertFor(e);
       broadcast('alert', a);
       if (a.speak) tts.speak(alertText(e));
+    }
+    for (const { rule, times } of matched) {
+      for (let i = 0; i < times; i += 1) {
+        const a = ruleAlert(rule, e);
+        broadcast('alert', a);
+        if (rule.speak) tts.speak(a.plain);
+      }
     }
     goals.handleEvent(e);
     // Lo que escribe la propia app (con la cuenta aparte o con la tuya) no se lee en voz alta.
@@ -215,6 +242,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const sound = t.sound === 'file' && !t.file ? 'none' : t.sound || 'campanita';
     return {
       ...e,
+      image: localImg(e.extra?.image),
+      instant: e.type === 'sticker',
       big: isBig,
       durationMs: Math.round(Math.max(1, Math.min(60, seconds)) * 1000),
       fitSound: Boolean(t.fitSound),
@@ -227,6 +256,32 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       },
     };
   }
+  // Imagen de regalo o sticker servida desde tu PC (se copia la primera vez).
+  const localImg = (url) => (/^https:\/\//.test(url || '') ? `/gift-img?u=${encodeURIComponent(url)}` : /^\/(alert-sounds|gift-img)/.test(url || '') ? url : '');
+
+  // Una alerta propia: sale con su nombre, su texto, su sonido y su imagen.
+  function ruleAlert(r, e) {
+    const DEFAULT_TEXT = { gift: '{usuario} envió {regalo}', coins: '{usuario} envió {regalo}', likesPerson: '¡{usuario} lleva un montón de likes!', likesTotal: '¡Llegamos a más likes!', follow: '{usuario} te sigue', sub: '{usuario} se suscribió', share: '{usuario} compartió el directo', sticker: '{usuario}', join: '{usuario} llegó', superfan: '¡{usuario} es superfan!', keyword: '{usuario}: {mensaje}', liveStart: '¡Empezó el directo!', liveEnd: 'Gracias por acompañarme' };
+    const plain = alertRules.render(r.text || DEFAULT_TEXT[r.trigger] || '{usuario}', e);
+    const ruleImg = r.image ? (r.image.startsWith('/') ? r.image : localImg(r.image)) : '';
+    const seconds = Number(r.seconds) || (r.trigger === 'sticker' ? 2 : 5);
+    const sound = r.sound === 'file' && !r.file ? 'none' : r.sound || 'campanita';
+    return {
+      ...e,
+      custom: true,
+      ruleId: r.id,
+      label: r.name || 'Alerta',
+      title: plain,
+      plain,
+      image: r.showImage === false ? '' : ruleImg || localImg(e.extra?.image),
+      instant: r.instant ?? r.trigger === 'sticker',
+      color: r.color || '',
+      durationMs: Math.round(Math.max(1, Math.min(60, seconds)) * 1000),
+      fitSound: Boolean(r.fitSound),
+      sound: { sound, volume: r.volume ?? 75, maxSeconds: Number(r.maxSeconds) || 0, url: sound === 'file' ? `/alert-sounds/${r.file}` : '' },
+    };
+  }
+
   function alertText(e) {
     const n = e.user?.name || 'Alguien';
     const x = e.extra || {};
@@ -236,6 +291,9 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       case 'gift': return `${n} envió ${x.count > 1 ? `${x.count} ` : ''}${x.giftName || 'un regalo'}`;
       case 'like': return `${n} dio ${e.amount} likes`;
       case 'share': return `${n} compartió el directo`;
+      case 'sticker': return `${n} mandó un sticker`;
+      case 'join': return `${n} llegó`;
+      case 'superfan': return `${n} ahora es superfan`;
       default: return '';
     }
   }
@@ -611,7 +669,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
 
   // Sonidos propios para las alertas (mp3, wav u ogg).
   const SOUND_TYPES = { 'audio/mpeg': 'mp3', 'audio/mp3': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/wave': 'wav', 'audio/ogg': 'ogg', 'audio/webm': 'webm' };
-  const ALERT_KEYS = ['follow', 'sub', 'gift', 'like', 'share', 'bigGift'];
+  const ALERT_KEYS = ['follow', 'sub', 'gift', 'like', 'share', 'sticker', 'join', 'superfan', 'bigGift'];
   const soundsDir = path.join(dataDir, 'alert-sounds');
   fs.mkdirSync(soundsDir, { recursive: true });
   app.use('/alert-sounds', express.static(soundsDir, { maxAge: 0 }));
@@ -627,6 +685,66 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const patch = { file: `${file}?v=${Date.now()}`, fileName: decodeURIComponent(name), sound: 'file' };
     store.update({ alerts: key === 'bigGift' ? { bigGift: patch } : { types: { [key]: patch } } });
     ok(res, { alerts: store.get('alerts') });
+  });
+
+  // Sonido de una alerta propia.
+  app.post('/api/alert-rules/:id/sound', express.raw({ type: Object.keys(SOUND_TYPES), limit: '10mb' }), (req, res) => {
+    const id = String(req.params.id).replace(/[^\w-]/g, '').slice(0, 40);
+    const ext = SOUND_TYPES[req.headers['content-type']];
+    if (!id) return fail(res, 'Alerta desconocida');
+    if (!ext || !Buffer.isBuffer(req.body) || !req.body.length) return fail(res, 'Usa un sonido MP3, WAV u OGG (hasta 10 MB)');
+    for (const f of fs.readdirSync(soundsDir)) if (f.startsWith(`rule-${id}.`)) fs.rmSync(path.join(soundsDir, f));
+    const file = `rule-${id}.${ext}`;
+    fs.writeFileSync(path.join(soundsDir, file), req.body);
+    ok(res, { file: `${file}?v=${Date.now()}`, fileName: decodeURIComponent(String(req.headers['x-file-name'] || '').slice(0, 80)) });
+  });
+
+  // Probar una alerta propia: arma un evento de ejemplo y la manda al overlay.
+  app.post('/api/alert-rules/test', (req, res) => {
+    const r = (store.get('alertRules') || []).find((x) => x.id === req.body?.id);
+    if (!r) return fail(res, 'Esa alerta ya no existe');
+    const plat = r.platform === 'any' || !r.platform ? 'tiktok' : r.platform;
+    const gift = r.trigger === 'gift' ? catalog.list('gifts', plat).find((g) => (r.gifts || []).map(String).includes(String(g.id))) : null;
+    const sticker = r.trigger === 'sticker' ? catalog.list('stickers', plat).find((g) => !r.stickers?.length || r.stickers.map(String).includes(String(g.id))) : null;
+    const type = { gift: 'gift', coins: 'gift', likesPerson: 'like', likesTotal: 'like', keyword: 'chat', liveStart: 'live-start', liveEnd: 'live-end' }[r.trigger] || r.trigger;
+    const e = makeEvent({
+      platform: plat,
+      type,
+      user: { id: 'prueba', name: 'Espectador' },
+      amount: gift?.value || Number(r.min) || Number(r.every) || 1,
+      message: r.trigger === 'keyword' ? String(r.keyword || '').split(',')[0] : '',
+      extra: { giftId: gift?.id, giftName: gift?.name || r.giftNames?.[0] || 'Regalo', count: 1, image: gift?.image || sticker?.image, stickerId: sticker?.id },
+      test: true,
+    });
+    broadcast('alert', ruleAlert(r, e));
+    ok(res, {});
+  });
+
+  // Catálogo de regalos y stickers (Alertas propias).
+  app.get('/api/gifts/:platform', (req, res) => {
+    const p = req.params.platform;
+    ok(res, { gifts: catalog.list('gifts', p), stickers: catalog.list('stickers', p), summary: catalog.summary() });
+  });
+  app.post('/api/gifts/tiktok/import', async (_req, res) => {
+    try {
+      const gifts = await connectors.tiktok.fetchGifts(store.get('platforms').tiktok?.channel);
+      if (!gifts.length) return fail(res, 'TikTok no devolvió regalos. Prueba de nuevo cuando estés en LIVE.');
+      catalog.merge('gifts', 'tiktok', gifts, { replace: true });
+      ok(res, { count: gifts.length, summary: catalog.summary() });
+    } catch (err) {
+      fail(res, `No pude traer el catálogo de TikTok: ${String(err.message || err).slice(0, 140)}. Si no estás en LIVE, se importa solo al conectar.`);
+    }
+  });
+  app.get('/gift-img', async (req, res) => {
+    const url = String(req.query.u || '');
+    try {
+      const f = await catalog.imagePath(url);
+      if (!f) return res.status(404).end();
+      res.set('Cache-Control', 'public, max-age=604800');
+      res.sendFile(f);
+    } catch {
+      if (/^https:\/\//.test(url)) res.redirect(url); else res.status(404).end();
+    }
   });
 
   // Fotos de los guías (opcional: si no hay foto se usa su dibujo).

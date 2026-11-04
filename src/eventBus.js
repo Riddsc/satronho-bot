@@ -20,7 +20,7 @@
 
 const { EventEmitter } = require('events');
 
-const EVENT_TYPES = ['follow', 'sub', 'gift', 'like', 'share', 'chat'];
+const EVENT_TYPES = ['follow', 'sub', 'gift', 'like', 'share', 'chat', 'sticker', 'join', 'superfan', 'live-start', 'live-end'];
 
 const bus = new EventEmitter();
 bus.setMaxListeners(50);

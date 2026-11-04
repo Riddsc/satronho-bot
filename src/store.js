@@ -29,7 +29,7 @@ const DEFAULTS = {
   alerts: {
     durationMs: 5000, // duración por defecto (las de cada tipo mandan)
     minGift: 1, // diamantes mínimos para lanzar alerta de regalo
-    enabled: { follow: true, sub: true, gift: true, like: false, share: false },
+    enabled: { follow: true, sub: true, gift: true, like: false, share: false, sticker: true, join: false, superfan: true },
     // Por tipo: segundos en pantalla, sonido (incluido, 'file' o 'none'),
     // volumen 0–100, cortar el sonido a los N s (0 = completo), durar lo
     // que dura el sonido, y si Troya la lee en voz alta.
@@ -39,6 +39,10 @@ const DEFAULTS = {
       gift: { seconds: 5, sound: 'moneda', volume: 70, maxSeconds: 0, fitSound: false, speak: false, file: '' },
       like: { seconds: 3, sound: 'burbuja', volume: 50, maxSeconds: 0, fitSound: false, speak: false, file: '' },
       share: { seconds: 4, sound: 'zas', volume: 60, maxSeconds: 0, fitSound: false, speak: false, file: '' },
+      // Stickers: salen al instante (sin cola), cortitos y con su imagen.
+      sticker: { seconds: 2, sound: 'burbuja', volume: 55, maxSeconds: 2, fitSound: false, speak: false, file: '' },
+      join: { seconds: 3, sound: 'brillo', volume: 40, maxSeconds: 0, fitSound: false, speak: false, file: '' },
+      superfan: { seconds: 7, sound: 'fanfarria', volume: 80, maxSeconds: 0, fitSound: false, speak: true, file: '' },
     },
     // Regalos grandes: desde cierta cantidad de diamantes, otra alerta.
     bigGift: { enabled: false, min: 500, seconds: 10, sound: 'aplauso', volume: 85, maxSeconds: 0, fitSound: false, speak: true, file: '' },
@@ -136,6 +140,8 @@ const DEFAULTS = {
   },
   // Ventana: nunca se abre sola. Opcionalmente se esconde junto al reloj al minimizar.
   window: { minimizeToTray: false },
+  // Alertas propias: reglas por regalo, sticker, rango de monedas, likes… (alertRules.js)
+  alertRules: [],
   ttsAllowed: {}, // usuarios de TikTok que enviaron el regalo: { id: { name, ts } }
   music: {
     enabled: true,

@@ -5,6 +5,7 @@
 import { connectSatronho } from '/overlays/client.js';
 import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSaved } from './util.js';
 import { initGuides, setBubble, sayFor, guideToast, GUIDES } from './guides.js';
+import { initAlertRules, onCatalogChange } from './alertRulesUI.js';
 import { addChatEvent, markChatDecision, initLiveChat, resetChat } from './livechat.js';
 import { initVoice, renderEngine, renderAllowed, onTtsItem, updateTroya, onTtsQueue, setOnlineVoices, setTtsLog, addTtsLog } from './voice.js';
 import { initMusic, onMusic, onMusicNotice } from './music.js';
@@ -264,6 +265,7 @@ function initGoalsAndAlerts() {
   });
 
   initAlerts(config);
+  initAlertRules(config);
 }
 
 // ---------- Chat en vivo (livechat.js) ----------
@@ -430,6 +432,7 @@ async function init() {
         case 'music-notice': onMusicNotice(p); break;
         case 'tts-decision': markDecision(p); break;
         case 'tts-log': addTtsLog(p); break;
+        case 'gift-catalog': onCatalogChange(p); break;
         case 'stats': lastStats = p; onStats(p); homeStats(p); break;
         case 'stats-history': onStatsHistory(p); break;
         default: break;

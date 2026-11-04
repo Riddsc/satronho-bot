@@ -21,7 +21,25 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
   let info = null; // { channelId, chatroomId }
 
   function handle(eventName, rawData) {
-    if (!String(eventName || '').endsWith('ChatMessageEvent')) return;
+    const name = String(eventName || '');
+    // Kicks (regalos de Kick). Kick no publica cómo es este evento: lo leemos
+    // con cuidado y, si cambia, simplemente no sale.
+    if (name.endsWith('KicksGifted')) {
+      let g = rawData;
+      try { if (typeof g === 'string') g = JSON.parse(g); } catch { return; }
+      const gift = g?.gift || {};
+      const sender = g?.sender || g?.user || {};
+      if (!sender.username) return;
+      base.emit({
+        type: 'gift',
+        user: { id: sender.id || sender.username, name: sender.username },
+        amount: Number(gift.amount ?? g.amount ?? 0),
+        message: g.message || '',
+        extra: { giftId: String(gift.gift_id || gift.id || gift.name || ''), giftName: gift.name || 'Kicks', count: 1, currency: 'kicks', unitValue: Number(gift.amount ?? 0) },
+      });
+      return;
+    }
+    if (!name.endsWith('ChatMessageEvent')) return;
     let d = rawData;
     if (typeof d === 'string') {
       try {
@@ -41,6 +59,15 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
         color: d.sender.identity?.color || '',
       },
     });
+    // Emotes de Kick como stickers: una alerta corta por mensaje.
+    const em = String(d.content || '').match(/\[emote:(\d+):([^\]]*)\]/);
+    if (em) {
+      base.emit({
+        type: 'sticker',
+        user: { id: d.sender.id || d.sender.username, name: d.sender.username },
+        extra: { stickerId: em[1], stickerName: em[2], image: `https://files.kick.com/emotes/${em[1]}/fullsize` },
+      });
+    }
   }
 
   async function resolveChannel(slug) {

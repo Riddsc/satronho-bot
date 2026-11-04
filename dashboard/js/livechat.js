@@ -20,6 +20,8 @@ const DEFAULTS = {
   hideBots: false,
   hideMuted: false,
   showEvents: true,
+  showStickers: true,
+  showJoins: false,
   giftsInline: false,
   giftsColumn: true,
   minGift: 0,
@@ -71,6 +73,11 @@ function describe(e) {
     case 'gift': return `envió ${x.count > 1 ? `${x.count}× ` : ''}<b>${esc(x.giftName || 'un regalo')}</b>`;
     case 'like': return `dio ${e.amount} me gusta`;
     case 'share': return 'compartió tu directo';
+    case 'sticker': return 'mandó un sticker';
+    case 'join': return 'llegó al directo';
+    case 'superfan': return 'ahora es superfan ⭐';
+    case 'live-start': return '· empezó tu directo';
+    case 'live-end': return '· terminó tu directo';
     default: return '';
   }
 }
@@ -99,9 +106,9 @@ function nodeFor(e) {
         <button type="button" data-lc="mute" title="${sp?.action === 'mute' ? 'Devolverle la voz' : 'Silenciar su voz'}">${sp?.action === 'mute' ? '🔈' : '🔇'}</button>
       </div>`;
   } else {
-    const img = e.type === 'gift' && e.extra?.image ? `<img class="lc-giftimg" src="${esc(e.extra.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '';
+    const img = (e.type === 'gift' || e.type === 'sticker') && e.extra?.image ? `<img class="lc-giftimg ${e.type === 'sticker' ? 'lc-sticker' : ''}" src="/gift-img?u=${encodeURIComponent(e.extra.image)}" alt="" loading="lazy">` : '';
     const amount = e.type === 'gift' ? `<span class="lc-amount">${Number(e.amount || 0).toLocaleString('es-CO')} ${esc(e.extra?.currency || '')}</span>` : '';
-    li.innerHTML = `<span class="lc-evicon">${{ follow: '♥', sub: '✦', gift: '🎁', like: '👍', share: '↗' }[e.type] || '•'}</span>
+    li.innerHTML = `<span class="lc-evicon">${{ follow: '♥', sub: '✦', gift: '🎁', like: '👍', share: '↗', sticker: '✨', join: '👋', superfan: '⭐', 'live-start': '🔴', 'live-end': '⏹' }[e.type] || '•'}</span>
       <p class="lc-evtext">${LOGO(e.platform)}<b>${name}</b> ${describe(e)} ${img}${amount}</p><time>${timeOf(e.ts)}</time>`;
   }
   return li;
@@ -117,6 +124,9 @@ function visible(e) {
       if (e.amount < (Number(prefs.minGift) || 0)) return false;
       return true;
     }
+    if (e.type === 'sticker') return prefs.showStickers !== false;
+    if (e.type === 'join') return Boolean(prefs.showJoins);
+    if (e.type === 'live-start' || e.type === 'live-end') return true;
     return prefs.showEvents && e.type !== 'like';
   }
   if (prefs.hideCommands && isCommand(e)) return false;

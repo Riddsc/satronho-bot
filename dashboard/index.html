@@ -76,6 +76,8 @@
       <button data-sim="sub">★ Suscripción</button>
       <button data-sim="like">👍 Likes</button>
       <button data-sim="share">↗ Compartido</button>
+      <button data-sim="sticker" data-body='{"user":{"id":"stickerfan","name":"StickerFan"},"extra":{"stickerId":"demo","stickerName":"Sticker"}}'>✨ Sticker</button>
+      <button data-sim="superfan">⭐ Superfan</button>
       <h6>Chat</h6>
       <button data-sim="chat" data-body='{"platform":"kick","user":{"id":"espectador","name":"Espectador"},"message":"Hola, saludos desde Kick"}'>💬 Mensaje en Kick</button>
       <button data-sim="chat" data-body='{"platform":"starvios","user":{"id":"estrella","name":"Estrella"},"message":"Hola desde Starvios"}'>💬 Mensaje en Starvios</button>
@@ -235,6 +237,8 @@
       <label class="switch"><input type="checkbox" data-lcp="hideBots"><span></span> <em class="sw-t">Ocultar bots<small>BotRix, Nightbot y parecidos</small></em></label>
       <label class="switch"><input type="checkbox" data-lcp="hideMuted"><span></span> <em class="sw-t">Ocultar lo que Troya no lee</em></label>
       <label class="switch"><input type="checkbox" data-lcp="showEvents"><span></span> <em class="sw-t">Mostrar seguidores, suscripciones y compartidos</em></label>
+      <label class="switch"><input type="checkbox" data-lcp="showStickers"><span></span> <em class="sw-t">Mostrar stickers</em></label>
+      <label class="switch"><input type="checkbox" data-lcp="showJoins"><span></span> <em class="sw-t">Mostrar quién llega<small>Puede ser mucho en directos grandes</small></em></label>
       <h5>Regalos</h5>
       <label class="switch"><input type="checkbox" data-lcp="giftsColumn"><span></span> <em class="sw-t">Columna de regalos<small>Con el total de cada moneda</small></em></label>
       <label class="switch"><input type="checkbox" data-lcp="giftsInline"><span></span> <em class="sw-t">También dentro del chat</em></label>
@@ -551,8 +555,22 @@
 </section>
 
 <section class="page" id="page-alertas" data-page="alertas" hidden>
-  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Alertas</h1><p>Lo que aparece en pantalla cuando alguien te sigue o te regala algo en TikTok.</p></div>
-    <div class="host" style="--g:#9b8cff"><p class="bubble" data-bubble="troya" data-static><b>Troya:</b> Activa las que quieras y pruébalas. Para verlas en el stream, pon el overlay de alertas en OBS.</p><span class="guide" data-avatar="troya" data-size="hero"></span></div></div>
+  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Alertas</h1><p>Lo que suena y aparece en pantalla con cada regalo, sticker, seguidor o like.</p></div>
+    <div class="host" style="--g:#9b8cff"><p class="bubble" data-bubble="troya" data-static><b>Troya:</b> Dale a cada regalo o sticker su propio sonido en «Alertas propias». Para verlas en el stream, pon el overlay de alertas en OBS.</p><span class="guide" data-avatar="troya" data-size="hero"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="alertas"><button data-tab="propias">Alertas propias</button><button data-tab="serie">Alertas de serie</button></div>
+  <div class="tabpanel" data-tabpanel="propias" style="--g:#9b8cff">
+    <div class="card ar-card">
+      <div class="ar-head">
+        <div class="seg" id="ar-plats"></div>
+        <div class="mz-search-form ar-search"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="ar-q" placeholder="Buscar alerta…" autocomplete="off"></div>
+        <button type="button" class="btn" id="ar-import" title="Trae todos los regalos de tu TikTok con su imagen, ID y valor">⬇ Importar regalos de TikTok <small></small></button>
+        <button type="button" class="btn primary" id="ar-new">＋ Nueva alerta</button>
+      </div>
+      <p class="hint ar-note">✦ Lo que no tenga alerta propia suena con su <b>alerta de serie</b>. Los stickers saltan al instante, sin esperar turno.</p>
+      <div id="ar-list" class="ar-list"></div>
+    </div>
+  </div>
+  <div class="tabpanel" data-tabpanel="serie" hidden>
   <div class="cols al-layout" id="card-alertas" style="--g:#9b8cff">
     <div class="card"><div class="row space"><h3 class="card-title">Qué alertas salen</h3>
         <label class="switch"><input type="checkbox" id="al-sound-on"><span></span> Sonido en OBS</label></div>
@@ -562,6 +580,7 @@
       <div class="card al-big" id="al-big"></div>
       <div class="card"><h3 class="card-title">En OBS</h3><p class="hint">Copia la URL del overlay de alertas en <b>Overlays para OBS</b> y ponla como Fuente de navegador (800 × 300). Para oír los sonidos, en OBS marca <b>«Controlar audio mediante OBS»</b> en esa fuente.</p><a class="btn small mt" href="#/overlays">Ir a Overlays</a></div>
     </div>
+  </div>
   </div>
 </section>
 
@@ -752,6 +771,21 @@
       </div>
     </div>
     <div class="vp-foot"><span class="hint" id="vp-count"></span><button type="button" class="btn small ghost" id="vp-default" hidden>Usar su voz de siempre</button><span class="hint" id="vp-sel"></span></div>
+  </div>
+</div>
+<div class="vp-modal ar-modal" id="ar-modal" hidden role="dialog" aria-modal="true" aria-labelledby="ar-modal-title">
+  <div class="vp-card ar-mcard" style="--g:#9b8cff">
+    <div class="vp-head"><h2 id="ar-modal-title">Nueva alerta</h2><button type="button" class="btn small ghost" id="ar-close" aria-label="Cerrar">✕</button></div>
+    <div class="ar-mbody">
+      <div class="ar-left">
+        <h5>¿De dónde llega?</h5><div class="ar-src" id="ar-src"></div>
+        <h5>¿Qué tiene que pasar?</h5><div class="ar-trigs" id="ar-trigs"></div>
+        <div id="ar-opts"></div>
+        <div id="ar-picker" class="ar-picker"></div>
+      </div>
+      <div class="ar-side" id="ar-side"></div>
+    </div>
+    <div class="vp-foot"><span class="hint">Lo que no tenga alerta propia suena con la de serie.</span><span class="row tight"><button type="button" class="btn ghost" id="ar-cancel">Cancelar</button><button type="button" class="btn primary" id="ar-save">Guardar</button></span></div>
   </div>
 </div>
 <div class="news-modal" id="news-modal" hidden role="dialog" aria-modal="true" aria-labelledby="news-modal-title">

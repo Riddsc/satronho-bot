@@ -52,7 +52,22 @@ function rolesOf(d, hostId) {
   };
 }
 
-function createTiktokConnector({ bus, onStatus, getSettings = () => ({}) }) {
+const imgOf = (m) => m?.urlList?.[0] || m?.url_list?.[0] || m?.url?.[0] || m?.imageUrl || '';
+
+// Catálogo de regalos de la sala (lo que TikTok tiene disponible en tu LIVE).
+function normalizeGifts(raw) {
+  const list = Array.isArray(raw) ? raw : raw?.gifts || raw?.data?.gifts || [];
+  return list
+    .map((g) => ({
+      id: String(g.id ?? g.gift_id ?? ''),
+      name: g.name || g.describe || '',
+      value: Number(g.diamond_count ?? g.diamondCount ?? 0),
+      image: imgOf(g.image) || imgOf(g.icon),
+    }))
+    .filter((g) => g.id && g.name);
+}
+
+function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGifts = () => {} }) {
   const base = createConnectorBase({ platform: 'tiktok', bus, onStatus });
   let conn = null;
   let hostId = ''; // id de tu cuenta de TikTok (dueña del LIVE)
@@ -62,6 +77,19 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}) }) {
     c.on(WebcastEvent.CHAT, (d) => base.emit({ type: 'chat', user: userOf(d), message: d.comment || '', extra: { roles: rolesOf(d, hostId) } }));
 
     c.on(WebcastEvent.FOLLOW, (d) => base.emit({ type: 'follow', user: userOf(d) }));
+
+    // Stickers (emotes) que manda el chat: alerta inmediata con su imagen.
+    if (WebcastEvent.EMOTE) {
+      c.on(WebcastEvent.EMOTE, (d) => {
+        for (const em of (d.emoteList || []).slice(0, 3)) {
+          base.emit({ type: 'sticker', user: userOf(d), extra: { stickerId: String(em.emoteId || ''), image: imgOf(em.image), roles: rolesOf(d, hostId) } });
+        }
+      });
+    }
+    // Alguien entra al LIVE.
+    if (WebcastEvent.MEMBER) c.on(WebcastEvent.MEMBER, (d) => base.emit({ type: 'join', user: userOf(d) }));
+    // Superfan nuevo.
+    if (WebcastEvent.SUPER_FAN_JOIN) c.on(WebcastEvent.SUPER_FAN_JOIN, (d) => base.emit({ type: 'superfan', user: userOf(d) }));
 
     c.on(WebcastEvent.SHARE, (d) => base.emit({ type: 'share', user: userOf(d) }));
 
@@ -88,6 +116,7 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}) }) {
         amount: unit * count,
         message: '',
         extra: {
+          giftId: String(d.giftId ?? g.id ?? d.extendedGiftInfo?.id ?? ''),
           giftName: g.giftName || d.extendedGiftInfo?.name || 'Regalo',
           count,
           unitValue: unit,
@@ -160,6 +189,11 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}) }) {
       if (base.stopped || conn !== c) return c.disconnect();
       const room = c.roomInfo || {};
       hostId = String(room.owner?.id_str || room.owner_user_id || room.data?.owner?.id_str || '');
+      // Catálogo de regalos: lo guardamos para «Alertas propias».
+      try {
+        const gifts = normalizeGifts(c.availableGifts || (await c.fetchAvailableGifts?.()));
+        if (gifts.length) onGifts(gifts);
+      } catch { /* sin catálogo: se llena con lo que llegue */ }
       base.resetBackoff();
       base.status('connected');
     } catch (err) {
@@ -168,6 +202,17 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}) }) {
       const offline = /offline|not live|UserOffline/i.test(text) || err?.constructor?.name === 'UserOfflineError';
       base.retry(run, offline ? 'El canal no está en directo' : text.slice(0, 140));
     }
+  }
+
+  // Pide el catálogo sin estar en vivo (si TikTok lo permite).
+  async function fetchGifts(channelName) {
+    const { TikTokLiveConnection } = await loadLib();
+    const user = cleanChannel(channelName || base.channel);
+    if (!user) throw new Error('Falta tu usuario de TikTok');
+    if (conn?.availableGifts) return normalizeGifts(conn.availableGifts);
+    const { signApiKey } = getSettings();
+    const c = new TikTokLiveConnection(user, { signApiKey: signApiKey || undefined });
+    return normalizeGifts(await c.fetchAvailableGifts());
   }
 
   async function connect(channelName) {
@@ -193,7 +238,7 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}) }) {
     base.status('disconnected');
   }
 
-  return { connect, disconnect };
+  return { connect, disconnect, fetchGifts };
 }
 
 module.exports = { createTiktokConnector };
