@@ -21,6 +21,7 @@ const ICONS = {
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
   terminal: '<rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="m7 10 3 2.5L7 15M12.5 15H17"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><path d="m12 8 1.4 2.6L16 12l-2.6 1.4L12 16l-1.4-2.6L8 12l2.6-1.4z"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7"/><path d="M12 17h.01"/>',
 };
 
@@ -33,14 +34,16 @@ const PAGES = {
   alertas: { title: 'Alertas', guide: 'troya', words: 'alertas seguidor regalo suscripción likes compartir' },
   metas: { title: 'Metas', guide: 'juana', words: 'metas objetivo barra progreso diamantes' },
   overlays: { title: 'Overlays para OBS', guide: 'samy', words: 'obs overlay url fuente navegador estilo streamlabs' },
-  comandos: { title: 'Comandos del chat', guide: 'samy', words: 'comandos comando respuesta redes discord bot chat alias espera moderadores' },
-  automaticos: { title: 'Mensajes automáticos', guide: 'samy', words: 'mensajes automáticos temporizador timer cada minutos anuncio recordatorio' },
+  chatbot: { title: 'Chat Bot', guide: 'mecha', words: 'chat bot chatbot mecharidds comandos comando respuesta redes discord alias espera moderadores mensajes automáticos temporizador timer cada minutos anuncio escribir enviar' },
   estadisticas: { title: 'Estadísticas', guide: 'juana', words: 'estadísticas números gané diamantes tops historial gráfica' },
   ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones atajos teclado teclas' },
-  ayuda: { title: 'Ayuda', guide: 'samy', words: 'ayuda preguntas guías' },
+  novedades: { title: 'Novedades', guide: 'mecha', words: 'novedades cambios versión actualización qué hay de nuevo changelog notas' },
+  ayuda: { title: 'Ayuda', guide: 'samy', words: 'ayuda preguntas guías reportar error problema falla bug idea sugerencia soporte discord' },
 };
 
 const TAB_NAMES = {
+  ayuda: { preguntas: 'Preguntas', reportar: 'Reportar un problema' },
+  chatbot: { inicio: 'Inicio', comandos: 'Comandos', automaticos: 'Mensajes automáticos' },
   voz: { voces: 'Voces', quien: 'Quién se lee', filtros: 'Filtros y límites', especiales: 'Espectadores especiales', probar: 'Probar' },
   ajustes: { apariencia: 'Apariencia', app: 'App', atajos: 'Atajos de teclado', acerca: 'Acerca de' },
 };
@@ -56,7 +59,9 @@ const store = {
 };
 
 // ---------- Pantallas y pestañas ----------
+const OLD_PAGES = { comandos: ['chatbot', 'comandos'], automaticos: ['chatbot', 'automaticos'] };
 export function showPage(page, tab) {
+  if (OLD_PAGES[page]) [page, tab] = OLD_PAGES[page];
   if (!PAGES[page]) page = 'inicio';
   const changed = page !== current;
   current = page;

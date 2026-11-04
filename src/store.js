@@ -24,6 +24,8 @@ const DEFAULTS = {
     twitch: { channel: '', autoConnect: false, hidden: false },
     starvios: { channel: '', autoConnect: false, hidden: false },
   },
+  // Orden de las plataformas en el panel (Conexiones → Plataformas que usas).
+  platformOrder: ['kick', 'starvios', 'tiktok', 'twitch'],
   alerts: {
     durationMs: 5000, // duración por defecto (las de cada tipo mandan)
     minGift: 1, // diamantes mínimos para lanzar alerta de regalo
@@ -85,6 +87,7 @@ const DEFAULTS = {
   // Respuestas del bot en el chat (Kick por ahora).
   // sendAs: 'me' = con la cuenta del streamer (lo normal); 'bot' = cuenta aparte.
   chatBot: {
+    enabled: true, // interruptor general del Chat Bot (MechaRidds)
     kick: { enabled: true, sendAs: 'me', music: true },
     starvios: { enabled: true, sendAs: 'me', music: true },
   },
@@ -129,6 +132,8 @@ const DEFAULTS = {
     feedUrl: '',
     auto: true,
   },
+  // Novedades: última versión cuyas novedades ya vio el streamer.
+  seenVersion: '',
   guides: {
     visible: true,
     welcomeDone: false,

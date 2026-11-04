@@ -26,12 +26,13 @@ const { createTwitchConnector } = require('./connectors/twitch');
 const { createKickChat } = require('./connectors/kickChat');
 const { createStarviosChat } = require('./connectors/starviosChat');
 const { createCommands } = require('./modules/commands');
+const { createSupport, createLogbook } = require('./modules/support');
 
 const ROOT = path.join(__dirname, '..');
 const PLATFORMS = ['tiktok', 'kick', 'starvios', 'twitch'];
-const GUIDES = ['samy', 'troya', 'nono', 'juana'];
+const GUIDES = ['samy', 'troya', 'nono', 'juana', 'mecha'];
 // Nombre visible de cada guía (las fotos se guardan con él: "Ñoño.png").
-const GUIDE_NAMES = { samy: 'Samy', troya: 'Troya', nono: 'Ñoño', juana: 'Juana' };
+const GUIDE_NAMES = { samy: 'Samy', troya: 'Troya', nono: 'Ñoño', juana: 'Juana', mecha: 'MechaRidds' };
 const PHOTO_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' };
 
 // Eventos de prueba del panel.
@@ -47,6 +48,8 @@ const SAMPLE = {
 function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, resolver: customResolver, appInfo = {}, hooks = {} }) {
   const app = express();
   app.use(express.json());
+  // Bitácora de errores para los reportes (Ayuda → Reportar un problema).
+  const logbook = createLogbook();
   app.use('/', express.static(path.join(ROOT, 'dashboard')));
   app.use('/overlays', express.static(path.join(ROOT, 'overlays')));
 
@@ -83,6 +86,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const status = {};
   function onStatus(s) {
     status[s.platform] = s;
+    if (s.state === 'error' || (s.state === 'connecting' && s.detail)) logbook.add('conexión', `${s.platform}: ${s.state} ${s.detail || ''}`);
     broadcast('status', s);
   }
   const deps = { bus, onStatus, fetch: fetchFn };
@@ -111,8 +115,24 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     vault: hooks.vault || null,
     openLogin: hooks.openLogin || null,
   });
-  // Quién escribe en cada plataforma.
-  const writers = { kick: kickChat, starvios: starviosChat };
+  // Quién escribe en cada plataforma. Todo lo que escribe el Chat Bot pasa
+  // por aquí: respeta el interruptor general y queda en «Lo que he escrito».
+  const botLog = [];
+  const logBot = (entry) => {
+    botLog.unshift(entry);
+    botLog.length = Math.min(botLog.length, 60);
+    broadcast('bot-said', entry);
+  };
+  const guarded = (platform, w) => ({
+    ...w,
+    say(text, source = 'bot') {
+      if (store.get('chatBot')?.enabled === false) return false;
+      const ok = w.say(text);
+      if (ok) logBot({ platform, text: String(text).slice(0, 480), source, ts: Date.now() });
+      return ok;
+    },
+  });
+  const writers = { kick: guarded('kick', kickChat), starvios: guarded('starvios', starviosChat) };
   const tts = createTts({ store, broadcast, engine, online });
   // music se crea más abajo; los comandos lo consultan al responder.
   let musicRef = null;
@@ -136,7 +156,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
         const writer = writers[payload.platform];
         if (writer && cb?.enabled !== false && cb?.music !== false) {
           const icon = { ok: '🎵', warn: '⚠️', error: '❌' }[payload.kind] || '🐾';
-          writer.say(`${icon} ${payload.text}`);
+          writer.say(`${icon} ${payload.text}`, 'musica');
         }
       }
     },
@@ -241,6 +261,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           kickbot: kickChat.status(),
           starviosbot: starviosChat.status(),
           commands: commands.list(),
+          botLog: botLog.slice(0, 30),
           timers: commands.timers(),
           app: { window: store.get('window') },
         },
@@ -465,7 +486,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     ok(res, { kickbot: kickChat.status() });
   });
   app.post('/api/kickbot/test', (_req, res) => {
-    const sent = kickChat.say('🐾 Satronho Bot está listo. Pide música con !play o !temita.');
+    const sent = writers.kick.say('🐾 Satronho Bot está listo. Pide música con !play o !temita.', 'prueba');
     if (!sent) return fail(res, 'Falta autorizar una cuenta o escribir tu canal de Kick en Conexiones');
     ok(res);
   });
@@ -479,6 +500,42 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     } catch (err) {
       res.send(page('No se pudo autorizar', String(err.message).replace(/[<>&]/g, ''), false));
     }
+  });
+
+  // ---- Novedades (CHANGELOG.json, incluido en la app) ----
+  let changelog = [];
+  try {
+    changelog = JSON.parse(fs.readFileSync(path.join(ROOT, 'CHANGELOG.json'), 'utf8'));
+  } catch {
+    /* sin historial */
+  }
+  app.get('/api/changelog', (_req, res) => ok(res, { changelog }));
+
+  // ---- Ayuda: reportar un problema (llega a Discord) ----
+  const support = createSupport({ fetch: fetchFn, logbook, appInfo: { version: appInfo.version || require('../package.json').version }, getStatus: () => status });
+  app.get('/api/support', (_req, res) => ok(res, { available: support.available(), diagnostics: support.diagnostics() }));
+  app.post('/api/support/report', async (req, res) => {
+    try {
+      ok(res, await support.send(req.body || {}));
+    } catch (err) {
+      fail(res, err);
+    }
+  });
+  // Errores del panel (para el diagnóstico).
+  app.post('/api/support/client-error', (req, res) => {
+    logbook.add('panel', String(req.body?.message || '').slice(0, 600));
+    ok(res);
+  });
+
+  // ---- Chat Bot: escribir a mano ----
+  app.post('/api/chatbot/send', (req, res) => {
+    const text = String(req.body?.text || '').trim().slice(0, 450);
+    if (!text) return fail(res, 'Escribe el mensaje');
+    if (store.get('chatBot')?.enabled === false) return fail(res, 'El Chat Bot está apagado');
+    const wanted = Array.isArray(req.body?.platforms) ? req.body.platforms : Object.keys(writers);
+    const sent = wanted.filter((p) => writers[p]?.say(text, 'manual'));
+    if (!sent.length) return fail(res, 'No pude escribir: conecta la plataforma en Escuchar y autoriza una cuenta en Escribir');
+    ok(res, { sent });
   });
 
   // ---- Comandos del chat ----
@@ -526,7 +583,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     ok(res, { starviosbot: starviosChat.status() });
   });
   app.post('/api/starviosbot/test', (_req, res) => {
-    const sent = starviosChat.say('🐾 Satronho Bot está listo. Pide música con !play o !temita.');
+    const sent = writers.starvios.say('🐾 Satronho Bot está listo. Pide música con !play o !temita.', 'prueba');
     if (!sent) return fail(res, 'Inicia sesión y escribe tu canal de Starvios en Conexiones → Escuchar');
     ok(res);
   });

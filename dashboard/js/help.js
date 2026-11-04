@@ -47,16 +47,22 @@ const KB = [
     go: '#tts-bots',
   },
   {
-    guide: 'samy', q: '¿Cómo creo un comando como !redes?',
+    guide: 'mecha', q: '¿Cómo creo un comando como !redes?',
     keys: ['comando', 'comandos', 'redes', 'discord', '!', 'respuesta', 'crear comando'],
-    answer: 'En <b>Comandos del chat</b> pulsa <b>Nuevo comando</b>, escribe el nombre (sin !) y la respuesta. Puedes usar {usuario}, {mensaje} y más. Respondo en Kick y Starvios; en Twitch y TikTok Troya puede decirlo en voz alta. Pruébalo en la tarjeta <b>Probar</b>.',
+    answer: 'En <b>Chat Bot → Comandos</b> pulsa <b>Nuevo comando</b>, escribe el nombre (sin !) y la respuesta. Puedes usar {usuario}, {mensaje} y más. Respondo en Kick y Starvios; en Twitch y TikTok Troya puede decirlo en voz alta. Pruébalo en la tarjeta <b>Probar</b>.',
     go: '#card-comandos',
   },
   {
-    guide: 'samy', q: '¿Cómo pongo un mensaje que se repita cada X minutos?',
+    guide: 'mecha', q: '¿Cómo pongo un mensaje que se repita cada X minutos?',
     keys: ['automático', 'automaticos', 'cada', 'minutos', 'repetir', 'temporizador', 'timer', 'anuncio'],
-    answer: 'En <b>Mensajes automáticos</b> pulsa <b>Nuevo mensaje</b>, escribe el texto y cada cuántos minutos. Si pones un mínimo de mensajes, espero a que el chat hable para no escribir solo.',
+    answer: 'En <b>Chat Bot → Mensajes automáticos</b> pulsa <b>Nuevo mensaje</b>, escribe el texto y cada cuántos minutos. Si pones un mínimo de mensajes, espero a que el chat hable para no escribir solo.',
     go: '#card-automaticos',
+  },
+  {
+    guide: 'mecha', q: '¿Cómo reporto un error o pido ayuda?',
+    keys: ['error', 'falla', 'bug', 'reportar', 'problema', 'soporte', 'ayuda', 'idea', 'sugerencia', 'no funciona'],
+    answer: 'En <b>Ayuda → Reportar un problema</b> cuéntame qué pasó y pulsa <b>Enviar a Ridds</b>. Le llega directo a su Discord, con la versión y los últimos errores si lo dejas marcado. Nunca envío tus claves.',
+    go: '#card-reportar',
   },
   {
     guide: 'samy', q: '¿Cómo escondo las plataformas que no uso?',
@@ -324,6 +330,7 @@ const GREET = {
   troya: 'Hola, soy <b>Troya</b>, la voz del stream. Pregúntame por las voces, los filtros, las alertas o por qué leí (o no) un mensaje.',
   nono: '¡Epa! Soy <b>Ñoño</b>, el DJ. Pregúntame cómo pedir, saltar o quitar canciones.',
   juana: 'Hola, soy <b>Juana</b>. Llevo las metas y las cuentas de tus directos. ¿Qué quieres saber?',
+  mecha: 'Sistema en línea. Soy <b>MechaRidds</b>, la versión androide de Ridds. Llevo el Chat Bot, los comandos y las novedades de cada versión. ¿En qué te ayudo?',
 };
 
 const HANDOFF = {
@@ -331,6 +338,7 @@ const HANDOFF = {
   troya: (to) => `De eso sabe más ${GUIDES[to].name}. Escúchale:`,
   nono: (to) => `Uy, eso es cosa de ${GUIDES[to].name}:`,
   juana: (to) => `Eso lo lleva ${GUIDES[to].name}:`,
+  mecha: (to) => `Redirigiendo a ${GUIDES[to].name}…`,
 };
 
 const DONT_KNOW = {
@@ -338,6 +346,7 @@ const DONT_KNOW = {
   troya: 'No estoy segura de entenderte. ¿Era alguna de estas?',
   nono: 'Ni idea, parce. ¿Querías decir alguna de estas?',
   juana: 'No encontré eso. Quizá te sirva alguna de estas:',
+  mecha: 'No tengo eso en mi memoria. ¿Era alguna de estas? Si es un error, repórtalo en Ayuda.',
 };
 
 // ---------- Búsqueda ----------
@@ -481,7 +490,7 @@ export function initHelp() {
   panel.innerHTML = `
     <header class="h-head"><div id="help-who" class="h-who"></div><button type="button" class="btn small ghost" id="help-close" aria-label="Cerrar">✕</button></header>
     <div id="help-switch" class="h-switch">
-      ${['samy', 'troya', 'nono', 'juana'].map((id) => `<button type="button" data-switch="${id}" class="${GUIDES[id].lead ? 'lead' : ''}" title="${esc(GUIDES[id].name)} · ${esc(GUIDES[id].role)}">${avatarHTML(id, 'xs')}<span>${esc(GUIDES[id].name)}</span></button>`).join('')}
+      ${['samy', 'troya', 'nono', 'juana', 'mecha'].map((id) => `<button type="button" data-switch="${id}" class="${GUIDES[id].lead ? 'lead' : ''}" title="${esc(GUIDES[id].name)} · ${esc(GUIDES[id].role)}">${avatarHTML(id, 'xs')}<span>${esc(GUIDES[id].name)}</span></button>`).join('')}
     </div>
     <div id="help-log" class="h-log" aria-live="polite"></div>
     <form id="help-form" class="h-form"><input id="help-input" autocomplete="off"><button class="btn primary">Preguntar</button></form>

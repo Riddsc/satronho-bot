@@ -78,6 +78,8 @@ jobs:
           # App de Kick «SatronhoBot»: Settings → Secrets and variables → Actions.
           SATRONHO_KICK_CLIENT_ID: ${{ secrets.KICK_CLIENT_ID }}
           SATRONHO_KICK_CLIENT_SECRET: ${{ secrets.KICK_CLIENT_SECRET }}
+          # Webhook de Discord para «Reportar un problema».
+          SATRONHO_DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: node scripts/release.mjs
 
       - name: Publicar en GitHub Releases
@@ -86,3 +88,13 @@ jobs:
         run: |
           V=$(node -p "require('./package.json').version")
           vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --publish --releaseName "Satronho Bot $V" --tag "v$V" --outputDir releases
+
+      - name: Notas de la versión (desde CHANGELOG.json)
+        if: steps.check.outputs.skip != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          V=$(node -p "require('./package.json').version")
+          node scripts/notes.mjs "$V" > notas.md
+          gh release edit "v$V" --repo "${{ github.repository }}" --notes-file notas.md

@@ -145,7 +145,7 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     cmd.uses = (cmd.uses || 0) + 1;
     store.set('commands', list().map((c) => (c.id === cmd.id ? { ...c, uses: cmd.uses } : c)));
     const writer = writers[e.platform];
-    const wrote = writer ? writer.say(text) : false;
+    const wrote = writer ? writer.say(text, 'comando') : false;
     if (cmd.speak) speak?.(text);
     broadcast('command-used', { name: cmd.name, user: e.user?.name, platform: e.platform, text, wrote, ts: now });
     return { ran: true, text, wrote, command: cmd.name };
@@ -206,7 +206,7 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     for (const p of ['kick', 'starvios']) {
       if (item.platforms?.[p] === false) continue;
       if (status[p]?.state !== 'connected') continue;
-      if (writers[p]?.say(item.text)) sent.push(p);
+      if (writers[p]?.say(item.text, 'automatico')) sent.push(p);
     }
     return sent;
   }

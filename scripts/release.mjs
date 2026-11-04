@@ -61,16 +61,20 @@ const [outDir] = await packager({
     // Si ya existe src/builtin.json (solo en tu PC, no se sube), se usa ese.
     async ({ buildPath }) => {
       const file = path.join(buildPath, 'src', 'builtin.json');
+      let data = {};
+      try {
+        data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      } catch {
+        /* sin src/builtin.json en este PC */
+      }
       const clientId = process.env.SATRONHO_KICK_CLIENT_ID;
       const clientSecret = process.env.SATRONHO_KICK_CLIENT_SECRET;
-      if (clientId && clientSecret) {
-        fs.writeFileSync(file, JSON.stringify({ kick: { clientId, clientSecret } }, null, 2));
-        console.log('✓ App de Kick incluida');
-      } else if (fs.existsSync(file)) {
-        console.log('✓ App de Kick incluida (desde src/builtin.json)');
-      } else {
-        console.warn('⚠ Sin app de Kick incluida: cada streamer tendrá que pegar la suya en «Avanzado»');
-      }
+      if (clientId && clientSecret) data.kick = { clientId, clientSecret };
+      // Webhook de Discord para «Reportar un problema».
+      if (process.env.SATRONHO_DISCORD_WEBHOOK) data.discord = { webhook: process.env.SATRONHO_DISCORD_WEBHOOK };
+      fs.writeFileSync(file, JSON.stringify(data, null, 2));
+      console.log(data.kick ? '✓ App de Kick incluida' : '⚠ Sin app de Kick incluida: cada streamer tendrá que pegar la suya en «Avanzado»');
+      console.log(data.discord ? '✓ Reportes a Discord incluidos' : '⚠ Sin webhook de Discord: «Reportar un problema» no podrá enviar');
     },
     async ({ buildPath }) => {
       const repo = process.env.SATRONHO_UPDATE_REPO;
