@@ -620,8 +620,22 @@
 <section class="page" id="page-overlays" data-page="overlays" hidden>
   <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Overlays para OBS</h1><p>Copia la URL y en OBS: Fuentes → + → Navegador. Funciona igual en Streamlabs y TikTok LIVE Studio.</p></div>
     <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Aquí cambias también cómo se ven: tipografía, color, tamaño y fondo. La vista previa se actualiza al instante.</p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
-  <div class="cols" style="grid-template-columns:minmax(0,1fr) 320px">
+  <div class="cols ov-layout" style="grid-template-columns:minmax(0,1fr) 340px">
     <div id="overlay-list" class="ov-grid urls"></div>
+    <div style="display:grid;gap:16px;align-content:start">
+    <div class="card"><h3 class="card-title">Tema de pantalla</h3>
+      <p class="hint">Uno para todo lo que pones en OBS. Cada tema trae su letra y sus colores; después puedes ajustarlos.</p>
+      <div class="ov-themes" id="ov-themes"></div></div>
+    <div class="card" id="ov-podium"><div class="row space"><h3 class="card-title">Podio en vivo</h3><button type="button" class="btn small ghost" id="pd-reset">Reiniciar</button></div>
+      <span class="field-label">Qué mide</span>
+      <div class="seg pd-seg"><label><input type="radio" name="pd-metric" value="likes" data-pd="metric"><span>Likes</span></label><label><input type="radio" name="pd-metric" value="gifts" data-pd="metric"><span>Regalos</span></label><label><input type="radio" name="pd-metric" value="chat" data-pd="metric"><span>Mensajes</span></label></div>
+      <span class="field-label mt">Puestos</span>
+      <div class="seg pd-seg"><label><input type="radio" name="pd-size" value="3" data-pd="size"><span>Top 3</span></label><label><input type="radio" name="pd-size" value="4" data-pd="size"><span>Top 4</span></label><label><input type="radio" name="pd-size" value="5" data-pd="size"><span>Top 5</span></label></div>
+      <label class="field mt"><span>Título (vacío = automático)</span><input data-pd="title" placeholder="Top likes"></label>
+      <label class="switch"><input type="checkbox" data-pd="showValues"><span></span> Mostrar los números</label>
+      <label class="switch"><input type="checkbox" data-pd="avatars"><span></span> Fotos de perfil (TikTok)</label>
+      <label class="switch"><input type="checkbox" data-pd="crown"><span></span> Corona para el primero</label>
+      <p class="hint">¿Varios podios? Añade a la URL <code>?metrica=regalos</code> o <code>?puestos=5</code>. Se reinicia solo al terminar el directo.</p></div>
     <div class="card" id="ov-style"><h3 class="card-title">Estilo de los overlays</h3>
       <label class="field"><span>Tipografía</span><select data-ov="font"></select></label>
       <label class="field"><span>Color principal</span><span class="row"><input type="color" data-ov="accent"><span class="swatches" id="ov-swatches"></span></span></label>
@@ -632,6 +646,7 @@
       <label class="field"><span>Tamaño <b id="ov-scale-val"></b></span><input type="range" min="0.7" max="1.6" step="0.05" data-ov="scale"></label>
       <label class="switch"><input type="checkbox" data-ov="sound"><span></span> Sonido en las alertas</label>
       <button class="btn small ghost mt" id="ov-reset">Volver al estilo Satronho</button></div>
+    </div>
   </div>
 </section>
 

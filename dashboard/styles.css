@@ -1297,3 +1297,23 @@ kbd { font: 700 .82em var(--font); padding: 3px 8px; border-radius: 6px; backgro
 .mcmd input.mcmd-names { height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--edge); background: var(--well); color: var(--g); font: 600 13px ui-monospace, Consolas, monospace; }
 .mcmd.off { opacity: .55; }
 .mcopy .who-opt { margin-bottom: 4px; }
+
+/* ---------- Overlays: temas y podio (0.13) ---------- */
+.ov-themes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.ov-theme { display: grid; gap: 6px; padding: 8px; border-radius: 12px; border: 1px solid var(--edge); background: var(--well); color: var(--ink); cursor: pointer; font: inherit; text-align: left; }
+.ov-theme:hover { border-color: color-mix(in srgb, var(--g, var(--accent)) 50%, var(--edge)); }
+.ov-theme[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent); }
+.ov-tprev { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 10px; background: var(--tb); color: var(--tf); border: 2px solid var(--td); background-image: linear-gradient(135deg, rgba(255,255,255,.04), transparent), repeating-conic-gradient(rgba(255,255,255,.04) 0 25%, transparent 0 50%) 0 0 / 12px 12px; }
+.ov-tprev i { font-style: normal; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--td); color: var(--tb); font-size: 12px; }
+.ov-tprev b { font-size: 14px; }
+.ov-tprev[data-k="glow"] { box-shadow: 0 0 10px var(--td), inset 0 0 8px color-mix(in srgb, var(--td) 40%, transparent); }
+.ov-tprev[data-k="dashed"] { border-style: dashed; box-shadow: 3px 3px 0 var(--td); }
+.ov-tprev[data-k="hard"] { border-radius: 2px; box-shadow: 4px 4px 0 color-mix(in srgb, var(--td) 50%, #000); text-transform: uppercase; }
+.ov-tprev[data-k="line"] { border: 0; border-left: 3px solid var(--td); border-radius: 0; background: #2a2440; }
+.ov-tname { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.ov-theme[aria-pressed="true"] .ov-tname { color: var(--ink); }
+.pd-seg label { position: relative; }
+.pd-seg input { position: absolute; opacity: 0; pointer-events: none; }
+.pd-seg span { display: inline-block; padding: 5px 12px; border-radius: 7px; font-size: 12.5px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.pd-seg input:checked + span { color: var(--ink); background: color-mix(in srgb, var(--accent) 20%, var(--panel)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+@media (max-width: 1100px) { .ov-layout { grid-template-columns: 1fr !important; } }

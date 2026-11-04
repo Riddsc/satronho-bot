@@ -20,6 +20,7 @@ const { createPiperEngine } = require('./tts/piper');
 const { createMsOnlineEngine } = require('./tts/msonline');
 const { createGiftCatalog } = require('./modules/giftCatalog');
 const { createAlertRules } = require('./modules/alertRules');
+const { createLeaderboard } = require('./modules/leaderboard');
 const { createYoutubeResolver } = require('./music/youtube');
 const { createKickConnector } = require('./connectors/kick');
 const { createTiktokConnector } = require('./connectors/tiktok');
@@ -103,6 +104,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const deps = { bus, onStatus, fetch: fetchFn };
   const catalog = createGiftCatalog({ dataDir, broadcast: (...a) => broadcast(...a), fetchFn });
   const alertRules = createAlertRules({ store });
+  const podium = createLeaderboard({ broadcast: (...a) => broadcast(...a) });
   const connectors = {
     tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }) }),
     kick: createKickConnector(deps),
@@ -182,6 +184,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   bus.on('viewers', (v) => stats.onViewers(v));
   bus.on('stream-end', (x) => {
     stats.end('fin del LIVE de TikTok');
+    podium.reset();
     bus.emit('event', makeEvent({ platform: x?.platform || 'tiktok', type: 'live-end', user: { id: 'tu', name: 'Tu directo' } }));
   });
 
@@ -193,6 +196,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     stats.handleEvent(e);
 
     catalog.onEvent(e);
+    podium.handleEvent(e);
     // Alertas propias primero: si alguna es «solo la suya», la de serie no sale.
     const matched = alertRules.match(e);
     const exclusive = matched.some((m) => m.rule.exclusive !== false);
@@ -310,6 +314,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           status,
           recent: recent.slice(0, 80),
           ttsLog: tts.recentLog(),
+          podium: podium.snapshot(),
           music: music.snapshot(),
           engine: engine.state(),
           allowed: tts.allowedList(),
@@ -484,7 +489,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
   app.get('/api/stats/all-time', (_req, res) => ok(res, { tops: stats.allTimeTops() }));
   app.get('/api/stats/overview', (_req, res) => ok(res, { sessions: stats.overview(), usdPerDiamond: store.get('stats')?.usdPerDiamond }));
-  app.post('/api/stats/end', (_req, res) => ok(res, { session: stats.end('manual') }));
+  app.post('/api/stats/end', (_req, res) => { podium.reset(); ok(res, { session: stats.end('manual') }); });
+  app.post('/api/podium/reset', (_req, res) => { podium.reset(); ok(res, {}); });
 
   app.get('/api/tts/allowed',(_req, res) => ok(res, { allowed: tts.allowedList() }));
   app.delete('/api/tts/allowed/:id', (req, res) => {

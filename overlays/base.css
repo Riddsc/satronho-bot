@@ -9,3 +9,24 @@ body[data-card="glass"] .surface { backdrop-filter: blur(10px); }
 body[data-card="none"] .surface { background: transparent !important; border-color: transparent !important; box-shadow: none !important; }
 body[data-card="none"] { text-shadow: 0 2px 6px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.9); }
 .muted { color: color-mix(in srgb, var(--ink) 72%, transparent); }
+
+/* ---------- Temas de pantalla (se eligen en Overlays para OBS) ---------- */
+/* Neón: fondo muy oscuro y bordes que brillan. */
+body[data-theme="neon"] { --bg: rgba(6, 3, 18, 0.9); }
+body[data-theme="neon"] .surface { border: 2px solid var(--accent) !important; box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 70%, transparent), 0 0 34px color-mix(in srgb, var(--accent) 40%, transparent), inset 0 0 14px color-mix(in srgb, var(--accent) 25%, transparent) !important; }
+body[data-theme="neon"] { text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 65%, transparent); }
+/* Cristal: vidrio claro y desenfocado. */
+body[data-theme="cristal"] { --bg: rgba(255, 255, 255, 0.14); }
+body[data-theme="cristal"] .surface { backdrop-filter: blur(14px) saturate(140%); border: 1px solid rgba(255, 255, 255, 0.35) !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important; }
+/* Cuaderno: papel crema, tinta oscura y borde a mano. */
+body[data-theme="papel"] { --bg: #fff8e7; --ink: #2a2140; --muted: #6b5f80; }
+body[data-theme="papel"] .surface { color: #2a2140; border: 2.5px dashed #2a2140 !important; box-shadow: 4px 5px 0 rgba(42, 33, 64, 0.85) !important; background-image: repeating-linear-gradient(transparent 0 23px, rgba(80, 120, 200, 0.18) 23px 24px) !important; }
+/* Arcade: bloques rectos, sombra dura y letras de máquina. */
+body[data-theme="arcade"] { --bg: #0c0b1d; --r: 0.08 !important; }
+body[data-theme="arcade"] .surface { border: 3px solid var(--accent) !important; box-shadow: 6px 6px 0 color-mix(in srgb, var(--accent) 55%, #000) !important; text-transform: uppercase; letter-spacing: .04em; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 2px, transparent 2px 4px) !important; }
+/* Dulce: pastel, burbujas y bordes suaves. */
+body[data-theme="dulce"] { --bg: #ffeaf4; --ink: #4a2142; --muted: #8a5c80; }
+body[data-theme="dulce"] .surface { color: #4a2142; border: 3px solid #ffb6d9 !important; box-shadow: 0 8px 0 #ffc9e2, 0 14px 28px rgba(255, 120, 180, 0.35) !important; }
+/* Minimal: sin tarjeta, una línea de color. */
+body[data-theme="minimal"] .surface { background: transparent !important; border: 0 !important; box-shadow: none !important; border-left: 4px solid var(--accent) !important; border-radius: 0 !important; }
+body[data-theme="minimal"] { text-shadow: 0 2px 6px rgba(0, 0, 0, .8); }

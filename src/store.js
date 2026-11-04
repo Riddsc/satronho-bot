@@ -124,7 +124,12 @@ const DEFAULTS = {
   // sidebar: 'compact' (solo iconos; se despliega al pasar el ratón) o 'open'.
   appearance: { theme: 'noche', accent: '#ffb23e', font: 'bricolage-grotesque', size: 'm', corners: 'redondas', sidebar: 'compact' },
   // Cómo se ven los overlays en OBS.
-  overlayStyle: { font: 'bricolage-grotesque', accent: '#ffb23e', text: '#ffffff', card: 'solid', corners: 'round', scale: 1, sound: true, alertColors: 'type' },
+  overlayStyle: {
+    font: 'bricolage-grotesque', accent: '#ffb23e', text: '#ffffff', card: 'solid', corners: 'round', scale: 1, sound: true, alertColors: 'type',
+    theme: 'satronho', // satronho · neon · cristal · papel · arcade · dulce · minimal
+    // Podio en vivo: qué mide, cuántos puestos (3 a 5), título y qué muestra.
+    podium: { metric: 'likes', size: 3, title: '', showValues: true, avatars: true, crown: true },
+  },
   // Atajos de teclado globales (funcionan aunque estés en OBS o en un juego).
   // Apagados al principio para no chocar con los atajos de otros programas.
   hotkeys: {

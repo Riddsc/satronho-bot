@@ -25,6 +25,7 @@ export function applyOverlayStyle(s = {}) {
   root.setProperty('--r', String(RADIUS[st.corners] ?? 1));
   root.setProperty('--scale', param('scale') || String(st.scale || 1));
   document.body.dataset.card = st.card || 'solid';
+  document.body.dataset.theme = st.theme || 'satronho';
   document.body.dataset.alertColors = st.alertColors || 'type';
 }
 
