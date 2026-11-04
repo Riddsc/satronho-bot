@@ -13,6 +13,8 @@ import { initNav, countEvent, setStepFacts } from './nav.js';
 import { initAppearance, applyAppearance } from './appearance.js';
 import { initOverlays, setOverlayGoals } from './overlays.js';
 import { initKickbot, renderKickbot } from './kickbot.js';
+import { initAlerts } from './alerts.js';
+import { initStarviosbot, renderStarviosbot } from './starviosbot.js';
 import { initHome, homeEvent, homeVoice, homeMusic, homeStats } from './home.js';
 
 let config = null;
@@ -213,15 +215,7 @@ function initGoalsAndAlerts() {
     }
   });
 
-  const alerts = config.alerts;
-  for (const el of $$('[data-alert]')) {
-    el.checked = alerts.enabled[el.dataset.alert] !== false;
-    el.addEventListener('change', () => saveConfig({ alerts: { enabled: { [el.dataset.alert]: el.checked } } }));
-  }
-  $('#alert-duration').value = Math.round((alerts.durationMs || 5000) / 1000);
-  $('#alert-duration').addEventListener('change', (ev) => saveConfig({ alerts: { durationMs: Math.max(2, Math.min(20, Number(ev.target.value) || 5)) * 1000 } }));
-  $('#alert-mingift').value = alerts.minGift ?? 1;
-  $('#alert-mingift').addEventListener('change', (ev) => saveConfig({ alerts: { minGift: Math.max(0, Number(ev.target.value) || 0) } }));
+  initAlerts(config);
 }
 
 // ---------- Chat y actividad ----------
@@ -375,8 +369,13 @@ async function init() {
           lastStats = p.stats;
           lastMusic = p.music;
           setOnlineVoices(p.onlineVoices || []);
-          if (!started) initKickbot(config, p.kickbot);
-          else renderKickbot(p.kickbot);
+          if (!started) {
+            initKickbot(config, p.kickbot);
+            initStarviosbot(config, p.starviosbot);
+          } else {
+            renderKickbot(p.kickbot);
+            renderStarviosbot(p.starviosbot);
+          }
           kickWriteState(p.kickbot);
           renderEngine(p.engine);
           setStepFacts({ voice: p.engine?.voices?.some((x) => x.installed) });
@@ -398,6 +397,7 @@ async function init() {
           break;
         case 'update': renderUpdate(p); break;
         case 'kickbot': renderKickbot(p); kickWriteState(p); break;
+        case 'starviosbot': renderStarviosbot(p); break;
         case 'event': addLog(p); homeEvent(p); countEvent(); break;
         case 'goal': goals.set(p.id, p); renderGoals(); break;
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;

@@ -175,13 +175,14 @@
       <p class="uses">Responde a los pedidos de música · Mensaje de prueba</p>
       <div id="kickbot"><div id="kickbot-body"><p class="hint">Cargando…</p></div></div>
     </div>
-    <div class="platform write soon" data-platform-write="starvios">
-      <div class="phead"><span class="pl" style="background:#69d9ff">S</span><b>Starvios</b><span class="pstate">Pronto</span></div>
-      <p class="hint">Podrás iniciar sesión en una ventana de la app, con tu cuenta o con una cuenta aparte para el bot.</p>
+    <div class="platform write" data-platform-write="starvios">
+      <div class="phead"><span class="pl" style="background:#69d9ff">S</span><b>Starvios</b><span class="pstate" id="starvios-write-state"></span></div>
+      <p class="uses">Responde a los pedidos de música · Mensaje de prueba</p>
+      <div id="starviosbot"><div id="starviosbot-body"><p class="hint">Cargando…</p></div></div>
     </div>
     <div class="platform write soon" data-platform-write="tiktok">
-      <div class="phead"><span class="pl" style="background:#ff5d8f">T</span><b>TikTok LIVE</b><span class="pstate">Pronto · opcional</span></div>
-      <p class="hint">TikTok no tiene una forma oficial de escribir en el chat. Cuando llegue será opcional y te recomendaremos usar una cuenta aparte.</p>
+      <div class="phead"><span class="pl" style="background:#ff5d8f">T</span><b>TikTok LIVE</b><span class="pstate">Más adelante</span></div>
+      <p class="hint">TikTok no tiene una forma oficial de escribir en el chat. Por ahora Satronho Bot solo lo escucha: alertas, metas, estadísticas y voz.</p>
     </div>
     <div class="platform write soon" data-platform-write="twitch">
       <div class="phead"><span class="pl" style="background:#9146ff;color:#fff">Tw</span><b>Twitch</b><span class="pstate">No disponible</span></div>
@@ -332,19 +333,15 @@
 <section class="page" id="page-alertas" data-page="alertas" hidden>
   <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Alertas</h1><p>Lo que aparece en pantalla cuando alguien te sigue o te regala algo en TikTok.</p></div>
     <div class="host" style="--g:#9b8cff"><p class="bubble" data-bubble="troya" data-static><b>Troya:</b> Activa las que quieras y pruébalas. Para verlas en el stream, pon el overlay de alertas en OBS.</p><span class="guide" data-avatar="troya" data-size="hero"></span></div></div>
-  <div class="cols c2" id="card-alertas" style="--g:#9b8cff">
-    <div class="card span2"><h3 class="card-title">Qué alertas salen</h3>
-      <div class="alert-rows tests">
-        <div class="alert-row" style="--c:#8b7bff"><span class="ico">♥</span><span><b>Nuevo seguidor</b><small>Cuando alguien te sigue</small></span><button class="btn small" data-sim-quick="follow">Probar</button><label class="switch"><input type="checkbox" data-alert="follow"><span></span></label></div>
-        <div class="alert-row" style="--c:#ff5d8f"><span class="ico">🎁</span><span><b>Regalo</b><small>Cualquier regalo, con su imagen y cantidad</small></span><button class="btn small" data-sim-quick="gift">Probar</button><label class="switch"><input type="checkbox" data-alert="gift"><span></span></label></div>
-        <div class="alert-row" style="--c:#ffb23e"><span class="ico">★</span><span><b>Suscripción</b><small>Subs y meses acumulados</small></span><button class="btn small" data-sim-quick="sub">Probar</button><label class="switch"><input type="checkbox" data-alert="sub"><span></span></label></div>
-        <div class="alert-row" style="--c:#4fd1c5"><span class="ico">👍</span><span><b>Likes</b><small>Cada tanda de likes (puede ser mucho)</small></span><button class="btn small" data-sim-quick="like">Probar</button><label class="switch"><input type="checkbox" data-alert="like"><span></span></label></div>
-        <div class="alert-row" style="--c:#5ab0ff"><span class="ico">↗</span><span><b>Compartido</b><small>Cuando alguien comparte tu LIVE</small></span><button class="btn small" data-sim-quick="share">Probar</button><label class="switch"><input type="checkbox" data-alert="share"><span></span></label></div>
-      </div></div>
-    <div class="card"><h3 class="card-title">Ajustes</h3>
-      <label class="field"><span>Cuánto dura cada alerta (segundos)</span><input type="number" min="2" max="20" id="alert-duration"></label>
-      <label class="field"><span>Regalos: solo si valen al menos (diamantes)</span><input type="number" min="0" id="alert-mingift"></label></div>
-    <div class="card"><h3 class="card-title">En OBS</h3><p class="hint">Copia la URL del overlay de alertas en <b>Overlays para OBS</b> y ponla como Fuente de navegador (800 × 300).</p><a class="btn small mt" href="#/overlays">Ir a Overlays</a></div>
+  <div class="cols al-layout" id="card-alertas" style="--g:#9b8cff">
+    <div class="card"><div class="row space"><h3 class="card-title">Qué alertas salen</h3>
+        <label class="switch"><input type="checkbox" id="al-sound-on"><span></span> Sonido en OBS</label></div>
+      <p class="hint">Pulsa <b>▾</b> en cada alerta para elegir cuántos segundos dura, su sonido, el volumen y si Troya la lee.</p>
+      <div class="al-rows alert-rows tests" id="al-rows"></div></div>
+    <div class="al-side">
+      <div class="card al-big" id="al-big"></div>
+      <div class="card"><h3 class="card-title">En OBS</h3><p class="hint">Copia la URL del overlay de alertas en <b>Overlays para OBS</b> y ponla como Fuente de navegador (800 × 300). Para oír los sonidos, en OBS marca <b>«Controlar audio mediante OBS»</b> en esa fuente.</p><a class="btn small mt" href="#/overlays">Ir a Overlays</a></div>
+    </div>
   </div>
 </section>
 

@@ -483,3 +483,174 @@ details summary { cursor: pointer; color: var(--muted); font-weight: 700; }
 .kb-sub { margin: 16px 0 2px; font-size: .92em; }
 @media (max-width: 640px) { .conn-pick-list { position: static; width: auto; } }
 .conn-pane[hidden], .platform[hidden], .pchip[hidden] { display: none !important; }
+
+/* ---------- Alertas: ajustes por alerta ---------- */
+.al-layout { grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); }
+@media (max-width: 1000px) { .al-layout { grid-template-columns: 1fr; } }
+.al-side { display: grid; gap: 16px; }
+.al-rows { display: grid; gap: 10px; margin-top: 10px; }
+.al-row { border-radius: var(--radius-sm); background: var(--panel-2); border: 1px solid var(--line); transition: border-color .2s, opacity .2s; }
+.al-row.open { border-color: color-mix(in srgb, var(--c) 55%, var(--line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 12%, transparent); }
+.al-row.off { opacity: .6; }
+.al-head { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto auto auto 34px; gap: 12px; align-items: center; padding: 10px 12px 10px 14px; }
+.al-head .ico { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; background: color-mix(in srgb, var(--c) 25%, var(--panel)); border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); }
+.al-name b { display: block; } .al-name small { color: var(--muted); font-size: .86em; }
+.al-meta { font-size: 12px; font-weight: 700; color: color-mix(in srgb, var(--c) 70%, var(--ink)); background: color-mix(in srgb, var(--c) 12%, transparent); padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+.al-head .switch { margin: 0; }
+.al-toggle { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+.al-toggle:hover { border-color: var(--c); }
+.al-chev { width: 9px; height: 9px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .2s; }
+.al-row.open .al-chev { transform: translateY(2px) rotate(-135deg); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.al-row .al-set { display: none; }
+.al-row.open .al-set { display: grid; }
+.al-set { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 18px; padding: 4px 16px 14px 72px; border-top: 1px dashed var(--line); --g: var(--c); }
+.al-big .al-set { display: grid; padding: 4px 0 0; border: 0; grid-template-columns: 1fr; --g: #ff5d8f; }
+.al-big.off .al-set { opacity: .5; pointer-events: none; }
+.al-set .field { margin-top: 10px; }
+.al-set .switch { align-self: end; margin: 12px 0 4px; }
+.al-num { display: flex; align-items: center; gap: 10px; }
+.al-num input[type=range] { flex: 1; }
+.al-num output { min-width: 66px; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; font-size: .9em; }
+.al-set .row select { flex: 1; }
+.al-play { width: 38px; justify-content: center; }
+.al-file { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.al-file small { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.al-file[hidden] { display: none; }
+@media (max-width: 700px) {
+  .al-head { grid-template-columns: 40px minmax(0, 1fr) auto 34px; }
+  .al-head .al-meta, .al-head [data-sim-alert] { display: none; }
+  .al-set { grid-template-columns: 1fr; padding-left: 16px; }
+}
+
+/* =====================================================================
+   Pulido premium (0.7) · la órbita de Satronho
+   Una sola idea memorable: el anillo del planeta. Detrás del título de
+   cada página hay una órbita tenue y la sección activa del menú lleva un
+   pequeño planeta en órbita. Lo demás es sobrio: jerarquía con relieve,
+   títulos en minúscula normal, cifras alineadas.
+   Todo usa las variables de los temas, así que funciona en los cuatro.
+   ===================================================================== */
+
+:root {
+  --edge: color-mix(in srgb, var(--ink) 9%, transparent);          /* borde fino */
+  --lift: inset 0 1px 0 color-mix(in srgb, var(--ink) 7%, transparent); /* brillo superior */
+  --shade: 0 1px 2px rgb(0 0 0 / .18), 0 10px 28px -12px rgb(0 0 0 / .45);
+  --ring: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+[data-theme="claro"] { --shade: 0 1px 2px rgb(40 20 80 / .06), 0 12px 28px -14px rgb(40 20 80 / .22); --lift: inset 0 1px 0 #fff; }
+
+/* Fondo: un cielo con algo de polvo de estrellas, muy tenue */
+body {
+  background:
+    radial-gradient(1200px 620px at 92% -18%, var(--glow) 0%, transparent 62%),
+    radial-gradient(1.2px 1.2px at 12% 22%, color-mix(in srgb, var(--ink) 30%, transparent) 50%, transparent 51%) 0 0 / 220px 180px,
+    radial-gradient(1px 1px at 68% 74%, color-mix(in srgb, var(--ink) 22%, transparent) 50%, transparent 51%) 0 0 / 300px 260px,
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+[data-theme="claro"] body { background: radial-gradient(1200px 620px at 92% -18%, var(--glow) 0%, transparent 62%), var(--bg); }
+
+/* ---------- Menú lateral ---------- */
+.side { border-right: 0; box-shadow: inset -1px 0 0 var(--edge); }
+.nav-group h6 { text-transform: none; letter-spacing: .01em; font-size: 12px; font-weight: 700; color: color-mix(in srgb, var(--muted) 85%, transparent); }
+.nav-item { position: relative; font-weight: 650; }
+.nav-item.on {
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  box-shadow: none;
+  color: var(--ink);
+}
+/* El planeta en órbita de la sección activa */
+.nav-item.on::after {
+  content: ''; position: absolute; left: -12px; top: 50%; width: 22px; height: 22px; translate: 0 -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, var(--accent) 0 3.5px, transparent 4px);
+  box-shadow: 0 0 10px var(--ring);
+}
+.nav-item.on .ic { color: var(--accent); }
+.nav-item .badge { border: 0; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+
+/* ---------- Barra superior ---------- */
+.topbar { border-bottom: 0; box-shadow: 0 1px 0 var(--edge); }
+.pchip { border-color: var(--edge); background: color-mix(in srgb, var(--panel) 85%, transparent); box-shadow: var(--lift); }
+.pchip[hidden] { display: none; }
+
+/* ---------- Encabezado de página con la órbita ---------- */
+.ph { position: relative; isolation: isolate; padding-top: 10px; margin-bottom: 20px; }
+.ph::before {
+  content: ''; position: absolute; z-index: -1; left: -70px; top: -34px; width: 640px; height: 150px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  transform: rotate(-5deg);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 60%, transparent 100%);
+  pointer-events: none;
+}
+.ph .t small { text-transform: none; letter-spacing: .01em; font-size: 13px; font-weight: 700; color: var(--accent); }
+.ph h1 { font-size: 2.15em; line-height: 1.05; letter-spacing: -.025em; font-weight: 800; margin: 4px 0 6px; }
+.ph .t p { max-width: 62ch; }
+
+/* ---------- Tarjetas: relieve y jerarquía ---------- */
+.card {
+  border: 1px solid var(--edge);
+  box-shadow: var(--lift), var(--shade);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 100%, var(--ink) 2%), var(--panel));
+  padding: 18px 20px 20px;
+}
+/* Títulos de tarjeta en minúscula normal, no en MAYÚSCULAS espaciadas */
+.card h3, .card .card-title {
+  text-transform: none; letter-spacing: -.005em; font-size: 1.02em; font-weight: 750; color: var(--ink);
+}
+.card h3:not(:first-child) { margin-top: 18px; }
+/* Lo secundario va más plano: dentro de una tarjeta, sin relieve */
+.card .card, .platform, .al-row, .kb-acc { box-shadow: none; }
+.platform { border-color: var(--edge); background: color-mix(in srgb, var(--panel-2) 70%, var(--panel)); }
+
+/* ---------- Bienvenida ---------- */
+.welcome {
+  position: relative; z-index: 1;
+  border: 1px solid var(--edge);
+  box-shadow: var(--lift), var(--shade);
+  background:
+    radial-gradient(420px 220px at 78% 50%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 100%, var(--ink) 3%), var(--panel));
+}
+.welcome h2 { font-size: 1.6em; letter-spacing: -.02em; }
+
+/* ---------- Controles ---------- */
+input, select, textarea {
+  background: var(--well); border-color: var(--edge);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / .18);
+  transition: border-color .15s, box-shadow .15s;
+}
+input:hover, select:hover, textarea:hover { border-color: color-mix(in srgb, var(--ink) 18%, transparent); }
+input:focus, select:focus, textarea:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+input[type=range] { box-shadow: none; background: transparent; border: 0; }
+input[type=checkbox] { box-shadow: none; }
+.btn { border-color: var(--edge); box-shadow: var(--lift); background: color-mix(in srgb, var(--panel-2) 90%, var(--ink) 4%); }
+.btn:focus-visible, .seg button:focus-visible, .nav-item:focus-visible, .al-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.primary {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 100%, #fff 14%), var(--accent));
+  border-color: color-mix(in srgb, var(--accent) 70%, #000);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 40%, transparent), 0 6px 18px -8px color-mix(in srgb, var(--accent) 80%, transparent);
+  font-weight: 800;
+}
+.btn.ghost { box-shadow: none; background: transparent; }
+.seg { border-color: var(--edge); background: var(--well); padding: 3px; gap: 2px; border-radius: calc(var(--radius-sm) + 3px); }
+.seg button { border-radius: var(--radius-sm); }
+.seg button[aria-pressed="true"] { background: var(--panel-2); box-shadow: var(--lift), 0 1px 3px rgb(0 0 0 / .25); }
+.tabs { border-bottom-color: var(--edge); }
+.tabs button[aria-selected="true"] { border-bottom-width: 2px; }
+
+/* ---------- Cifras ---------- */
+.kpi b, .al-num output, .badge, .tops b { font-variant-numeric: tabular-nums; }
+.kpi b { letter-spacing: -.02em; }
+
+/* ---------- Burbujas de los guías ---------- */
+.bubble { box-shadow: var(--shade); }
+
+/* ---------- Ajustes finos de Alertas ---------- */
+.al-set .field > span { font-weight: 650; }
+.al-num output { min-width: 74px; }
+.al-set .row { flex-wrap: nowrap; }
+.al-set .row select { width: auto; min-width: 0; }
+[data-theme="claro"] .ph .t small { color: color-mix(in srgb, var(--accent) 55%, #000); }

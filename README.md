@@ -73,7 +73,7 @@ Twitch se lee con su chat oficial como espectador anónimo: no hace falta inicia
 
 La pantalla **Conexiones** tiene dos pestañas:
 - **Escuchar:** escribes tu usuario y Satronho Bot lee el chat (y en TikTok, los regalos).
-- **Escribir:** Satronho Bot responde en tu chat. Por ahora, solo en Kick.
+- **Escribir:** Satronho Bot responde en tu chat de **Kick** y de **Starvios**. TikTok solo se escucha por ahora.
 
 En **Plataformas que uso** desmarcas las que no usas: se esconden del panel y no se conectan solas.
 
@@ -88,6 +88,22 @@ Cada streamer pulsa **Autorizar** en «Tu cuenta de Kick», entra con su cuenta 
 - **En tu PC:** con las variables `SATRONHO_KICK_CLIENT_ID` y `SATRONHO_KICK_CLIENT_SECRET`, o con un archivo `src/builtin.json` (`{"kick":{"clientId":"…","clientSecret":"…"}}`), que nunca se sube.
 
 El Secret se puede extraer del `.exe`. Si alguien abusa, lo regeneras en Kick, actualizas el secreto en GitHub y sacas una versión nueva. Quienes ya autorizaron solo tendrán que volver a pulsar «Autorizar».
+
+### Escribir en Starvios
+
+Pulsa **Iniciar sesión** en «Tu cuenta de Starvios». Se abre una ventana de starvios.com dentro de la app. Cuando inicias sesión, la app toma la sesión que guardó la web, la cifra y la renueva sola. Satronho Bot nunca ve tu contraseña. Envía los mensajes igual que la web de Starvios, con `send_live_message`. En **Avanzado** puedes entrar con una cuenta aparte para el bot.
+
+## Alertas (Troya)
+
+Cada alerta (seguidor, regalo, suscripción, likes, compartido) tiene sus propios ajustes:
+- **Segundos en pantalla**, de 1 a 30, o **que dure lo que dura el sonido**.
+- **Sonido:** 8 sonidos propios generados en el momento (Campanita, Brillo, Burbuja, Moneda, Latido, Zas, Fanfarria, Aplausos), **tu propio archivo** (MP3, WAV u OGG, hasta 10 MB) o sin sonido.
+- **Volumen** y **cortar el sonido** a los N segundos, con un desvanecido al final.
+- **Troya la lee en voz alta** («Fulano te sigue»).
+
+**Regalos grandes:** desde la cantidad de diamantes que elijas sale otra alerta, más grande y con brillo, con sus propios ajustes.
+
+El interruptor **Sonido en OBS** apaga todos los sonidos de las alertas. En OBS, marca «Controlar audio mediante OBS» en la fuente de alertas.
 
 ## Voz (Troya)
 

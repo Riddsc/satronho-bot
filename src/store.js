@@ -25,9 +25,21 @@ const DEFAULTS = {
     starvios: { channel: '', autoConnect: false, hidden: false },
   },
   alerts: {
-    durationMs: 5000,
+    durationMs: 5000, // duración por defecto (las de cada tipo mandan)
     minGift: 1, // diamantes mínimos para lanzar alerta de regalo
     enabled: { follow: true, sub: true, gift: true, like: false, share: false },
+    // Por tipo: segundos en pantalla, sonido (incluido, 'file' o 'none'),
+    // volumen 0–100, cortar el sonido a los N s (0 = completo), durar lo
+    // que dura el sonido, y si Troya la lee en voz alta.
+    types: {
+      follow: { seconds: 5, sound: 'campanita', volume: 70, maxSeconds: 0, fitSound: false, speak: false, file: '' },
+      sub: { seconds: 6, sound: 'fanfarria', volume: 70, maxSeconds: 0, fitSound: false, speak: false, file: '' },
+      gift: { seconds: 5, sound: 'moneda', volume: 70, maxSeconds: 0, fitSound: false, speak: false, file: '' },
+      like: { seconds: 3, sound: 'burbuja', volume: 50, maxSeconds: 0, fitSound: false, speak: false, file: '' },
+      share: { seconds: 4, sound: 'zas', volume: 60, maxSeconds: 0, fitSound: false, speak: false, file: '' },
+    },
+    // Regalos grandes: desde cierta cantidad de diamantes, otra alerta.
+    bigGift: { enabled: false, min: 500, seconds: 10, sound: 'aplauso', volume: 85, maxSeconds: 0, fitSound: false, speak: true, file: '' },
   },
   tts: {
     enabled: true,
@@ -67,9 +79,12 @@ const DEFAULTS = {
   },
   // Respuestas del bot en el chat (Kick por ahora).
   // sendAs: 'me' = con la cuenta del streamer (lo normal); 'bot' = cuenta aparte.
-  chatBot: { kick: { enabled: true, sendAs: 'me', music: true } },
+  chatBot: {
+    kick: { enabled: true, sendAs: 'me', music: true },
+    starvios: { enabled: true, sendAs: 'me', music: true },
+  },
   // Claves y permisos (solo en tu PC; nunca se mandan al panel).
-  secrets: { kick: {} },
+  secrets: { kick: {}, starvios: {} },
   windowsVoices: [], // nombres de las voces de Windows en español (los manda el panel)
   // Cómo se ve el panel (solo en tu PC).
   appearance: { theme: 'noche', accent: '#ffb23e', font: 'bricolage-grotesque', size: 'm', corners: 'redondas' },
