@@ -602,7 +602,35 @@
 <!-- ---------- Estadísticas (Juana) ---------- -->
 <section class="page" id="page-estadisticas" data-page="estadisticas" hidden>
   <div class="ph"><div class="t"><small>Tus números</small><h1>Estadísticas</h1><p>Cada directo guardado en tu PC: lo que te regalaron, quién habló más y cómo fue la actividad.</p></div>
-    <div class="host" style="--g:#ff8fb5"><p class="bubble" data-bubble="juana" data-static><b>Juana:</b> Elige un directo arriba para compararlo con el anterior, o «Totales de siempre» para ver a tus fans de siempre.</p><span class="guide" data-avatar="juana" data-size="hero"></span></div></div>
+    <div class="host" style="--g:#ff8fb5"><p class="bubble" data-bubble="juana" data-static id="ov-juana"></p><span class="guide" data-avatar="juana" data-size="hero"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="estadisticas"><button data-tab="resumen">Resumen</button><button data-tab="directo">Directo por directo</button></div>
+  <div class="tabpanel" data-tabpanel="resumen">
+    <div id="ov-root" style="--g:#ff8fb5">
+      <div class="ov-bar">
+        <div class="seg" id="ov-plat"></div>
+        <div class="seg" id="ov-period"></div>
+        <div class="ov-dates" id="ov-dates" hidden><input type="date" id="ov-from" aria-label="Desde"><span>a</span><input type="date" id="ov-to" aria-label="Hasta"></div>
+      </div>
+      <div class="ov-tiles" id="ov-tiles"></div>
+      <p class="hint" id="ov-prev-note"></p>
+      <div class="ov-grid">
+        <div class="card ov-chartcard"><div class="chart-head"><h3>Directo a directo</h3>
+          <div class="seg" id="ov-metric"><button data-ovm="diamonds">Diamantes</button><button data-ovm="chat">Mensajes</button><button data-ovm="interactions">Interacciones</button><button data-ovm="viewers">Espectadores</button></div></div>
+          <div class="chart ov-chart" id="ov-chart"></div></div>
+        <div class="card ov-radarcard"><div class="row space"><h3 class="card-title">Perfil del último directo</h3><small class="hint" id="ov-radar-when"></small></div>
+          <div class="ov-radar" id="ov-radar"></div>
+          <p class="hint ov-radar-key"><i class="k mine"></i> Último directo <i class="k typ"></i> Tu directo típico</p>
+          <ul class="ov-radar-legend" id="ov-radar-legend"></ul></div>
+        <div class="card"><h3 class="card-title">Regalos más enviados</h3><div id="ov-gifts"></div></div>
+        <div class="card"><h3 class="card-title">Quienes más te regalan</h3><div id="ov-fans"></div></div>
+        <div class="card span2"><div class="row space"><h3 class="card-title">Tus directos</h3><small class="hint" id="ov-count"></small></div>
+          <p class="hint">Clic en un directo para ver su detalle. Marca dos casillas para compararlos.</p>
+          <div class="card ov-compare" id="ov-compare" hidden></div>
+          <div class="table-wrap" id="ov-table"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="tabpanel" data-tabpanel="directo" hidden>
   <div class="card" id="card-stats" style="--g:#ff8fb5">
     <div class="row wrap stats-bar"><select id="stats-session" aria-label="Directo a mostrar"></select><button class="btn ghost" id="stats-end">Terminar sesión</button></div>
     <p class="hint" id="stats-headline"></p>
@@ -617,6 +645,7 @@
       <details><summary>Ver como tabla</summary><div id="stats-table" class="table-wrap"></div></details>
     </div>
     <div class="tops" id="stats-tops"></div>
+  </div>
   </div>
 </section>
 
