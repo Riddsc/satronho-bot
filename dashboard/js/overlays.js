@@ -52,6 +52,20 @@ let query = '';
 let editing = null; // { id, w, tab, real }
 
 const origin = () => location.origin;
+// Enlace https para TikTok LIVE Studio (no acepta http://127.0.0.1).
+let appInfo = null;
+fetch('/api/state').then((r) => r.json()).then((d) => { appInfo = d.app || null; }).catch(() => {});
+const tiktokUrl = (path) => {
+  const base = appInfo?.pagesBase || 'https://riddsc.github.io/satronho-bot';
+  const port = Number(appInfo?.port || location.port) || 3800;
+  return `${base}/o/?p=${encodeURIComponent(path)}${port !== 3800 ? `&port=${port}` : ''}`;
+};
+const pathOf = (url) => url.replace(origin(), '');
+// Dos enlaces: OBS / Streamlabs (local) y TikTok LIVE Studio (https).
+const urlRows = (local, attr) => `<div class="ov-links">
+  <div class="ov-link"><span class="ov-link-name">OBS · Streamlabs</span><code>${esc(local)}</code><button type="button" class="btn small primary" data-copy="${esc(local)}">Copiar</button></div>
+  <div class="ov-link tt"><span class="ov-link-name"><span class="pl plogo" data-logo="tiktok" aria-hidden="true"></span>TikTok LIVE Studio</span><code>${esc(tiktokUrl(pathOf(local)))}</code><button type="button" class="btn small" data-copy="${esc(tiktokUrl(pathOf(local)))}" data-tt>Copiar</button></div>
+</div>`;
 const urlOf = (id) => `${origin()}/overlays/w.html?id=${encodeURIComponent(id)}`;
 // Un overlay guardado, o el de serie de su tipo (id = nombre del tipo).
 const widgetOf = (id) => widgets[id] || (KINDS[id] ? { kind: id, name: KINDS[id].name } : null);
@@ -255,8 +269,8 @@ function renderQuick() {
     <div class="ovq-body">
       <div class="ovq-stage checker"><iframe src="${quickPath(quick.kind)}${quick.kind === 'alerts' ? '?' : '&'}preview=1" width="${W}" height="${H}" title="Vista previa" tabindex="-1"></iframe></div>
       <p class="ovq-desc">${esc(info.desc)} <span>Vista previa con datos de ejemplo.</span></p>
-      <div class="ovq-url"><span class="ovq-dot"></span><code>${esc(origin() + quickPath(quick.kind))}</code><button type="button" class="btn small primary" data-ovq-copy>Copiar</button><button type="button" class="ovq-icon" data-ovq-open title="Abrir en el navegador" aria-label="Abrir en el navegador">↗</button></div>
-      <p class="hint ovq-size">Fuente de navegador de <b>${W} × ${H}</b> · Funciona con la app abierta en este PC.</p>
+      ${urlRows(origin() + quickPath(quick.kind))}
+      <p class="hint ovq-size">Tamaño <b>${W} × ${H}</b> · En OBS: Fuente de navegador. En TikTok LIVE Studio: Enlace. Funciona con la app abierta en este PC.</p>
     </div>
     <footer class="ovq-foot ovq-foot-one"><button type="button" class="btn ovq-all" data-ovq-all>Ir a todos los Overlays →</button></footer>
   </div>`;
@@ -264,6 +278,23 @@ function renderQuick() {
   f.addEventListener('load', () => pushStyle(f));
   requestAnimationFrame(fitQuick);
 }
+
+// Copiar un enlace (OBS o TikTok LIVE Studio), con la ayuda de Samy.
+async function copyLink(btn) {
+  try {
+    await navigator.clipboard.writeText(btn.dataset.copy);
+    guideToast('samy', btn.dataset.tt !== undefined
+      ? 'Enlace para TikTok copiado. En TikTok LIVE Studio: + Agregar fuente → Enlace, pégalo y pulsa Aplicar. La app tiene que estar abierta en este PC.'
+      : 'URL copiada. En OBS: Fuentes → + → Navegador, y pégala.');
+    markStep('overlay');
+  } catch {
+    toast('No se pudo copiar: selecciónala a mano');
+  }
+}
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest('.ov-links [data-copy]');
+  if (b && !b.closest('#ovg')) copyLink(b);
+});
 
 function initNavTree() {
   document.addEventListener('click', (ev) => {
@@ -319,7 +350,7 @@ function openEditor(id) {
           <div class="row space"><div class="seg ove-data" role="group" aria-label="Datos de la vista previa"><button type="button" data-real="0">Ejemplo</button><button type="button" data-real="1">Mis datos</button></div>
             <div class="row" style="gap:6px"><button type="button" class="btn small ghost" data-bg="checker" title="Fondo de cuadros">▦</button><button type="button" class="btn small ghost" data-bg="dark" title="Fondo oscuro">●</button><button type="button" class="btn small ghost" data-bg="light" title="Fondo claro">○</button></div></div>
           <div class="ove-stage checker" data-w="${W}" data-h="${H}"><iframe id="ove-frame" width="${W}" height="${H}" title="Vista previa"></iframe></div>
-          <div class="ove-url"><code id="ove-url"></code><button type="button" class="btn small primary" data-copy-url>Copiar URL</button><button type="button" class="btn small ghost" data-open-url title="Abrir en el navegador">↗</button></div>
+          <div id="ove-urls"></div>
           <p class="hint ove-size">En OBS, fuente de navegador de <b>${W} × ${H}</b>. Marca «Actualizar el navegador cuando la escena se active».</p>
           ${w.kind === 'giftspot' || w.kind === 'giftrain' || w.kind === 'lastgifts' || w.kind === 'bestgift' || w.kind === 'mvp' ? '<button type="button" class="btn small ghost" data-sim-quick="gift">▶ Simular un regalo</button>' : ''}
           ${w.kind === 'ranking' || w.kind === 'mvp' ? '<button type="button" class="btn small ghost" data-reset-podium>Reiniciar ranking</button>' : ''}
@@ -353,7 +384,7 @@ function setFrame() {
   f.src = `/overlays/w.html?id=${encodeURIComponent(editing.id)}&preview=1${editing.real ? '&real=1' : ''}`;
   f.onload = () => { pushPreview(); pushStyle(f); };
   for (const b of $$('[data-real]')) b.setAttribute('aria-pressed', String((b.dataset.real === '1') === editing.real));
-  $('#ove-url').textContent = urlOf(editing.id);
+  $('#ove-urls').innerHTML = urlRows(urlOf(editing.id));
 }
 const pushPreview = () => $('#ove-frame')?.contentWindow?.postMessage({ satronhoWidget: editing.w }, origin());
 function pushStyle(f) {
@@ -736,7 +767,7 @@ function renderClassic() {
     { name: 'Podio (clásico)', path: '/overlays/podium.html', note: 'Usa ?metrica=regalos o ?puestos=5', w: 900, h: 420 },
     ...goals.map((g) => ({ name: `Meta: ${g.title}`, path: `/overlays/goal.html?id=${encodeURIComponent(g.id)}`, note: 'Barra de una sola meta', w: 700, h: 140 })),
   ];
-  $('#overlay-list').innerHTML = list.map((it) => `<div class="ovg-crow"><b>${esc(it.name)}<small>${it.w} × ${it.h} · ${esc(it.note)}</small></b><code>${esc(origin() + it.path)}</code><button type="button" class="btn small ghost" data-copy="${esc(origin() + it.path)}">Copiar</button></div>`).join('');
+  $('#overlay-list').innerHTML = list.map((it) => `<div class="ovg-crow"><b>${esc(it.name)}<small>${it.w} × ${it.h} · ${esc(it.note)}</small></b><code>${esc(origin() + it.path)}</code><button type="button" class="btn small ghost" data-copy="${esc(origin() + it.path)}">Copiar</button><button type="button" class="btn small ghost" data-copy="${esc(tiktokUrl(it.path))}" data-tt title="Enlace https para TikTok LIVE Studio">TikTok</button></div>`).join('');
 }
 
 // ---------- Estilo general ----------
@@ -845,7 +876,7 @@ export function initOverlays(cfg) {
     if (pin) { ev.stopPropagation(); return togglePin(pin.dataset.pin); }
     const copy = ev.target.closest('[data-copy]');
     if (copy) {
-      try { await navigator.clipboard.writeText(copy.dataset.copy); guideToast('samy', 'URL copiada.'); markStep('overlay'); } catch { toast('No se pudo copiar: selecciónala a mano'); }
+      await copyLink(copy);
       return;
     }
     if (ev.target.closest('[data-go-alerts]')) return showPage('alertas');

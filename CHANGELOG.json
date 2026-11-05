@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.20.0",
+    "date": "2026-11-05",
+    "title": "Música que sí suena y overlays en TikTok LIVE Studio",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Música: ya no rechaza canciones cuando YouTube pide «confirmar que no eres un bot». Si una versión de verdad no se puede poner, el reproductor salta a la siguiente."
+      },
+      {
+        "type": "nuevo",
+        "text": "Cada overlay trae ahora dos enlaces: el de OBS y Streamlabs, y uno https para TikTok LIVE Studio, que no acepta enlaces locales."
+      },
+      {
+        "type": "mejora",
+        "text": "Mensajes de música más claros: si todas las versiones duran demasiado, te dice dónde subir el límite."
+      }
+    ]
+  },
+  {
     "version": "0.19.0",
     "date": "2026-11-05",
     "title": "Un Inicio para empezar y todos los overlays de cada apartado",
