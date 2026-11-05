@@ -534,7 +534,7 @@ const nowplaying = {
   tick: true,
   css: BASE_CSS + `
   .w { width: 620px; }
-  .np { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 12px 18px 12px 12px; border: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); animation: k-in .5s both; }
+  .np { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; padding: 12px 18px 12px 12px; border: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); animation: k-in .5s both; }
   .np-art { width: 96px; height: 96px; border-radius: calc(14px * var(--r)); object-fit: cover; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
   .np-label { font-size: 12px; letter-spacing: .14em; font-weight: 900; color: var(--accent); display: flex; align-items: center; gap: 8px; }
   .np-eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; } .np-eq i { width: 3px; background: var(--accent); animation: np-eq .9s ease-in-out infinite; } .np-eq i:nth-child(2) { animation-delay: .2s; } .np-eq i:nth-child(3) { animation-delay: .4s; }
@@ -542,7 +542,8 @@ const nowplaying = {
   .np-title { font-size: 22px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .np-by { font-weight: 700; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .np-req { font-weight: 800; color: var(--accent); font-size: 14px; }
-  .np-prog { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; font-size: 12px; font-weight: 800; margin-top: 6px; opacity: .9; }
+  .np > div { min-width: 0; } /* un título largo se corta con «…» y no estira la tarjeta ni la barra */
+  .np-prog { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 12px; font-weight: 800; margin-top: 6px; opacity: .9; }
   .np-prog b { height: 5px; border-radius: 9px; background: color-mix(in srgb, var(--ink) 15%, transparent); overflow: hidden; } .np-prog b i { display: block; height: 100%; background: var(--accent); transition: width 1s linear; }
   body[data-style="vinilo"] .np-art { border-radius: 50%; animation: np-spin 6s linear infinite; box-shadow: 0 0 0 6px #111, 0 0 0 7px #333; }
   @keyframes np-spin { to { transform: rotate(360deg); } }
@@ -570,14 +571,14 @@ const queue = {
   css: BASE_CSS + `
   .w { width: 440px; }
   .q { display: grid; gap: 8px; padding: 14px; }
-  .q-row { display: grid; grid-template-columns: 24px 48px 1fr auto; gap: 10px; align-items: center; animation: k-in .4s both; }
+  .q-row { display: grid; grid-template-columns: 24px 48px minmax(0, 1fr) auto; gap: 10px; align-items: center; animation: k-in .4s both; }
   .q-n { font-weight: 900; color: var(--accent); text-align: center; }
   .q-art { width: 48px; height: 36px; border-radius: 8px; object-fit: cover; }
   .q-t { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .q-r { font-size: 13px; font-weight: 700; color: var(--accent); }
   .q-d { font-weight: 700; opacity: .8; font-size: 13px; }
   .q-help { margin-top: 4px; font-weight: 700; font-size: 14px; opacity: .85; } .q-help code { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
   body[data-style="tarjetas"] .q { background: transparent !important; padding: 0; } body[data-style="tarjetas"] .q-row { background: var(--bg); border-radius: calc(12px * var(--r)); padding: 6px 12px 6px 6px; }
-  body[data-style="minimo"] .q { background: transparent !important; text-shadow: 0 2px 6px rgba(0,0,0,.9); } body[data-style="minimo"] .q-art { display: none; } body[data-style="minimo"] .q-row { grid-template-columns: 24px 1fr auto; }
+  body[data-style="minimo"] .q { background: transparent !important; text-shadow: 0 2px 6px rgba(0,0,0,.9); } body[data-style="minimo"] .q-art { display: none; } body[data-style="minimo"] .q-row { grid-template-columns: 24px minmax(0, 1fr) auto; }
   `,
   render({ S, set }) {
     const list = (S.music?.queue || []).slice(0, set.count);

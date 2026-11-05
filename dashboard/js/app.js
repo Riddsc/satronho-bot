@@ -293,23 +293,61 @@ function initAppSettings() {
 }
 
 // ---------- Actualizaciones ----------
+// Aviso de actualización: una franja arriba en todas las pantallas y, si
+// la escondes con «Luego», un botón fijo en la barra superior que no se va
+// hasta que actualices. Así nadie se queda en una versión vieja.
+let updateState = null;
+let updateHidden = false;
 function renderUpdate(u) {
+  if (u) updateState = u;
+  u = updateState;
   const el = $('#update-banner');
-  if (!u || u.state === 'error') {
+  const pill = $('#update-pill');
+  if (!u || u.state === 'error' || !['ready', 'available', 'downloading'].includes(u.state)) {
     el.hidden = true;
+    pill.hidden = true;
     return;
   }
-  el.hidden = false;
+  const pct = Math.round(u.pct || 0);
+  pill.hidden = false;
+  pill.className = `update-pill ${u.state}`;
+  pill.innerHTML = u.state === 'ready'
+    ? '<i></i>Reiniciar y actualizar'
+    : u.state === 'downloading'
+      ? `<i></i>Actualizando… ${pct}%`
+      : '<i></i>Actualizar';
+  pill.title = u.state === 'ready' ? `La versión ${u.version} está lista` : `Versión ${u.version}`;
+  el.hidden = updateHidden;
+  el.className = `update-banner ${u.state}`;
   if (u.state === 'ready') {
-    el.innerHTML = `<span>🐾 Ya descargué la versión ${esc(u.version)} de Satronho Bot.</span><button class="btn primary small" id="update-apply">Reiniciar y actualizar</button>`;
+    el.innerHTML = `<span>🐾 La versión <b>${esc(u.version)}</b> de Satronho Bot ya está lista.</span><button class="btn primary small" id="update-apply">Reiniciar y actualizar</button><button class="btn ghost small" id="update-later">Luego</button>`;
   } else if (u.state === 'available') {
-    el.innerHTML = `<span>🐾 Hay una versión nueva de Satronho Bot: ${esc(u.version)}.</span>${u.url ? `<button class="btn primary small" id="update-open">Descargarla</button>` : ''}<button class="btn ghost small" id="update-later">Luego</button>`;
+    el.innerHTML = `<span>🐾 Hay una versión nueva de Satronho Bot: <b>${esc(u.version)}</b>.</span>${u.url ? `<button class="btn primary small" id="update-open">Actualizar</button>` : ''}<button class="btn ghost small" id="update-later">Luego</button>`;
   } else {
-    el.innerHTML = `<span>Descargando la versión ${esc(u.version)}… ${Math.round(u.pct || 0)}%</span>`;
+    el.innerHTML = `<span>Se está actualizando Satronho Bot a la versión <b>${esc(u.version)}</b>… ${pct}%</span><span class="upd-bar"><i style="width:${pct}%"></i></span><span class="hint" style="margin:0">Puedes seguir usando la app.</span>`;
   }
-  $('#update-apply')?.addEventListener('click', () => api('POST', '/api/update/apply').catch((e) => toast(e.message)));
+  $('#update-apply')?.addEventListener('click', applyUpdate);
   $('#update-open')?.addEventListener('click', () => window.open(u.url, '_blank'));
-  $('#update-later')?.addEventListener('click', () => { el.hidden = true; });
+  $('#update-later')?.addEventListener('click', () => { updateHidden = true; el.hidden = true; });
+}
+function applyUpdate() {
+  api('POST', '/api/update/apply').catch((e) => toast(e.message));
+}
+function initUpdatePill() {
+  $('#update-pill').addEventListener('click', () => {
+    const u = updateState;
+    if (u?.state === 'ready') return applyUpdate();
+    if (u?.state === 'available' && u.url) return window.open(u.url, '_blank');
+    updateHidden = false;
+    renderUpdate();
+  });
+  // Al cambiar de pantalla, si sigue pendiente, la franja vuelve a aparecer.
+  onPageChange(() => {
+    if (updateState && updateHidden && updateState.state === 'ready') {
+      updateHidden = false;
+      renderUpdate();
+    }
+  });
 }
 
 // ---------- Ayuda: preguntas por guía ----------
@@ -367,6 +405,7 @@ async function init() {
   initHotkeys(config);
   initSupport();
   initNews(config, state.app?.version);
+  initUpdatePill();
   onPageChange(onNewsPage);
   for (const p of ['tiktok', 'kick', 'starvios', 'twitch']) renderStatus({ platform: p, state: 'disconnected' });
 

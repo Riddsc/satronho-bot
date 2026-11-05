@@ -209,13 +209,26 @@ function renderSectionLinks() {
   }
 }
 
-// ---------- Ventana rápida de overlays (desde cada apartado) ----------
-// Se abre encima de la pantalla en la que estás; al cerrarla, sigues ahí.
-const quick = { page: '', kind: '' };
+// ---------- Ventana de overlays de cada apartado ----------
+// Se abre encima de la pantalla en la que estás, con TODOS los overlays de
+// ese apartado (uno por pestaña) y su editor completo: vista previa en vivo
+// a la izquierda y «Qué se muestra», «Estilo» y demás a la derecha. Se
+// guarda solo. Al cerrarla sigues donde estabas.
+const quick = { page: '', kind: '', open: false };
+function startEditing(id) {
+  const w = widgetOf(id);
+  if (!w) return false;
+  const k = KINDS[w.kind];
+  editing = { id, w: JSON.parse(JSON.stringify({ kind: w.kind, name: w.name || k.name, style: styleOf(w), settings: settingsOf(w), look: w.look || {} })), tab: 'ajustes', real: Boolean(k.extraTab) };
+  return true;
+}
 function openOverlayQuick(page, kind) {
   const kinds = SECTION_OVERLAYS[page] || ['nowplaying'];
+  // Si el editor de la página Overlays estaba abierto, se cierra (mismo editor).
+  if (editing && !quick.open) closeEditor();
   quick.page = page;
   quick.kind = kinds.includes(kind) ? kind : kinds[0];
+  quick.open = true;
   let m = $('#ovq');
   if (!m) {
     m = document.createElement('div');
@@ -226,16 +239,31 @@ function openOverlayQuick(page, kind) {
       if (ev.target === m || ev.target.closest('[data-ovq-close]')) return closeQuick();
       const tab = ev.target.closest('[data-ovq-kind]');
       if (tab) { quick.kind = tab.dataset.ovqKind; return renderQuick(); }
-      if (ev.target.closest('[data-ovq-copy]')) {
-        try { await navigator.clipboard.writeText(origin() + quickPath(quick.kind)); guideToast('samy', 'URL copiada. En OBS: Fuentes → + → Navegador, y pégala.'); markStep('overlay'); } catch { toast('No se pudo copiar: selecciónala a mano'); }
-        return;
-      }
-      if (ev.target.closest('[data-ovq-open]')) return window.open(origin() + quickPath(quick.kind), '_blank');
-      if (ev.target.closest('[data-ovq-edit]')) { closeQuick(); return quick.kind === 'alerts' ? showPage('alertas') : go(quick.kind); }
       if (ev.target.closest('[data-ovq-all]')) { closeQuick(); return go('galeria'); }
+      if (ev.target.closest('[data-ovq-alerts]')) { closeQuick(); return showPage('alertas'); }
+      const th = ev.target.closest('[data-qtheme]');
+      if (th) {
+        const t = THEMES.find((x) => x.id === th.dataset.qtheme);
+        setStyle({ theme: t.id, ...t.set });
+        renderQuickAlerts();
+        return guideToast('troya', `Tema «${t.name}» en tus alertas y en todos tus overlays.`);
+      }
+      const ac = ev.target.closest('[data-qaccent]');
+      if (ac) { setStyle({ accent: ac.dataset.qaccent }); return renderQuickAlerts(); }
+      if (ev.target.closest('[data-ovq-sim]')) return api('POST', '/api/test/gift').catch((e) => toast(e.message));
+      if (editing && ev.target.closest('#ovq-editor')) return onEditorClick(ev);
     });
+    m.addEventListener('input', (ev) => { if (editing && ev.target.closest('#ovq-editor') && !ev.target.dataset.c && ev.target.dataset.gtitle === undefined && ev.target.dataset.gtarget === undefined && ev.target.type !== 'checkbox') onEditorInput(ev); });
+    m.addEventListener('change', (ev) => {
+      if (ev.target.id === 'ovq-sound') {
+        config.overlayStyle = { ...config.overlayStyle, sound: ev.target.checked };
+        return setStyle({ sound: ev.target.checked });
+      }
+      if (editing && ev.target.closest('#ovq-editor')) onEditorChange(ev);
+    });
+    m.addEventListener('submit', (ev) => { if (editing && ev.target.closest('#ovq-editor')) onEditorSubmit(ev); });
     document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !m.hidden) closeQuick(); });
-    window.addEventListener('resize', () => { if (!m.hidden) fitQuick(); });
+    window.addEventListener('resize', () => { if (!m.hidden) fitAll(m); });
   }
   renderQuick();
   m.hidden = false;
@@ -244,39 +272,68 @@ function openOverlayQuick(page, kind) {
 function closeQuick() {
   const m = $('#ovq');
   if (!m) return;
+  // Lo pendiente de guardar se guarda ya.
+  if (editing && saveTimer) {
+    clearTimeout(saveTimer);
+    widgets[editing.id] = JSON.parse(JSON.stringify(editing.w));
+    saveConfig({ widgets: { [editing.id]: widgets[editing.id] } });
+  }
+  editing = null;
+  quick.open = false;
   m.classList.remove('on');
   setTimeout(() => { m.hidden = true; m.innerHTML = ''; }, 160);
-}
-function fitQuick() {
-  const pv = $('#ovq .ovq-stage');
-  if (!pv) return;
-  const [W, H] = quickInfo(quick.kind).size;
-  const k = Math.min(pv.clientWidth / W, 380 / H, 1.2);
-  pv.style.height = `${Math.round(H * k)}px`;
-  const f = pv.querySelector('iframe');
-  f.style.transform = `scale(${k})`;
-  f.style.left = `${Math.max(0, (pv.clientWidth - W * k) / 2)}px`;
+  renderGallery();
 }
 function renderQuick() {
   const m = $('#ovq');
   const kinds = SECTION_OVERLAYS[quick.page] || [];
+  const isAlerts = quick.kind === 'alerts';
   const info = quickInfo(quick.kind);
   const [W, H] = info.size;
-  const color = quick.kind === 'alerts' ? GUIDES.troya.color : GUIDES[catOf(quick.kind).guide].color;
-  m.innerHTML = `<div class="ovq-card" role="dialog" aria-modal="true" aria-label="Overlays de ${esc(SECTION_NAME[quick.page] || '')}" style="--g:${color}">
-    <header class="ovq-head"><span class="ovq-ic">🖥</span><div><b>Overlays de ${esc(SECTION_NAME[quick.page] || 'este apartado')}</b><small>Esto es exactamente lo que se ve en tu fuente de navegador. Copia la URL en OBS, TikTok LIVE Studio o Streamlabs.</small></div><button type="button" class="ovq-x" data-ovq-close aria-label="Cerrar">✕</button></header>
+  const guide = isAlerts ? 'troya' : catOf(quick.kind).guide;
+  const color = GUIDES[guide].color;
+  editing = null;
+  if (!isAlerts) startEditing(quick.kind);
+  m.innerHTML = `<div class="ovq-card ovq-wide" role="dialog" aria-modal="true" aria-label="Overlays de ${esc(SECTION_NAME[quick.page] || '')}" style="--g:${color}">
+    <header class="ovq-head"><span class="ovq-ic">🖥</span><div><b>Overlays de ${esc(SECTION_NAME[quick.page] || 'este apartado')}</b><small>Elige uno, cámbialo a tu gusto y copia su enlace. Se guarda solo y OBS o TikTok se actualizan al instante.</small></div><button type="button" class="ovq-x" data-ovq-close aria-label="Cerrar">✕</button></header>
     ${kinds.length > 1 ? `<nav class="ovq-tabs">${kinds.map((k) => `<button type="button" data-ovq-kind="${k}" aria-selected="${k === quick.kind}"><i>${quickInfo(k).icon}</i>${esc(quickInfo(k).name)}</button>`).join('')}</nav>` : ''}
-    <div class="ovq-body">
-      <div class="ovq-stage checker"><iframe src="${quickPath(quick.kind)}${quick.kind === 'alerts' ? '?' : '&'}preview=1" width="${W}" height="${H}" title="Vista previa" tabindex="-1"></iframe></div>
-      <p class="ovq-desc">${esc(info.desc)} <span>Vista previa con datos de ejemplo.</span></p>
-      ${urlRows(origin() + quickPath(quick.kind))}
-      <p class="hint ovq-size">Tamaño <b>${W} × ${H}</b> · En OBS: Fuente de navegador. En TikTok LIVE Studio: Enlace. Funciona con la app abierta en este PC.</p>
+    <div class="ovq-cols" id="ovq-editor">
+      <div class="ovq-left">
+        ${isAlerts ? '' : `<div class="row space ovq-pvbar"><div class="seg ove-data" role="group" aria-label="Datos de la vista previa"><button type="button" data-real="0">Ejemplo</button><button type="button" data-real="1">Mis datos</button></div>
+          <div class="row" style="gap:6px"><button type="button" class="btn small ghost" data-bg="checker" title="Fondo de cuadros">▦</button><button type="button" class="btn small ghost" data-bg="dark" title="Fondo oscuro">●</button><button type="button" class="btn small ghost" data-bg="light" title="Fondo claro">○</button></div></div>`}
+        <div class="ove-stage checker" data-w="${W}" data-h="${H}">${isAlerts ? `<iframe src="${quickPath('alerts')}?preview=1" width="${W}" height="${H}" title="Vista previa" tabindex="-1"></iframe>` : `<iframe id="ove-frame" width="${W}" height="${H}" title="Vista previa"></iframe>`}</div>
+        <p class="ovq-desc">${esc(info.desc)}</p>
+        <div id="ove-urls">${isAlerts ? urlRows(origin() + quickPath('alerts')) : ''}</div>
+        <p class="hint ovq-size">Tamaño <b>${W} × ${H}</b>. En OBS: Fuente de navegador. En TikTok LIVE Studio: Enlace, con «Resolución personalizada» en ${W} × ${H}.</p>
+      </div>
+      <div class="ovq-right">
+        ${isAlerts ? '<div id="ovq-alerts"></div>' : `<div class="ove-head ovq-ehead" id="ove-head"></div><b id="ove-crumb-name" hidden></b><div class="ove-tabs" id="ove-tabs"></div><div id="ove-panel"></div>`}
+      </div>
     </div>
-    <footer class="ovq-foot ovq-foot-one"><button type="button" class="btn ovq-all" data-ovq-all>Ir a todos los Overlays →</button></footer>
+    <footer class="ovq-foot ovq-foot-one"><button type="button" class="btn ovq-all" data-ovq-all>Ir a todos los Overlays personalizables →</button></footer>
   </div>`;
-  const f = m.querySelector('iframe');
-  f.addEventListener('load', () => pushStyle(f));
-  requestAnimationFrame(fitQuick);
+  if (isAlerts) {
+    const f = m.querySelector('iframe');
+    f.addEventListener('load', () => pushStyle(f));
+    renderQuickAlerts();
+  } else {
+    renderEditorHead();
+    renderTabs();
+    setFrame();
+  }
+  requestAnimationFrame(() => fitAll(m));
+}
+// Alertas: su diseño sigue el tema de tus overlays; textos, sonidos y reglas
+// están en el apartado Alertas.
+function renderQuickAlerts() {
+  const box = $('#ovq-alerts');
+  if (!box) return;
+  box.innerHTML = `<span class="field-label">Tema de tus alertas</span>
+    <div class="ovq-themes">${THEMES.map((t) => `<button type="button" class="ov-theme" data-qtheme="${t.id}" aria-pressed="${style.theme === t.id}" title="${esc(t.desc)}"><span class="ov-tprev" style="--tb:${t.bg};--tf:${t.fg};--td:${t.bd}"><b>Satronho</b></span><span class="ov-tname">${esc(t.name)}</span></button>`).join('')}</div>
+    <span class="field-label mt">Color</span>
+    <div class="row wrap" style="gap:6px">${ACCENTS.map((c) => `<button type="button" class="swatch" data-qaccent="${c}" aria-pressed="${style.accent === c}" style="background:${c};width:26px;height:26px" title="${c}"></button>`).join('')}</div>
+    <label class="switch mt"><input type="checkbox" id="ovq-sound" ${style.sound !== false ? 'checked' : ''}><span></span> Sonido de las alertas en el directo</label>
+    <div class="row wrap mt" style="gap:8px"><button type="button" class="btn small" data-ovq-sim>▶ Probar con un regalo</button><button type="button" class="btn small primary" data-ovq-alerts>Textos, sonidos y reglas de cada alerta</button></div>`;
 }
 
 // Copiar un enlace (OBS o TikTok LIVE Studio), con la ayuda de Samy.
@@ -388,7 +445,7 @@ function setFrame() {
 }
 const pushPreview = () => $('#ove-frame')?.contentWindow?.postMessage({ satronhoWidget: editing.w }, origin());
 function pushStyle(f) {
-  const frames = f ? [f] : $$('#page-overlays iframe');
+  const frames = f ? [f] : [...$$('#page-overlays iframe'), ...$$('#ovq iframe')];
   for (const x of frames) x.contentWindow?.postMessage({ satronhoStyle: style }, origin());
 }
 

@@ -35,16 +35,28 @@ function parseVideoId(input) {
 const textOf = (t) => (t ? (typeof t === 'string' ? t : t.toString?.() || t.text || '') : '');
 
 async function details(yt, videoId) {
-  const info = await yt.getBasicInfo(videoId);
+  // Primero preguntamos como reproductor incrustado (lo que usa el panel) y,
+  // si YouTube no contesta bien, como la web normal.
+  let info = null;
+  let lastErr = null;
+  for (const client of ['WEB_EMBEDDED', 'WEB']) {
+    try {
+      info = await yt.getBasicInfo(videoId, { client });
+      if (String(info.playability_status?.status || 'OK') === 'OK') break;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  if (!info) throw lastErr || new Error('Sin ficha');
   const b = info.basic_info || {};
   const ps = info.playability_status || {};
   const status = String(ps.status || 'OK');
   const reason = String(ps.reason || '');
-  // YouTube a veces responde «inicia sesión para confirmar que no eres un
-  // bot» a la app aunque el video se vea normal en el reproductor del panel.
-  // Eso no es un video bloqueado: lo dejamos pasar y, si de verdad no suena,
-  // el reproductor avisa y salta a la siguiente.
-  const botCheck = status === 'LOGIN_REQUIRED' && !/edad|age|privado|private|members|miembros/i.test(reason);
+  // Solo cuando YouTube responde «OK» sabemos de verdad si se puede incrustar.
+  // Con «confirma que no eres un bot» la librería lo marca como no
+  // incrustable aunque sí lo sea: ahí no lo sabemos y lo dejamos probar.
+  const blocked = /edad|age|privado|private|members|miembros|eliminado|removed|no disponible|unavailable/i.test(reason)
+    || status === 'AGE_CHECK_REQUIRED' || status === 'CONTENT_CHECK_REQUIRED';
   return {
     videoId,
     title: b.title || 'Sin título',
@@ -52,9 +64,10 @@ async function details(yt, videoId) {
     durationSec: Number(b.duration) || 0,
     thumbnail: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,
     isLive: Boolean(b.is_live),
-    embeddable: ps.embeddable !== false,
-    playable: status === 'OK' || botCheck,
-    unsure: botCheck || status === 'ERROR',
+    embeddable: status === 'OK' ? ps.embeddable !== false : !blocked,
+    playable: status === 'OK' || !blocked,
+    sure: status === 'OK',
+    blocked,
     status,
   };
 }
@@ -127,7 +140,7 @@ function createYoutubeResolver({ fetch: fetchFn = fetch, client = null } = {}) {
       }
       if (usable(v)) return v;
       // No se puede incrustar o tiene restricción de edad: esa no sirve.
-      if (!v.embeddable || v.status === 'AGE_CHECK_REQUIRED' || v.status === 'CONTENT_CHECK_REQUIRED') continue;
+      if (v.blocked || (v.sure && !v.embeddable)) continue;
       backup ??= v.durationSec ? v : fromSearch(c);
     }
     if (backup) return backup;

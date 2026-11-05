@@ -1,5 +1,40 @@
 [
   {
+    "version": "0.21.0",
+    "date": "2026-11-05",
+    "title": "Música arreglada de verdad y overlays que se editan donde estás",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Música: cuando YouTube pide «confirmar que no eres un bot», las canciones ya no se rechazan como «no se puede poner fuera de YouTube». Ahora se revisan como reproductor incrustado, que es lo que usa la app."
+      },
+      {
+        "type": "nuevo",
+        "text": "El botón «Overlay» de cada apartado abre una ventana con todos sus overlays y el editor completo: qué se muestra, estilo, metas, contadores… con la vista previa cambiando al instante."
+      },
+      {
+        "type": "mejora",
+        "text": "Abajo de esa ventana: «Ir a todos los Overlays personalizables»."
+      },
+      {
+        "type": "arreglo",
+        "text": "La barra de progreso y los títulos largos de las canciones ya no se salen del recuadro en «Sonando ahora» ni en la Cola: el título se corta con «…» y la barra queda dentro."
+      },
+      {
+        "type": "mejora",
+        "text": "Los overlays crecen para llenar la fuente si es más grande que el diseño (TikTok LIVE Studio usa 1920 × 1080): se leen bien al achicarlos en la escena."
+      },
+      {
+        "type": "mejora",
+        "text": "La app siempre abre en el Inicio."
+      },
+      {
+        "type": "mejora",
+        "text": "El aviso de actualización se ve en todas las pantallas: una franja arriba y un botón fijo en la barra superior («Actualizando… 42 %», «Reiniciar y actualizar») que no se va hasta que actualices."
+      }
+    ]
+  },
+  {
     "version": "0.20.0",
     "date": "2026-11-05",
     "title": "Música que sí suena y overlays en TikTok LIVE Studio",
