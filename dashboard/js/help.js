@@ -95,7 +95,7 @@ const KB = [
   {
     guide: 'samy', q: 'No se conecta, ¿qué hago?',
     keys: ['error', 'falla', 'reintento', 'funciona', 'bloqueado', 'offline', 'problema', 'conectar', 'nada'],
-    answer: 'Primero mira el estado junto al nombre de la plataforma. «El canal no está en directo» es normal en TikTok: me conecto solo cuando empiezas el LIVE. Si dice «reintento en…», yo sigo intentando sin que hagas nada. En TikTok, una clave de Euler Stream (en <i>Avanzado</i>) hace la conexión más estable.',
+    answer: 'Primero mira el estado junto al nombre de la plataforma. «El canal no está en directo» es normal en TikTok: me conecto solo cuando empiezas el LIVE. Si dice «reintento en…», yo sigo intentando sin que hagas nada. En TikTok, una clave de conexión (en <i>Avanzado</i>) hace la conexión más estable.',
     go: '#card-conexiones',
   },
   {
@@ -119,13 +119,13 @@ const KB = [
   {
     guide: 'samy', q: '¿Dónde veo lo que está pasando en el chat?',
     keys: ['actividad', 'registro', 'mensajes', 'chat', 'eventos', 'log', 'pasando', 'ver'],
-    answer: 'En <b>Chat en vivo</b> ves todo lo que llega: chat, regalos, follows… Cada mensaje lleva 🔊 si Troya lo leyó o 🔇 con el motivo si no. Ahí mismo puedes <b>simular un mensaje</b> para probar sin estar en directo.',
+    answer: 'En <b>Chat en vivo</b> ves todo lo que llega: chat, regalos, seguidores… Cada mensaje lleva 🔊 si Troya lo leyó o 🔇 con el motivo si no. Ahí mismo puedes <b>simular un mensaje</b> para probar sin estar en directo.',
     go: '#card-actividad',
   },
   {
     guide: 'samy', q: '¿Cómo pruebo sin estar en directo?',
     keys: ['probar', 'simular', 'prueba', 'test', 'ensayar', 'practicar', 'directo', 'vivo'],
-    answer: 'Tienes dos formas: los botones <b>Probar</b> de <b>Alertas</b> lanzan follows, regalos o un Quiéreme falsos, y en <b>Chat en vivo</b> (o con <b>▶ Simular</b> arriba) puedes simular cualquier mensaje del chat, incluso <code>!play</code>.',
+    answer: 'Tienes dos formas: los botones <b>Probar</b> de <b>Alertas</b> lanzan seguidores, regalos o un Quiéreme falsos, y en <b>Chat en vivo</b> (o con <b>▶ Simular</b> arriba) puedes simular cualquier mensaje del chat, incluso <code>!play</code>.',
     go: '#sim',
   },
   {
@@ -288,7 +288,7 @@ const KB = [
     go: '#music-pause',
   },
   {
-    guide: 'nono', q: '¿Cómo muestro la canción en el stream?',
+    guide: 'nono', q: '¿Cómo muestro la canción en mi directo?',
     keys: ['sonando', 'mostrar', 'overlay', 'pantalla', 'cancion', 'stream'],
     answer: 'Usa el overlay <b>Sonando ahora</b>: copia su URL en <b>Overlays para OBS</b> y ponla en OBS como Fuente de navegador (700×140). Muestra la canción, quién la pidió y mis avisos.',
     go: '#overlay-list',
@@ -332,14 +332,14 @@ const KB = [
   {
     guide: 'juana', q: '¿Qué muestra la gráfica?',
     keys: ['grafica', 'grafico', 'minuto', 'actividad', 'espectadores', 'pico', 'muestra'],
-    answer: 'La gráfica muestra minuto a minuto los mensajes, interacciones, diamantes o espectadores (elige arriba a la derecha). Pasa el ratón por una barra para ver el número, o ábrela como tabla.',
+    answer: 'La gráfica muestra minuto a minuto los mensajes, interacciones, diamantes o espectadores (elige arriba a la derecha). Pasa el mouse por una barra para ver el número, o ábrela como tabla.',
     go: '#stats-chart',
   },
 ];
 
 const GREET = {
   samy: '¡Hola! Soy <b>Samy</b>. Te ayudo a conectarte y a encontrar cualquier cosa en la app. ¿Qué necesitas?',
-  troya: 'Hola, soy <b>Troya</b>, la voz del stream. Pregúntame por las voces, los filtros, las alertas o por qué leí (o no) un mensaje.',
+  troya: 'Hola, soy <b>Troya</b>, la voz de tu directo. Pregúntame por las voces, los filtros, las alertas o por qué leí (o no) un mensaje.',
   nono: '¡Epa! Soy <b>Ñoño</b>, el DJ. Pregúntame cómo pedir, saltar o quitar canciones.',
   juana: 'Hola, soy <b>Juana</b>. Llevo las metas y las cuentas de tus directos. ¿Qué quieres saber?',
   mecha: 'Sistema en línea. Soy <b>MechaRidds</b>, la versión androide de Ridds. Llevo el Chat Bot, los comandos y las novedades de cada versión. ¿En qué te ayudo?',

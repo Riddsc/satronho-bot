@@ -26,6 +26,16 @@
   --line: #2a2a31; --ink: #f1f1f4; --muted: #9c9caa; --glow: #1b1b26; --accent-2: #8b7bff;
   color-scheme: dark;
 }
+[data-theme="metal"] {
+  --bg: #0e1014; --side: #12151a; --panel: #171a20; --panel-2: #1f232b; --well: #0c0e12;
+  --line: #333945; --ink: #eef1f6; --muted: #a0a8b6; --glow: #23293a; --accent-2: #c3cad8;
+  color-scheme: dark;
+}
+[data-theme="mate"] {
+  --bg: #080808; --side: #0d0d0d; --panel: #131313; --panel-2: #1a1a1a; --well: #0a0a0a;
+  --line: #262626; --ink: #f2f2f2; --muted: #9a9a9a; --glow: #141414; --accent-2: #bdbdbd;
+  color-scheme: dark;
+}
 [data-theme="claro"] {
   --bg: #f6f2fb; --side: #efe9f8; --panel: #ffffff; --panel-2: #f3eefb; --well: #e7e0f2;
   --line: #ddd3ee; --ink: #1d1630; --muted: #6c6385; --glow: #e7dcff; --accent-2: #6d5dfc;
@@ -2218,3 +2228,108 @@ body.rail .side:not(:hover):not(:focus-within):not(.peek) .nav-sub { display: no
 .conn-dot.connecting { background: var(--warn); opacity: 1; }
 .conn-dot.error { background: var(--bad); opacity: 1; }
 #plat-order-card[hidden], .platform[hidden] { display: none !important; }
+/* Logo de la app (el ícono con los guías en órbita) */
+.brand-logo { width: 40px; height: 40px; border-radius: 11px; flex: none; box-shadow: 0 4px 14px -6px rgb(0 0 0 / .6); }
+@media (min-width: 0px) { body.rail .side:not(:hover):not(:focus-within):not(.peek) .brand-logo { width: 36px; height: 36px; border-radius: 10px; } }
+
+/* ---------- Cómo se ve la app: Amplia (por defecto), Compacta o Clásica ---------- */
+.density-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+.density-opts button { display: grid; gap: 4px; text-align: left; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--edge); background: color-mix(in srgb, var(--panel-2) 60%, transparent); color: var(--ink); font: inherit; cursor: pointer; }
+.density-opts button:hover { border-color: color-mix(in srgb, var(--ink) 20%, transparent); }
+.density-opts button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent); }
+.density-opts small { color: var(--muted); }
+.dz { display: grid; gap: 4px; height: 54px; padding: 6px; border-radius: 8px; background: var(--well); margin-bottom: 6px; }
+.dz i { border-radius: 4px; background: color-mix(in srgb, var(--ink) 14%, transparent); }
+.dz-amplia { grid-template-columns: 1fr 1fr 1fr; }
+.dz-compacta { grid-template-columns: repeat(4, 1fr); padding: 5px; gap: 3px; }
+.dz-clasica { grid-template-columns: 1fr 1fr; padding: 6px 22%; }
+
+/* Compacta: el mismo acomodo, todo un poco más pequeño */
+[data-density="compacta"] { --fs: 13px; }
+[data-density="compacta"][data-size="l"] { --fs: 14px; }
+[data-density="compacta"][data-size="s"] { --fs: 12px; }
+[data-density="compacta"] .page { padding: 10px 18px 70px; }
+[data-density="compacta"] .card { padding: 11px 13px 13px; }
+[data-density="compacta"] .cols { gap: 10px; }
+[data-density="compacta"] .ph { padding-bottom: 9px; margin-bottom: 9px; }
+[data-density="compacta"] .ph h1 { font-size: 1.32em; }
+[data-density="compacta"] .tabs button { padding: 8px 12px 7px; }
+[data-density="compacta"] .nav-item { padding: 5px 10px; }
+
+/* Clásica: como se veía antes de la 0.23 (centrada, encabezado grande con el guía) */
+[data-density="clasica"] { --fs: 15px; --radius: 18px; --radius-sm: 10px; }
+[data-density="clasica"][data-size="s"] { --fs: 13.5px; }
+[data-density="clasica"][data-size="l"] { --fs: 16.5px; }
+[data-density="clasica"] .page { max-width: 1320px; margin: 0 auto; padding: 22px 28px 120px; }
+[data-density="clasica"] .foot { max-width: 1320px; margin: 0 auto; padding: 0 28px 28px; }
+[data-density="clasica"] .ph { display: flex; align-items: flex-end; gap: 18px; padding: 10px 0 0; margin: 0 0 20px; border-bottom: 0; }
+[data-density="clasica"] .ph::before { display: block; }
+[data-density="clasica"] .ph .t small { display: block; }
+[data-density="clasica"] .ph h1 { font-size: 2.15em; line-height: 1.05; margin: 4px 0 6px; }
+[data-density="clasica"] .ph .t p { font-size: 1em; max-width: 62ch; }
+[data-density="clasica"] .ph .host { display: flex; align-items: flex-end; gap: 10px; max-width: 48%; order: 2; }
+[data-density="clasica"] .ph .host .guide { zoom: 2.08; }
+[data-density="clasica"] .ph .host .bubble { display: block; -webkit-line-clamp: unset; max-width: none; font-size: .93em; border-radius: 14px 14px 4px 14px; padding: 9px 13px; }
+[data-density="clasica"] .tabs, [data-density="clasica"] .ph + .tabs { margin: 0 0 16px; }
+[data-density="clasica"] .card { padding: 18px 20px 20px; }
+[data-density="clasica"] .cols { gap: 16px; }
+
+/* ---------- Tema Metálico: brillo de metal cepillado; cada guía en su metal ---------- */
+[data-theme="metal"] body { background: radial-gradient(1000px 500px at 90% -10%, #2a3142 0%, transparent 60%), radial-gradient(800px 500px at -10% 110%, #2a2133 0%, transparent 60%), var(--bg); }
+[data-theme="metal"] .card, [data-theme="metal"] .side { background: linear-gradient(165deg, color-mix(in srgb, #c9d1de 7%, var(--panel)), var(--panel) 45%, color-mix(in srgb, #000 12%, var(--panel))); }
+[data-theme="metal"] .card { border-color: color-mix(in srgb, #c9d1de 16%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .09), 0 10px 28px -14px rgb(0 0 0 / .7); }
+[data-theme="metal"] .card::before { background: linear-gradient(90deg, transparent, rgb(230 236 245 / .45), transparent); opacity: .7; }
+[data-theme="metal"] .btn.primary { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 70%, #fff), var(--accent) 45%, color-mix(in srgb, var(--accent) 70%, #000)); box-shadow: inset 0 1px 0 rgb(255 255 255 / .5), 0 2px 6px -2px rgb(0 0 0 / .6); }
+[data-theme="metal"] .btn { background: linear-gradient(180deg, #2a2f39, #1c2027); }
+[data-theme="metal"] .seg button[aria-pressed="true"], [data-theme="metal"] .lc-ptabs button[aria-selected="true"] { background: linear-gradient(180deg, #3a414e, #272c35); }
+[data-theme="metal"] .switch input:checked + span { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 75%, #fff), color-mix(in srgb, var(--accent) 80%, #000)); }
+/* Los guías en metal: Samy oro, Troya amatista, Ñoño turquesa, Juana oro rosa, MechaRidds esmeralda */
+[data-theme="metal"] .avatar { box-shadow: 0 0 0 1px rgb(255 255 255 / .25), 0 4px 12px -4px rgb(0 0 0 / .7); }
+[data-theme="metal"] .nav-group h6 i { background: linear-gradient(135deg, #fff 0%, var(--g) 45%, color-mix(in srgb, var(--g) 55%, #000) 100%); box-shadow: 0 0 6px color-mix(in srgb, var(--g) 50%, transparent); }
+[data-theme="metal"] .ph h1 { background: linear-gradient(180deg, #ffffff, #c7cedb 55%, #8d96a6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---------- Tema Mate: solo negro, grises y blanco ---------- */
+[data-theme="mate"] { --accent: #e9e9e9 !important; --on-accent: #0b0b0b !important; --accent-2: #bdbdbd; --ok: #d9d9d9; --warn: #bdbdbd; }
+[data-theme="mate"] body { background: var(--bg); }
+[data-theme="mate"] .card { background: var(--panel); box-shadow: none; }
+[data-theme="mate"] .card::before { display: none; }
+[data-theme="mate"] .btn.primary { background: #ececec; color: #0b0b0b; box-shadow: none; }
+[data-theme="mate"] .bubble b:first-child, [data-theme="mate"] .nav-group h6 i { color: var(--ink); background: #8a8a8a; }
+[data-theme="mate"] .bubble b:first-child { background: none; }
+[data-theme="mate"] .guide::after { background: #d0d0d0; color: #0b0b0b; }
+[data-theme="mate"] .pl.plogo, [data-theme="mate"] .lc-pl, [data-theme="mate"] .fl-wave i { filter: grayscale(1); }
+[data-theme="mate"] .avatar, [data-theme="mate"] .crew .avatar { filter: grayscale(.85) contrast(1.05); }
+/* Mate: todo lo que trae el color de un guía o de una plataforma pasa a gris */
+[data-theme="mate"] [style*="--g"] { --g: #a3a3a3 !important; }
+[data-theme="mate"] .nav-group h6 i { background: #7a7a7a !important; }
+[data-theme="mate"] .qr-btn, [data-theme="mate"] .qr-btn.on, [data-theme="mate"] .qr-btn.off { color: var(--muted); }
+[data-theme="mate"] .qr-btn.on { color: var(--ink); }
+[data-theme="mate"] .hs-tile .ic, [data-theme="mate"] .lc-evicon, [data-theme="mate"] .ov-jump-btn i, [data-theme="mate"] .ov-jump-main i, [data-theme="mate"] .pchip img, [data-theme="mate"] .pchip .pl { filter: grayscale(1); }
+[data-theme="mate"] .bubble { border-color: var(--line); }
+/* Metálico: los bordes de color de las tarjetas, como metal pulido */
+[data-theme="metal"] [style*="--g"] { --g-metal: linear-gradient(90deg, color-mix(in srgb, var(--g) 50%, #fff), var(--g) 40%, color-mix(in srgb, var(--g) 55%, #000)); }
+[data-theme="metal"] .pchip { background: linear-gradient(180deg, #262b34, #1a1e25); }
+[data-theme="metal"] .hs-tile::before { background: var(--g-metal, var(--g)); height: 3px; opacity: .95; }
+[data-theme="mate"] .hs-tile .hs-ic, [data-theme="mate"] .brand-logo, [data-theme="mate"] .mecha-ic, [data-theme="mate"] .tu-avatar, [data-theme="mate"] .profile-btn img { filter: grayscale(1); }
+[data-theme="mate"] .hs-tile [class*="ic"] { filter: grayscale(1); }
+
+/* ---------- En construcción (la crew con cascos) ---------- */
+.cz { display: grid; justify-items: center; gap: 14px; padding: 22px 16px 18px; text-align: center; }
+.cz-scene { position: relative; padding-bottom: 10px; }
+.cz-crew { display: flex; align-items: flex-end; gap: 10px; }
+.cz-dog { position: relative; width: calc(64px * var(--k)); animation: cz-bob 2.6s ease-in-out var(--d) infinite; }
+.cz-face { display: block; width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: color-mix(in srgb, var(--c) 18%, var(--panel-2)); box-shadow: 0 0 0 3px var(--c); }
+.cz-face svg { width: 100%; height: 100%; display: block; }
+.cz-helmet { position: absolute; left: 12%; width: 76%; top: -18%; z-index: 2; filter: drop-shadow(0 2px 2px rgb(0 0 0 / .35)); }
+.cz-tape { position: absolute; left: -14px; right: -14px; bottom: 0; height: 12px; border-radius: 3px; background: repeating-linear-gradient(-45deg, #ffc531 0 12px, #1a1a1a 12px 24px); opacity: .9; }
+.cz-sign b { display: block; font-size: 1.08em; }
+.cz-sign p { margin: 4px auto 0; max-width: 46ch; color: var(--muted); }
+@keyframes cz-bob { 50% { transform: translateY(-5px); } }
+@media (prefers-reduced-motion: reduce) { .cz-dog { animation: none; } }
+.ov-building { margin-bottom: 12px; }
+.pcol .cz { padding: 10px 0 4px; } .pcol .cz-dog { width: calc(44px * var(--k)); }
+/* Los avisos siempre por encima de cualquier ventana abierta */
+.toast { z-index: 9000; }
+.ar-err { color: #ff8d98 !important; font-weight: 700; }
+.ar-shake { animation: ar-shake .5s; outline: 2px solid #ff8d98; outline-offset: 3px; border-radius: 10px; }
+@keyframes ar-shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }

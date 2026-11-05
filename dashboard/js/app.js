@@ -28,6 +28,7 @@ import { initSupport } from './support.js';
 import { initNews, onNewsPage } from './news.js';
 import { initStarviosPeople } from './starviosPeople.js';
 import { initFiles, onFilesChanged } from './files.js';
+import { building } from './construction.js';
 import { initHome, homeEvent, homeVoice, homeMusic, homeStats, homeConnections, homeRefreshExtras } from './home.js';
 
 let config = null;
@@ -438,6 +439,7 @@ async function init() {
   initStarviosPeople(config);
   setChatConfig(config);
   initFiles();
+  for (const el of $$('[data-building]')) { const [t, x] = el.dataset.building.split('|'); el.innerHTML = building(t, x); }
   initUpdatePill();
   onPageChange(onNewsPage);
   for (const p of ['tiktok', 'kick', 'starvios', 'twitch']) renderStatus({ platform: p, state: 'disconnected' });

@@ -7,6 +7,7 @@
 //   - Lista de directos: clic para ver el detalle, casillas para comparar dos.
 
 import { $, $$, api, esc, toast, PLATFORM_NAMES } from './util.js';
+import { building } from './construction.js';
 const setBubble = (_id, html) => { const el = $('#ov-juana'); if (el) el.innerHTML = `<b>Juana:</b> ${html}`; };
 
 const DAY = 86400000;
@@ -228,6 +229,10 @@ function render() {
     ...Object.entries(t.currencies).filter(([, n]) => n > 0).map(([cur, n]) => tile({ Starvies: '⭐', Kicks: '🟢', Bits: '💠' }[cur] || '🪙', cur, compact(n), { Starvies: 'en Starvios', Kicks: 'en Kick', Bits: 'en Twitch' }[cur] || 'otras monedas', delta(n, p?.currencies?.[cur]))),
   ].join('');
   $('#ov-prev-note').textContent = p ? 'Los porcentajes comparan con el periodo anterior del mismo largo.' : '';
+  // Starvios: los mensajes ya cuentan; los Starvies y espectadores todavía no llegan.
+  const sv = st.plat === 'starvios' && !t.currencies.Starvies;
+  $('#ov-building').hidden = !sv;
+  if (sv) $('#ov-building').innerHTML = building('Estadísticas de Starvios: en construcción', 'Ya contamos los mensajes de Starvios. Los Starvies, seguidores y espectadores están en camino: la crew está aprendiendo a leerlos. Mantente pendiente de las próximas actualizaciones.');
   chart(list);
   const prof = radar(list);
   giftsAndFans(list);

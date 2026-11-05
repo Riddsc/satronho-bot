@@ -1,5 +1,44 @@
 [
   {
+    "version": "0.23.1",
+    "date": "2026-11-05",
+    "title": "Elige cómo se ve la app, temas nuevos y la crew trabajando",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Ajustes → Apariencia → «Cómo se ve la app»: Amplia (la nueva), Compacta (igual pero todo un poco más pequeño) o Clásica (como antes, centrada y con los guías grandes). Lo demás no cambia."
+      },
+      {
+        "type": "nuevo",
+        "text": "Dos temas nuevos: «Metálico», con brillo de metal y los colores de la crew pulidos, y «Mate», solo negro, grises y blanco."
+      },
+      {
+        "type": "mejora",
+        "text": "El logo nuevo, con los guías en órbita, ya sale dentro de la app (arriba del menú) y en la ventana aparte del chat."
+      },
+      {
+        "type": "cambio",
+        "text": "«Mis archivos» pasó al grupo Sistema del menú."
+      },
+      {
+        "type": "nuevo",
+        "text": "Lo que todavía no está listo muestra a la crew con cascos de obra y un aviso para estar pendientes: las estadísticas de Starvios y escribir en el chat de TikTok."
+      },
+      {
+        "type": "arreglo",
+        "text": "Overlays: «Translúcido» y «Sin fondo» ahora funcionan con todos los estilos (antes el estilo Satronho y Neón seguían viéndose sólidos o con borde)."
+      },
+      {
+        "type": "arreglo",
+        "text": "Los avisos de error (por ejemplo «Elige al menos un regalo» al crear una alerta) salían detrás de la ventana. Ahora salen encima, dentro de la misma ventana, y te llevan a lo que falta."
+      },
+      {
+        "type": "mejora",
+        "text": "Textos más nuestros: «seguidor» en vez de «follow», «directo» en vez de «stream», «mouse» en vez de «ratón», y sin nombres técnicos donde no hacen falta."
+      }
+    ]
+  },
+  {
     "version": "0.23.0",
     "date": "2026-11-05",
     "title": "Más amplia, más sobria y con Mis archivos",

@@ -25,11 +25,13 @@ const THEMES = [
   { id: 'medianoche', name: 'Medianoche', note: 'Azul profundo', c: ['#0d1322', '#121a2c', '#5ab0ff'] },
   { id: 'cafe', name: 'Café', note: 'Cálido, tostado', c: ['#1b140f', '#221912', '#e07a4a'] },
   { id: 'grafito', name: 'Grafito', note: 'Gris sobrio', c: ['#121215', '#18181c', '#8b7bff'] },
+  { id: 'metal', name: 'Metálico', note: 'Oro, plata y amatista', c: ['linear-gradient(135deg,#1a1d24,#2a2f3a)', 'linear-gradient(135deg,#3a404c,#cfd6e2 60%,#7d8594)', 'linear-gradient(135deg,#f6d27a,#b8862b)'] },
+  { id: 'mate', name: 'Mate', note: 'Negro, gris y blanco', c: ['#0a0a0a', '#161616', '#e8e8e8'] },
   { id: 'claro', name: 'Claro', note: 'Para el día', c: ['#efe9f8', '#ffffff', '#6d5dfc'] },
 ];
 
 export const ACCENTS = ['#ffb23e', '#ff8fb5', '#9b8cff', '#4fd1c5', '#5ab0ff', '#7bd66b', '#ff6b5e', '#f4d35e'];
-const DEFAULT = { theme: 'noche', accent: '#ffb23e', font: 'bricolage-grotesque', size: 'm', corners: 'redondas' };
+const DEFAULT = { theme: 'noche', accent: '#ffb23e', font: 'bricolage-grotesque', size: 'm', corners: 'redondas', density: 'amplia' };
 
 // Texto oscuro o claro sobre el acento, según cuánta luz tenga.
 export function onColor(hex) {
@@ -46,9 +48,11 @@ function apply() {
   root.dataset.theme = look.theme;
   root.dataset.size = look.size;
   root.dataset.corners = look.corners;
+  root.dataset.density = look.density || 'amplia';
   root.style.setProperty('--accent', look.accent);
   root.style.setProperty('--on-accent', onColor(look.accent));
   root.style.setProperty('--font', fontFamily(look.font));
+  for (const b of $$('[data-density-opt]')) b.setAttribute('aria-pressed', String(b.dataset.densityOpt === (look.density || 'amplia')));
   for (const b of $$('#theme-cards [data-theme-opt]')) b.setAttribute('aria-pressed', String(b.dataset.themeOpt === look.theme));
   for (const b of $$('#accent-swatches [data-accent]')) b.setAttribute('aria-pressed', String(b.dataset.accent === look.accent));
   for (const b of $$('#font-cards [data-font]')) b.setAttribute('aria-pressed', String(b.dataset.font === look.font));
@@ -70,6 +74,7 @@ export function applyAppearance(config) {
   root.dataset.theme = look.theme;
   root.dataset.size = look.size;
   root.dataset.corners = look.corners;
+  root.dataset.density = look.density || 'amplia';
   root.style.setProperty('--accent', look.accent);
   root.style.setProperty('--on-accent', onColor(look.accent));
   root.style.setProperty('--font', fontFamily(look.font));
@@ -90,6 +95,7 @@ export function initAppearance(config) {
   $('#accent-custom').addEventListener('input', (ev) => set({ accent: ev.target.value }));
   $('#font-cards').addEventListener('click', (ev) => { const b = ev.target.closest('[data-font]'); if (b) set({ font: b.dataset.font }); });
   $('#size-seg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-size-opt]'); if (b) set({ size: b.dataset.sizeOpt }); });
+  $('#density-opts').addEventListener('click', (ev) => { const b = ev.target.closest('[data-density-opt]'); if (b) set({ density: b.dataset.densityOpt }); });
   $('#corners-seg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-corners-opt]'); if (b) set({ corners: b.dataset.cornersOpt }); });
   $('#appearance-reset').addEventListener('click', () => set({ ...DEFAULT }));
   apply();

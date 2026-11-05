@@ -82,6 +82,10 @@ export function setBubble(id, html) {
 export function sayFor(id, html, ms = 7000, kind = '') {
   clearTimeout(timers[id]);
   render(id, html, kind);
+  // Si hay una ventana abierta encima, la burbuja quedaría tapada: el aviso
+  // sale también flotando por encima de todo.
+  const modalOpen = [...document.querySelectorAll('.vp-modal, .sndp-modal, .ovq, .ask-modal, .news-modal, [role="dialog"]')].some((m) => !m.hidden && m.offsetParent !== null);
+  if (modalOpen) toast(String(html).replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&'), avatarHTML(id, 'xs'));
   if (kind === 'ok') setMood(id, 'happy');
   else if (kind === 'err' || kind === 'warn') setMood(id, 'alert');
   else setMood(id, 'wave');

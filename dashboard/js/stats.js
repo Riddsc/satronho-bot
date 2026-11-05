@@ -13,7 +13,7 @@ let metric = 'chat';
 
 const METRICS = {
   chat: { label: 'Mensajes por minuto', unit: 'mensajes' },
-  interactions: { label: 'Interacciones por minuto (follows, regalos, likes…)', unit: 'interacciones' },
+  interactions: { label: 'Interacciones por minuto (seguidores, regalos, likes…)', unit: 'interacciones' },
   diamonds: { label: 'Diamantes por minuto', unit: 'diamantes' },
   viewers: { label: 'Espectadores de TikTok', unit: 'espectadores' },
 };
@@ -77,7 +77,7 @@ function renderTiles(s) {
 
 // ---------- Gráfica de actividad ----------
 // Una sola serie (sin leyenda: el título la nombra), barras finas desde la
-// base, eje Y recesivo con 3 marcas y un tooltip al pasar el ratón.
+// base, eje Y recesivo con 3 marcas y un tooltip al pasar el mouse.
 function bucketize(timeline, key) {
   const size = timeline.length > 180 ? 10 : timeline.length > 90 ? 5 : 1;
   const out = [];
@@ -227,7 +227,7 @@ async function show() {
   else shown = (await api('GET', `/api/stats/sessions/${encodeURIComponent(selected)}`)).session;
 
   if (!shown) {
-    $('#stats-headline').textContent = 'Todavía no hay actividad en este directo. Las cifras aparecen con el primer mensaje, follow o regalo.';
+    $('#stats-headline').textContent = 'Todavía no hay actividad en este directo. Las cifras aparecen con el primer mensaje, seguidor o regalo.';
     $('#stats-session-view').hidden = true;
     $('#stats-tops').innerHTML = '';
     return;
