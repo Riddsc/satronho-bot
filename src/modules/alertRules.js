@@ -85,7 +85,11 @@ function createAlertRules({ store }) {
   // Devuelve [{ rule, times }] y actualiza los contadores de likes.
   function match(e) {
     const out = [];
+    // Si el regalo tiene su propia alerta, esa manda: las de rango de monedas
+    // no suenan además (antes sonaban las dos).
+    const hasGiftRule = e.type === 'gift' && rules().some((r) => r.trigger === 'gift' && hits(r, e) > 0);
     for (const r of rules()) {
+      if (hasGiftRule && r.trigger === 'coins') continue;
       const n = hits(r, e);
       if (n <= 0) continue;
       const cd = Number(r.cooldownSec) || 0;
