@@ -158,11 +158,16 @@ export function initGuides(config) {
     saveConfig({ guides: { visible: toggle.checked } });
   });
 
+  // La bienvenida con todos los guías siempre está en el Inicio.
+  // «¡Empecemos!» baja a «¿Con qué deseas empezar hoy?».
   const welcome = $('#welcome');
-  welcome.hidden = Boolean(config.guides?.welcomeDone);
+  welcome.hidden = false;
+  const hour = new Date().getHours();
+  const hello = $('#welcome-hello');
+  if (hello) hello.textContent = hour < 12 ? '¡Buenos días!' : hour < 19 ? '¡Buenas tardes!' : '¡Buenas noches!';
   $('#welcome-done').addEventListener('click', () => {
-    welcome.hidden = true;
-    saveConfig({ guides: { welcomeDone: true } });
+    if (!config.guides?.welcomeDone) saveConfig({ guides: { welcomeDone: true } });
+    $('#home-start')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
   $('#welcome-again').addEventListener('click', () => {
     welcome.hidden = false;

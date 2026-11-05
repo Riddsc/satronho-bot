@@ -1849,3 +1849,40 @@ button.mu-ov { background: transparent; font: inherit; font-weight: 800; cursor:
 .ar-qs-btn:hover { filter: brightness(1.1); }
 .al-sound .row { flex-wrap: wrap; gap: 8px; } .al-sound > span:first-child { font-weight: 800; }
 .snd-list { align-content: start; } .snd-more { width: auto !important; height: auto !important; }
+.ovq-foot.ovq-foot-one { justify-content: flex-end; }
+/* Todas las pestañas a la vista: si no caben en una fila, bajan a la siguiente. */
+.ovq-tabs { flex-wrap: wrap; overflow-x: visible; row-gap: 0; }
+.ovq-tabs button { padding: 10px 12px; }
+
+/* ---------- Inicio: «¿Con qué deseas empezar hoy?» ---------- */
+.welcome-cta { display: grid; gap: 8px; justify-items: stretch; }
+.hs { margin-top: 4px; scroll-margin-top: 16px; }
+.hs-head { margin: 0 0 14px; }
+.hs-head h2 { margin: 0; font-size: 1.45em; letter-spacing: -.02em; }
+.hs-head p { margin: 4px 0 0; color: var(--muted); }
+.hs-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 1100px) { .hs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .hs-grid { grid-template-columns: 1fr; } }
+.hs-tile { position: relative; display: grid; grid-template-rows: auto auto 1fr auto; gap: 6px; min-height: 178px; padding: 16px 18px 14px; border-radius: var(--radius); border: 1px solid var(--edge);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--g) 7%, var(--panel)), var(--panel) 60%);
+  box-shadow: var(--lift), var(--shade); transition: border-color .15s, transform .15s, box-shadow .15s; }
+.hs-tile::before { content: ''; position: absolute; left: 18px; right: 18px; top: 0; height: 2px; border-radius: 0 0 2px 2px; background: var(--g); opacity: .7; }
+.hs-tile:hover { border-color: color-mix(in srgb, var(--g) 55%, var(--edge)); transform: translateY(-2px); }
+.hs-tile:focus-within { border-color: var(--g); }
+.hs-top { display: flex; align-items: center; justify-content: space-between; }
+.hs-ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 19px; background: color-mix(in srgb, var(--g) 16%, var(--well)); border: 1px solid color-mix(in srgb, var(--g) 35%, transparent); }
+.hs-guide { position: relative; z-index: 2; line-height: 0; }
+.hs-title { font-size: 1.15em; font-weight: 800; letter-spacing: -.01em; color: var(--ink); text-decoration: none; margin-top: 4px; }
+.hs-title::after { content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: 1; }
+.hs-title:focus-visible { outline: none; }
+.hs-tile:has(.hs-title:focus-visible) { outline: 2px solid var(--g); outline-offset: 2px; }
+.hs-desc { color: var(--muted); font-size: .92em; line-height: 1.4; }
+.hs-state { display: flex; align-items: center; gap: 7px; min-width: 0; margin-top: 6px; padding-top: 10px; border-top: 1px dashed var(--edge); font-size: .86em; color: var(--muted); }
+.hs-state > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hs-state.on { color: var(--ink); }
+.hs-state.warn { color: var(--warn); }
+.hs-state .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 60%, transparent); }
+.hs-state .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.hs-state .plat { font-size: 11px; font-weight: 800; color: var(--muted); }
+.hs-act { position: relative; z-index: 2; display: flex; gap: 6px; margin-top: 4px; }
+.hs-act .btn { font-size: .82em; }
