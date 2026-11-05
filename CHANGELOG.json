@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.23.2",
+    "date": "2026-11-05",
+    "title": "Una sola alerta por regalo",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Si un regalo tiene su propia alerta (por ejemplo «Rosa»), ya no suena además la alerta del rango de monedas en el que cae. Los regalos sin alerta propia siguen sonando con la de su rango."
+      }
+    ]
+  },
+  {
     "version": "0.23.1",
     "date": "2026-11-05",
     "title": "Elige cómo se ve la app, temas nuevos y la crew trabajando",
