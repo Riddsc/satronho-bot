@@ -380,6 +380,91 @@ export const specialFor = (platform, user) => {
   });
 };
 
+// ---------- Añadir persona: buscador con sugerencias ----------
+// Al escribir aparecen quienes ya pasaron por tu chat (con su foto y su
+// plataforma). Un toque y queda añadido. Si no está, se añade igual con lo
+// que escribiste, para cualquier plataforma.
+const PLAT_LOGO = (p) => (['tiktok', 'kick', 'twitch', 'starvios'].includes(p) ? `<img class="sp-sug-pl" src="/img/platforms/${p}.png" alt="${esc(PLATFORM_NAMES[p] || p)}">` : '');
+function initSpecialAdd() {
+  const box = $('#sp-addbox');
+  const input = $('#sp-add-q');
+  const sug = $('#sp-sug');
+  if (!box || !input) return;
+  let items = [];
+  let active = 0;
+  let seq = 0;
+  let timer = 0;
+  const open = () => {
+    box.hidden = false;
+    input.value = '';
+    input.focus();
+    search();
+  };
+  const close = () => { box.hidden = true; sug.innerHTML = ''; input.setAttribute('aria-expanded', 'false'); };
+  const already = (u) => (config.tts.special || []).some((x) => x.key === `${u.platform}:${String(u.name).toLowerCase()}` || x.key === `${u.platform}:${String(u.id).toLowerCase()}`);
+  function draw() {
+    const typed = input.value.trim().replace(/^@/, '');
+    const rows = items.map((u, i) => `<li role="option" class="sp-sug-row ${i === active ? 'on' : ''}" data-sug="${i}" aria-selected="${i === active}">
+        ${avatarHtml(u.name, u.avatar)}<span class="sp-sug-who"><b>${esc(u.name)}</b><small>@${esc(u.id)}</small></span>${PLAT_LOGO(u.platform)}${already(u) ? '<em class="sp-sug-in">Ya está</em>' : ''}</li>`);
+    if (typed && !items.some((u) => u.name.toLowerCase() === typed.toLowerCase() || String(u.id).toLowerCase() === typed.toLowerCase())) {
+      rows.push(`<li role="option" class="sp-sug-row sp-sug-free ${active === items.length ? 'on' : ''}" data-sug="free"><span class="av sp-sug-plus">＋</span><span class="sp-sug-who"><b>Añadir «${esc(typed)}»</b><small>En cualquier plataforma</small></span></li>`);
+    }
+    sug.innerHTML = rows.length ? rows.join('') : `<li class="sp-sug-empty">${typed ? 'Nadie con ese nombre todavía.' : 'Cuando la gente escriba en tu chat, aparecerá aquí. También puedes escribir su nombre.'}</li>`;
+    input.setAttribute('aria-expanded', String(rows.length > 0));
+  }
+  async function search() {
+    const my = ++seq;
+    const q = input.value.trim();
+    try {
+      const r = await api('GET', `/api/people?limit=8&q=${encodeURIComponent(q)}`);
+      if (my !== seq) return;
+      items = r.people || [];
+    } catch {
+      items = [];
+    }
+    active = 0;
+    draw();
+  }
+  function pick(which) {
+    let entry;
+    if (which === 'free') {
+      const user = input.value.trim().replace(/^@/, '');
+      if (!user) return;
+      entry = { key: `*:${user.toLowerCase()}`, name: user, avatar: '' };
+    } else {
+      const u = items[Number(which)];
+      if (!u) return;
+      // Por su @usuario: no cambia aunque cambie el apodo.
+      entry = { key: `${u.platform}:${String(u.id || u.name).toLowerCase()}`, name: u.name, avatar: u.avatar || '' };
+    }
+    upsertSpecial(entry);
+    sayFor('troya', `Listo: <b>${esc(entry.name)}</b> está en tu lista. Elige su voz, o tócale «Con voz» para silenciarlo.`, 5000, 'ok');
+    close();
+    // Que se vea la fila nueva arriba, resaltada.
+    requestAnimationFrame(() => {
+      const row = $('#sp-list .sp-row');
+      row?.classList.add('sp-new');
+      row?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+  }
+  $('#sp-add').addEventListener('click', () => (box.hidden ? open() : close()));
+  $('#sp-add-close').addEventListener('click', close);
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, 120); });
+  input.addEventListener('keydown', (ev) => {
+    const n = sug.querySelectorAll('[data-sug]').length;
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); active = Math.min(n - 1, active + 1); draw(); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); active = Math.max(0, active - 1); draw(); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); const el = sug.querySelectorAll('[data-sug]')[active]; if (el) pick(el.dataset.sug); }
+    else if (ev.key === 'Escape') close();
+  });
+  sug.addEventListener('mousedown', (ev) => {
+    const row = ev.target.closest('[data-sug]');
+    if (!row) return;
+    ev.preventDefault();
+    pick(row.dataset.sug);
+  });
+}
+
 function initSpecial() {
   const el = $('#sp-list');
   if (!el) return;
@@ -394,14 +479,7 @@ function initSpecial() {
   $('#sp-q').addEventListener('input', (ev) => { sp.q = ev.target.value; renderSpecial(); });
   $('#sp-plat').addEventListener('click', (ev) => { const b = ev.target.closest('[data-sp-plat]'); if (b) { sp.plat = b.dataset.spPlat; renderSpecial(); } });
   $('#sp-state').addEventListener('click', (ev) => { const b = ev.target.closest('[data-sp-state]'); if (b) { sp.state = b.dataset.spState; renderSpecial(); } });
-  $('#sp-add').addEventListener('click', () => {
-    const who = prompt('¿Cómo se llama en el chat? (sin @)');
-    const user = String(who || '').trim().replace(/^@/, '');
-    if (!user) return;
-    const plat = sp.plat !== 'all' ? sp.plat : '*';
-    upsertSpecial({ key: `${plat}:${user.toLowerCase()}`, name: user });
-    sayFor('troya', `Anotado: <b>${esc(user)}</b>. Ahora elige su voz, su velocidad o su tono.`, 5000, 'ok');
-  });
+  initSpecialAdd();
   el.addEventListener('change', (ev) => {
     const i = rowOf(ev);
     const f = ev.target.dataset.spField;

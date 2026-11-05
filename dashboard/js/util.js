@@ -54,3 +54,20 @@ export function toast(text, guideHtml = '') {
 }
 
 export const timeOf = (ts) => new Date(ts).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+// Pide un texto en una ventanita propia (la app de escritorio no muestra
+// prompt()). Devuelve el texto, o null si se cancela.
+export function askText(title, value = '', okText = 'Guardar') {
+  return new Promise((resolve) => {
+    const m = document.createElement('div');
+    m.className = 'ask-modal';
+    m.innerHTML = `<form class="ask-card" role="dialog" aria-modal="true" aria-label="${esc(title)}"><label><b>${esc(title)}</b><input maxlength="60" value="${esc(value)}"></label><div class="ask-actions"><button type="button" class="btn ghost" data-ask-cancel>Cancelar</button><button class="btn primary">${esc(okText)}</button></div></form>`;
+    document.body.append(m);
+    const input = m.querySelector('input');
+    const done = (v) => { m.remove(); resolve(v); };
+    m.querySelector('form').addEventListener('submit', (ev) => { ev.preventDefault(); const v = input.value.trim(); if (v) done(v); else input.focus(); });
+    m.addEventListener('click', (ev) => { if (ev.target === m || ev.target.closest('[data-ask-cancel]')) done(null); });
+    m.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') done(null); });
+    requestAnimationFrame(() => { input.focus(); input.select(); });
+  });
+}

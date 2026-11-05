@@ -2,7 +2,7 @@
 // oficial de YouTube incrustado), buscar y añadir, cola e historial,
 // listas de reproducción y actividad. Solo una ventana reproduce a la vez.
 
-import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES } from './util.js';
+import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, askText } from './util.js';
 import { setBubble, sayFor, setMood, guideToast } from './guides.js';
 
 let config;
@@ -229,7 +229,7 @@ export function initMusic(cfg, { clientId, sendWs }) {
   $('#mz-shuffle').addEventListener('click', () => (state.queue.length > 1 ? act('shuffle').catch(() => {}) : toast('Hacen falta al menos 2 canciones en cola')));
   $('#mz-save').addEventListener('click', async () => {
     if (!state.current && !state.queue.length) return toast('La cola está vacía: no hay nada que guardar');
-    const name = prompt('Nombre de la lista:', `Mi lista ${(state.playlists?.length || 0) + 1}`);
+    const name = await askText('Nombre de la lista', `Mi lista ${(state.playlists?.length || 0) + 1}`);
     if (name === null) return;
     const r = await act('save-playlist', { name }).catch(() => null);
     if (r) guideToast('nono', `Guardé «${esc(r.playlist.name)}» con ${r.playlist.songs.length} canciones.`);
@@ -317,8 +317,7 @@ export function initMusic(cfg, { clientId, sendWs }) {
     if (ev.target.closest('[data-pl-shuffle]')) act('load-playlist', { id, shuffle: true }).catch(() => {});
     if (ev.target.closest('[data-pl-rename]')) {
       const cur = state.playlists.find((p) => p.id === id);
-      const name = prompt('Nuevo nombre:', cur?.name || '');
-      if (name) act('rename-playlist', { id, name }).catch(() => {});
+      askText('Nuevo nombre de la lista', cur?.name || '').then((name) => { if (name) act('rename-playlist', { id, name }).catch(() => {}); });
     }
     if (ev.target.closest('[data-pl-delete]') && confirm('¿Eliminar esta lista?')) act('delete-playlist', { id }).catch(() => {});
   });
