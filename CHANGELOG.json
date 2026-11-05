@@ -1,5 +1,44 @@
 [
   {
+    "version": "0.22.0",
+    "date": "2026-11-05",
+    "title": "Overlays que se leen bien en cualquier tamaño",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Los overlays ya no se cortan ni se descentran al cambiar el tamaño de la fuente en OBS o TikTok LIVE Studio: se acomodan solos y la llenan sin deformarse."
+      },
+      {
+        "type": "mejora",
+        "text": "Cada overlay cambia su diseño según la forma de la fuente: en una tira baja va en fila, en un rectángulo es una tarjeta y en una fuente cuadrada va en vertical."
+      },
+      {
+        "type": "mejora",
+        "text": "«Sonando ahora» rediseñado: letra más grande, portada con un brillo de su color, título en dos líneas cuando cabe y barra de progreso más clara."
+      },
+      {
+        "type": "mejora",
+        "text": "Ranking rediseñado: el podio va en una tarjeta con su título y, si todavía no hay nadie, muestra los puestos libres en vez de quedar vacío. En fuentes bajas se vuelve una tira con los tres primeros."
+      },
+      {
+        "type": "mejora",
+        "text": "Cola de música, metas, contadores, últimos regalos y actividad se reorganizan en columnas cuando la fuente es ancha y baja. Los textos fuera de la tarjeta tienen más sombra para leerse sobre cualquier fondo."
+      },
+      {
+        "type": "mejora",
+        "text": "Tarjetas de los overlays más finas: brillo suave arriba, filo interior y sombra profunda."
+      },
+      {
+        "type": "mejora",
+        "text": "Ventana de overlays: la vista previa se ve como en tu directo («Escena»), las opciones van en una lista ordenada y «Tamaño» ahora es «Cuánto llena la fuente»."
+      },
+      {
+        "type": "mejora",
+        "text": "Los enlaces viejos de «Sonando ahora (clásico)» y «Podio (clásico)» muestran ya el diseño nuevo."
+      }
+    ]
+  },
+  {
     "version": "0.21.0",
     "date": "2026-11-05",
     "title": "Música arreglada de verdad y overlays que se editan donde estás",
