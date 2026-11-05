@@ -283,7 +283,18 @@ function createKickChat({ store, fetch: fetchFn = fetch, redirectUri, onChange =
     sending = false;
   }
 
-  return { status, setApp, forgetOwnApp, authUrl, finish, logout, say, isOwnMessage };
+  // Foto de perfil de alguien de Kick (por su número o su @usuario), con la
+  // cuenta que ya autorizaste. Sin cuenta autorizada, no hay foto.
+  async function userPicture(idOrSlug) {
+    const account = pickAccount();
+    if (!account || !idOrSlug) return '';
+    let id = String(idOrSlug);
+    if (!/^\d+$/.test(id)) id = String(await broadcasterId(account, id.toLowerCase()));
+    const data = await api(account, 'GET', `/users?id=${encodeURIComponent(id)}`);
+    return data.data?.[0]?.profile_picture || '';
+  }
+
+  return { status, setApp, forgetOwnApp, authUrl, finish, logout, say, isOwnMessage, userPicture };
 }
 
 module.exports = { createKickChat, builtinApp };

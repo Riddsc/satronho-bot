@@ -15,6 +15,7 @@
 // ("🔊 leído" o "🔇 no se lee: ...") y en la prueba de filtros.
 
 const { sanitize, screen, normalizeName, emojiWords } = require('../tts/textFilter');
+const { whoReason } = require('./roles');
 const { MS_VOICES } = require('../tts/msonline');
 const { VOICES: PIPER_VOICES } = require('../tts/voices');
 
@@ -110,8 +111,8 @@ function createTts({ store, broadcast, engine, online = null }) {
         default: return '';
       }
     }
-    // Kick y Twitch traen insignias; Starvios no, así que ahí se lee a todos.
-    if (e.platform === 'starvios') return '';
+    // Starvios no trae insignias: usa tus moderadores y tu lista.
+    if (e.platform === 'starvios') return whoReason(e, mode);
     const isMod = hasBadge(e, /^(moderator|broadcaster|owner)$/);
     const isVip = isMod || hasBadge(e, /^vip$/);
     const isSub = isVip || hasBadge(e, /^(subscriber|founder|og|sub_gifter)$/);
@@ -241,7 +242,16 @@ function createTts({ store, broadcast, engine, online = null }) {
     const voice = pickVoice(e.platform, e.user, special);
     // «dice» en el idioma de la voz (inglés y francés se dan a mano).
     const says = /^en_/.test(voice || '') ? 'says' : /^fr_/.test(voice || '') ? 'dit' : 'dice';
-    return { read: true, reason: 'se lee', text: c.sayName ? `${spoken} ${says}: ${clean}` : clean, voice, rate: special?.rate, pitch: special?.pitch };
+    const PNAME = { tiktok: 'TikTok', kick: 'Kick', twitch: 'Twitch', starvios: 'Starvios' };
+    const tpl = String(c.template || '').trim();
+    const text = !c.sayName ? clean
+      : tpl && /\{mensaje\}/i.test(tpl) ? tpl.replace(/\{usuario\}/gi, spoken).replace(/\{plataforma\}/gi, PNAME[e.platform] || '').replace(/\{mensaje\}/gi, clean).replace(/\s+/g, ' ').trim()
+      : `${spoken} ${says}: ${clean}`;
+    // Velocidad por plataforma (sobre la del espectador especial, si tiene).
+    const pp = c.perPlatform?.[e.platform] || {};
+    const ppRate = Number(pp.rate) || 1;
+    const rate = Number(special?.rate) ? Number(special.rate) * ppRate : ppRate !== 1 ? (Number(c.rate) || 1) * ppRate : undefined;
+    return { read: true, reason: 'se lee', text, voice, rate, pitch: special?.pitch, volume: Number(pp.volume) || 1 };
   }
 
   // ---------- Generar audio ----------
@@ -266,6 +276,7 @@ function createTts({ store, broadcast, engine, online = null }) {
       pitch: Math.max(0.6, Math.min(1.6, Number(meta.pitch) || Number(c.pitch) || 1)),
     };
     if (Number(meta.rate)) item.rate = Number(meta.rate);
+    if (Number(meta.volume) && Number(meta.volume) !== 1) item.volume = Math.max(0, Math.min(2, (Number(c.volume) || 1) * Number(meta.volume)));
     const synthRate = Math.max(0.3, Math.min(3, (Number(item.rate) || 1) / item.pitch));
     const [base, tone = ''] = String(voice || '').split('~');
     item.tone = tone;
@@ -313,7 +324,7 @@ function createTts({ store, broadcast, engine, online = null }) {
     if (e.platform === 'tiktok' && e.type === 'gift' && isGateGift(e)) allow(e.user);
     if (e.type !== 'chat') return null;
     const d = decide(e);
-    if (d.read) speak(d.text, { user: e.user.name, platform: e.platform, voice: d.voice, rate: d.rate, pitch: d.pitch });
+    if (d.read) speak(d.text, { user: e.user.name, platform: e.platform, voice: d.voice, rate: d.rate, pitch: d.pitch, volume: d.volume });
     remember(e, d);
     return d;
   }

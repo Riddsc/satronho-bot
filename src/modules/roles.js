@@ -1,12 +1,27 @@
 // Quién es quién en el chat (común para la voz y la música).
 //   TikTok: e.extra.roles = { follower, sub, mod, host, team }
 //   Kick y Twitch: e.extra.badges = ['moderator', 'vip', 'subscriber', …]
-//   Starvios no manda roles: ahí todos pasan.
+//   Starvios no manda roles: tú dices quiénes son tus moderadores y tu
+//   lista de personas (Música y Voz del chat → Starvios).
+//   Modos de Starvios: all · list (tu lista y tus moderadores) · mods.
 // whoReason(e, mode, opts) devuelve '' si puede, o el motivo si no.
 // Modos: all · followers · subs · vip · team · team-gift · mods
 // (team-gift = Miembro de tu equipo que ya te mandó el regalo; opts.sentGift dice si lo mandó).
 
 const hasBadge = (e, re) => (e.extra?.badges || []).some((b) => re.test(b));
+
+// Starvios: el servidor nos pasa cómo leer tu canal y tus listas.
+let starviosInfo = () => ({ owner: '', mods: [], allowed: [] });
+function configureStarvios(fn) { starviosInfo = fn; }
+const clean = (x) => String(x || '').trim().replace(/^@/, '').toLowerCase();
+function starviosRoles(e) {
+  const { owner, mods = [], allowed = [] } = starviosInfo() || {};
+  const ids = [e.user?.id, e.user?.name, e.user?.login].map(clean).filter(Boolean);
+  const isOwner = Boolean(owner) && ids.includes(clean(owner));
+  const isMod = isOwner || mods.map(clean).some((m) => ids.includes(m));
+  const inList = isMod || allowed.map(clean).some((m) => ids.includes(m));
+  return { host: isOwner, mod: isMod, inList };
+}
 
 function rolesOf(e) {
   if (e.platform === 'tiktok') {
@@ -21,7 +36,14 @@ function rolesOf(e) {
 }
 
 function whoReason(e, mode = 'all', { teamMinLevel = 1, sentGift = false, giftName = 'Quiéreme' } = {}) {
-  if (!mode || mode === 'all' || e.platform === 'starvios' || e.platform === 'panel') return '';
+  if (!mode || mode === 'all' || e.platform === 'panel') return '';
+  if (e.platform === 'starvios') {
+    const r = starviosRoles(e);
+    if (r.mod) return '';
+    if (mode === 'list') return r.inList ? '' : 'no está en tu lista de Starvios';
+    if (mode === 'mods') return 'solo tú y tus moderadores';
+    return '';
+  }
   const r = rolesOf(e);
   if (r.host || r.mod) return '';
   const min = Math.max(1, Number(teamMinLevel) || 1);
@@ -37,4 +59,4 @@ function whoReason(e, mode = 'all', { teamMinLevel = 1, sentGift = false, giftNa
   }
 }
 
-module.exports = { whoReason, rolesOf };
+module.exports = { whoReason, rolesOf, configureStarvios, starviosRoles };

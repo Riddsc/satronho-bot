@@ -7,6 +7,7 @@ import { GUIDES, avatarHTML } from './guides.js';
 
 // Iconos propios, trazo fino.
 const ICONS = {
+  folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
   home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/>',
   plug: '<path d="M9 3v5M15 3v5"/><path d="M6.5 8h11v3a5.5 5.5 0 0 1-11 0z"/><path d="M12 16.5V21"/>',
   chat: '<path d="M4 5.5h16v10H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
@@ -63,14 +64,16 @@ const PAGES = {
   ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones atajos teclado teclas' },
   novedades: { title: 'Novedades', guide: 'mecha', words: 'novedades cambios versión actualización qué hay de nuevo changelog notas' },
   perfil: { title: 'Tu perfil', guide: 'samy', words: 'perfil nombre foto cuentas menú ordenar ocultar barra derecha botones rápidos saludo' },
+  archivos: { title: 'Mis archivos', guide: 'nono', words: 'archivos mis archivos subir sonidos audios imágenes videos mp3 borrar renombrar sin usar' },
   ayuda: { title: 'Ayuda', guide: 'samy', words: 'ayuda preguntas guías reportar error problema falla bug idea sugerencia soporte discord' },
 };
 
 const TAB_NAMES = {
+  archivos: { todos: 'Todos los archivos', audios: 'Audios', imagenes: 'Imágenes', videos: 'Videos', sinuso: 'Sin usar' },
   sonidos: { memes: 'Memes', mios: 'Mis sonidos', frases: 'Frases', biblioteca: 'Básicos', chat: 'Comando del chat' },
   ayuda: { preguntas: 'Preguntas', reportar: 'Reportar un problema' },
   chatbot: { inicio: 'Inicio', comandos: 'Comandos', automaticos: 'Mensajes automáticos' },
-  voz: { voces: 'Voces', quien: 'Quién se lee', filtros: 'Filtros y límites', especiales: 'Espectadores especiales', probar: 'Probar' },
+  voz: { voces: 'Voces', mensaje: 'Mensaje y plataformas', quien: 'Quién se lee', filtros: 'Filtros y límites', especiales: 'Espectadores especiales', probar: 'Probar' },
   ajustes: { apariencia: 'Apariencia', app: 'App', atajos: 'Atajos de teclado', acerca: 'Acerca de' },
 };
 
@@ -353,6 +356,7 @@ export function applyMenuPrefs(cfg) {
       group.append(a);
       // Los overlays fijados y su desplegable van pegados a «Overlays para OBS».
       if (a.dataset.page === 'overlays' && $('#nav-pins')) a.after($('#nav-pins'));
+      if (a.dataset.page === 'archivos' && $('#nav-files')) a.after($('#nav-files'));
     }
     group.hidden = items.every((a) => a.hidden);
   }

@@ -11,6 +11,8 @@ import { avatarHtml, upsertSpecial, specialFor } from './voice.js';
 import { sayFor } from './guides.js';
 
 const PLATS = ['tiktok', 'kick', 'twitch', 'starvios'];
+let config = null; // la configuración de la app (palabras prohibidas, tus canales)
+export function setChatConfig(c) { config = c; }
 const PREFS_KEY = 'satronho.livechat';
 const DEFAULTS = {
   tab: 'all',
@@ -25,6 +27,16 @@ const DEFAULTS = {
   giftsInline: false,
   giftsColumn: true,
   minGift: 0,
+  countSubs: true,
+  censor: false,
+  hiddenAccounts: '',
+  hl: { mods: true, subs: false, team: false, special: true, first: false, mentions: true },
+  mentionWords: '',
+  fontSize: 14,
+  showAvatars: true,
+  showTime: true,
+  compact: false,
+  ptab: 'filtros',
   platforms: { tiktok: true, kick: true, twitch: true, starvios: true },
   panel: true,
 };
@@ -33,13 +45,14 @@ const items = []; // eventos del directo (más viejo primero)
 const decisions = new Map(); // id -> { read, reason }
 const counts = { all: 0, tiktok: 0, kick: 0, twitch: 0, starvios: 0 };
 const gifts = [];
+const users = new Map(); // platform:usuario -> { name, platform, avatar, count, last, e }
 let paused = false;
 let q = '';
 
 function loadPrefs() {
   try {
     const raw = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}');
-    return { ...DEFAULTS, ...raw, platforms: { ...DEFAULTS.platforms, ...(raw.platforms || {}) } };
+    return { ...DEFAULTS, ...raw, platforms: { ...DEFAULTS.platforms, ...(raw.platforms || {}) }, hl: { ...DEFAULTS.hl, ...(raw.hl || {}) } };
   } catch {
     return { ...DEFAULTS };
   }
@@ -84,6 +97,40 @@ function describe(e) {
 
 const isCommand = (e) => e.type === 'chat' && /^\s*!/.test(e.message || '');
 
+// ---------- Cuentas ocultas, censura y destacados ----------
+const listOf = (txt) => String(txt || '').split(',').map((x) => x.trim().replace(/^@/, '').toLowerCase()).filter(Boolean);
+const isHidden = (e) => {
+  const hidden = listOf(prefs.hiddenAccounts);
+  return hidden.length > 0 && [e.user?.name, e.user?.id].some((x) => hidden.includes(String(x || '').toLowerCase()));
+};
+function censor(text) {
+  if (!prefs.censor) return text;
+  const words = (config?.tts?.bannedWords || []).map((w) => String(w).trim()).filter((w) => w.length > 1);
+  if (!words.length) return text;
+  const re = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'giu');
+  return text.replace(re, (m) => '✱'.repeat(Math.min(6, m.length)));
+}
+const firstSeen = new Set(); // platform:usuario que ya escribió en este directo
+function mentionRe() {
+  const mine = Object.values(config?.platforms || {}).map((p) => String(p?.channel || '').replace(/^@/, '')).filter(Boolean);
+  const words = [...mine, ...listOf(prefs.mentionWords)];
+  return words.length ? new RegExp(`(^|[^\\p{L}\\p{N}])@?(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?![\\p{L}\\p{N}])`, 'iu') : null;
+}
+function highlightOf(e, sp, first) {
+  if (e.type !== 'chat') return '';
+  const r = e.extra?.roles || {};
+  const b = new Set(e.extra?.badges || []);
+  const h = prefs.hl || {};
+  const re = h.mentions ? mentionRe() : null;
+  if (h.mentions && re && re.test(e.message || '')) return 'hl-mention';
+  if (h.mods && (r.mod || b.has('moderator'))) return 'hl-mod';
+  if (h.special && sp && sp.action !== 'mute') return 'hl-special';
+  if (h.subs && (r.sub || b.has('subscriber') || b.has('vip') || b.has('founder'))) return 'hl-sub';
+  if (h.team && r.team) return 'hl-team';
+  if (h.first && first) return 'hl-first';
+  return '';
+}
+
 function nodeFor(e) {
   const li = document.createElement('li');
   li.dataset.id = e.id;
@@ -92,14 +139,14 @@ function nodeFor(e) {
   const sp = e.user ? specialFor(e.platform, e.user) : null;
   li.className = ['lc-item', e.type === 'chat' ? 'lc-chat' : 'lc-event', `t-${e.type}`,
     isCommand(e) ? 'is-cmd' : '', d?.reason === 'es un bot' ? 'is-bot' : '', d && !d.read ? 'is-muted' : '',
-    sp?.action === 'mute' ? 'is-silenced' : ''].filter(Boolean).join(' ');
+    sp?.action === 'mute' ? 'is-silenced' : '', highlightOf(e, sp, e._first)].filter(Boolean).join(' ');
   const color = e.extra?.color || '';
   const name = esc(e.user?.name || 'Anónimo');
   const tts = d ? (d.read ? '<span class="lc-tts ok" title="Se leyó en voz alta">🔊</span>' : `<span class="lc-tts no" title="No se leyó: ${esc(d.reason)}">🔇 <small>${esc(d.reason)}</small></span>`) : '';
   if (e.type === 'chat') {
     li.innerHTML = `<span class="lc-avw">${avatarHtml(e.user?.name, e.user?.avatar, color)}${LOGO(e.platform)}</span>
       <div class="lc-body"><div class="lc-meta">${badgesHtml(e)}<b class="lc-name" ${color ? `style="color:${esc(color)}"` : ''}>${name}</b>${sp?.voice || sp?.spokenName ? '<i class="bd voz" title="Tiene voz propia">🎙</i>' : ''}<time>${timeOf(e.ts)}</time>${e.test ? '<small class="lc-test">prueba</small>' : ''}${tts}</div>
-      <p class="lc-text">${esc(e.message)}</p></div>
+      <p class="lc-text">${esc(censor(e.message || ''))}</p></div>
       <div class="lc-act" role="group" aria-label="Acciones">
         <button type="button" data-lc="read" title="Leer ahora">🔊</button>
         <button type="button" data-lc="voice" title="Darle voz propia">🎙</button>
@@ -117,6 +164,7 @@ function nodeFor(e) {
 // ---------- Filtros ----------
 function visible(e) {
   if (!prefs.platforms[e.platform] && PLATS.includes(e.platform)) return false;
+  if (e.user && isHidden(e)) return false;
   if (!prefs.split && prefs.tab !== 'all' && e.platform !== prefs.tab) return false;
   if (e.type !== 'chat') {
     if (e.type === 'gift') {
@@ -155,7 +203,8 @@ function renderFeeds() {
   const wrap = $('#lc-feeds');
   if (!wrap) return;
   const cols = prefs.split ? PLATS.filter((p) => prefs.platforms[p]) : ['all'];
-  wrap.className = `lc-feeds ${prefs.split ? 'split' : ''} ${prefs.hideBots ? 'hide-bots' : ''} ${prefs.hideMuted ? 'hide-muted' : ''}`;
+  wrap.className = `lc-feeds ${prefs.split ? 'split' : ''} ${prefs.hideBots ? 'hide-bots' : ''} ${prefs.hideMuted ? 'hide-muted' : ''} ${prefs.showAvatars ? '' : 'no-av'} ${prefs.showTime ? '' : 'no-time'} ${prefs.compact ? 'compact' : ''}`;
+  wrap.style.setProperty('--lc-fs', `${Number(prefs.fontSize) || 14}px`);
   wrap.style.setProperty('--cols', cols.length);
   wrap.innerHTML = cols.map((p) => `<section class="lc-col">${prefs.split ? `<h4>${LOGO(p)}${PLATFORM_NAMES[p]} <small>${counts[p]}</small></h4>` : ''}<ul class="lc-feed" id="lc-feed-${p}"></ul></section>`).join('');
   for (const e of items) if (visible(e)) place(feedOf(e), nodeFor(e));
@@ -177,11 +226,12 @@ function renderTabs() {
 // ---------- Regalos ----------
 function giftTotals() {
   const by = new Map();
-  for (const g of gifts) by.set(g.currency, (by.get(g.currency) || 0) + g.amount);
+  for (const g of gifts) if (!g.sub) by.set(g.currency, (by.get(g.currency) || 0) + g.amount);
   return [...by].map(([cur, n]) => `<b>${n.toLocaleString('es-CO')}</b> ${esc(cur || '')}`).join(' · ') || 'Todavía nada';
 }
 function giftRow(e) {
   const x = e.extra || {};
+  if (e.type === 'sub') return `<li>${avatarHtml(e.user?.name, e.user?.avatar)}<div><b>${esc(e.user?.name || 'Anónimo')}</b><small>${LOGO(e.platform)}${e.amount > 1 ? `se suscribió (${e.amount} meses)` : 'se suscribió'}</small></div><span class="lc-amount">✦</span></li>`;
   return `<li>${avatarHtml(e.user?.name, e.user?.avatar)}<div><b>${esc(e.user?.name || 'Anónimo')}</b><small>${LOGO(e.platform)}${x.count > 1 ? `${x.count}× ` : ''}${esc(x.giftName || 'Regalo')}</small></div>${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}<span class="lc-amount">${Number(e.amount || 0).toLocaleString('es-CO')}<small>${esc(x.currency || '')}</small></span></li>`;
 }
 function renderGifts() {
@@ -190,8 +240,26 @@ function renderGifts() {
   col.hidden = !prefs.giftsColumn;
   $('#lc-gift-total').innerHTML = giftTotals();
   $('#lc-gift-count').textContent = `${gifts.length} ${gifts.length === 1 ? 'regalo' : 'regalos'}`;
-  const list = gifts.filter((g) => g.amount >= (Number(prefs.minGift) || 0));
+  const list = gifts.filter((g) => (g.sub ? prefs.countSubs : g.amount >= (Number(prefs.minGift) || 0)));
   $('#lc-gift-list').innerHTML = list.length ? list.slice(0, 120).map((g) => giftRow(g.e)).join('') : '<li class="lc-empty">Los regalos y propinas de todas las plataformas salen aquí.</li>';
+}
+
+// ---------- Usuarios del directo ----------
+let uq = '';
+function renderUsers() {
+  const el = $('#lc-users');
+  if (!el) return;
+  const hidden = listOf(prefs.hiddenAccounts);
+  const list = [...users.values()]
+    .filter((u) => !uq || u.name.toLowerCase().includes(uq))
+    .sort((a, b) => b.count - a.count || b.last - a.last)
+    .slice(0, 150);
+  el.innerHTML = list.length ? list.map((u) => {
+    const sp = specialFor(u.platform, u.e.user);
+    const off = hidden.includes(u.name.toLowerCase());
+    return `<li data-uk="${esc(u.platform)}:${esc(String(u.e.user.id || u.name).toLowerCase())}">${avatarHtml(u.name, u.avatar)}<div class="lc-u-who"><b>${esc(u.name)}</b><small>${LOGO(u.platform)}${u.count} ${u.count === 1 ? 'mensaje' : 'mensajes'}</small></div>
+      <span class="lc-u-act"><button type="button" data-ua="voice" title="Darle voz propia">🎙</button><button type="button" data-ua="mute" title="${sp?.action === 'mute' ? 'Devolverle la voz' : 'Silenciar su voz'}">${sp?.action === 'mute' ? '🔈' : '🔇'}</button><button type="button" data-ua="hide" title="${off ? 'Volver a mostrar en el chat' : 'Ocultar en el chat'}" aria-pressed="${off}">${off ? '👁' : '🙈'}</button></span></li>`;
+  }).join('') : `<li class="lc-empty">${users.size ? 'Nadie con ese nombre.' : 'Aquí aparece quien escribe en este directo, con cuántos mensajes lleva.'}</li>`;
 }
 
 // ---------- Panel de ajustes ----------
@@ -202,6 +270,11 @@ function fillPanel() {
     if (el.type === 'checkbox') el.checked = Boolean(v);
     else el.value = v;
   }
+  for (const b of $$('#lc-ptabs [data-lcpt]')) b.setAttribute('aria-selected', String(b.dataset.lcpt === prefs.ptab));
+  for (const sec of $$('#lc-panel [data-lcps]')) sec.hidden = sec.dataset.lcps !== prefs.ptab;
+  if ($('#lc-fs-val')) $('#lc-fs-val').textContent = `${prefs.fontSize} px`;
+  $('#lc-split')?.setAttribute('aria-pressed', String(prefs.split));
+  if (prefs.ptab === 'usuarios') renderUsers();
   $('#lc-layout').classList.toggle('no-panel', !prefs.panel);
   $('#lc-panel-btn').setAttribute('aria-pressed', String(prefs.panel));
   $('#lc-order').textContent = prefs.newestBottom ? 'Lo nuevo abajo' : 'Lo nuevo arriba';
@@ -212,8 +285,17 @@ export function addChatEvent(e) {
   items.push(e);
   if (items.length > 1500) items.splice(0, items.length - 1500);
   if (PLATS.includes(e.platform) && e.type === 'chat') { counts.all += 1; counts[e.platform] += 1; }
-  if (e.type === 'gift') {
-    gifts.unshift({ e, amount: Number(e.amount) || 0, currency: e.extra?.currency || '' });
+  if (e.type === 'chat' && e.user) {
+    const k = `${e.platform}:${String(e.user.id || e.user.name).toLowerCase()}`;
+    if (!firstSeen.has(k)) { firstSeen.add(k); e._first = true; }
+    const u = users.get(k) || { name: e.user.name, platform: e.platform, avatar: '', count: 0, last: 0, e };
+    u.count += 1; u.last = e.ts || Date.now(); u.name = e.user.name; u.e = e;
+    if (e.user.avatar) u.avatar = e.user.avatar;
+    users.set(k, u);
+    if (prefs.ptab === 'usuarios') renderUsers();
+  }
+  if (e.type === 'gift' || (e.type === 'sub' && prefs.countSubs)) {
+    gifts.unshift({ e, amount: e.type === 'sub' ? 0 : Number(e.amount) || 0, currency: e.type === 'sub' ? '' : e.extra?.currency || '', sub: e.type === 'sub' });
     if (gifts.length > 500) gifts.length = 500;
     renderGifts();
   }
@@ -261,6 +343,8 @@ export function setChatShows(p, on) {
 export function resetChat() {
   items.length = 0;
   gifts.length = 0;
+  users.clear();
+  firstSeen.clear();
   decisions.clear();
   for (const k of Object.keys(counts)) counts[k] = 0;
   if ($('#lc-feeds')) { renderFeeds(); renderGifts(); }
@@ -282,6 +366,30 @@ export function initLiveChat() {
   });
   $('#lc-q').addEventListener('input', (ev) => { q = ev.target.value.trim().toLowerCase(); renderFeeds(); });
   $('#lc-panel-btn').addEventListener('click', () => { prefs.panel = !prefs.panel; savePrefs(); fillPanel(); });
+  $('#lc-ptabs').addEventListener('click', (ev) => { const b = ev.target.closest('[data-lcpt]'); if (!b) return; prefs.ptab = b.dataset.lcpt; savePrefs(); fillPanel(); });
+  $('#lc-split').addEventListener('click', () => { prefs.split = !prefs.split; savePrefs(); fillPanel(); renderFeeds(); });
+  $('#lc-popout').addEventListener('click', () => window.open('/popout-chat.html', 'satronho-chat', 'width=440,height=720'));
+  $('#lc-uq').addEventListener('input', (ev) => { uq = ev.target.value.trim().toLowerCase(); renderUsers(); });
+  $('#lc-users').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-ua]');
+    const u = users.get(b?.closest('[data-uk]')?.dataset.uk);
+    if (!b || !u) return;
+    const e = u.e;
+    const sp = specialFor(e.platform, e.user);
+    const key = `${e.platform}:${String(e.user?.id || e.user?.name || '').toLowerCase()}`;
+    if (b.dataset.ua === 'hide') {
+      const list = listOf(prefs.hiddenAccounts);
+      const n = u.name.toLowerCase();
+      prefs.hiddenAccounts = (list.includes(n) ? list.filter((x) => x !== n) : [...list, n]).join(', ');
+      savePrefs(); fillPanel(); renderFeeds();
+    } else if (b.dataset.ua === 'mute') {
+      upsertSpecial({ key: sp?.key || key, name: e.user?.name, avatar: e.user?.avatar || '', action: sp?.action === 'mute' ? 'allow' : 'mute' });
+      renderUsers(); renderFeeds();
+    } else if (b.dataset.ua === 'voice') {
+      upsertSpecial({ key: sp?.key || key, name: e.user?.name, avatar: e.user?.avatar || '', action: 'allow' });
+      location.hash = '#/voz/especiales';
+    }
+  });
   $('#lc-order').addEventListener('click', () => { prefs.newestBottom = !prefs.newestBottom; savePrefs(); fillPanel(); renderFeeds(); });
   $('#lc-clear').addEventListener('click', () => {
     items.length = 0;
@@ -294,12 +402,20 @@ export function initLiveChat() {
     const el = ev.target.closest('[data-lcp]');
     if (!el) return;
     const [a, b] = el.dataset.lcp.split('.');
-    const v = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Number(el.value) || 0 : el.value;
+    const v = el.type === 'checkbox' ? el.checked : el.type === 'number' || el.type === 'range' ? Number(el.value) || 0 : el.value;
     if (b) prefs[a][b] = v; else prefs[a] = v;
     if (a === 'platforms' && !prefs.platforms[prefs.tab]) prefs.tab = 'all';
     savePrefs();
+    fillPanel();
     renderFeeds();
     renderGifts();
+  });
+  $('#lc-panel').addEventListener('input', (ev) => {
+    const el = ev.target.closest('[data-lcp="fontSize"]');
+    if (!el) return;
+    prefs.fontSize = Number(el.value) || 14;
+    $('#lc-fs-val').textContent = `${prefs.fontSize} px`;
+    $('#lc-feeds').style.setProperty('--lc-fs', `${prefs.fontSize}px`);
   });
 
   // Pausar el desplazamiento mientras lees algo más arriba.

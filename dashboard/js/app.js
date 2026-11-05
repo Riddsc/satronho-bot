@@ -7,7 +7,7 @@ import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSav
 import { initGuides, setBubble, sayFor, guideToast, GUIDES } from './guides.js';
 import { initAlertRules, onCatalogChange } from './alertRulesUI.js';
 import { initQuick, onQuickStatus, onQuickMusic, refreshRail } from './quick.js';
-import { addChatEvent, markChatDecision, initLiveChat, resetChat } from './livechat.js';
+import { addChatEvent, markChatDecision, initLiveChat, resetChat, setChatConfig } from './livechat.js';
 import { initVoice, renderEngine, renderAllowed, onTtsItem, updateTroya, onTtsQueue, setOnlineVoices, setTtsLog, addTtsLog } from './voice.js';
 import { initMusic, onMusic, onMusicNotice } from './music.js';
 import { initStats, onStats, onStatsHistory } from './stats.js';
@@ -26,6 +26,8 @@ import { initHotkeys, onHotkeysStatus, onHotkey } from './hotkeys.js';
 import { initChatbot, onBotSaid, onChatbotAccounts, onChatbotStatus } from './chatbot.js';
 import { initSupport } from './support.js';
 import { initNews, onNewsPage } from './news.js';
+import { initStarviosPeople } from './starviosPeople.js';
+import { initFiles, onFilesChanged } from './files.js';
 import { initHome, homeEvent, homeVoice, homeMusic, homeStats, homeConnections, homeRefreshExtras } from './home.js';
 
 let config = null;
@@ -44,6 +46,8 @@ function renderStatus(s) {
   if (!PLATFORM_NAMES[s.platform] || s.platform === 'panel') return;
   onQuickStatus(s);
   status[s.platform] = s;
+  const dot = $(`#conn-tabs [data-conn-tab="${s.platform}"] .conn-dot`);
+  if (dot) dot.className = `conn-dot ${s.state}`;
   const name = PLATFORM_NAMES[s.platform];
   const chip = $(`#chip-${s.platform}`);
   chip.className = `pchip ${STATE_CLASS[s.state] || ''}`;
@@ -121,10 +125,36 @@ function applyPlatformVisibility() {
     for (const el of $$(`[data-platform="${p}"]`)) el.hidden = !show;
   }
   renderPlatformOrder();
+  renderConnTabs();
   updateConnCount();
 }
 
+// Barra de arriba en Conexiones: ver todas o una sola plataforma.
+let connTab = 'all';
+function renderConnTabs() {
+  const bar = $('#conn-tabs');
+  if (!bar) return;
+  const shown = platformOrder().filter(isShown);
+  if (connTab !== 'all' && !shown.includes(connTab)) connTab = 'all';
+  bar.innerHTML = [['all', 'Todas'], ...shown.map((p) => [p, PLAT_FULL[p]])].map(([id, n]) => `<button type="button" data-conn-tab="${id}" aria-pressed="${connTab === id}">${id === 'all' ? '' : PLAT_LOGO[id]}${esc(n)}${id === 'all' ? '' : `<i class="conn-dot ${esc(status[id]?.state || 'disconnected')}"></i>`}</button>`).join('');
+  for (const p of ALL_PLATFORMS) {
+    const card = $(`.platform[data-platform="${p}"]`);
+    if (card && isShown(p)) card.hidden = connTab !== 'all' && connTab !== p;
+  }
+  $('#plat-order-card').hidden = connTab !== 'all';
+}
+
+function initConnTabBar() {
+  $('#conn-tabs')?.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-conn-tab]');
+    if (!b) return;
+    connTab = b.dataset.connTab;
+    renderConnTabs();
+  });
+}
+
 function initConnTabs() {
+  initConnTabBar();
   const list = $('#plat-order');
   list.addEventListener('change', async (ev) => {
     const p = ev.target.dataset.show;
@@ -405,6 +435,9 @@ async function init() {
   initHotkeys(config);
   initSupport();
   initNews(config, state.app?.version);
+  initStarviosPeople(config);
+  setChatConfig(config);
+  initFiles();
   initUpdatePill();
   onPageChange(onNewsPage);
   for (const p of ['tiktok', 'kick', 'starvios', 'twitch']) renderStatus({ platform: p, state: 'disconnected' });
@@ -472,7 +505,7 @@ async function init() {
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;
         case 'live': setOverlayLive(p); break;
         case 'alert': onAlert(p); break;
-        case 'sounds-changed': onSoundsChanged(); homeRefreshExtras(); break;
+        case 'sounds-changed': onSoundsChanged(); homeRefreshExtras(); onFilesChanged(); break;
         case 'spotify': onSpotify(p); break;
         case 'alert-overlays': setAlertOverlays(p.count); break;
         case 'alert-control': onAlertControl(p); break;

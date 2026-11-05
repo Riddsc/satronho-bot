@@ -24,11 +24,16 @@ const DEFAULTS = {
     twitch: { channel: '', autoConnect: false, hidden: false },
     starvios: { channel: '', autoConnect: false, hidden: false },
   },
+  // Starvios no dice quién es quién: tus moderadores y tu lista de personas
+  // (para «Quién pide música» y «Quién se lee»).
+  starviosPeople: { mods: [], allowed: [] },
   // Orden de las plataformas en el panel (Conexiones → Plataformas que usas).
   platformOrder: ['kick', 'starvios', 'tiktok', 'twitch'],
   alerts: {
     durationMs: 5000, // duración por defecto (las de cada tipo mandan)
     minGift: 1, // diamantes mínimos para lanzar alerta de regalo
+    masterVolume: 100, // volumen general de todas las alertas (0–100)
+    platforms: { tiktok: true, kick: true, twitch: true, starvios: true }, // alertas de serie por plataforma
     enabled: { follow: true, sub: true, gift: true, like: false, share: false, sticker: true, join: false, superfan: true },
     // Por tipo: segundos en pantalla, sonido (incluido, 'file' o 'none'),
     // volumen 0–100, cortar el sonido a los N s (0 = completo), durar lo
@@ -73,6 +78,10 @@ const DEFAULTS = {
     filterProfanity: true, // reemplaza groserías por "piip"
     filterTricks: true, // detecta trucos: T0NT0, t.o.n.t.o, toooonto, letras raras
     bannedWords: DEFAULT_BANNED,
+    // Cómo se lee: {usuario} {mensaje} {plataforma}. Vacío = «Fulano dice: …».
+    template: '',
+    // Velocidad y volumen por plataforma (1 = como la voz principal).
+    perPlatform: { tiktok: { rate: 1, volume: 1 }, kick: { rate: 1, volume: 1 }, twitch: { rate: 1, volume: 1 }, starvios: { rate: 1, volume: 1 } },
     emojiWords: true, // 😂 «jajaja», ❤️ «corazón»… una vez; los demás emojis se ignoran
     stripNumbers: false, // no leer números (ni los escondidos en palabras)
     // Escudo anti-trampas (0.12): alfabetos permitidos y qué hacer con los demás.

@@ -24,6 +24,7 @@ const THEMES = [
   { id: 'noche', name: 'Noche', note: 'Morado nocturno', c: ['#141022', '#19152a', '#8b7bff'] },
   { id: 'medianoche', name: 'Medianoche', note: 'Azul profundo', c: ['#0d1322', '#121a2c', '#5ab0ff'] },
   { id: 'cafe', name: 'Café', note: 'Cálido, tostado', c: ['#1b140f', '#221912', '#e07a4a'] },
+  { id: 'grafito', name: 'Grafito', note: 'Gris sobrio', c: ['#121215', '#18181c', '#8b7bff'] },
   { id: 'claro', name: 'Claro', note: 'Para el día', c: ['#efe9f8', '#ffffff', '#6d5dfc'] },
 ];
 
