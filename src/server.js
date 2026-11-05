@@ -20,6 +20,9 @@ const { createPiperEngine } = require('./tts/piper');
 const { createMsOnlineEngine } = require('./tts/msonline');
 const { createGiftCatalog } = require('./modules/giftCatalog');
 const { createAlertRules } = require('./modules/alertRules');
+const { createSoundLibrary } = require('./modules/soundLibrary');
+const { createSpotify } = require('./connectors/spotify');
+const { whoReason } = require('./modules/roles');
 const { createLeaderboard } = require('./modules/leaderboard');
 const { createLive } = require('./modules/live');
 const { createYoutubeResolver } = require('./music/youtube');
@@ -56,7 +59,9 @@ const SAMPLE = {
 
 function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, resolver: customResolver, appInfo = {}, hooks = {} }) {
   const app = express();
-  app.use(express.json());
+  const jsonBody = express.json();
+  // Los packs de sonidos son grandes: los lee su propia ruta con más margen.
+  app.use((req, res, next) => (req.path === '/api/sounds/pack' && req.method === 'POST' ? next() : jsonBody(req, res, next)));
   // Bitácora de errores para los reportes (Ayuda → Reportar un problema).
   const logbook = createLogbook();
   app.use('/', express.static(path.join(ROOT, 'dashboard')));
@@ -118,6 +123,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const engine = createPiperEngine({ dataDir, fetch: fetchFn, onState: (s) => broadcast('tts-engine', s) });
   const goals = createGoals({ store, broadcast });
   const online = createMsOnlineEngine({ outDir: engine.outDir });
+  const soundLib = createSoundLibrary({ dataDir, fetchFn, engine, online, store });
   const kickChat = createKickChat({
     store,
     fetch: fetchFn,
@@ -163,8 +169,10 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
   const stats = createStats({ store, dataDir, broadcast });
   const resolver = customResolver || createYoutubeResolver({ fetch: fetchFn });
+  const spotify = createSpotify({ store, fetchFn, broadcast: (...a) => broadcast(...a) });
   const music = createMusic({
     store,
+    spotify,
     broadcast(kind, payload) {
       broadcast(kind, payload);
       if (kind === 'music-notice' && payload.kind !== 'busy') {
@@ -191,6 +199,24 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
 
   const alertOverlays = new Set();
+  // «!sonido boing»: el público lanza sonidos de tu biblioteca (si lo activas).
+  const soundCooldown = { all: 0, users: new Map() };
+  function chatSound(e) {
+    const c = store.get('sounds')?.chat || {};
+    if (!c.enabled) return;
+    const m = String(e.message || '').trim().match(/^!(\S+)\s+(.{1,60})$/);
+    if (!m || m[1].toLowerCase() !== String(c.command || 'sonido').replace(/^!/, '').toLowerCase()) return;
+    if (whoReason(e, c.who || 'all')) return;
+    const now = Date.now();
+    const key = `${e.platform}:${e.user?.id || e.user?.name}`;
+    if (now - soundCooldown.all < (Number(c.cooldownSec) || 0) * 1000) return;
+    if (now - (soundCooldown.users.get(key) || 0) < (Number(c.userCooldownSec) || 0) * 1000) return;
+    const hit = soundLib.find(m[2]);
+    if (!hit || (c.onlyMine && !hit.ref.startsWith('m:'))) return;
+    soundCooldown.all = now;
+    soundCooldown.users.set(key, now);
+    broadcast('alert', { ...e, type: 'sfx', soundOnly: true, instant: true, title: hit.name, sound: { sound: hit.ref, volume: Number(c.volume) || 70, maxSeconds: 10 } });
+  }
   const recent = [];
   bus.on('event', (e) => {
     if (e.type !== 'join') recent.unshift(e);
@@ -224,6 +250,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const fromBot = e.type === 'chat' && Boolean(writers[e.platform]?.isOwnMessage(e.user?.name, e.message));
     // Comandos propios (!redes…) y conteo para los mensajes automáticos.
     if (!fromBot && e.type === 'chat') {
+      chatSound(e);
       commands.onChat(e);
       try {
         commands.handle(e);
@@ -283,6 +310,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       plain,
       image: r.showImage === false ? '' : ruleImg || localImg(e.extra?.image),
       instant: r.instant ?? r.trigger === 'sticker',
+      soundOnly: r.visual === false,
       color: r.color || '',
       durationMs: Math.round(Math.max(1, Math.min(60, seconds)) * 1000),
       fitSound: Boolean(r.fitSound),
@@ -315,6 +343,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
         payload: {
           clientId: ws.clientId,
           alertOverlays: alertOverlays.size,
+          spotify: spotify.status(),
           goals: goals.list(),
           status,
           recent: recent.slice(0, 80),
@@ -613,6 +642,34 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     }
   });
 
+  // ---- Spotify (0.16) ----
+  app.get('/api/spotify', (_req, res) => ok(res, { spotify: spotify.status() }));
+  app.post('/api/spotify/login', (_req, res) => {
+    try { ok(res, { url: spotify.authUrl() }); } catch (err) { fail(res, err); }
+  });
+  app.post('/api/spotify/disconnect', (_req, res) => { spotify.disconnect(); ok(res, { spotify: spotify.status() }); });
+  app.get('/api/spotify/queue', safe(async (_req, res) => ok(res, { queue: await spotify.queueList() })));
+  app.post('/api/spotify/control/:action', safe(async (req, res) => {
+    const a = req.params.action;
+    if (a === 'skip') await spotify.skip();
+    else if (a === 'pause') await spotify.pause();
+    else if (a === 'play') await spotify.play();
+    else if (a === 'request') await spotify.request(String(req.body?.q || ''), 'Streamer');
+    else return fail(res, 'Acción desconocida');
+    ok(res, {});
+  }));
+  app.get('/auth/spotify/callback', async (req, res) => {
+    const page = (title, text, okk) => `<!doctype html><meta charset="utf-8"><title>Satronho Bot</title>
+      <body style="margin:0;display:grid;place-items:center;height:100vh;background:#0f0d17;color:#f4efe6;font:16px system-ui">
+      <div style="text-align:center;max-width:420px;padding:24px"><div style="font-size:48px">${okk ? '🎧' : '⚠️'}</div><h2>${title}</h2><p style="color:#a39ac0">${text}</p></div>`;
+    try {
+      const st = await spotify.finish(req.query || {});
+      res.send(page('¡Spotify conectado!', `${st.user?.name ? `<b>${String(st.user.name).replace(/[<>&]/g, '')}</b> quedó conectada.` : 'Tu cuenta quedó conectada.'} Ya puedes cerrar esta ventana y volver a Satronho Bot.`, true));
+    } catch (err) {
+      res.send(page('No se pudo conectar Spotify', String(err.message).replace(/[<>&]/g, ''), false));
+    }
+  });
+
   // ---- Novedades (CHANGELOG.json, incluido en la app) ----
   let changelog = [];
   try {
@@ -718,6 +775,77 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const patch = { file: `${file}?v=${Date.now()}`, fileName: decodeURIComponent(name), sound: 'file' };
     store.update({ alerts: key === 'bigGift' ? { bigGift: patch } : { types: { [key]: patch } } });
     ok(res, { alerts: store.get('alerts') });
+  });
+
+  // ---------- Biblioteca de sonidos (0.16) ----------
+  app.use('/sfx', express.static(path.join(ROOT, 'sounds'), { maxAge: '30d' }));
+  app.get('/my-sounds/:id', (req, res) => {
+    const f = soundLib.fileOf(String(req.params.id));
+    if (!f) return res.sendStatus(404);
+    res.type(f.mime);
+    res.sendFile(f.full, (err) => err && !res.headersSent && res.sendStatus(404));
+  });
+  app.get('/api/sounds', (_req, res) => ok(res, soundLib.list()));
+  app.post('/api/sounds/upload', express.raw({ type: Object.keys(soundLib.EXT), limit: '10mb' }), safe(async (req, res) => {
+    const ext = soundLib.EXT[req.headers['content-type']];
+    if (!ext) return fail(res, 'Usa un sonido MP3, WAV, OGG o M4A (hasta 10 MB)');
+    const name = decodeURIComponent(String(req.headers['x-file-name'] || 'Sonido')).replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ');
+    const sound = soundLib.addFile(req.body, { name, ext, cat: String(req.headers['x-cat'] || 'mis') });
+    broadcast('sounds-changed', {});
+    ok(res, { sound });
+  }));
+  app.post('/api/sounds/memes/search', safe(async (req, res) => ok(res, await soundLib.searchMemes(req.body?.q || '', req.body?.page))));
+  app.post('/api/sounds/add-url', safe(async (req, res) => {
+    const urls = (Array.isArray(req.body?.urls) ? req.body.urls : [req.body?.url]).map((u) => String(u || '').trim()).filter(Boolean).slice(0, 40);
+    if (!urls.length) return fail(res, 'Pega al menos un enlace');
+    const added = [];
+    const errors = [];
+    for (const url of urls) {
+      try { added.push(await soundLib.addFromUrl({ url, name: urls.length === 1 ? req.body?.name : '', tags: req.body?.tags || '', cat: req.body?.cat || 'memes' })); } catch (err) { errors.push({ url, error: err.message }); }
+    }
+    if (added.length) broadcast('sounds-changed', {});
+    if (!added.length) return fail(res, errors[0]?.error || 'No se pudo agregar');
+    ok(res, { added, errors });
+  }));
+  app.post('/api/sounds/phrase', safe(async (req, res) => {
+    const texts = (Array.isArray(req.body?.texts) ? req.body.texts : [req.body?.text]).map((t) => String(t || '').trim()).filter(Boolean).slice(0, 60);
+    const added = [];
+    const errors = [];
+    for (const text of texts) {
+      const cat = req.body?.cats?.[text] || req.body?.cat || 'frases';
+      try { added.push(await soundLib.addPhrase({ text, voice: req.body?.voice || '', cat })); } catch (err) { errors.push({ text, error: err.message }); }
+    }
+    if (added.length) broadcast('sounds-changed', {});
+    if (!added.length) return fail(res, errors[0]?.error || 'No se pudo crear la frase');
+    ok(res, { added, errors });
+  }));
+  app.patch('/api/sounds/mine/:id', (req, res) => {
+    const e = soundLib.update(String(req.params.id), req.body || {});
+    if (!e) return fail(res, 'Ese sonido no existe', 404);
+    broadcast('sounds-changed', {});
+    ok(res, { sound: e });
+  });
+  app.delete('/api/sounds/mine/:id', (req, res) => {
+    soundLib.remove(String(req.params.id));
+    broadcast('sounds-changed', {});
+    ok(res, {});
+  });
+  app.get('/api/sounds/pack', (req, res) => {
+    const ids = String(req.query.ids || '').split(',').filter(Boolean);
+    res.setHeader('Content-Disposition', `attachment; filename="mis-sonidos-${new Date().toISOString().slice(0, 10)}.satronho-sonidos"`);
+    res.json(soundLib.exportPack(ids));
+  });
+  app.post('/api/sounds/pack', express.json({ limit: '300mb' }), safe(async (req, res) => {
+    const added = soundLib.importPack(req.body);
+    broadcast('sounds-changed', {});
+    ok(res, { added });
+  }));
+  // Probar un sonido en el overlay de alertas (o en la app si no hay overlay).
+  app.post('/api/sounds/play', (req, res) => {
+    const sound = String(req.body?.sound || '').slice(0, 80);
+    if (!sound) return fail(res, 'Falta el sonido');
+    broadcast('alert', { id: `sfx-${Date.now()}`, ts: Date.now(), type: 'sfx', platform: 'panel', user: { name: 'Prueba' }, soundOnly: true, instant: true, sound: { sound, volume: Number(req.body?.volume) || 75 } });
+    ok(res, {});
   });
 
   // Sonido de una alerta propia.

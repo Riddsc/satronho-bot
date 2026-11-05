@@ -108,6 +108,8 @@
   let busy = false;
 
   function enqueue(e) {
+    // Solo sonido (sonidos del chat, pruebas o alertas sin nada en pantalla).
+    if (e.soundOnly) { if (soundOn()) playAlertSound(e.sound || { sound: 'campanita' }); return; }
     if (e.instant) return instant(e);
     if (!TEMPLATES[e.type] && !e.custom) return;
     queue.push(e);

@@ -8,6 +8,7 @@
 import { $, $$, api, esc, toast, saveConfig } from './util.js';
 import { sayFor } from './guides.js';
 import { SOUNDS, playAlertSound } from '/overlays/sounds.js';
+import { openSoundPicker, soundLabel, loadSounds } from './soundsUI.js';
 
 const PLATS = [
   ['tiktok', 'TikTok'], ['kick', 'Kick'], ['starvios', 'Starvios'], ['any', 'Cualquiera'],
@@ -103,7 +104,7 @@ function triggerCell(r) {
 function soundName(r) {
   if (r.sound === 'none') return 'Sin sonido';
   if (r.sound === 'file') return r.fileName || 'Mi sonido';
-  return SOUNDS[r.sound] || SOUNDS.campanita;
+  return soundLabel(r.sound);
 }
 function renderList() {
   const box = $('#ar-list');
@@ -221,7 +222,7 @@ function sentence() {
     keyword: `escriba <b>«${esc(String(d.keyword || '…').split(',')[0].trim())}»</b>`,
     liveStart: '', liveEnd: '',
   }[d.trigger];
-  const sound = d.sound === 'none' ? 'sin sonido' : d.sound === 'file' ? `con <b>${esc(d.fileName || 'tu sonido')}</b>` : `con <b>${esc(SOUNDS[d.sound] || 'Campanita')}</b>`;
+  const sound = d.sound === 'none' ? 'sin sonido' : d.sound === 'file' ? `con <b>${esc(d.fileName || 'tu sonido')}</b>` : `con <b>${esc(soundLabel(d.sound))}</b>`;
   const lead = d.trigger === 'liveStart' ? `Cuando empiece tu directo ${where}` : d.trigger === 'liveEnd' ? `Cuando termine tu directo ${where}` : `Cuando alguien ${where} ${what}`;
   return `${lead}, sale <b>${esc(d.name || TRIG[d.trigger]?.name || 'la alerta')}</b> ${sound}${d.instant ?? d.trigger === 'sticker' ? ', al instante' : ` durante <b>${d.fitSound ? 'lo que dure el sonido' : `${d.seconds || 5} s`}</b>`}${d.speak ? ' y Troya la lee' : ''}.`;
 }
@@ -267,6 +268,8 @@ function renderEditor() {
 
   const s = d.sound || 'campanita';
   $('#ar-look').innerHTML = `
+    <label class="switch ar-visual"><input type="checkbox" data-d="visual" ${d.visual !== false ? 'checked' : ''}><span></span> <em class="sw-t">Mostrar en pantalla (si lo apagas, solo suena)</em></label>
+    <div class="ar-lookbody" ${d.visual === false ? 'hidden' : ''}>
     <div class="two"><label class="field"><span>Nombre (para ti)</span><input data-d="name" value="${esc(d.name || '')}" placeholder="${esc(TRIG[t]?.name || 'Alerta')}"></label>
       <label class="field"><span>Color</span><input type="color" data-d="color" value="${esc(d.color || '#ff5d8f')}"></label></div>
     <label class="field"><span>Texto en pantalla</span><input data-d="text" value="${esc(d.text || '')}" placeholder="{usuario} envió {regalo}"></label>
@@ -274,9 +277,11 @@ function renderEditor() {
     <div class="two"><label class="field"><span>Segundos en pantalla</span><input type="number" min="1" max="60" data-d="seconds" value="${d.seconds ?? 5}" ${d.fitSound ? 'disabled' : ''}></label>
       <label class="field"><span>Espera entre repeticiones (s)</span><input type="number" min="0" max="600" data-d="cooldownSec" value="${d.cooldownSec || 0}"></label></div>
     <label class="switch"><input type="checkbox" data-d="showImage" ${d.showImage !== false ? 'checked' : ''}><span></span> Mostrar la imagen del regalo o sticker</label>
-    <label class="switch"><input type="checkbox" data-d="instant" ${(d.instant ?? t === 'sticker') ? 'checked' : ''}><span></span> Al instante: salta sin esperar a que termine la anterior</label>`;
+    <label class="switch"><input type="checkbox" data-d="instant" ${(d.instant ?? t === 'sticker') ? 'checked' : ''}><span></span> Al instante: salta sin esperar a que termine la anterior</label>
+    </div>`;
   $('#ar-sound').innerHTML = `
     <div class="ar-sounds">${Object.entries(SOUNDS).map(([id, n]) => `<button type="button" class="ar-snd ${s === id ? 'on' : ''}" data-snd="${id}">▶ ${esc(n)}</button>`).join('')}<button type="button" class="ar-snd ${s === 'file' ? 'on' : ''}" data-snd="file">📁 Mi sonido</button><button type="button" class="ar-snd ${s === 'none' ? 'on' : ''}" data-snd="none">🔇 Sin sonido</button></div>
+    <div class="ar-lib">${!SOUNDS[s] && !['file', 'none'].includes(s) ? `<button type="button" class="ar-snd on" data-snd="${esc(s)}">▶ ${esc(soundLabel(s))}</button>` : ''}<button type="button" class="btn small primary" data-snd-lib>📚 Elegir de la biblioteca (cientos de sonidos y tus memes)</button></div>
     <div class="ar-file" ${s === 'file' ? '' : 'hidden'}><button type="button" class="btn small" id="ar-up">${d.fileName ? 'Cambiar sonido' : 'Subir sonido'}</button><small>${esc(d.fileName || 'MP3, WAV u OGG, hasta 10 MB')}</small>${d.file ? '<button type="button" class="btn small ghost" id="ar-play">▶ Escuchar</button>' : ''}<input type="file" id="ar-up-file" accept="audio/mpeg,audio/wav,audio/ogg,audio/webm,.mp3,.wav,.ogg" hidden></div>
     <label class="field"><span>Volumen <b>${d.volume ?? 75} %</b></span><input type="range" min="0" max="100" step="5" data-d="volume" value="${d.volume ?? 75}"></label>
     <div class="two"><label class="field"><span>Cortar el sonido a los (s, 0 = completo)</span><input type="number" min="0" max="60" data-d="maxSeconds" value="${d.maxSeconds || 0}"></label>
@@ -293,6 +298,7 @@ function readDraftField(el) {
   if (k === 'max' && v === '') v = undefined;
   draft[k] = v;
   if (k === 'fitSound') return renderEditor();
+  if (k === 'visual') { const b = $('.ar-lookbody'); if (b) b.hidden = v === false; }
   if (k === 'volume') el.closest('.field').querySelector('b').textContent = `${v} %`;
   renderSummary();
 }
@@ -343,6 +349,7 @@ export function initAlertRules(cfg) {
   config = cfg;
   if (!$('#ar-list')) return;
   loadCatalog('tiktok').then(renderList);
+  loadSounds().then(renderList);
   renderList();
 
   $('#ar-plats').addEventListener('click', (ev) => { const b = ev.target.closest('[data-ar-plat]'); if (b) { ui.plat = b.dataset.arPlat; loadCatalog(ui.plat).then(renderList); renderList(); } });
@@ -408,6 +415,9 @@ export function initAlertRules(cfg) {
     if (tr && !tr.disabled) { draft.trigger = tr.dataset.trig; return renderEditor(); }
     const tier = ev.target.closest('[data-tier]');
     if (tier) { pick.price = tier.dataset.tier; return renderPicker(); }
+    if (ev.target.closest('[data-snd-lib]')) {
+      return openSoundPicker(draft.sound, (ref) => { draft.sound = ref; playAlertSound({ sound: ref, volume: draft.volume ?? 75 }); renderEditor(); });
+    }
     const snd = ev.target.closest('[data-snd]');
     if (snd) {
       draft.sound = snd.dataset.snd;

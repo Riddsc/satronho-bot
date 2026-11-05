@@ -30,6 +30,11 @@ const THEMES = [
   { id: 'mecha', name: 'MechaRidds', desc: 'Pantalla de androide: verde Hulk y ojo violeta', guide: 'mecha', set: { font: 'jetbrains-mono', accent: '#74d14c', text: '#e8ffe0', card: 'solid', corners: 'square' }, bg: '#051209', fg: '#e8ffe0', bd: '#74d14c' },
   { id: 'colonizadora', name: 'Colonizadora', desc: 'Rosa chicle, lila, brillos y corazoncitos', set: { font: 'baloo-2', accent: '#ff3d9a', text: '#7a1650', card: 'solid', corners: 'round' }, bg: 'linear-gradient(135deg,#ffd1e8,#e8d2ff)', fg: '#7a1650', bd: '#ff6fb5' },
 ];
+// Lo que dice cada tema en su muestra (variado, nada de un nombre fijo).
+const SAMPLE = {
+  satronho: '¡Nuevo seguidor!', neon: 'Combo ×20', cristal: 'Meta al 80 %', papel: 'Gracias, de verdad', arcade: '¡Level up!', dulce: '¡Te quiero!', minimal: 'Sígueme',
+  samy: '¡Guau, gracias!', troya: 'Regalo real', nono: 'Sonando ahora', juana: 'Faltan 20', mecha: 'SISTEMA OK', colonizadora: '¡Divina! ✨',
+};
 const TYPE_NAMES = { follow: 'Seguidores', sub: 'Suscripciones', gift: 'Monedas', like: 'Likes', share: 'Compartidos' };
 // Lo que dice cada guía en el editor de su categoría.
 const GUIDE_TIP = {
@@ -600,7 +605,7 @@ function setStyle(patch) {
 }
 function renderThemes() {
   $('#ov-themes').innerHTML = THEMES.map((t) => `<button type="button" class="ov-theme" data-theme-pick="${t.id}" title="${esc(t.desc)}">
-    <span class="ov-tprev" style="--tb:${t.bg};--tf:${t.fg};--td:${t.bd};font-family:'${esc(FONTS.find((f) => f.id === t.set.font)?.family || 'inherit')}'" data-k="${t.glow ? 'glow' : t.dashed ? 'dashed' : t.hard ? 'hard' : t.line ? 'line' : /gradient/.test(t.bg) ? 'grad' : ''}">${t.guide ? `<span class="ov-tguide">${avatarHTML(t.guide, 'xs')}</span>` : `<i>${t.id === 'colonizadora' ? '♡' : '♥'}</i>`}<b>Rosalinda</b></span>
+    <span class="ov-tprev" style="--tb:${t.bg};--tf:${t.fg};--td:${t.bd};font-family:'${esc(FONTS.find((f) => f.id === t.set.font)?.family || 'inherit')}'" data-k="${t.glow ? 'glow' : t.dashed ? 'dashed' : t.hard ? 'hard' : t.line ? 'line' : /gradient/.test(t.bg) ? 'grad' : ''}">${t.guide ? `<span class="ov-tguide">${avatarHTML(t.guide, 'xs')}</span>` : `<i>${t.id === 'colonizadora' ? '♡' : '♥'}</i>`}<b>${esc(SAMPLE[t.id] || '¡Gracias!')}</b></span>
     <span class="ov-tname">${esc(t.name)}</span></button>`).join('');
 }
 

@@ -15,6 +15,8 @@ import { initHelp, setHelpContext, openHelp, _test as helpKb } from './help.js';
 import { initNav, countEvent, setStepFacts, onPageChange } from './nav.js';
 import { initAppearance, applyAppearance } from './appearance.js';
 import { setAlertOverlays, setAlertSoundEnabled, onAlert, onAlertControl } from './alertSound.js';
+import { initSounds, onSoundsChanged } from './soundsUI.js';
+import { initSpotify, onSpotify } from './spotifyUI.js';
 import { initOverlays, setOverlayGoals, setOverlayLive, setOverlayWidgets } from './overlays.js';
 import { initKickbot, renderKickbot } from './kickbot.js';
 import { initAlerts } from './alerts.js';
@@ -355,6 +357,8 @@ async function init() {
   onTtsQueue(() => homeVoice(config, lastEngine));
   initGoalsAndAlerts();
   initOverlays(config);
+  initSounds(config);
+  initSpotify(config);
   initLiveChat();
   initQuick(config);
   initHome();
@@ -375,6 +379,7 @@ async function init() {
           renderGoals();
           setOverlayLive(p.live);
           setAlertOverlays(p.alertOverlays);
+          if (p.spotify) onSpotify(p.spotify);
           setAlertSoundEnabled(p.overlayStyle?.sound);
           Object.values(p.status || {}).forEach(renderStatus);
           resetChat();
@@ -427,6 +432,8 @@ async function init() {
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;
         case 'live': setOverlayLive(p); break;
         case 'alert': onAlert(p); break;
+        case 'sounds-changed': onSoundsChanged(); break;
+        case 'spotify': onSpotify(p); break;
         case 'alert-overlays': setAlertOverlays(p.count); break;
         case 'alert-control': onAlertControl(p); break;
         case 'overlay-style': setAlertSoundEnabled(p?.sound); break;

@@ -118,7 +118,9 @@ const DEFAULTS = {
     starvios: { enabled: true, sendAs: 'me', music: true },
   },
   // Claves y permisos (solo en tu PC; nunca se mandan al panel).
-  secrets: { kick: {}, starvios: {} },
+  secrets: { kick: {}, starvios: {}, spotify: {} },
+  // Spotify (0.16): con Premium, los pedidos del chat van a tu cola de Spotify.
+  spotify: { clientId: '', requests: false, showInOverlay: true },
   windowsVoices: [], // nombres de las voces de Windows en español (los manda el panel)
   // Cómo se ve el panel (solo en tu PC).
   // sidebar: 'compact' (solo iconos; se despliega al pasar el ratón) o 'open'.
@@ -162,6 +164,13 @@ const DEFAULTS = {
   // Overlays de la galería: { id: { kind, name, style, settings, look } }
   widgets: {},
   // Contadores en pantalla: { id, name, icon, value, step, command, gift, anyone }
+  // Biblioteca de sonidos (0.16): favoritos, recientes y el comando del chat.
+  sounds: {
+    favorites: [],
+    recent: [],
+    hideRude: false, // esconder la categoría «Groseros»
+    chat: { enabled: false, command: 'sonido', cooldownSec: 15, userCooldownSec: 60, who: 'all', volume: 70, onlyMine: false },
+  },
   counters: [
     { id: 'muertes', name: 'Muertes', icon: '💀', value: 0, step: 1, command: 'muerte', gift: '', anyone: false },
     { id: 'jefes', name: 'Jefes', icon: '⚔️', value: 0, step: 1, command: 'jefe', gift: '', anyone: false, goal: 5 },

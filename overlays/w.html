@@ -92,7 +92,7 @@
     if (k === 'hello') {
       S.overlayStyle = p.overlayStyle;
       S.widgets = { ...(p.widgets || {}), ...(isPreview ? S.widgets : {}) };
-      if (!demo) Object.assign(S, { goals: p.goals || [], podium: p.podium || {}, live: p.live || {}, music: p.music || {}, recent: p.recent || [] });
+      if (!demo) Object.assign(S, { goals: p.goals || [], podium: p.podium || {}, live: p.live || {}, music: p.music || {}, recent: p.recent || [], spotify: p.spotify || null });
       return apply();
     }
     if (k === 'overlay-style') { S.overlayStyle = p; return apply(); }
@@ -104,8 +104,9 @@
     if (k === 'podium') S.podium = p;
     if (k === 'live') { const prev = S.live; S.live = p; kind?.onLive?.(prev, p, ctx()); }
     if (k === 'music') S.music = p;
+    if (k === 'spotify') S.spotify = p;
     if (k === 'event') { S.recent.unshift(p); S.recent.length = Math.min(S.recent.length, 80); kind?.onEvent?.(p, ctx()); }
-    if (['goal', 'goal-removed', 'podium', 'live', 'music', 'event'].includes(k)) draw();
+    if (['goal', 'goal-removed', 'podium', 'live', 'music', 'event', 'spotify'].includes(k)) draw();
   });
 </script>
 </body>

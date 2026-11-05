@@ -19,7 +19,7 @@ const DEFAULT_CMDS = {
 
 const strip = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
+function createMusic({ store, broadcast, resolver, spotify = null, onSong = () => {} }) {
   let current = null;
   let queue = [];
   let history = []; // lo que ya sonó (más reciente primero)
@@ -90,6 +90,15 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
     }
     lastAsk.set(key, Date.now());
 
+    // Con Spotify activo, el pedido va a la cola de Spotify del streamer.
+    if (spotify?.active()) {
+      try {
+        const t = await spotify.request(query, user.name);
+        return notice(`${user.name} pidió «${t.title}» de ${t.author} (en Spotify)`, 'ok', user.name, platform);
+      } catch (err) {
+        return notice(`${user.name}: ${err.message || 'no pude pedirla en Spotify'}`, 'error', user.name, platform);
+      }
+    }
     pending.set(key, (pending.get(key) || 0) + 1);
     broadcast('music-notice', { text: `Buscando «${query.slice(0, 60)}» para ${user.name}…`, kind: 'busy', user: user.name, platform, ts: Date.now() });
     try {
@@ -113,6 +122,10 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
   }
 
   function skipOwn(user, platform, isMod) {
+    if (spotify?.active()) {
+      if (!isMod) return notice(`${user.name}: con Spotify solo tú y tus moderadores saltan (o vota con !${(cfg().commands?.vote?.names || DEFAULT_CMDS.vote)[0]})`, 'warn', user.name, platform);
+      return spotify.skip().then(() => notice(`${user.name} saltó la canción`, 'info', user.name, platform)).catch((e) => notice(e.message, 'error', user.name, platform));
+    }
     if (!current) return;
     if (!isMod && current.requesterKey !== keyOf(user, platform)) {
       return notice(`${user.name}: solo puedes saltar tu propia canción (o vota con !${(cfg().commands?.vote?.names || DEFAULT_CMDS.vote)[0]})`, 'warn', user.name, platform);
@@ -143,6 +156,8 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
     notice(`Sonando: ${current ? current.title.slice(0, 50) : '—'}${next ? ` · Siguen: ${next}` : ''}${queue.length > 3 ? ` · y ${queue.length - 3} más` : ''}`, 'info', user.name, platform);
   }
   function sayNow(user, platform) {
+    const sp = spotify?.active() ? spotify.nowPlaying() : null;
+    if (sp) return notice(`Sonando en Spotify: «${sp.title}» de ${sp.author}${sp.requester ? `, la pidió ${sp.requester}` : ''}`, 'info', user.name, platform);
     if (!current) return notice('No suena nada ahora mismo', 'info', user.name, platform);
     notice(`Sonando: «${current.title}» de ${current.author || '—'}, la pidió ${current.requester} · youtu.be/${current.videoId}`, 'info', user.name, platform);
   }
@@ -155,8 +170,19 @@ function createMusic({ store, broadcast, resolver, onSong = () => {} }) {
     notice(`${user.name}: «${queue[i].title.slice(0, 50)}» va de ${i + 1} en la cola (en unos ${Math.max(1, Math.round(wait / 60))} min)`, 'info', user.name, platform);
   }
   function vote(user, platform, isMod) {
-    if (!current) return;
+    const sp = spotify?.active() ? spotify.nowPlaying() : null;
+    if (!current && !sp) return;
     const c = cfg();
+    if (sp) {
+      if (c.voteSkip?.enabled === false) return;
+      const k = keyOf(user, platform);
+      if (votes.spUri !== sp.uri) { votes = new Set(); votes.spUri = sp.uri; }
+      if (isMod || (votes.add(k), votes.size >= Math.max(2, Number(c.voteSkip?.needed) || 3))) {
+        votes = new Set();
+        return spotify.skip().then(() => notice(isMod ? `${user.name} saltó «${sp.title}»` : `El chat votó y se saltó «${sp.title}»`, 'info', user.name, platform)).catch((e) => notice(e.message, 'error', user.name, platform));
+      }
+      return notice(`${user.name} votó para saltar (${votes.size}/${Math.max(2, Number(c.voteSkip?.needed) || 3)})`, 'info', user.name, platform);
+    }
     if (c.voteSkip?.enabled === false) return;
     if (isMod) { notice(`${user.name} saltó «${current.title}»`, 'info', user.name, platform); return playNext(); }
     const key = keyOf(user, platform);
