@@ -48,7 +48,8 @@ const BASE_CSS = `
   .surface { background: var(--bg); border-radius: calc(18px * var(--r)); }
   /* Tema Satronho: un brillo suave arriba, filo interior y sombra profunda;
      se ve sobrio y se lee bien sobre cualquier juego o cámara. */
-  body[data-theme="satronho"] .surface { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 9%, var(--bg)), var(--bg) 70%); box-shadow: 0 18px 44px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.04); }
+  body[data-theme="satronho"]:not([data-card="glass"]):not([data-card="none"]) .surface { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 9%, var(--bg)), var(--bg) 70%); box-shadow: 0 18px 44px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.04); }
+  body[data-theme="satronho"][data-card="glass"] .surface { box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.08); }
   .k-shadow { text-shadow: 0 2px 10px rgba(0,0,0,.55); }
   /* Estilos sin tarjeta: nada de sombra alrededor (se vería un halo). */
   body[data-style="minimo"] .surface, body[data-style="cifra"] .surface, body[data-style="clasico"] .surface, body[data-style="marcador"] .surface, body[data-style="burbujas"] .lg, body[data-style="tarjetas"] :is(.q, .ac) { box-shadow: none !important; }

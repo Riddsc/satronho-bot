@@ -303,7 +303,7 @@ function initSteps() {
 }
 
 // ---------- Arranque ----------
-// Menú lateral: compacto (solo iconos; se despliega al pasar el ratón o
+// Menú lateral: compacto (solo iconos; se despliega al pasar el mouse o
 // al tocarlo) o abierto siempre. Se guarda en Apariencia.
 function initSidebar(cfg) {
   const btn = $('#side-pin');
@@ -322,7 +322,7 @@ function initSidebar(cfg) {
     side.classList.remove('peek');
     apply();
   });
-  // En pantallas táctiles no hay «pasar el ratón»: un toque lo despliega
+  // En pantallas táctiles no hay «pasar el mouse»: un toque lo despliega
   // y tocar fuera (o elegir una sección) lo vuelve a cerrar.
   let touch = false;
   side.addEventListener('pointerdown', (ev) => { touch = ev.pointerType === 'touch'; });

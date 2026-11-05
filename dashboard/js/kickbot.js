@@ -25,7 +25,7 @@ function accountRow(id, label, primary = false) {
 const masked = (id) => (id ? `${'•'.repeat(Math.max(4, id.length - 4))}${id.slice(-4)}` : '');
 
 function ownAppForm() {
-  return `<label class="field"><span>Client ID</span><input id="kb-id" autocomplete="off" spellcheck="false" ${st.clientId ? `placeholder="${esc(masked(st.clientId))} · déjalo vacío para conservarlo"` : ''}></label>
+  return `<label class="field"><span>Client ID <small class="hint">(código de tu app, tal cual sale en Kick)</small></span><input id="kb-id" autocomplete="off" spellcheck="false" ${st.clientId ? `placeholder="${esc(masked(st.clientId))} · déjalo vacío para conservarlo"` : ''}></label>
     <label class="field"><span>Client Secret${st.ownApp ? ' nuevo' : ''}</span><input id="kb-secret" type="password" autocomplete="off" ${st.ownApp ? 'placeholder="Déjalo vacío para conservar el actual"' : ''}></label>
     <p class="hint">Redirección en tu app de Kick: <code>http://localhost:3800/auth/kick/callback</code></p>
     <div class="row wrap mt"><button type="button" class="btn small" data-kb="save">Guardar mi app</button>${st.ownApp ? '<button type="button" class="btn small ghost" data-kb="forget">Borrar mi app</button>' : ''}</div>

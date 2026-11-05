@@ -15,7 +15,7 @@
 
 <!-- ===================== Menú lateral ===================== -->
 <aside class="side" aria-label="Menú">
-  <a class="brand" href="#/inicio"><span class="logo" aria-hidden="true"><span></span></span><span><b>Satronho Bot</b><small id="app-version">v0.4.0</small></span></a>
+  <a class="brand" href="#/inicio"><img class="brand-logo" src="img/logo.png" alt="" aria-hidden="true"><span><b>Satronho Bot</b><small id="app-version">v0.4.0</small></span></a>
 
   <nav class="nav-group" style="--g:#ffb23e"><h6><i></i>Tu directo</h6>
     <a class="nav-item" href="#/inicio" data-page="inicio"><span class="ic" data-icon="home"></span>Inicio</a>
@@ -29,8 +29,6 @@
     <a class="nav-item" href="#/voz" data-page="voz"><span class="ic" data-icon="mic"></span>Voz del chat</a>
     <a class="nav-item" href="#/musica" data-page="musica"><span class="ic" data-icon="music"></span>Música<span class="badge" id="nav-queue" hidden>0</span></a>
     <a class="nav-item" href="#/sonidos" data-page="sonidos"><span class="ic" data-icon="volume"></span>Sonidos</a>
-    <a class="nav-item" href="#/archivos" data-page="archivos"><span class="ic" data-icon="folder"></span>Mis archivos</a>
-    <div class="nav-sub" id="nav-files" hidden></div>
   </nav>
   <nav class="nav-group" style="--g:#9b8cff"><h6><i></i>Lo que se ve</h6>
     <a class="nav-item" href="#/alertas" data-page="alertas"><span class="ic" data-icon="bell"></span>Alertas</a>
@@ -41,6 +39,8 @@
     <a class="nav-item" href="#/estadisticas" data-page="estadisticas"><span class="ic" data-icon="chart"></span>Estadísticas</a>
   </nav>
   <nav class="nav-group" style="--g:#ffb23e"><h6><i></i>Sistema</h6>
+    <a class="nav-item" href="#/archivos" data-page="archivos"><span class="ic" data-icon="folder"></span>Mis archivos</a>
+    <div class="nav-sub" id="nav-files" hidden></div>
     <a class="nav-item" href="#/ajustes" data-page="ajustes"><span class="ic" data-icon="gear"></span>Ajustes</a>
     <a class="nav-item" href="#/novedades" data-page="novedades"><span class="ic" data-icon="spark"></span>Novedades<span class="badge new" id="nav-news" hidden>nuevo</span></a>
     <a class="nav-item" href="#/ayuda" data-page="ayuda"><span class="ic" data-icon="help"></span>Ayuda</a>
@@ -78,7 +78,7 @@
     <button class="btn small" id="sim-btn" aria-haspopup="true">▶ Simular</button>
     <div class="menu" id="sim-menu" hidden>
       <h6>TikTok</h6>
-      <button data-sim="follow">♥ Follow</button>
+      <button data-sim="follow">♥ Seguidor</button>
       <button data-sim="gift">🎁 Regalo</button>
       <button data-sim="gift" data-body='{"user":{"id":"satronho","name":"Satronho"},"amount":1,"extra":{"giftName":"Quiéreme","count":1,"currency":"diamantes"}}'>💗 Quiéreme</button>
       <button data-sim="sub">★ Suscripción</button>
@@ -257,12 +257,12 @@
         <div class="row"><input data-field="channel" placeholder="@tu_usuario" autocomplete="off"><button class="btn primary" data-act="connect">Conectar</button></div>
         <div class="row space"><label class="check"><input type="checkbox" data-field="autoConnect"> Conectar al abrir la app</label><button class="btn small ghost" data-act="disconnect">Desconectar</button></div>
         <details><summary>Avanzado</summary>
-          <label class="field"><span>Clave de Euler Stream (opcional, conexión más estable)</span><input data-field="signApiKey" type="password" autocomplete="off"></label>
+          <label class="field"><span>Clave de conexión de TikTok (opcional, más estable)</span><input data-field="signApiKey" type="password" autocomplete="off"></label>
         </details>
       </div>
       <div class="pcol" data-platform-write="tiktok">
-        <h4>Escribir <span class="pstate">Más adelante</span></h4>
-        <p class="hint">TikTok no tiene una forma oficial de escribir en el chat. Por ahora Satronho Bot solo lo escucha.</p>
+        <h4>Escribir <span class="pstate">En construcción</span></h4>
+        <div data-building="Escribir en TikTok: en construcción|TikTok no tiene una forma oficial de escribir en su chat. La crew está buscando cómo hacerlo bien; por ahora Satronho Bot lo escucha. Mantente pendiente."></div>
       </div>
       </div>
     </article>
@@ -272,7 +272,7 @@
 <!-- ---------- Chat en vivo (Samy) ---------- -->
 <section class="page" id="page-actividad" data-page="actividad" hidden>
   <div class="ph"><div class="t"><small>Tu directo</small><h1>Chat en vivo</h1><p>Todas tus plataformas en un solo chat, con 🔊 si se leyó en voz alta o 🔇 y el motivo si no.</p></div>
-    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Aquí llega todo tu directo. Pasa el ratón por un mensaje para leerlo en voz alta, quitarle la voz a esa persona o darle una voz propia.</p><span class="guide" data-avatar="samy" data-size="mini"></span></div></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Aquí llega todo tu directo. Pasa el mouse por un mensaje para leerlo en voz alta, quitarle la voz a esa persona o darle una voz propia.</p><span class="guide" data-avatar="samy" data-size="mini"></span></div></div>
   <div class="lc-layout" id="lc-layout">
     <div class="card lc-main">
       <div class="lc-bar">
@@ -544,7 +544,7 @@
 <!-- ---------- Sonidos (Ñoño) ---------- -->
 <!-- ---------- Mis archivos (Ñoño) ---------- -->
 <section class="page" id="page-archivos" data-page="archivos" hidden>
-  <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Mis archivos</h1><p>Tus sonidos, imágenes y videos en un solo sitio: escúchalos, renómbralos y mira dónde se usan.</p></div>
+  <div class="ph"><div class="t"><small>Sistema</small><h1>Mis archivos</h1><p>Tus sonidos, imágenes y videos en un solo sitio: escúchalos, renómbralos y mira dónde se usan.</p></div>
     <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono" data-static id="fl-bubble"><b>Ñoño:</b> Aquí está todo lo que subiste o descargaste. Lo marcado «sin usar» lo puedes borrar sin miedo.</p><span class="guide" data-avatar="nono" data-size="mini"></span></div></div>
   <div class="tabs fl-tabs" role="tablist" data-tabs="archivos"><button data-tab="todos">Todos</button><button data-tab="audios">Audios</button><button data-tab="imagenes">Imágenes</button><button data-tab="videos">Videos</button><button data-tab="sinuso">Sin usar</button></div>
   <div class="fl-layout" style="--g:#4fd1c5">
@@ -742,7 +742,7 @@
 
 <section class="page" id="page-alertas" data-page="alertas" hidden>
   <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Alertas</h1><p>Lo que suena y aparece en pantalla con cada regalo, sticker, seguidor o like.</p></div>
-    <div class="host" style="--g:#9b8cff"><p class="bubble" data-bubble="troya" data-static><b>Troya:</b> Dale a cada regalo o sticker su propio sonido en «Alertas propias». Para verlas en el stream, pon el overlay de alertas en OBS.</p><span class="guide" data-avatar="troya" data-size="mini"></span></div></div>
+    <div class="host" style="--g:#9b8cff"><p class="bubble" data-bubble="troya" data-static><b>Troya:</b> Dale a cada regalo o sticker su propio sonido en «Alertas propias». Para verlas en tu directo, pon el overlay de alertas en OBS.</p><span class="guide" data-avatar="troya" data-size="mini"></span></div></div>
   <div class="tabs al-tabs-hidden" role="tablist" data-tabs="alertas"><button data-tab="propias">Alertas propias</button><button data-tab="serie">Alertas de serie</button></div>
     <div class="al-top" id="al-top">
       <div class="seg al-plats" id="ar-plats"></div>
@@ -779,7 +779,7 @@
 
 <!-- ---------- Metas (Juana) ---------- -->
 <section class="page" id="page-metas" data-page="metas" hidden>
-  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Metas</h1><p>Barras de progreso para tu stream: diamantes, seguidores, likes…</p></div>
+  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Metas</h1><p>Barras de progreso para tu directo: diamantes, seguidores, likes…</p></div>
     <div class="host" style="--g:#ff8fb5"><p class="bubble" data-bubble="juana"></p><span class="guide" data-avatar="juana" data-size="mini"></span></div></div>
   <div class="card" style="--g:#ff8fb5">
     <div id="goal-list" class="goals"></div>
@@ -839,6 +839,7 @@
         <div class="seg" id="ov-period"></div>
         <div class="ov-dates" id="ov-dates" hidden><input type="date" id="ov-from" aria-label="Desde"><span>a</span><input type="date" id="ov-to" aria-label="Hasta"></div>
       </div>
+      <div class="card ov-building" id="ov-building" hidden></div>
       <div class="ov-tiles" id="ov-tiles"></div>
       <p class="hint" id="ov-prev-note"></p>
       <div class="ov-grid">
@@ -888,7 +889,15 @@
     <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Los cambios de apariencia se ven al instante y solo cambian la app; el estilo de los overlays está en Overlays para OBS.</p><span class="guide" data-avatar="samy" data-size="mini"></span></div></div>
   <div class="tabs" role="tablist" data-tabs="ajustes"><button data-tab="apariencia">Apariencia</button><button data-tab="app">App</button><button data-tab="atajos">Atajos de teclado</button><button data-tab="acerca">Acerca de</button></div>
   <div class="tabpanel" data-tabpanel="apariencia">
-    <div class="cols c2">
+    <div class="card density-card"><h3 class="card-title">Cómo se ve la app</h3>
+      <p class="hint">Elige cuánto espacio usa cada pantalla. Solo cambia el acomodo; tus ajustes y colores siguen igual.</p>
+      <div class="density-opts" id="density-opts">
+        <button type="button" data-density-opt="amplia"><span class="dz dz-amplia"><i></i><i></i><i></i></span><b>Amplia</b><small>Todo el ancho, aprovecha la pantalla</small></button>
+        <button type="button" data-density-opt="compacta"><span class="dz dz-compacta"><i></i><i></i><i></i><i></i></span><b>Compacta</b><small>Igual, pero todo un poco más pequeño</small></button>
+        <button type="button" data-density-opt="clasica"><span class="dz dz-clasica"><i></i><i></i></span><b>Clásica</b><small>Como antes: centrada y con los guías grandes</small></button>
+      </div>
+    </div>
+    <div class="cols c2 mt">
       <div class="card"><h3 class="card-title">Tema</h3><div class="theme-cards" id="theme-cards"></div>
         <h3>Color de acento</h3><div class="row wrap"><div class="swatches" id="accent-swatches"></div><input type="color" id="accent-custom" title="Otro color"></div></div>
       <div class="card"><h3 class="card-title">Tipografía</h3><div class="font-cards" id="font-cards"></div>
@@ -1034,7 +1043,7 @@
         <p class="hint" id="ar-excl-hint"></p>
       </aside>
     </div>
-    <div class="vp-foot"><span class="hint">Lo que no tenga alerta propia suena con la de serie.</span><span class="row tight"><button type="button" class="btn ghost" id="ar-cancel">Cancelar</button><button type="button" class="btn primary" id="ar-save">Guardar alerta</button></span></div>
+    <div class="vp-foot"><span class="hint" id="ar-foot-hint">Lo que no tenga alerta propia suena con la de serie.</span><span class="row tight"><button type="button" class="btn ghost" id="ar-cancel">Cancelar</button><button type="button" class="btn primary" id="ar-save">Guardar alerta</button></span></div>
   </div>
 </div>
 <div class="news-modal" id="news-modal" hidden role="dialog" aria-modal="true" aria-labelledby="news-modal-title">

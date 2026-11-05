@@ -328,7 +328,15 @@ function validate() {
 
 function saveDraft() {
   const err = validate();
-  if (err) return toast(err);
+  if (err) {
+    // El error se ve dentro de la ventana (no detrás) y la lleva a lo que falta.
+    const h = $('#ar-foot-hint');
+    if (h) { h.textContent = `⚠ ${err}`; h.classList.add('ar-err'); setTimeout(() => { h.textContent = 'Lo que no tenga alerta propia suena con la de serie.'; h.classList.remove('ar-err'); }, 5000); }
+    const target = /regalo/.test(err) ? ($('.vt-shelves') || $('#ar-giftnames')) : /palabra/.test(err) ? $('#ar-keyword') : null;
+    target?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    target?.classList.add('ar-shake'); setTimeout(() => target?.classList.remove('ar-shake'), 700);
+    return toast(err);
+  }
   const list = [...rules()];
   const i = list.findIndex((r) => r.id === draft.id);
   if (i >= 0) list[i] = draft; else list.unshift(draft);

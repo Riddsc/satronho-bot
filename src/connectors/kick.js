@@ -135,7 +135,7 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
       body: JSON.stringify({ client_id: conn.clientId }),
     });
     const token = auth?.data?.token;
-    if (!token) throw new Error('Kick no entregó el token temporal');
+    if (!token) throw new Error('Kick no respondió bien al conectar; se reintenta sola');
 
     const ws = new WebSocket(url);
     ws.on('open', () => ws.send(JSON.stringify({ id: 1, connect: { token, name: 'satronho-bot' } })));

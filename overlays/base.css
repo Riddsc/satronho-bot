@@ -57,3 +57,10 @@ body[data-theme="colonizadora"] { --bg: linear-gradient(135deg, #ffd1e8, #e8d2ff
 body[data-theme="colonizadora"] .surface { color: #7a1650; background: linear-gradient(135deg, #ffd6ea, #ecd7ff) !important; border: 3px solid #fff !important; box-shadow: 0 0 0 3px #ff6fb5, 0 10px 26px rgba(255, 92, 170, .45), inset 0 2px 0 rgba(255, 255, 255, .8) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46'%3E%3Cpath d='M12 9c-2-3-7-2-7 2 0 3 4 5 7 8 3-3 7-5 7-8 0-4-5-5-7-2z' fill='%23ff6fb5' fill-opacity='.18'/%3E%3Cpath d='M35 30l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z' fill='%23fff' fill-opacity='.7'/%3E%3C/svg%3E"), linear-gradient(135deg, #ffd6ea, #ecd7ff) !important; }
 body[data-theme="colonizadora"] .k-title, body[data-theme="colonizadora"] .g-pct { color: #ff3d9a !important; }
+
+/* Fondo de las tarjetas (Sólido / Translúcido / Sin fondo) manda sobre el tema:
+   así funciona igual con Neón, Cristal, los temas de los guías, etc. */
+body[data-card="glass"] { --bg: rgba(18, 14, 30, 0.45); }
+body[data-card="glass"] .surface { background: color-mix(in srgb, var(--bg) 100%, transparent) !important; background-image: none !important; backdrop-filter: blur(10px) saturate(130%); }
+body[data-card="glass"][data-theme="papel"] .surface, body[data-card="glass"][data-theme="samy"] .surface, body[data-card="glass"][data-theme="dulce"] .surface, body[data-card="glass"][data-theme="colonizadora"] .surface { background: rgba(255, 248, 235, .55) !important; }
+body[data-card="none"] .surface { background: transparent !important; background-image: none !important; border-color: transparent !important; box-shadow: none !important; outline: 0 !important; backdrop-filter: none !important; clip-path: none !important; }

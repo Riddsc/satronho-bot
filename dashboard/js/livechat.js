@@ -2,7 +2,7 @@
 //   - Pestañas por plataforma con contador, o una columna por plataforma.
 //   - Insignias: moderador, suscriptor, VIP y nivel en tu equipo de TikTok.
 //   - 🔊 / 🔇 con el motivo de Troya en cada mensaje.
-//   - Acciones al pasar el ratón: leer ahora, silenciar o darle voz propia.
+//   - Acciones al pasar el mouse: leer ahora, silenciar o darle voz propia.
 //   - Columna de regalos con el total por moneda.
 //   - Panel de ajustes: plataformas, ruido y regalos (se recuerda en este PC).
 
