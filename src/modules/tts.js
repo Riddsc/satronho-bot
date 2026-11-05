@@ -14,7 +14,7 @@
 // Cada decisión trae un motivo, que el panel muestra en Actividad
 // ("🔊 leído" o "🔇 no se lee: ...") y en la prueba de filtros.
 
-const { sanitize, screen, normalizeName } = require('../tts/textFilter');
+const { sanitize, screen, normalizeName, emojiWords } = require('../tts/textFilter');
 const { MS_VOICES } = require('../tts/msonline');
 const { VOICES: PIPER_VOICES } = require('../tts/voices');
 
@@ -219,7 +219,8 @@ function createTts({ store, broadcast, engine, online = null }) {
     const now = Date.now();
     if (c.cooldownSec > 0 && now - (lastRead.get(key) || 0) < c.cooldownSec * 1000) return no('escribe muy seguido (tiempo de espera)');
 
-    const screened = screen(e.message, c);
+    // Los emojis comunes se dicen en palabras (😂 «jajaja», ❤️ «corazón»…).
+    const screened = screen(c.emojiWords !== false ? emojiWords(e.message) : e.message, c);
     if (screened.skip) return no(screened.skip);
     let clean = sanitize(screened.text, c);
     if (c.stripNumbers) clean = clean.replace(/\p{N}+/gu, ' ').replace(/\s+/g, ' ').trim();

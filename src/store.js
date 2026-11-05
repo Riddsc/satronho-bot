@@ -73,6 +73,7 @@ const DEFAULTS = {
     filterProfanity: true, // reemplaza groserías por "piip"
     filterTricks: true, // detecta trucos: T0NT0, t.o.n.t.o, toooonto, letras raras
     bannedWords: DEFAULT_BANNED,
+    emojiWords: true, // 😂 «jajaja», ❤️ «corazón»… una vez; los demás emojis se ignoran
     stripNumbers: false, // no leer números (ni los escondidos en palabras)
     // Escudo anti-trampas (0.12): alfabetos permitidos y qué hacer con los demás.
     scripts: ['latin'],

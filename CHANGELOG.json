@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.22.5",
+    "date": "2026-11-05",
+    "title": "TikTok se lee de verdad y los emojis suenan bien",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "TikTok: los mensajes llegaban vacíos y la voz decía «no queda texto que leer». El conector de TikTok cambió de formato; la app ya lee el texto del chat, el @usuario, la foto, los regalos (nombre, valor e imagen), los likes y los espectadores en el formato nuevo."
+      },
+      {
+        "type": "mejora",
+        "text": "Los emojis más comunes se dicen en palabras, una sola vez aunque vengan repetidos: 😂 «jajaja», ❤️ «corazón», 😍 «me encanta», 🔥 «fuego», 👍 «me gusta», 👏 «aplausos», 😭 «qué triste», 😮 «guau», 🎉 «fiesta», 👋 «hola», 🙏 «gracias». Si el mensaje ya dice la palabra, no se repite. Los demás emojis se ignoran. Se apaga en Voz del chat → Filtros."
+      },
+      {
+        "type": "arreglo",
+        "text": "La voz ya no se traba con emojis en el nombre de quien escribe (👩‍🦳Angélica👩‍🦳 → «Angélica») ni con símbolos que no se ven (□, ♡, ✓, ™)."
+      }
+    ]
+  },
+  {
     "version": "0.22.4",
     "date": "2026-11-05",
     "title": "Voz del chat en TikTok, sin trabas",
