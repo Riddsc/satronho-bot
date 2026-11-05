@@ -1,71 +1,93 @@
-// Inicio: lo importante de un vistazo (feed en vivo, voz, música y el directo).
+// Inicio: los guías saludando (bienvenida) y «¿Con qué deseas empezar hoy?»,
+// recuadros grandes con cada función del bot. Cada recuadro muestra su
+// estado en vivo y, cuando aplica, un atajo (saltar voz, probar alerta,
+// terminar sesión).
 
-import { $, api, esc, toast, timeOf, PLATFORM_NAMES } from './util.js';
+import { $, api, esc, toast, PLATFORM_NAMES } from './util.js';
 import { skipTts, ttsStatus, mainVoiceName } from './voice.js';
 import { sayFor } from './guides.js';
 
 const LABEL = { follow: 'te sigue', sub: 'se suscribió', like: 'dio likes', share: 'compartió el LIVE' };
+const setState = (key, html, tone = '') => {
+  const el = $(`#hs-${key}`);
+  if (!el) return;
+  el.innerHTML = html;
+  el.className = `hs-state ${tone}`;
+};
+const compact = (n) => (Number(n) || 0).toLocaleString('es-CO', { notation: 'compact', maximumFractionDigits: 1 });
 
+// Chat en vivo: lo último que pasó.
 export function homeEvent(e) {
-  // Las entradas al directo y el inicio o fin del LIVE no llenan el resumen.
   if (['join', 'live-start', 'live-end'].includes(e.type)) return;
-  const feed = $('#home-feed');
-  feed.querySelector('.empty')?.remove();
-  const li = document.createElement('li');
   let what;
-  if (e.type === 'chat') what = `: ${esc(e.message)}`;
+  if (e.type === 'chat') what = `: ${esc(String(e.message || '').slice(0, 60))}`;
   else if (e.type === 'gift') what = ` envió ${esc(e.extra?.giftName || 'un regalo')}${e.extra?.count > 1 ? ` ×${e.extra.count}` : ''}`;
   else if (e.type === 'like') what = ` dio ${e.amount} likes`;
   else if (e.type === 'sticker') what = ' mandó un sticker';
   else if (e.type === 'superfan') what = ' ahora es superfan';
   else what = ` ${LABEL[e.type] || e.type}`;
-  li.innerHTML = `<span class="tag ${e.type}">${e.type === 'chat' ? 'chat' : e.type === 'gift' ? 'regalo' : e.type}</span>
-    <span class="txt"><span class="plat ${e.platform}">${esc(PLATFORM_NAMES[e.platform] || e.platform)}</span><b>${esc(e.user.name)}</b>${what}</span><time>${timeOf(e.ts).slice(0, 5)}</time>`;
-  feed.prepend(li);
-  while (feed.children.length > 40) feed.lastChild.remove();
+  setState('actividad', `<i class="dot on"></i><span><span class="plat ${e.platform}">${esc(PLATFORM_NAMES[e.platform] || e.platform)}</span> <b>${esc(e.user?.name || '')}</b>${what}</span>`, 'on');
+}
+
+export function homeConnections(on, total, names = []) {
+  if (!total) return setState('conexiones', 'Elige tus plataformas en Conexiones', 'warn');
+  setState('conexiones', on
+    ? `<i class="dot on"></i>${on} de ${total} conectadas · ${esc(names.join(', '))}`
+    : `<i class="dot"></i>Sin conectar · empieza aquí`, on ? 'on' : 'warn');
 }
 
 export function homeVoice(config, engine) {
   const t = config.tts;
   const v = engine?.voices?.find((x) => x.id === t.piperVoice && x.installed);
-  const installed = engine?.voices?.filter((x) => x.installed).length || 0;
   const q = ttsStatus();
-  $('#home-voice').innerHTML = `<div class="kpis">
-      <div class="kpi"><span>Estado</span><b>${t.enabled ? 'Activa' : 'Apagada'}</b><em>${q.queue} en cola${q.speaking ? ' · hablando' : ''}</em></div>
-      <div class="kpi"><span>Voz principal</span><b style="font-size:1.05em">${esc(mainVoiceName() || (v ? v.label : 'Sin voz elegida'))}</b><em>${installed} ${installed === 1 ? 'voz descargada' : 'voces descargadas'}</em></div>
-    </div>
-    <p class="hint">TikTok: ${esc({ all: 'lee a todos', followers: 'quienes te siguen', subs: 'suscriptores', team: 'tu equipo', 'team-gift': `tu equipo con ${t.tiktokGate.giftNames[0] || 'Quiéreme'}`, gift: `quien envía ${t.tiktokGate.giftNames[0] || 'Quiéreme'}`, mods: 'moderadores' }[t.who?.tiktok?.mode || 'all'] || 'lee a todos')} · ${t.filterProfanity ? 'filtro activo' : 'sin filtro'}</p>
-    <a class="btn small ghost mt" href="#/voz">Abrir Voz del chat</a>`;
+  const name = mainVoiceName() || (v ? v.label : '');
+  setState('voz', t.enabled
+    ? `<i class="dot on"></i>Activa · ${esc(name || 'sin voz elegida')}${q.queue ? ` · ${q.queue} en cola` : ''}${q.speaking ? ' · hablando' : ''}`
+    : '<i class="dot"></i>Apagada', t.enabled ? 'on' : '');
 }
 
 export function homeMusic(m) {
   if (!m) return;
   const c = m.current;
-  $('#home-music').innerHTML = c
-    ? `<div class="now">${c.thumbnail ? `<img src="${esc(c.thumbnail)}" alt="">` : ''}<div><b>${esc(c.title)}</b><small>Pedida por ${esc(c.requester)}${m.paused ? ' · en pausa' : ''}</small></div></div>
-       <p class="hint">${m.queue.length ? `${m.queue.length} en cola` : 'La cola está vacía'} · peticiones ${m.enabled ? 'abiertas' : 'cerradas'}</p>`
-    : `<p class="hint">No suena nada. Tu chat pide con <code>!play</code> o <code>!temita</code>.</p><p class="hint">Peticiones ${m.enabled ? 'abiertas' : 'cerradas'}</p>`;
+  setState('musica', c
+    ? `<i class="dot on"></i>Suena «${esc(c.title)}»${m.paused ? ' · en pausa' : ''}${m.queue.length ? ` · ${m.queue.length} en cola` : ''}`
+    : `<i class="dot"></i>No suena nada · peticiones ${m.enabled ? 'abiertas' : 'cerradas'}`, c ? 'on' : '');
   const badge = $('#nav-queue');
-  badge.hidden = !m.queue.length;
-  badge.textContent = String(m.queue.length);
+  if (badge) {
+    badge.hidden = !m.queue.length;
+    badge.textContent = String(m.queue.length);
+  }
 }
 
-const compact = (n) => (Number(n) || 0).toLocaleString('es-CO', { notation: 'compact', maximumFractionDigits: 1 });
-
 export function homeStats(s) {
-  const box = $('#home-stats');
-  if (!s || !s.live) {
-    box.innerHTML = '<p class="hint">Todavía no hay directo en curso. Empieza con el primer mensaje, follow o regalo.</p>';
-    return;
+  if (!s || !s.live) return setState('estadisticas', '<i class="dot"></i>Sin directo en curso');
+  setState('estadisticas', `<i class="dot on"></i>En curso · ${compact(s.diamonds)} diamantes · ${compact(s.counts?.chat)} mensajes · ${s.durationMin || 0} min`, 'on');
+}
+
+async function loadExtras() {
+  try {
+    const { commands } = await api('GET', '/api/commands');
+    const on = (commands || []).filter((c) => c.enabled).length;
+    setState('chatbot', `${on ? '<i class="dot on"></i>' : '<i class="dot"></i>'}${on} ${on === 1 ? 'comando activo' : 'comandos activos'}`, on ? 'on' : '');
+  } catch {
+    setState('chatbot', 'Comandos, mensajes automáticos y respuestas');
   }
-  box.innerHTML = `<div class="kpis">
-      <div class="kpi"><span>Diamantes</span><b>${compact(s.diamonds)}</b><em>≈ US$ ${esc(s.usd)}</em></div>
-      <div class="kpi"><span>Mensajes</span><b>${compact(s.counts?.chat)}</b><em>${compact(s.uniqueChatters)} personas</em></div>
-      <div class="kpi"><span>Seguidores</span><b>${compact(s.counts?.follow)}</b><em>${s.durationMin || 0} min en vivo</em></div>
-    </div><a class="btn small ghost mt" href="#/estadisticas">Ver estadísticas</a>`;
+  try {
+    const lib = await api('GET', '/api/sounds');
+    const mine = (lib.mine || []).length;
+    setState('sonidos', mine ? `<i class="dot on"></i>${mine} ${mine === 1 ? 'sonido tuyo' : 'sonidos tuyos'}` : '<i class="dot"></i>Busca memes populares en un clic', mine ? 'on' : '');
+  } catch {
+    setState('sonidos', 'Memes, frases y tus propios sonidos');
+  }
+  setState('overlays', 'Vista previa, copiar la URL y listo');
+  setState('alertas', 'Pruébalas aquí mismo, sin estar en vivo');
 }
 
 export function initHome() {
+  // Los atajos de cada recuadro no abren la página.
+  $('#home-start').addEventListener('click', (ev) => {
+    if (ev.target.closest('.hs-act')) ev.preventDefault();
+  });
   $('#home-skip-voice').addEventListener('click', () => skipTts());
   $('#home-end-session').addEventListener('click', async () => {
     if (!confirm('¿Terminar el directo actual y guardarlo en Estadísticas?')) return;
@@ -77,4 +99,10 @@ export function initHome() {
       toast(e.message);
     }
   });
+  if (!$('#hs-actividad').textContent.trim() || $('#hs-actividad').textContent === '…') setState('actividad', '<i class="dot"></i>Aún no llega nada · prueba con ▶ Simular');
+  loadExtras();
+}
+
+export function homeRefreshExtras() {
+  loadExtras();
 }

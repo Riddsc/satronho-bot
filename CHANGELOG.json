@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.19.0",
+    "date": "2026-11-05",
+    "title": "Un Inicio para empezar y todos los overlays de cada apartado",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Inicio: los guías siempre te saludan y abajo te preguntan «¿Con qué deseas empezar hoy?», con recuadros grandes para cada función y su estado en vivo."
+      },
+      {
+        "type": "mejora",
+        "text": "La ventana de overlays de cada apartado muestra todos los que le corresponden, cada uno en su pestaña, y abajo un solo botón: «Ir a todos los Overlays»."
+      },
+      {
+        "type": "arreglo",
+        "text": "Sonidos: «Populares» y «Buscar memes» ya no se mezclan. Lo que escribes o buscas en una no afecta a la otra."
+      }
+    ]
+  },
+  {
     "version": "0.18.0",
     "date": "2026-11-04",
     "title": "Memes en un clic, ventana de overlays y sonido a la vista",

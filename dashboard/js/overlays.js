@@ -157,8 +157,9 @@ function renderNavPins() {
   box.hidden = !list.length && !open;
   box.innerHTML = `${list.length ? `<div class="nav-pinned">${list.map(navLink).join('')}</div>` : ''}${tree}`;
 }
-// Cada apartado con algo que se puede poner en OBS lleva botones a su overlay.
-const SECTION_OVERLAYS = {
+// Cada apartado con algo que se puede poner en OBS lleva botones a su overlay
+// (los atajos del encabezado de cada página, sin cambios)…
+const SECTION_JUMPS = {
   musica: ['nowplaying', 'queue'],
   actividad: ['chat', 'activity', 'viewers'],
   alertas: ['alerts', 'giftspot', 'lastgifts', 'giftrain', 'bestgift'],
@@ -167,6 +168,17 @@ const SECTION_OVERLAYS = {
   voz: ['chat'],
   sonidos: ['alerts'],
 };
+// …y la ventana de overlays de cada apartado muestra TODOS los que le
+// corresponden, cada uno en su pestaña.
+const SECTION_OVERLAYS = {
+  musica: ['nowplaying', 'queue'],
+  actividad: ['chat', 'activity', 'ticker', 'viewers', 'followers', 'uptime'],
+  alertas: ['alerts', 'giftspot', 'lastgifts', 'giftrain', 'bestgift', 'mvp', 'ranking'],
+  estadisticas: ['ranking', 'mvp', 'bestgift', 'viewers', 'followers', 'uptime', 'goals', 'counters', 'countdown'],
+  chatbot: ['chat', 'ticker', 'activity', 'counters', 'countdown'],
+  voz: ['chat', 'activity'],
+  sonidos: ['alerts', 'giftspot', 'giftrain'],
+};
 const SECTION_NAME = { musica: 'música', actividad: 'chat', alertas: 'alertas', estadisticas: 'estadísticas', chatbot: 'Chat Bot', voz: 'voz', sonidos: 'sonidos' };
 // «Alertas» no es de la galería (tiene su propio editor), pero sí sale aquí.
 const ALERTS_KIND = { icon: '🔔', name: 'Alertas', size: [800, 300], desc: 'Regalos, stickers, seguidores y tus alertas propias, con su sonido.' };
@@ -174,7 +186,7 @@ const quickInfo = (k) => (k === 'alerts' ? ALERTS_KIND : KINDS[k]);
 const quickPath = (k) => (k === 'alerts' ? '/overlays/alerts.html' : `/overlays/w.html?id=${encodeURIComponent(k)}`);
 
 function renderSectionLinks() {
-  for (const [page, kinds] of Object.entries(SECTION_OVERLAYS)) {
+  for (const [page, kinds] of Object.entries(SECTION_JUMPS)) {
     const t = $(`#page-${page} .ph .t`);
     if (!t || page === 'musica') continue; // Música tiene su botón «Overlay» arriba
     let box = t.querySelector('.ov-jump');
@@ -246,7 +258,7 @@ function renderQuick() {
       <div class="ovq-url"><span class="ovq-dot"></span><code>${esc(origin() + quickPath(quick.kind))}</code><button type="button" class="btn small primary" data-ovq-copy>Copiar</button><button type="button" class="ovq-icon" data-ovq-open title="Abrir en el navegador" aria-label="Abrir en el navegador">↗</button></div>
       <p class="hint ovq-size">Fuente de navegador de <b>${W} × ${H}</b> · Funciona con la app abierta en este PC.</p>
     </div>
-    <footer class="ovq-foot"><button type="button" class="ovq-link" data-ovq-edit>🎨 Personalizar el aspecto de este overlay</button><button type="button" class="btn ovq-all" data-ovq-all>Ir a todos los Overlays →</button></footer>
+    <footer class="ovq-foot ovq-foot-one"><button type="button" class="btn ovq-all" data-ovq-all>Ir a todos los Overlays →</button></footer>
   </div>`;
   const f = m.querySelector('iframe');
   f.addEventListener('load', () => pushStyle(f));

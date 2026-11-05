@@ -213,7 +213,12 @@ function renderChat() {
 // Pestañas: 🔥 Populares (memes del momento) · 🔎 Memes (buscar) ·
 // ⭐ Mis sonidos · 🎛 Básicos (los incluidos). «Elegir» en un meme lo baja
 // a tu PC y lo deja elegido en un solo paso.
-const picker = { current: '', cb: null, tab: 'populares', q: '', results: [], busy: false, page: 1, more: false, err: '', loadedFor: null };
+// Populares y Buscar memes tienen cada una su propio estado: lo que escribes
+// o buscas en una no afecta a la otra, y una búsqueda lenta en una no deja
+// a la otra esperando. «draft» guarda lo escrito aunque no pulses Buscar.
+const memeTab = () => ({ results: [], busy: false, page: 1, more: false, err: '', loadedFor: null, seq: 0 });
+const picker = { current: '', cb: null, tab: 'populares', q: '', draft: '', tabs: { populares: memeTab(), memes: memeTab() } };
+const tabState = (t = picker.tab) => picker.tabs[t];
 const PICK_TABS = [['populares', '🔥 Populares'], ['memes', '🔎 Buscar memes'], ['mios', '⭐ Mis sonidos'], ['basicos', '🎛 Básicos']];
 function memeRows(list, pickMode) {
   const have = new Map(lib.mine.map((x) => [x.source, x]));
@@ -224,22 +229,26 @@ function memeRows(list, pickMode) {
       ${pickMode ? `<button type="button" class="snd-pick" data-mpick="${i}">${mine && picker.current === `m:${mine.id}` ? 'Elegido' : 'Elegir'}</button>` : (mine ? '<span class="snd-added">✓ Añadido</span>' : `<button type="button" class="snd-pick" data-madd="${i}">+ Añadir</button>`)}</div>`;
   }).join('');
 }
-async function pickerSearch(more = false) {
-  if (picker.busy) return;
-  picker.busy = true;
-  picker.err = '';
-  if (!more) { picker.page = 1; picker.results = []; }
+async function pickerSearch(more = false, tab = picker.tab) {
+  const st = tabState(tab);
+  if (!st || st.busy) return;
+  const q = tab === 'populares' ? '' : picker.q;
+  const my = ++st.seq;
+  st.busy = true;
+  st.err = '';
+  if (!more) { st.page = 1; st.results = []; }
   renderPickerBody();
   try {
-    const r = await api('POST', '/api/sounds/memes/search', { q: picker.tab === 'populares' ? '' : picker.q, page: picker.page });
-    picker.results = more ? [...picker.results, ...r.results] : r.results;
-    picker.more = r.more;
-    picker.page += 1;
-    picker.loadedFor = `${picker.tab}|${picker.q}`;
+    const r = await api('POST', '/api/sounds/memes/search', { q, page: st.page });
+    if (my !== st.seq) return; // llegó tarde: ya se pidió otra cosa en esta pestaña
+    st.results = more ? [...st.results, ...r.results] : r.results;
+    st.more = r.more;
+    st.page += 1;
+    st.loadedFor = `${tab}|${q}`;
   } catch (e) {
-    picker.err = e.message;
+    if (my === st.seq) st.err = e.message;
   } finally {
-    picker.busy = false;
+    if (my === st.seq) st.busy = false;
     renderPickerBody();
   }
 }
@@ -250,16 +259,24 @@ function renderPickerBody() {
   const top = $('#sndp-top', m);
   const list = $('#sndp-list', m);
   if (picker.tab === 'populares' || picker.tab === 'memes') {
-    top.innerHTML = picker.tab === 'memes'
-      ? `<form class="sndp-search" id="sndp-memeform"><label class="snd-find"><span>⌕</span><input id="sndp-mq" value="${esc(picker.q)}" placeholder="rosalía, bruh, sus, risa, se fue, gemido…" autocomplete="off"></label><button class="snd-pick big">Buscar</button></form>`
-      : '<p class="sndp-note">Los memes que más suenan ahora. ▶ para escuchar, «Elegir» y listo.</p>';
-    if (picker.busy && !picker.results.length) list.innerHTML = '<p class="snd-empty"><i class="spf-spin"></i> Buscando memes…</p>';
-    else if (picker.err) list.innerHTML = `<p class="snd-empty sndp-err">${esc(picker.err)}<br><button type="button" class="snd-pick" data-pretry>Intentar de nuevo</button></p>`;
-    else if (!picker.results.length) list.innerHTML = `<p class="snd-empty">${picker.tab === 'memes' ? (picker.loadedFor ? 'Nada con esa búsqueda. Prueba con otra palabra.' : 'Escribe qué buscas y pulsa «Buscar».') : 'Cargando…'}</p>`;
-    else list.innerHTML = memeRows(picker.results, true) + (picker.more ? `<button type="button" class="snd-more" data-pmore ${picker.busy ? 'disabled' : ''}>${picker.busy ? 'Cargando…' : 'Ver más'}</button>` : '');
-    if (picker.tab === 'populares' && picker.loadedFor !== 'populares|' && !picker.busy && !picker.err) pickerSearch();
+    const st = tabState();
+    const isMemes = picker.tab === 'memes';
+    // El cuadro de búsqueda solo se vuelve a dibujar al cambiar de pestaña,
+    // así no se pierde lo que estás escribiendo.
+    if (top.dataset.for !== picker.tab) {
+      top.dataset.for = picker.tab;
+      top.innerHTML = isMemes
+        ? `<form class="sndp-search" id="sndp-memeform"><label class="snd-find"><span>⌕</span><input id="sndp-mq" value="${esc(picker.draft)}" placeholder="rosalía, bruh, sus, risa, se fue, gemido…" autocomplete="off"></label><button class="snd-pick big">Buscar</button></form>`
+        : '<p class="sndp-note">Los memes que más suenan ahora. ▶ para escuchar, «Elegir» y listo.</p>';
+    }
+    if (st.busy && !st.results.length) list.innerHTML = `<p class="snd-empty"><i class="spf-spin"></i> ${isMemes ? `Buscando «${esc(picker.q)}»…` : 'Cargando los memes del momento…'}</p>`;
+    else if (st.err) list.innerHTML = `<p class="snd-empty sndp-err">${esc(st.err)}<br><button type="button" class="snd-pick" data-pretry>Intentar de nuevo</button></p>`;
+    else if (!st.results.length) list.innerHTML = `<p class="snd-empty">${isMemes ? (st.loadedFor ? 'Nada con esa búsqueda. Prueba con otra palabra.' : 'Escribe qué buscas y pulsa «Buscar».') : 'Cargando…'}</p>`;
+    else list.innerHTML = memeRows(st.results, true) + (st.more ? `<button type="button" class="snd-more" data-pmore ${st.busy ? 'disabled' : ''}>${st.busy ? 'Cargando…' : 'Ver más'}</button>` : '');
+    if (!isMemes && st.loadedFor !== 'populares|' && !st.busy && !st.err) pickerSearch(false, 'populares');
     return;
   }
+  top.dataset.for = picker.tab;
   top.innerHTML = `<label class="snd-find"><span>⌕</span><input id="sndp-q" value="${esc(ui.q)}" placeholder="${picker.tab === 'mios' ? 'Busca en tus sonidos…' : 'Busca: golpe, victoria, moneda, campana…'}" autocomplete="off"></label>${picker.tab === 'basicos' ? catsBar('pick') : ''}`;
   const all2 = filtered();
   const shown = picker.tab === 'mios' ? all2.filter((x) => x.ref.startsWith('m:')) : all2.filter((x) => !x.ref.startsWith('m:'));
@@ -289,12 +306,12 @@ export async function openSoundPicker(current, cb) {
       const pk = ev.target.closest('[data-spick]');
       if (pk) { remember(pk.dataset.spick); picker.cb?.(pk.dataset.spick); m.hidden = true; return; }
       const mp = ev.target.closest('[data-mplay]');
-      if (mp) return playUrl(picker.results[Number(mp.dataset.mplay)].url);
+      if (mp) return playUrl(tabState().results[Number(mp.dataset.mplay)].url);
       if (ev.target.closest('[data-pmore]')) return pickerSearch(true);
-      if (ev.target.closest('[data-pretry]')) { picker.err = ''; return pickerSearch(); }
+      if (ev.target.closest('[data-pretry]')) { tabState().err = ''; return pickerSearch(); }
       const mk = ev.target.closest('[data-mpick]');
       if (mk) {
-        const meme = picker.results[Number(mk.dataset.mpick)];
+        const meme = tabState().results[Number(mk.dataset.mpick)];
         mk.disabled = true;
         mk.textContent = 'Bajando…';
         try {
@@ -308,8 +325,8 @@ export async function openSoundPicker(current, cb) {
         } catch (e) { toast(e.message); mk.disabled = false; mk.textContent = 'Elegir'; }
       }
     });
-    m.addEventListener('input', (ev) => { if (ev.target.id === 'sndp-q') { ui.q = ev.target.value; const pos = ev.target.selectionStart; renderPickerBody(); const n = $('#sndp-q'); n?.focus(); n?.setSelectionRange(pos, pos); } });
-    m.addEventListener('submit', (ev) => { ev.preventDefault(); if (ev.target.id === 'sndp-memeform') { picker.q = $('#sndp-mq').value.trim(); if (picker.q) pickerSearch(); } });
+    m.addEventListener('input', (ev) => { if (ev.target.id === 'sndp-mq') picker.draft = ev.target.value; if (ev.target.id === 'sndp-q') { ui.q = ev.target.value; const pos = ev.target.selectionStart; renderPickerBody(); const n = $('#sndp-q'); n?.focus(); n?.setSelectionRange(pos, pos); } });
+    m.addEventListener('submit', (ev) => { ev.preventDefault(); if (ev.target.id === 'sndp-memeform') { picker.draft = $('#sndp-mq').value; picker.q = picker.draft.trim(); if (picker.q) { tabState('memes').busy = false; pickerSearch(false, 'memes'); } } });
   }
   renderPickerBody();
   m.hidden = false;

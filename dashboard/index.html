@@ -112,7 +112,7 @@
 <section class="page" id="page-inicio" data-page="inicio" hidden>
   <section id="welcome" class="welcome" hidden>
     <div>
-      <h2>¡Hola! Somos Samy, Troya, Ñoño y Juana</h2>
+      <h2><span id="welcome-hello">¡Hola!</span> Somos Samy, Troya, Ñoño y Juana</h2>
       <p>Cada uno cuida una parte de tu directo: Samy te conecta y te ayuda a encontrar todo, Troya le pone voz al chat y luce tus regalos, Ñoño pone la música y Juana lleva las metas y las cuentas. Y MechaRidds, el creador de la app en versión androide, maneja tu Chat Bot.</p>
       <p class="tip">💬 <b>Toca a cualquiera de nosotros</b> para preguntarnos dónde está algo o cómo funciona.</p>
     </div>
@@ -123,21 +123,68 @@
       <li><span data-avatar="juana" data-size="110"></span><b>Juana</b><small>Metas y números</small></li>
       <li class="crew-mecha"><span data-avatar="mecha" data-size="110"></span><b>MechaRidds</b><small>Chat Bot y comunidad</small></li>
     </ul>
-    <button class="btn primary" id="welcome-done">¡Empecemos!</button>
+    <div class="welcome-cta"><button class="btn primary" id="welcome-done">¡Empecemos!</button><button type="button" class="btn ghost" data-open-help="samy">Pregúntanos algo</button></div>
   </section>
   <div class="ph"><div class="t"><small>Tu directo</small><h1 id="home-title">Inicio</h1><p>Todo lo importante de un vistazo. Configura una vez y minimiza tranquilo.</p></div>
     <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy"></p><span class="guide" data-avatar="samy" data-size="hero"></span></div></div>
-  <div class="cols home">
-    <div class="card rspan2"><div class="row space"><h3 class="card-title">En vivo</h3><a class="btn small ghost" href="#/actividad">Ver todo</a></div><ul class="log short" id="home-feed"><li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li></ul></div>
-    <div class="card" style="--g:#9b8cff"><span class="mini-host guide" data-avatar="troya" data-size="mini"></span><h3 class="card-title">Voz del chat</h3><div id="home-voice"></div></div>
-    <div class="card" style="--g:#4fd1c5"><span class="mini-host guide" data-avatar="nono" data-size="mini"></span><h3 class="card-title">Música</h3><div id="home-music"></div></div>
-    <div class="card" style="--g:#ff8fb5"><span class="mini-host guide" data-avatar="juana" data-size="mini"></span><h3 class="card-title">Este directo</h3><div id="home-stats"></div></div>
-    <div class="card"><h3 class="card-title">Atajos</h3><div class="shortcuts">
-      <a class="btn small" href="#/overlays">Copiar overlays</a>
-      <button class="btn small" data-sim-quick="follow">Probar alerta</button>
-      <button class="btn small" id="home-skip-voice">Saltar voz</button>
-      <button class="btn small" id="home-end-session">Terminar sesión</button>
-    </div></div>
+  <div class="hs" id="home-start">
+    <div class="hs-head"><h2>¿Con qué deseas empezar hoy?</h2><p>Elige una parte de tu directo. Cada guía te acompaña en la suya.</p></div>
+    <div class="hs-grid">
+      <article class="hs-tile" data-hs="conexiones" style="--g:#ffb23e">
+        <span class="hs-top"><span class="hs-ic">🔌</span><span class="guide hs-guide" data-avatar="samy" data-size="40"></span></span>
+        <a class="hs-title" href="#/conexiones">Conecta tu directo</a>
+        <span class="hs-desc">TikTok, Kick, Twitch y Starvios: escuchar el chat y que el bot responda.</span>
+        <span class="hs-state" id="hs-conexiones">…</span>
+      </article>
+      <article class="hs-tile" data-hs="voz" style="--g:#9b8cff">
+        <span class="hs-top"><span class="hs-ic">🎙</span><span class="guide hs-guide" data-avatar="troya" data-size="40"></span></span>
+        <a class="hs-title" href="#/voz">Voz del chat</a>
+        <span class="hs-desc">Que tu chat se escuche con voces de tu país, filtros y voces especiales.</span>
+        <span class="hs-state" id="hs-voz">…</span><span class="hs-act"><button type="button" class="btn small ghost" id="home-skip-voice">Saltar voz</button></span>
+      </article>
+      <article class="hs-tile" data-hs="musica" style="--g:#4fd1c5">
+        <span class="hs-top"><span class="hs-ic">🎵</span><span class="guide hs-guide" data-avatar="nono" data-size="40"></span></span>
+        <a class="hs-title" href="#/musica">Música</a>
+        <span class="hs-desc">Tu chat pide canciones con !play; tú controlas la cola y tus listas.</span>
+        <span class="hs-state" id="hs-musica">…</span>
+      </article>
+      <article class="hs-tile" data-hs="alertas" style="--g:#9b8cff">
+        <span class="hs-top"><span class="hs-ic">🔔</span><span class="guide hs-guide" data-avatar="troya" data-size="40"></span></span>
+        <a class="hs-title" href="#/alertas">Alertas</a>
+        <span class="hs-desc">Regalos, seguidores y stickers en pantalla, con su sonido.</span>
+        <span class="hs-state" id="hs-alertas">…</span><span class="hs-act"><button type="button" class="btn small ghost" data-sim-quick="follow">Probar alerta</button></span>
+      </article>
+      <article class="hs-tile" data-hs="sonidos" style="--g:#4fd1c5">
+        <span class="hs-top"><span class="hs-ic">🔊</span><span class="guide hs-guide" data-avatar="nono" data-size="40"></span></span>
+        <a class="hs-title" href="#/sonidos">Sonidos y memes</a>
+        <span class="hs-desc">Busca memes, guarda tus sonidos y deja que el chat los lance.</span>
+        <span class="hs-state" id="hs-sonidos">…</span>
+      </article>
+      <article class="hs-tile" data-hs="overlays" style="--g:#ffb23e">
+        <span class="hs-top"><span class="hs-ic">🖥</span><span class="guide hs-guide" data-avatar="samy" data-size="40"></span></span>
+        <a class="hs-title" href="#/overlays">Overlays para OBS</a>
+        <span class="hs-desc">Metas, ranking, chat en pantalla y más, listos para copiar en OBS.</span>
+        <span class="hs-state" id="hs-overlays">…</span>
+      </article>
+      <article class="hs-tile" data-hs="chatbot" style="--g:#5fd0ff">
+        <span class="hs-top"><span class="hs-ic">🤖</span><span class="guide hs-guide" data-avatar="mecha" data-size="40"></span></span>
+        <a class="hs-title" href="#/chatbot">Chat Bot</a>
+        <span class="hs-desc">Comandos como !redes, mensajes automáticos y respuestas en tu chat.</span>
+        <span class="hs-state" id="hs-chatbot">…</span>
+      </article>
+      <article class="hs-tile" data-hs="actividad" style="--g:#ffb23e">
+        <span class="hs-top"><span class="hs-ic">💬</span><span class="guide hs-guide" data-avatar="samy" data-size="40"></span></span>
+        <a class="hs-title" href="#/actividad">Chat en vivo</a>
+        <span class="hs-desc">Todo lo que pasa en tu directo, en todas tus plataformas a la vez.</span>
+        <span class="hs-state" id="hs-actividad">…</span>
+      </article>
+      <article class="hs-tile" data-hs="estadisticas" style="--g:#ff8fb5">
+        <span class="hs-top"><span class="hs-ic">📊</span><span class="guide hs-guide" data-avatar="juana" data-size="40"></span></span>
+        <a class="hs-title" href="#/estadisticas">Estadísticas</a>
+        <span class="hs-desc">Cuánto te regalaron, quién habló más y cómo te fue en cada directo.</span>
+        <span class="hs-state" id="hs-estadisticas">…</span><span class="hs-act"><button type="button" class="btn small ghost" id="home-end-session">Terminar sesión</button></span>
+      </article>
+    </div>
   </div>
 </section>
 

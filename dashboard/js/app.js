@@ -26,7 +26,7 @@ import { initHotkeys, onHotkeysStatus, onHotkey } from './hotkeys.js';
 import { initChatbot, onBotSaid, onChatbotAccounts, onChatbotStatus } from './chatbot.js';
 import { initSupport } from './support.js';
 import { initNews, onNewsPage } from './news.js';
-import { initHome, homeEvent, homeVoice, homeMusic, homeStats } from './home.js';
+import { initHome, homeEvent, homeVoice, homeMusic, homeStats, homeConnections, homeRefreshExtras } from './home.js';
 
 let config = null;
 let lastMusic = null;
@@ -71,6 +71,7 @@ function updateConnCount() {
   const shown = ALL_PLATFORMS.filter(isShown);
   const on = shown.filter((p) => status[p]?.state === 'connected').length;
   $('#nav-conn').textContent = `${on}/${shown.length}`;
+  homeConnections(on, shown.length, shown.filter((p) => status[p]?.state === 'connected').map((p) => PLATFORM_NAMES[p]));
   setStepFacts({ connected: on > 0 });
   updateSamy();
 }
@@ -383,7 +384,7 @@ async function init() {
           setAlertSoundEnabled(p.overlayStyle?.sound);
           Object.values(p.status || {}).forEach(renderStatus);
           resetChat();
-          $('#home-feed').innerHTML = '<li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li>';
+          if ($('#home-feed')) $('#home-feed').innerHTML = '<li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li>';
           [...(p.recent || [])].reverse().forEach((e) => { addLog(e); homeEvent(e); });
           setTtsLog(p.ttsLog);
           [...(p.ttsLog || [])].reverse().forEach((x) => x.eventId && markChatDecision({ eventId: x.eventId, read: x.read, reason: x.reason }));
@@ -423,7 +424,7 @@ async function init() {
         case 'kickbot': renderKickbot(p); kickWriteState(p); onChatbotAccounts('kick', p); break;
         case 'starviosbot': renderStarviosbot(p); onChatbotAccounts('starvios', p); break;
         case 'bot-said': onBotSaid(p); break;
-        case 'commands': onCommands(p); break;
+        case 'commands': onCommands(p); homeRefreshExtras(); break;
         case 'timers': onTimers(p); break;
         case 'hotkeys-status': onHotkeysStatus(p); break;
         case 'hotkey': onHotkey(p); break;
@@ -432,7 +433,7 @@ async function init() {
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;
         case 'live': setOverlayLive(p); break;
         case 'alert': onAlert(p); break;
-        case 'sounds-changed': onSoundsChanged(); break;
+        case 'sounds-changed': onSoundsChanged(); homeRefreshExtras(); break;
         case 'spotify': onSpotify(p); break;
         case 'alert-overlays': setAlertOverlays(p.count); break;
         case 'alert-control': onAlertControl(p); break;
