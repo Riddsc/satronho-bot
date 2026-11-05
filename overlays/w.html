@@ -11,9 +11,14 @@
 <style id="kind-css"></style>
 <style>
   body { height: 100vh; }
-  #root { position: fixed; inset: 0; display: grid; align-items: center; justify-items: center; padding: 14px; box-sizing: border-box; }
-  #root > .w { transform: scale(calc(var(--scale, 1) * var(--fit, 1))); transform-origin: var(--origin, center); max-width: 100%; box-sizing: border-box; }
-  body[data-pos="left"] #root { justify-items: start; } body[data-pos="right"] #root { justify-items: end; }
+  #root { position: fixed; inset: 0; overflow: hidden; }
+  /* El overlay se dibuja a su tamaño natural y luego se escala entero para
+     llenar la fuente (sin cortarse ni deformarse), sea 300 × 300 o 1920 × 1080. */
+  :where(#root > .w) { position: absolute; left: 0; top: 0; width: max-content; box-sizing: border-box; transform-origin: 0 0; }
+  /* Los que ocupan toda la pantalla (lluvia, pantallas, chat…) no se escalan. */
+  body[data-fit="off"] #root { display: grid; align-items: center; justify-items: center; padding: 14px; box-sizing: border-box; }
+  body[data-fit="off"] #root > .w { position: relative; transform: scale(var(--scale, 1)); transform-origin: center; max-width: 100%; }
+  body[data-fit="off"][data-pos="left"] #root { justify-items: start; } body[data-fit="off"][data-pos="right"] #root { justify-items: end; }
   .missing { font-size: 18px; font-weight: 700; place-self: center; padding: 10px 16px; border-radius: 12px; background: var(--bg); }
 </style>
 </head>
@@ -76,19 +81,44 @@
   // no cabe en la fuente de OBS, se achica lo justo; si sobra mucho espacio,
   // crece para llenarla.
   const NOFIT = new Set(['giftrain', 'screens', 'giftspot', 'chat']);
+  // Forma de la fuente: «wide» (tira baja), «box» (rectángulo) o «tall»
+  // (cuadrada o vertical). Cada overlay acomoda su diseño a esa forma para
+  // aprovechar el espacio en vez de quedar diminuto en medio.
+  const shapeOf = (r) => (r >= 3.1 ? 'wide' : r >= 1.25 ? 'box' : 'tall');
   function fit() {
     const w = root.firstElementChild;
-    if (!w || NOFIT.has(widget?.kind)) { document.documentElement.style.setProperty('--fit', '1'); return; }
-    const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
-    const cw = Math.max(w.scrollWidth, w.offsetWidth);
-    const ch = Math.max(w.scrollHeight, w.offsetHeight);
-    const room = Math.min((innerWidth - 36) / (cw * s), (innerHeight - 40) / (ch * s));
-    // Si la fuente es mucho más grande que el overlay (TikTok LIVE Studio usa
-    // 1920 × 1080 si no le pones resolución), el overlay crece hasta llenarla
-    // para que se lea bien al achicar la fuente en la escena.
-    const k = room > 1.3 ? Math.min(room, 4) : Math.min(1, room);
-    document.documentElement.style.setProperty('--fit', Math.max(0.3, k).toFixed(3));
+    const off = !w || w.classList.contains('missing') || NOFIT.has(widget?.kind);
+    document.body.dataset.fit = off ? 'off' : 'on';
+    if (off) return;
+    // Margen pequeño para sombras y brillos (proporcional a la fuente).
+    const pad = Math.round(Math.max(6, Math.min(innerWidth, innerHeight) * 0.035));
+    const aw = Math.max(40, innerWidth - pad * 2);
+    const ah = Math.max(40, innerHeight - pad * 2);
+    const shape = shapeOf(aw / ah);
+    // Algunos overlays cambian de diseño según la forma: se redibujan una vez.
+    if (document.body.dataset.shape !== shape) { document.body.dataset.shape = shape; if (kind?.render) { draw(); return; } }
+    // Ancho fluido (cintillo): ocupa todo el ancho y se escala por la altura.
+    const fluid = kind?.fluid;
+    w.style.transform = 'none';
+    if (fluid) w.style.width = `${aw}px`;
+    let cw = Math.max(w.scrollWidth, w.offsetWidth, 1);
+    let ch = Math.max(w.scrollHeight, w.offsetHeight, 1);
+    // «Tamaño» del estilo: 1 = llena la fuente; menos = más pequeño dentro de ella.
+    const s = Math.min(1, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1);
+    let k = Math.min(aw / cw, ah / ch, 5) * s;
+    if (fluid) {
+      k = Math.min(ah / ch, aw / 640, 3) * s; // nunca menos de 640 px de texto a lo ancho
+      w.style.width = `${aw / k}px`;
+      cw = aw / k;
+      ch = Math.max(w.scrollHeight, w.offsetHeight, 1);
+    }
+    const pos = document.body.dataset.pos;
+    const ax = pos === 'left' ? 0 : pos === 'right' ? 1 : 0.5;
+    const x = pad + (aw - cw * k) * ax;
+    const y = pad + (ah - ch * k) / 2;
+    w.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(${k.toFixed(4)})`;
   }
+  new ResizeObserver(() => fit()).observe(root);
   window.addEventListener('resize', fit);
   document.fonts?.addEventListener?.('loadingdone', fit);
 

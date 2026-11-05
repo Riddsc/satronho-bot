@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
+<script>
+  // Desde 0.22 este enlace muestra el overlay nuevo (se acomoda a cualquier tamaño).
+  (function () { var q = new URLSearchParams(location.search); if (!q.has('metrica') && !q.has('puestos')) location.replace('/overlays/w.html?id=ranking' + (q.get('preview') ? '&preview=1' : '')); })();
+</script>
 <meta charset="utf-8">
 <title>Satronho · Podio</title>
 <meta name="author" content="RiddsSatronho">

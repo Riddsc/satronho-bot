@@ -1920,3 +1920,27 @@ button.mu-ov { background: transparent; font: inherit; font-weight: 800; cursor:
 .update-pill.ready { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 18%, var(--panel)); }
 .update-pill.ready i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
 @media (prefers-reduced-motion: no-preference) { .update-pill i { animation: upd-pulse 1.6s ease-in-out infinite; } @keyframes upd-pulse { 50% { opacity: .35; } } }
+
+/* ---------- 0.22: vista previa tipo escena y opciones en tarjetas ---------- */
+/* «Escena»: cómo se ve sobre tu directo (fondo oscuro con luz suave), en vez de los cuadros. */
+.ove-stage[data-bg="scene"] { background: radial-gradient(90% 120% at 18% 0%, color-mix(in srgb, var(--g, #9b8cff) 22%, #2b2145) 0%, #17122a 48%, #0c0915 100%); }
+.ove-stage { position: relative; box-shadow: inset 0 1px 0 rgb(255 255 255 / .05), inset 0 -50px 90px -40px rgb(0 0 0 / .6); }
+.ove-bgs button { padding: 6px 12px; font-size: .86em; }
+.ovq .ove-stage { border-radius: 18px; border-color: color-mix(in srgb, var(--g) 18%, var(--line)); }
+.ovq-ic { color: var(--g); }
+.ovq-desc { font-size: .95em; }
+.ovq-size { font-size: .86em; max-width: 60ch; margin-inline: auto !important; }
+/* Encabezado del editor en la ventana: sin repetir el nombre. */
+.ovq .ove-name small { display: none; }
+.ovq .ove-name input { font-size: 1.45em; }
+.ovq .ove-ic { width: 46px; height: 46px; font-size: 22px; border-radius: 14px; }
+.ovq .ove-tabs { margin-bottom: 14px; }
+/* Opciones como lista de ajustes: etiqueta a la izquierda, control a la derecha. */
+.ovq .ove-fields { gap: 0; padding: 4px 16px; border-radius: 16px; background: var(--well); border: 1px solid var(--line); }
+.ovq .ove-fields > * { padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+.ovq .ove-fields > *:last-child { border-bottom: 0; }
+.ovq .ove-fields .ove-sw { display: flex; flex-direction: row-reverse; justify-content: space-between; gap: 14px; }
+.ovq .ove-fields .ove-sw .sw-t { font-style: normal; font-weight: 700; }
+.ovq .ove-fields .field > span:first-child { font-weight: 800; }
+.ovq-right { padding-left: 2px; }
+.ovq-cols { border-top: 0; }

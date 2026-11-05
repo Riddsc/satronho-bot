@@ -101,7 +101,7 @@ export const KINDS = {
   },
   // ---------------- Regalos y apoyo ----------------
   ranking: {
-    cat: 'regalos', icon: '🏆', name: 'Ranking', size: [900, 420],
+    cat: 'regalos', icon: '🏆', name: 'Ranking', size: [640, 400],
     desc: 'Quién más aporta: likes, regalos o mensajes, en podio, lista o tarjetas.',
     styles: [['podio', 'Podio'], ['lista', 'Lista'], ['tarjetas', 'Tarjetas']],
     defaults: { metric: 'likes', size: 3, title: '', showTitle: true, showValues: true, avatars: true, crown: true },
@@ -171,7 +171,7 @@ export const KINDS = {
   },
   // ---------------- Música ----------------
   nowplaying: {
-    cat: 'musica', icon: '🎵', name: 'Sonando ahora', size: [640, 160],
+    cat: 'musica', icon: '🎵', name: 'Sonando ahora', size: [720, 160],
     desc: 'La canción que suena, quién la pidió y cuánto le falta.',
     styles: [['tarjeta', 'Tarjeta'], ['vinilo', 'Vinilo'], ['minimo', 'Mínimo']],
     defaults: { showCover: true, showRequester: true, showProgress: true, hideWhenEmpty: true },

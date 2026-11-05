@@ -295,16 +295,16 @@ function renderQuick() {
   editing = null;
   if (!isAlerts) startEditing(quick.kind);
   m.innerHTML = `<div class="ovq-card ovq-wide" role="dialog" aria-modal="true" aria-label="Overlays de ${esc(SECTION_NAME[quick.page] || '')}" style="--g:${color}">
-    <header class="ovq-head"><span class="ovq-ic">🖥</span><div><b>Overlays de ${esc(SECTION_NAME[quick.page] || 'este apartado')}</b><small>Elige uno, cámbialo a tu gusto y copia su enlace. Se guarda solo y OBS o TikTok se actualizan al instante.</small></div><button type="button" class="ovq-x" data-ovq-close aria-label="Cerrar">✕</button></header>
+    <header class="ovq-head"><span class="ovq-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2.5"/><path d="M8 20h8M12 16v4"/><path d="M7.5 12.5l3-3 2 2 4-4"/></svg></span><div><b>Overlays de ${esc(SECTION_NAME[quick.page] || 'este apartado')}</b><small>Elige uno, cámbialo a tu gusto y copia su enlace. Se guarda solo y OBS o TikTok se actualizan al instante.</small></div><button type="button" class="ovq-x" data-ovq-close aria-label="Cerrar">✕</button></header>
     ${kinds.length > 1 ? `<nav class="ovq-tabs">${kinds.map((k) => `<button type="button" data-ovq-kind="${k}" aria-selected="${k === quick.kind}"><i>${quickInfo(k).icon}</i>${esc(quickInfo(k).name)}</button>`).join('')}</nav>` : ''}
     <div class="ovq-cols" id="ovq-editor">
       <div class="ovq-left">
         ${isAlerts ? '' : `<div class="row space ovq-pvbar"><div class="seg ove-data" role="group" aria-label="Datos de la vista previa"><button type="button" data-real="0">Ejemplo</button><button type="button" data-real="1">Mis datos</button></div>
-          <div class="row" style="gap:6px"><button type="button" class="btn small ghost" data-bg="checker" title="Fondo de cuadros">▦</button><button type="button" class="btn small ghost" data-bg="dark" title="Fondo oscuro">●</button><button type="button" class="btn small ghost" data-bg="light" title="Fondo claro">○</button></div></div>`}
-        <div class="ove-stage checker" data-w="${W}" data-h="${H}">${isAlerts ? `<iframe src="${quickPath('alerts')}?preview=1" width="${W}" height="${H}" title="Vista previa" tabindex="-1"></iframe>` : `<iframe id="ove-frame" width="${W}" height="${H}" title="Vista previa"></iframe>`}</div>
+          <div class="seg ove-bgs" role="group" aria-label="Fondo de la vista previa"><button type="button" data-bg="scene" aria-pressed="true" title="Como se ve en tu directo">Escena</button><button type="button" data-bg="checker" aria-pressed="false" title="Fondo transparente (cuadros)">Transparente</button><button type="button" data-bg="light" aria-pressed="false" title="Fondo claro">Claro</button></div></div>`}
+        <div class="ove-stage checker" data-bg="scene" data-w="${W}" data-h="${H}">${isAlerts ? `<iframe src="${quickPath('alerts')}?preview=1" width="${W}" height="${H}" title="Vista previa" tabindex="-1"></iframe>` : `<iframe id="ove-frame" width="${W}" height="${H}" title="Vista previa"></iframe>`}</div>
         <p class="ovq-desc">${esc(info.desc)}</p>
         <div id="ove-urls">${isAlerts ? urlRows(origin() + quickPath('alerts')) : ''}</div>
-        <p class="hint ovq-size">Tamaño <b>${W} × ${H}</b>. En OBS: Fuente de navegador. En TikTok LIVE Studio: Enlace, con «Resolución personalizada» en ${W} × ${H}.</p>
+        <p class="hint ovq-size">Tamaño sugerido <b>${W} × ${H}</b>, aunque se acomoda solo a cualquier tamaño: llena la fuente sin cortarse. En TikTok LIVE Studio, si se ve borroso al achicarlo, sube la «Resolución personalizada».</p>
       </div>
       <div class="ovq-right">
         ${isAlerts ? '<div id="ovq-alerts"></div>' : `<div class="ove-head ovq-ehead" id="ove-head"></div><b id="ove-crumb-name" hidden></b><div class="ove-tabs" id="ove-tabs"></div><div id="ove-panel"></div>`}
@@ -405,8 +405,8 @@ function openEditor(id) {
       <div class="ove-left">
         <div class="card ove-pvcard">
           <div class="row space"><div class="seg ove-data" role="group" aria-label="Datos de la vista previa"><button type="button" data-real="0">Ejemplo</button><button type="button" data-real="1">Mis datos</button></div>
-            <div class="row" style="gap:6px"><button type="button" class="btn small ghost" data-bg="checker" title="Fondo de cuadros">▦</button><button type="button" class="btn small ghost" data-bg="dark" title="Fondo oscuro">●</button><button type="button" class="btn small ghost" data-bg="light" title="Fondo claro">○</button></div></div>
-          <div class="ove-stage checker" data-w="${W}" data-h="${H}"><iframe id="ove-frame" width="${W}" height="${H}" title="Vista previa"></iframe></div>
+            <div class="seg ove-bgs" role="group" aria-label="Fondo de la vista previa"><button type="button" data-bg="scene" aria-pressed="true" title="Como se ve en tu directo">Escena</button><button type="button" data-bg="checker" aria-pressed="false" title="Fondo transparente (cuadros)">Transparente</button><button type="button" data-bg="light" aria-pressed="false" title="Fondo claro">Claro</button></div></div>
+          <div class="ove-stage checker" data-bg="scene" data-w="${W}" data-h="${H}"><iframe id="ove-frame" width="${W}" height="${H}" title="Vista previa"></iframe></div>
           <div id="ove-urls"></div>
           <p class="hint ove-size">En OBS, fuente de navegador de <b>${W} × ${H}</b>. Marca «Actualizar el navegador cuando la escena se active».</p>
           ${w.kind === 'giftspot' || w.kind === 'giftrain' || w.kind === 'lastgifts' || w.kind === 'bestgift' || w.kind === 'mvp' ? '<button type="button" class="btn small ghost" data-sim-quick="gift">▶ Simular un regalo</button>' : ''}
@@ -522,7 +522,7 @@ function styleHTML() {
       <label class="field"><span>Tipografía</span>${sel('font', FONTS.map((f) => [f.id, f.name]))}</label>
       <label class="field"><span>Fondo de las tarjetas</span>${sel('card', [['solid', 'Sólido'], ['glass', 'Translúcido'], ['none', 'Sin fondo']])}</label>
       <label class="field"><span>Esquinas</span>${sel('corners', [['round', 'Redondeadas'], ['soft', 'Suaves'], ['square', 'Rectas']])}</label>
-      <label class="field"><span>Tamaño <b class="ove-rv">${Math.round((Number(g('scale')) || style.scale || 1) * 100)}%</b></span><input type="range" min="0.5" max="2" step="0.05" data-l="scale" value="${Number(g('scale')) || style.scale || 1}"></label>
+      <label class="field"><span>Cuánto llena la fuente <b class="ove-rv">${Math.round(Math.min(1, Number(g('scale')) || 1) * 100)}%</b></span><input type="range" min="0.5" max="1" step="0.05" data-l="scale" value="${Math.min(1, Number(g('scale')) || 1)}"></label>
     </div>
     <div class="swatches mt">${ACCENTS.map((c) => `<button type="button" class="swatch" data-laccent="${c}" style="background:${c};width:24px;height:24px" title="${c}"></button>`).join('')}</div>
     <p class="hint">Lo que dejes en «General» sigue al <a href="#/overlays/estilo">estilo general</a> de tus overlays.</p>`;
@@ -685,7 +685,7 @@ async function onEditorClick(ev) {
     if (b.dataset.pin) return togglePin(b.dataset.pin);
     if (b.dataset.etab) { editing.tab = b.dataset.etab; return renderTabs(); }
     if (b.dataset.real) { editing.real = b.dataset.real === '1'; return setFrame(); }
-    if (b.dataset.bg) { $('.ove-stage').dataset.bg = b.dataset.bg; return; }
+    if (b.dataset.bg) { $('.ove-stage').dataset.bg = b.dataset.bg; b.parentElement.querySelectorAll('[data-bg]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); return; }
     if (b.dataset.copyUrl !== undefined) {
       await navigator.clipboard.writeText(urlOf(id)).catch(() => { throw new Error('No se pudo copiar: selecciónala a mano'); });
       guideToast(catOf(editing.w.kind).guide, 'URL copiada. En OBS: Fuentes → + → Navegador, y pégala.');
@@ -820,8 +820,6 @@ async function onEditorSubmit(ev) {
 function renderClassic() {
   const list = [
     { name: 'Alertas', path: '/overlays/alerts.html', note: 'Regalos, stickers, seguidores y tus alertas propias', w: 800, h: 300 },
-    { name: 'Sonando ahora (clásico)', path: '/overlays/now-playing.html', note: 'La canción y quién la pidió', w: 700, h: 140 },
-    { name: 'Podio (clásico)', path: '/overlays/podium.html', note: 'Usa ?metrica=regalos o ?puestos=5', w: 900, h: 420 },
     ...goals.map((g) => ({ name: `Meta: ${g.title}`, path: `/overlays/goal.html?id=${encodeURIComponent(g.id)}`, note: 'Barra de una sola meta', w: 700, h: 140 })),
   ];
   $('#overlay-list').innerHTML = list.map((it) => `<div class="ovg-crow"><b>${esc(it.name)}<small>${it.w} × ${it.h} · ${esc(it.note)}</small></b><code>${esc(origin() + it.path)}</code><button type="button" class="btn small ghost" data-copy="${esc(origin() + it.path)}">Copiar</button><button type="button" class="btn small ghost" data-copy="${esc(tiktokUrl(it.path))}" data-tt title="Enlace https para TikTok LIVE Studio">TikTok</button></div>`).join('');
