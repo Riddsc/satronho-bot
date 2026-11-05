@@ -1712,3 +1712,64 @@ kbd { font: 700 .82em var(--font); padding: 3px 8px; border-radius: 6px; backgro
 .spf-queue small { display: block; color: var(--muted); }
 .spf-add { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .spf-steps { display: grid; gap: 6px; padding-left: 20px; }
+/* Música: YouTube o Spotify (0.17) */
+.mu-mode { display: flex; align-items: center; gap: 12px; justify-content: flex-end; margin: -6px 0 14px; flex-wrap: wrap; }
+.mu-seg { display: inline-flex; padding: 4px; gap: 4px; border-radius: 14px; background: var(--well); border: 1px solid var(--line); }
+.mu-seg button { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font: inherit; font-weight: 800; cursor: pointer; }
+.mu-seg button[aria-pressed="true"] { background: var(--accent-2, #8b7bff); color: #fff; box-shadow: 0 4px 14px -6px var(--accent-2, #8b7bff); }
+.mu-seg button[data-mumode="spotify"][aria-pressed="true"] { background: #1db954; color: #04130a; box-shadow: 0 4px 14px -6px #1db954; }
+.mu-yt, .mu-sp { font-size: .8em; letter-spacing: -.05em; }
+.mu-sep { width: 1px; height: 28px; background: var(--line); }
+.mu-ov { padding: 8px 14px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--accent-2, #8b7bff) 60%, var(--line)); color: var(--ink); font-weight: 800; text-decoration: none; }
+.mu-ov:hover { background: color-mix(in srgb, var(--accent-2, #8b7bff) 14%, transparent); }
+#page-musica.mode-spotify [data-tabpanel="consola"], #page-musica.mode-spotify #mu-yt-tabs [data-tab="consola"] { display: none !important; }
+#page-musica.mode-spotify.sp-off #mu-yt-tabs, #page-musica.mode-spotify.sp-off [data-tabpanel] { display: none !important; }
+.spf-wrap { margin-bottom: 16px; }
+.spf-card { width: min(440px, 100%); margin: 40px auto; border-radius: 22px; overflow: hidden; border: 1px solid color-mix(in srgb, #1db954 25%, var(--line)); background: var(--panel); box-shadow: 0 30px 60px -30px rgb(0 0 0 / .7); }
+.spf-top { display: grid; justify-items: center; gap: 8px; padding: 26px 26px 20px; text-align: center; background: radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, #1db954 16%, transparent), transparent 70%); border-bottom: 1px solid var(--line); }
+.spf-top h2 { margin: 6px 0 0; font-size: 1.5em; }
+.spf-top p { margin: 0; color: var(--muted); }
+.spf-icon { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; background: #1db954; color: #04130a; font-weight: 900; font-size: 16px; letter-spacing: -.05em; box-shadow: 0 8px 26px -8px #1db954; }
+.spf-badge { margin-top: 6px; padding: 4px 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, #ffb23e 50%, transparent); background: color-mix(in srgb, #ffb23e 12%, transparent); color: #ffb23e; font-size: .82em; font-weight: 800; }
+.spf-bottom { display: grid; gap: 10px; padding: 18px 22px 22px; text-align: center; }
+.spf-bottom .hint { margin: 0; }
+.spf-wait { margin: 0; display: inline-flex; gap: 8px; align-items: center; justify-content: center; color: var(--accent-2, #8b7bff); font-weight: 800; }
+.spf-spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spf-spin .8s linear infinite; }
+@keyframes spf-spin { to { transform: rotate(360deg); } }
+.spf-go { width: 100%; padding: 13px; border: 0; border-radius: 12px; background: #1db954; color: #04130a; font: inherit; font-weight: 900; cursor: pointer; transition: transform .12s, filter .12s; }
+.spf-go:hover { transform: translateY(-1px); filter: brightness(1.08); }
+.spf-err { color: var(--bad) !important; }
+.spf-adv { text-align: left; font-size: .9em; }
+.spf-adv summary { cursor: pointer; color: var(--muted); font-weight: 700; text-align: center; }
+.spf-panel { display: grid; gap: 4px; }
+.spf-idle { margin: 12px 0 0; }
+/* Cuenta regresiva: cuánto suma cada cosa */
+.ove-rates { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 10px; }
+.ove-rates h4 { margin: 0; font-size: 1.05em; }
+.ove-rates h5 { margin: 10px 0 4px; font-size: .9em; color: var(--muted); }
+.ove-rates .hint { margin: 0; }
+.ove-rate-grid { display: grid; gap: 8px; }
+.ove-rate-grid.off { opacity: .45; pointer-events: none; }
+.ove-rate-head, .ove-rate { display: grid; grid-template-columns: 140px 1fr 1fr; gap: 10px; align-items: center; }
+.ove-rate-head span { font-size: .78em; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.ove-rate-in { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: .9em; white-space: nowrap; }
+.ove-rate-in input { width: 74px !important; padding: 5px 8px !important; }
+.ove-rate-sample { margin: 2px 0 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .84em; color: var(--muted); }
+.ove-rate-sample b { color: var(--g); }
+.ove-gr-list { display: grid; gap: 6px; }
+.ove-gr { display: grid; grid-template-columns: minmax(120px, 1fr) 120px auto auto auto; gap: 8px; align-items: center; padding: 6px; border-radius: var(--radius-sm); background: var(--panel-2); }
+.ove-gr-plus { display: inline-flex; gap: 4px; align-items: center; font-size: .82em; color: var(--muted); white-space: nowrap; }
+.ove-gr-plus input { width: auto !important; }
+.ove-rate-more { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 14px; }
+.ove-rate-more label { display: grid; gap: 4px; font-weight: 700; font-size: .9em; }
+.ove-rate-more small { color: var(--muted); font-weight: 500; }
+.ove-rate-more label > .ove-rate-in input { width: 74px !important; }
+.ove-rate-more label input[data-cr="likesEvery"] { width: 70px !important; display: inline-block; padding: 3px 6px !important; }
+@media (max-width: 640px) { .ove-rate-head { display: none; } .ove-rate { grid-template-columns: 1fr 1fr; } .ove-gr { grid-template-columns: 1fr 1fr; } }
+.spf-steps { text-align: left; }
+.ove-rate-more label { display: flex !important; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ove-rate-more label small { flex-basis: 100%; }
+[data-gradd] { width: fit-content; }
+.ove-gr { grid-template-columns: minmax(100px, 1fr) 112px auto auto auto; }
+.ove-gr input[data-grk="gift"] { min-width: 0; }
+.ove-gr select { padding: 5px 8px !important; }
