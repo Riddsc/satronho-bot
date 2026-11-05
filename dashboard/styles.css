@@ -1947,3 +1947,32 @@ button.mu-ov { background: transparent; font: inherit; font-weight: 800; cursor:
 /* La columna de la vista previa también se desplaza si no cabe (enlaces y tamaño siempre visibles). */
 .ovq-left { overflow-y: auto; max-height: calc(100vh - 230px); padding-right: 4px; }
 @media (max-width: 900px) { .ovq-left { max-height: none; } }
+/* ---------- Espectadores especiales: añadir con sugerencias ---------- */
+.sp-add { position: relative; margin: 14px 0 4px; padding: 14px; border-radius: 16px; background: color-mix(in srgb, var(--accent) 6%, var(--well)); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); animation: sp-add-in .16s ease-out; }
+@keyframes sp-add-in { from { opacity: 0; transform: translateY(-4px); } }
+.sp-add-field { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 4px 6px 4px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.sp-add-field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.sp-add-field input { border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 1.05em; padding: 10px 0; outline: none; min-width: 0; }
+.sp-add-x { width: 34px; height: 34px; border-radius: 10px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.sp-add-x:hover { background: var(--panel-2); color: var(--ink); }
+.sp-sug { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 2px; max-height: 340px; overflow-y: auto; }
+.sp-sug-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 12px; cursor: pointer; }
+.sp-sug-row:hover, .sp-sug-row.on { background: color-mix(in srgb, var(--accent) 14%, var(--panel)); }
+.sp-sug-who { display: grid; min-width: 0; }
+.sp-sug-who b, .sp-sug-who small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp-sug-who small { color: var(--muted); }
+.sp-sug-pl { width: 20px; height: 20px; border-radius: 6px; }
+.sp-sug-in { font-style: normal; font-size: .8em; font-weight: 800; color: var(--muted); padding: 2px 8px; border-radius: 999px; background: var(--panel-2); }
+.sp-sug-plus { display: grid; place-items: center; font-weight: 900; color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent) !important; }
+.sp-sug-free .sp-sug-who b { color: var(--accent); }
+.sp-sug-empty { padding: 14px 10px; color: var(--muted); text-align: center; }
+.sp-add-hint { margin: 10px 2px 0; }
+.sp-row.sp-new { animation: sp-new 1.6s ease-out; }
+@keyframes sp-new { 0%, 40% { background: color-mix(in srgb, var(--accent) 22%, transparent); } }
+.sp-add-field input, .sp-add-field input:focus { border: 0 !important; box-shadow: none !important; background: transparent !important; padding-inline: 0 !important; }
+/* Ventanita para escribir un nombre (reemplaza prompt()). */
+.ask-modal { position: fixed; inset: 0; z-index: 500; display: grid; place-items: center; padding: 18px; background: rgb(6 4 14 / .6); backdrop-filter: blur(5px); }
+.ask-card { width: min(420px, 100%); display: grid; gap: 16px; padding: 20px; border-radius: 18px; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 30px 80px -20px rgb(0 0 0 / .7); }
+.ask-card label { display: grid; gap: 10px; }
+.ask-card input { font: inherit; font-size: 1.05em; }
+.ask-actions { display: flex; justify-content: flex-end; gap: 8px; }

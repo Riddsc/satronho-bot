@@ -146,6 +146,9 @@ function createStats({ store, dataDir, broadcast }) {
     for (const [key, u] of Object.entries(s.users)) {
       const a = (allTime.users[key] ??= { name: u.name, platform: u.platform, messages: 0, diamonds: 0, likes: 0, gifts: 0, sessions: 0 });
       a.name = u.name;
+      if (u.id) a.id = u.id;
+      if (u.avatar) a.avatar = u.avatar;
+      if (u.lastTs) a.lastTs = u.lastTs;
       for (const f of ['messages', 'diamonds', 'likes', 'gifts']) a[f] += u[f];
       a.sessions += 1;
     }
@@ -191,6 +194,10 @@ function createStats({ store, dataDir, broadcast }) {
     const key = `${e.platform}:${e.user.id}`;
     const u = (s.users[key] ??= { name: e.user.name, platform: e.platform, messages: 0, diamonds: 0, likes: 0, gifts: 0 });
     u.name = e.user.name;
+    // Para buscar a la gente (Espectadores especiales): su @usuario, foto y última vez.
+    u.id = e.user.id;
+    if (e.user.avatar) u.avatar = e.user.avatar;
+    u.lastTs = now;
     const b = bucket(s, now);
     s.counts[e.type] += 1;
 
@@ -271,6 +278,34 @@ function createStats({ store, dataDir, broadcast }) {
     };
   }
 
+  // Gente que ha pasado por tu chat (este directo y los anteriores), para
+  // sugerirla al escribir. Lo que empieza igual va primero; luego lo reciente.
+  const fold = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  function people(q = '', limit = 8) {
+    const all = new Map();
+    for (const src of [allTime.users, current?.users || {}]) {
+      for (const [key, u] of Object.entries(src)) {
+        if (!u?.name || /^test|^prueba/i.test(u.id || '')) continue;
+        const prev = all.get(key) || {};
+        all.set(key, { platform: u.platform, id: String(u.id || key.split(':').slice(1).join(':')), name: u.name, avatar: u.avatar || prev.avatar || '', lastTs: Math.max(u.lastTs || 0, prev.lastTs || 0), score: (u.messages || 0) + (u.gifts || 0) * 3 + (prev.score || 0) });
+      }
+    }
+    const f = fold(q).replace(/^@/, '');
+    const rank = (u) => {
+      if (!f) return 1;
+      const n = fold(u.name);
+      const id = fold(u.id);
+      if (n.startsWith(f) || id.startsWith(f)) return 2;
+      return n.includes(f) || id.includes(f) ? 1 : 0;
+    };
+    return [...all.values()]
+      .map((u) => ({ u, r: rank(u) }))
+      .filter((x) => x.r > 0)
+      .sort((a, b) => b.r - a.r || b.u.lastTs - a.u.lastTs || b.u.score - a.u.score)
+      .slice(0, limit)
+      .map(({ u }) => ({ platform: u.platform, id: u.id, name: u.name, avatar: u.avatar }));
+  }
+
   function stop() {
     clearInterval(saveTimer);
     clearTimeout(pushTimer);
@@ -288,6 +323,7 @@ function createStats({ store, dataDir, broadcast }) {
     overview,
     getSession,
     allTimeTops,
+    people,
     stop,
   };
 }

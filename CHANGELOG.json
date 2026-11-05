@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.22.3",
+    "date": "2026-11-05",
+    "title": "Añadir espectadores especiales, fácil",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "«Añadir persona» no hacía nada en la app de escritorio. Ahora abre un buscador: escribes y aparecen las personas que ya pasaron por tu chat en TikTok, Kick, Twitch o Starvios, con su foto y su plataforma. Un toque y queda añadida."
+      },
+      {
+        "type": "mejora",
+        "text": "Si la persona todavía no ha escrito en tu chat, puedes añadirla igual con el nombre que escribas, para cualquier plataforma. Funciona con el teclado: flechas y Enter."
+      },
+      {
+        "type": "arreglo",
+        "text": "Música: «Guardar como lista» y «Renombrar» tampoco abrían nada en la app; ahora usan una ventanita propia."
+      }
+    ]
+  },
+  {
     "version": "0.22.2",
     "date": "2026-11-05",
     "title": "TikTok vuelve a conectar",

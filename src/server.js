@@ -543,6 +543,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     return s ? ok(res, { session: s }) : fail(res, 'Sesión no encontrada', 404);
   });
   app.get('/api/stats/all-time', (_req, res) => ok(res, { tops: stats.allTimeTops() }));
+  // Gente vista en tu chat, para buscarla al añadir espectadores especiales.
+  app.get('/api/people', (req, res) => ok(res, { people: stats.people(String(req.query.q || '').slice(0, 40), Math.min(20, Number(req.query.limit) || 8)) }));
   app.get('/api/stats/overview', (_req, res) => ok(res, { sessions: stats.overview(), usdPerDiamond: store.get('stats')?.usdPerDiamond }));
   app.post('/api/stats/end', (_req, res) => { podium.reset(); ok(res, { session: stats.end('manual') }); });
   app.post('/api/podium/reset', (_req, res) => { podium.reset(); ok(res, {}); });

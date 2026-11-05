@@ -450,6 +450,11 @@
         <div class="row space"><div><h3 class="card-title">Espectadores especiales</h3>
           <p class="hint">Dale a alguien su propia voz, velocidad, tono y un nombre para leer, o silencia a quien moleste. Esto manda sobre «Quién puede hablar». También puedes añadirlos desde <b>Chat en vivo</b> con un clic.</p></div>
           <button type="button" class="btn primary" id="sp-add">＋ Añadir persona</button></div>
+        <div class="sp-add" id="sp-addbox" hidden>
+          <div class="sp-add-field"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="sp-add-q" placeholder="Escribe su nombre o @usuario…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="sp-sug" aria-autocomplete="list"><button type="button" class="sp-add-x" id="sp-add-close" aria-label="Cerrar">✕</button></div>
+          <ul class="sp-sug" id="sp-sug" role="listbox"></ul>
+          <p class="hint sp-add-hint">Aparece la gente que ya pasó por tu chat en TikTok, Kick, Twitch o Starvios. Toca a alguien para añadirlo; luego eliges su voz o lo silencias.</p>
+        </div>
         <div class="sp-bar">
           <div class="mz-search-form"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="sp-q" placeholder="Busca por nombre o por cómo se lee…" autocomplete="off"></div>
           <div class="seg" id="sp-plat"></div>
