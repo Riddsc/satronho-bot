@@ -80,6 +80,8 @@ jobs:
           SATRONHO_KICK_CLIENT_SECRET: ${{ secrets.KICK_CLIENT_SECRET }}
           # Webhook de Discord para «Reportar un problema».
           SATRONHO_DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          # App de Spotify for Developers (solo el Client ID).
+          SATRONHO_SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
         run: node scripts/release.mjs
 
       - name: Publicar en GitHub Releases

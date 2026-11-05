@@ -6,6 +6,7 @@
 import { $, $$, api, esc, toast, saveConfig } from './util.js';
 import { guideToast } from './guides.js';
 import { SOUNDS, playAlertSound } from '/overlays/sounds.js';
+import { openSoundPicker, soundLabel } from './soundsUI.js';
 
 const KINDS = [
   { key: 'follow', icon: '♥', color: '#8b7bff', name: 'Nuevo seguidor', desc: 'Cuando alguien te sigue' },
@@ -29,6 +30,8 @@ function save(key, patch) {
 
 function soundOptions(t) {
   const opts = Object.entries(SOUNDS).map(([id, label]) => `<option value="${id}" ${t.sound === id ? 'selected' : ''}>${esc(label)}</option>`);
+  if (t.sound && !SOUNDS[t.sound] && !['file', 'none'].includes(t.sound)) opts.push(`<option value="${esc(t.sound)}" selected>♪ ${esc(soundLabel(t.sound))}</option>`);
+  opts.push('<option value="__lib">📚 Biblioteca de sonidos…</option>');
   opts.push(`<option value="file" ${t.sound === 'file' ? 'selected' : ''}>Mi sonido…</option>`);
   opts.push(`<option value="none" ${t.sound === 'none' ? 'selected' : ''}>Sin sonido</option>`);
   return opts.join('');
@@ -88,7 +91,7 @@ function render() {
 
 function summaryOf(key) {
   const t = settings(key);
-  return `${SOUNDS[t.sound] || (t.sound === 'file' ? 'Mi sonido' : 'Sin sonido')} · ${t.fitSound ? 'según el sonido' : `${t.seconds ?? 5} s`}`;
+  return `${t.sound === 'file' ? 'Mi sonido' : t.sound === 'none' ? 'Sin sonido' : soundLabel(t.sound)} · ${t.fitSound ? 'según el sonido' : `${t.seconds ?? 5} s`}`;
 }
 
 function preview(key) {
@@ -179,6 +182,20 @@ export function initAlerts(cfg) {
     const f = el.dataset.f;
     let v = el.type === 'checkbox' ? el.checked : el.tagName === 'SELECT' ? el.value : Number(el.value);
     if (f === 'min') v = Math.max(1, v || 1);
+    if (f === 'sound' && v === '__lib') {
+      const prev = settings(key).sound;
+      el.value = prev || 'campanita';
+      openSoundPicker(prev, (ref) => {
+        save(key, { sound: ref });
+        el.insertAdjacentHTML('afterbegin', `<option value="${esc(ref)}">♪ ${esc(soundLabel(ref))}</option>`);
+        el.value = ref;
+        box.querySelector('.al-file').hidden = true;
+        preview(key);
+        const meta = box.closest('.al-row')?.querySelector('.al-meta');
+        if (meta) meta.textContent = summaryOf(key);
+      });
+      return;
+    }
     save(key, { [f]: v });
     if (f === 'fitSound') box.querySelector('[data-f="seconds"]').disabled = v;
     if (f === 'sound') {

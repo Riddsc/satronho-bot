@@ -54,10 +54,10 @@ const PAGES = {
   conexiones: { title: 'Conexiones', guide: 'samy', words: 'conectar tiktok kick starvios usuario canal cuenta bot' },
   actividad: { title: 'Chat en vivo', guide: 'samy', words: 'chat en vivo actividad registro mensajes eventos simular regalos insignias silenciar' },
   voz: { title: 'Voz del chat', guide: 'troya', words: 'voz voces tts leer piper filtro groserías quiéreme' },
-  musica: { title: 'Música', guide: 'nono', words: 'música canción cola play temita skip quitar youtube' },
+  musica: { title: 'Música', guide: 'nono', words: 'música canción cola play temita skip quitar youtube spotify' },
+  sonidos: { title: 'Sonidos', guide: 'nono', words: 'sonidos efectos memes biblioteca frases soundboard groseros graciosos sospechoso rosalía packs' },
   alertas: { title: 'Alertas', guide: 'troya', words: 'alertas seguidor regalo suscripción likes compartir' },
-  metas: { title: 'Metas', guide: 'juana', words: 'metas objetivo barra progreso diamantes' },
-  overlays: { title: 'Overlays para OBS', guide: 'samy', words: 'obs overlay url fuente navegador estilo streamlabs' },
+  overlays: { title: 'Overlays para OBS', guide: 'samy', words: 'obs overlay url fuente navegador estilo streamlabs metas objetivo barra progreso contadores cuenta regresiva' },
   chatbot: { title: 'Chat Bot', guide: 'mecha', words: 'chat bot chatbot mecharidds comandos comando respuesta redes discord alias espera moderadores mensajes automáticos temporizador timer cada minutos anuncio escribir enviar' },
   estadisticas: { title: 'Estadísticas', guide: 'juana', words: 'estadísticas números gané diamantes tops historial gráfica' },
   ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones atajos teclado teclas' },
@@ -67,6 +67,7 @@ const PAGES = {
 };
 
 const TAB_NAMES = {
+  sonidos: { biblioteca: 'Biblioteca', memes: 'Memes', frases: 'Frases', mios: 'Mis sonidos', chat: 'Comando del chat' },
   ayuda: { preguntas: 'Preguntas', reportar: 'Reportar un problema' },
   chatbot: { inicio: 'Inicio', comandos: 'Comandos', automaticos: 'Mensajes automáticos' },
   voz: { voces: 'Voces', quien: 'Quién se lee', filtros: 'Filtros y límites', especiales: 'Espectadores especiales', probar: 'Probar' },
@@ -84,7 +85,7 @@ const store = {
 };
 
 // ---------- Pantallas y pestañas ----------
-const OLD_PAGES = { comandos: ['chatbot', 'comandos'], automaticos: ['chatbot', 'automaticos'] };
+const OLD_PAGES = { comandos: ['chatbot', 'comandos'], automaticos: ['chatbot', 'automaticos'], metas: ['overlays', 'goals'] };
 export function showPage(page, tab) {
   if (OLD_PAGES[page]) [page, tab] = OLD_PAGES[page];
   if (!PAGES[page]) page = 'inicio';

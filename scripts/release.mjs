@@ -70,10 +70,13 @@ const [outDir] = await packager({
       const clientId = process.env.SATRONHO_KICK_CLIENT_ID;
       const clientSecret = process.env.SATRONHO_KICK_CLIENT_SECRET;
       if (clientId && clientSecret) data.kick = { clientId, clientSecret };
+      // App de Spotify (solo el Client ID: el inicio de sesión es con PKCE).
+      if (process.env.SATRONHO_SPOTIFY_CLIENT_ID) data.spotify = { clientId: process.env.SATRONHO_SPOTIFY_CLIENT_ID };
       // Webhook de Discord para «Reportar un problema».
       if (process.env.SATRONHO_DISCORD_WEBHOOK) data.discord = { webhook: process.env.SATRONHO_DISCORD_WEBHOOK };
       fs.writeFileSync(file, JSON.stringify(data, null, 2));
       console.log(data.kick ? '✓ App de Kick incluida' : '⚠ Sin app de Kick incluida: cada streamer tendrá que pegar la suya en «Avanzado»');
+      console.log(data.spotify ? '✓ App de Spotify incluida' : '⚠ Sin app de Spotify: cada streamer pega su Client ID en Música → Spotify');
       console.log(data.discord ? '✓ Reportes a Discord incluidos' : '⚠ Sin webhook de Discord: «Reportar un problema» no podrá enviar');
     },
     async ({ buildPath }) => {

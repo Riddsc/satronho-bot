@@ -28,10 +28,10 @@
   <nav class="nav-group" style="--g:#9b8cff"><h6><i></i>Lo que se escucha</h6>
     <a class="nav-item" href="#/voz" data-page="voz"><span class="ic" data-icon="mic"></span>Voz del chat</a>
     <a class="nav-item" href="#/musica" data-page="musica"><span class="ic" data-icon="music"></span>Música<span class="badge" id="nav-queue" hidden>0</span></a>
+    <a class="nav-item" href="#/sonidos" data-page="sonidos"><span class="ic" data-icon="volume"></span>Sonidos</a>
   </nav>
   <nav class="nav-group" style="--g:#9b8cff"><h6><i></i>Lo que se ve</h6>
     <a class="nav-item" href="#/alertas" data-page="alertas"><span class="ic" data-icon="bell"></span>Alertas</a>
-    <a class="nav-item" href="#/metas" data-page="metas"><span class="ic" data-icon="target"></span>Metas</a>
     <a class="nav-item" href="#/overlays" data-page="overlays"><span class="ic" data-icon="layers"></span>Overlays para OBS</a>
     <div class="nav-pins" id="nav-pins" hidden></div>
   </nav>
@@ -433,10 +433,29 @@
 </section>
 
 <!-- ---------- Música (Ñoño) ---------- -->
+<!-- ---------- Sonidos (Ñoño) ---------- -->
+<section class="page" id="page-sonidos" data-page="sonidos" hidden>
+  <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Sonidos</h1><p>Tu biblioteca de sonidos para alertas, regalos y el chat: cientos incluidos, tus memes, tus frases y tus archivos.</p></div>
+    <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono" data-static><b>Ñoño:</b> Busca por nombre o por lo que sientes: «risa», «sus», «fail», «victoria». ▶ para escuchar, ★ para tenerlo a mano.</p><span class="guide" data-avatar="nono" data-size="hero"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="sonidos"><button data-tab="biblioteca">Biblioteca</button><button data-tab="memes">Memes</button><button data-tab="frases">Frases</button><button data-tab="mios">Mis sonidos</button><button data-tab="chat">Comando del chat</button></div>
+  <div class="tabpanel" data-tabpanel="biblioteca"><div class="card" id="snd-lib" style="--g:#4fd1c5"></div>
+    <p class="hint">Los sonidos de juego, interfaz y voces en inglés son de <b>Kenney</b> (dominio público, CC0). Los graciosos, de suspenso y de 8 bits los hace Satronho por código.</p></div>
+  <div class="tabpanel" data-tabpanel="memes" hidden><div class="card" style="--g:#4fd1c5">
+    <form class="snd-bar" id="snd-meme-form"><label class="snd-find"><span>⌕</span><input id="snd-meme-q" name="q" placeholder="rosalía, bruh, sus, risa, gemido, se fue…" autocomplete="off"></label><button class="btn primary">Buscar</button><button type="button" class="btn ghost" data-meme-top>🔥 Lo más sonado</button></form>
+    <p class="hint">Resultados de una página pública de sonidos de memes. «Añadir» lo descarga a tu PC para tu uso, igual que si lo bajaras tú.</p>
+    <div class="snd-list" id="snd-memes-list"></div></div>
+    <div class="card mt" style="--g:#4fd1c5"><h3 class="card-title">Pegar enlaces</h3><p class="hint">Uno por línea: el enlace directo a un audio (.mp3, .ogg, .wav) o la página de un sonido de memes. Los agrego todos de una.</p>
+    <form id="snd-links" class="snd-links"><textarea name="urls" rows="4" placeholder="https://…/vine-boom.mp3&#10;https://www.myinstants.com/es/instant/…"></textarea><div class="row"><select name="cat"><option value="memes">🐸 Memes</option><option value="graciosos">😂 Graciosos</option><option value="groseros">🤬 Groseros</option><option value="alertas">🔔 Alertas</option><option value="mis">📁 Mis archivos</option></select><button class="btn primary">Agregar enlaces</button></div></form></div></div>
+  <div class="tabpanel" data-tabpanel="frases" hidden><div class="card" id="snd-phrases" style="--g:#4fd1c5"></div></div>
+  <div class="tabpanel" data-tabpanel="mios" hidden><div class="card" id="snd-mine" style="--g:#4fd1c5"></div></div>
+  <div class="tabpanel" data-tabpanel="chat" hidden><div class="card" id="snd-chat" style="--g:#4fd1c5"></div></div>
+</section>
+
 <section class="page" id="page-musica" data-page="musica" hidden>
   <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Música</h1><p>Tu chat pide canciones con <code>!play</code> o <code>!temita</code>; Ñoño las pone en orden.</p></div>
     <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono"></p><span class="guide" data-avatar="nono" data-size="hero"></span></div></div>
-  <div class="tabs" role="tablist" data-tabs="musica"><button data-tab="consola">Consola</button><button data-tab="permisos">Permisos y comandos</button></div>
+  <div class="tabs" role="tablist" data-tabs="musica"><button data-tab="consola">Consola</button><button data-tab="permisos">Permisos y comandos</button><button data-tab="spotify">Spotify</button></div>
+  <div class="tabpanel" data-tabpanel="spotify" hidden><div class="card sp-card-main" id="spotify-box" style="--g:#1ed760"></div></div>
   <div class="tabpanel" data-tabpanel="consola">
   <div class="mz" id="card-musica" style="--g:#4fd1c5">
     <!-- Sonando ahora -->

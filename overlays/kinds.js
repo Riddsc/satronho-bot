@@ -551,6 +551,13 @@ const nowplaying = {
   `,
   render({ S, set }) {
     const c = S.music?.current;
+    // Sin canción pedida por YouTube: lo que suena en tu Spotify (si lo conectaste).
+    const sp = S.spotify?.showInOverlay !== false ? S.spotify?.now : null;
+    if (!c && sp) {
+      const el = sp.playing ? Math.min(sp.durationSec * 1000, sp.progressMs + (Date.now() - sp.at)) : sp.progressMs;
+      const t = (ms) => `${Math.floor(ms / 60000)}:${pad((ms / 1000) % 60)}`;
+      return `<div class="np surface" data-key="sp-${esc(sp.id)}">${set.showCover ? `<img class="np-art" src="${esc(sp.thumbnail)}" alt="">` : '<span></span>'}<div><div class="np-label">${sp.playing ? '<span class="np-eq"><i></i><i></i><i></i></span> SONANDO EN SPOTIFY' : '⏸ EN PAUSA'}</div><div class="np-title">${esc(sp.title)}</div><div class="np-by">${esc(sp.author)}</div>${set.showRequester && sp.requester ? `<div class="np-req">♪ Pedida por ${esc(sp.requester)}</div>` : ''}${set.showProgress && sp.durationSec ? `<div class="np-prog"><span>${t(Math.max(0, el))}</span><b><i style="width:${Math.max(0, Math.min(100, (el / (sp.durationSec * 1000)) * 100)).toFixed(1)}%"></i></b><span>${t(sp.durationSec * 1000)}</span></div>` : ''}</div></div>`;
+    }
     if (!c) return set.hideWhenEmpty ? '' : '<div class="np surface"><div></div><div><div class="np-label">MÚSICA</div><div class="np-title">No suena nada · pide con !play</div></div></div>';
     const dur = (c.durationSec || 0) * 1000;
     const paused = S.music.paused;

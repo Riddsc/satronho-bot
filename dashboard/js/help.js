@@ -298,8 +298,8 @@ const KB = [
   {
     guide: 'juana', q: '¿Cómo creo una meta?',
     keys: ['meta', 'metas', 'objetivo', 'barra', 'progreso', 'goal', 'crear'],
-    answer: 'En <b>Metas</b>: ponle nombre, elige qué cuenta (diamantes, seguidores, likes…), el objetivo y pulsa <b>Añadir meta</b>. Cada meta tiene su URL para OBS, y la puedes sumar, restar o reiniciar a mano.',
-    go: '#goal-form',
+    answer: 'En <b>Overlays para OBS → Metas</b>, pestaña «🎯 Metas»: ponle nombre, elige qué cuenta (monedas, seguidores, likes…) y el objetivo. Ahí mismo la sumas, restas, reinicias o la escondes de ese overlay.',
+    go: '#/overlays/goals',
   },
   {
     guide: 'juana', q: '¿Cuánto gané en el directo?',
@@ -434,6 +434,7 @@ function answer(question) {
 
 // Lleva a la sección y la resalta (abre los desplegables que la contengan).
 export function goTo(selector) {
+  if (selector.startsWith('#/')) { location.hash = selector; if (window.matchMedia('(max-width: 760px)').matches) closeHelp(); return; }
   const el = document.querySelector(selector);
   if (!el) return;
   // Primero la pantalla y la pestaña donde vive.

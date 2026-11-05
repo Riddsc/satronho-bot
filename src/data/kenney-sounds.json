@@ -1,0 +1,3773 @@
+[
+{
+"id": "k-abanico-de-cartas-1",
+"name": "Abanico de cartas 1",
+"cat": "objetos",
+"tags": "cartas casino",
+"file": "k-abanico-de-cartas-1.ogg",
+"dur": 0.72,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-abanico-de-cartas-2",
+"name": "Abanico de cartas 2",
+"cat": "objetos",
+"tags": "cartas casino",
+"file": "k-abanico-de-cartas-2.ogg",
+"dur": 1.31,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-abrir-paquete-de-cartas",
+"name": "Abrir paquete de cartas",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-abrir-paquete-de-cartas.ogg",
+"dur": 0.94,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-poner-carta-1",
+"name": "Poner carta 1",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-poner-carta-1.ogg",
+"dur": 0.69,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-poner-carta-2",
+"name": "Poner carta 2",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-poner-carta-2.ogg",
+"dur": 0.46,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-empujar-carta-1",
+"name": "Empujar carta 1",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-empujar-carta-1.ogg",
+"dur": 0.77,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-empujar-carta-2",
+"name": "Empujar carta 2",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-empujar-carta-2.ogg",
+"dur": 0.77,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-barajar-cartas",
+"name": "Barajar cartas",
+"cat": "objetos",
+"tags": "cartas casino",
+"file": "k-barajar-cartas.ogg",
+"dur": 3.06,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-deslizar-carta-1",
+"name": "Deslizar carta 1",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-deslizar-carta-1.ogg",
+"dur": 0.6,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-deslizar-carta-2",
+"name": "Deslizar carta 2",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-deslizar-carta-2.ogg",
+"dur": 0.58,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-deslizar-carta-3",
+"name": "Deslizar carta 3",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-deslizar-carta-3.ogg",
+"dur": 0.6,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-sacar-cartas",
+"name": "Sacar cartas",
+"cat": "objetos",
+"tags": "cartas",
+"file": "k-sacar-cartas.ogg",
+"dur": 0.5,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-ficha-de-casino-1",
+"name": "Ficha de casino 1",
+"cat": "objetos",
+"tags": "casino apuesta",
+"file": "k-ficha-de-casino-1.ogg",
+"dur": 0.17,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-ficha-de-casino-2",
+"name": "Ficha de casino 2",
+"cat": "objetos",
+"tags": "casino apuesta",
+"file": "k-ficha-de-casino-2.ogg",
+"dur": 0.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fichas-chocando-1",
+"name": "Fichas chocando 1",
+"cat": "objetos",
+"tags": "casino apuesta",
+"file": "k-fichas-chocando-1.ogg",
+"dur": 0.26,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fichas-chocando-2",
+"name": "Fichas chocando 2",
+"cat": "objetos",
+"tags": "casino apuesta",
+"file": "k-fichas-chocando-2.ogg",
+"dur": 0.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-ado-de-fichas-1",
+"name": "Puñado de fichas 1",
+"cat": "objetos",
+"tags": "casino apuesta dinero",
+"file": "k-pu-ado-de-fichas-1.ogg",
+"dur": 0.62,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-ado-de-fichas-2",
+"name": "Puñado de fichas 2",
+"cat": "objetos",
+"tags": "casino apuesta dinero",
+"file": "k-pu-ado-de-fichas-2.ogg",
+"dur": 0.55,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-ado-de-fichas-3",
+"name": "Puñado de fichas 3",
+"cat": "objetos",
+"tags": "casino apuesta dinero",
+"file": "k-pu-ado-de-fichas-3.ogg",
+"dur": 0.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-torre-de-fichas-1",
+"name": "Torre de fichas 1",
+"cat": "objetos",
+"tags": "casino apuesta dinero",
+"file": "k-torre-de-fichas-1.ogg",
+"dur": 0.29,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-torre-de-fichas-2",
+"name": "Torre de fichas 2",
+"cat": "objetos",
+"tags": "casino apuesta dinero",
+"file": "k-torre-de-fichas-2.ogg",
+"dur": 0.17,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-torre-de-fichas-3",
+"name": "Torre de fichas 3",
+"cat": "objetos",
+"tags": "casino apuesta dinero",
+"file": "k-torre-de-fichas-3.ogg",
+"dur": 0.37,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-lanzar-dados-1",
+"name": "Lanzar dados 1",
+"cat": "videojuegos",
+"tags": "dados suerte casino",
+"file": "k-lanzar-dados-1.ogg",
+"dur": 0.53,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-lanzar-dados-2",
+"name": "Lanzar dados 2",
+"cat": "videojuegos",
+"tags": "dados suerte casino",
+"file": "k-lanzar-dados-2.ogg",
+"dur": 0.65,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-lanzar-dados-3",
+"name": "Lanzar dados 3",
+"cat": "videojuegos",
+"tags": "dados suerte casino",
+"file": "k-lanzar-dados-3.ogg",
+"dur": 0.73,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-agarrar-dado",
+"name": "Agarrar dado",
+"cat": "objetos",
+"tags": "dados",
+"file": "k-agarrar-dado.ogg",
+"dur": 0.7,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-agitar-dados-1",
+"name": "Agitar dados 1",
+"cat": "videojuegos",
+"tags": "dados suerte",
+"file": "k-agitar-dados-1.ogg",
+"dur": 1.48,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-agitar-dados-2",
+"name": "Agitar dados 2",
+"cat": "videojuegos",
+"tags": "dados suerte",
+"file": "k-agitar-dados-2.ogg",
+"dur": 1.38,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tirar-un-dado-1",
+"name": "Tirar un dado 1",
+"cat": "videojuegos",
+"tags": "dados suerte",
+"file": "k-tirar-un-dado-1.ogg",
+"dur": 0.63,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tirar-un-dado-2",
+"name": "Tirar un dado 2",
+"cat": "videojuegos",
+"tags": "dados suerte",
+"file": "k-tirar-un-dado-2.ogg",
+"dur": 0.4,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-bajada-aguda",
+"name": "Bajada aguda",
+"cat": "videojuegos",
+"tags": "retro arcade bajar",
+"file": "k-bajada-aguda.ogg",
+"dur": 0.52,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-subida-aguda",
+"name": "Subida aguda",
+"cat": "videojuegos",
+"tags": "retro arcade subir",
+"file": "k-subida-aguda.ogg",
+"dur": 0.55,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-l-ser-1",
+"name": "Láser 1",
+"cat": "videojuegos",
+"tags": "disparo espacio pew ciencia ficción",
+"file": "k-l-ser-1.ogg",
+"dur": 1.1,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-l-ser-2",
+"name": "Láser 2",
+"cat": "videojuegos",
+"tags": "disparo espacio pew ciencia ficción",
+"file": "k-l-ser-2.ogg",
+"dur": 1.09,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-l-ser-3",
+"name": "Láser 3",
+"cat": "videojuegos",
+"tags": "disparo espacio pew ciencia ficción",
+"file": "k-l-ser-3.ogg",
+"dur": 0.98,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-l-ser-4",
+"name": "Láser 4",
+"cat": "videojuegos",
+"tags": "disparo espacio pew ciencia ficción",
+"file": "k-l-ser-4.ogg",
+"dur": 1.13,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-l-ser-5",
+"name": "Láser 5",
+"cat": "videojuegos",
+"tags": "disparo espacio pew ciencia ficción",
+"file": "k-l-ser-5.ogg",
+"dur": 1.01,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-l-ser-6",
+"name": "Láser 6",
+"cat": "videojuegos",
+"tags": "disparo espacio pew ciencia ficción",
+"file": "k-l-ser-6.ogg",
+"dur": 0.97,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-bajada-grave",
+"name": "Bajada grave",
+"cat": "fallos",
+"tags": "retro bajar perder",
+"file": "k-bajada-grave.ogg",
+"dur": 0.78,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-ruido-grave-raro",
+"name": "Ruido grave raro",
+"cat": "sospechosos",
+"tags": "raro extraño",
+"file": "k-ruido-grave-raro.ogg",
+"dur": 0.55,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tres-tonos-graves",
+"name": "Tres tonos graves",
+"cat": "fallos",
+"tags": "retro error",
+"file": "k-tres-tonos-graves.ogg",
+"dur": 1.02,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pip-pip-1",
+"name": "Pip pip 1",
+"cat": "alertas",
+"tags": "aviso notificación",
+"file": "k-pip-pip-1.ogg",
+"dur": 0.52,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pip-pip-2",
+"name": "Pip pip 2",
+"cat": "alertas",
+"tags": "aviso notificación",
+"file": "k-pip-pip-2.ogg",
+"dur": 0.55,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pip-pip-3",
+"name": "Pip pip 3",
+"cat": "alertas",
+"tags": "aviso notificación",
+"file": "k-pip-pip-3.ogg",
+"dur": 0.44,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-salto-de-fase-1",
+"name": "Salto de fase 1",
+"cat": "videojuegos",
+"tags": "salto retro brincar",
+"file": "k-salto-de-fase-1.ogg",
+"dur": 0.47,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-salto-de-fase-2",
+"name": "Salto de fase 2",
+"cat": "videojuegos",
+"tags": "salto retro brincar",
+"file": "k-salto-de-fase-2.ogg",
+"dur": 0.39,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-salto-de-fase-3",
+"name": "Salto de fase 3",
+"cat": "videojuegos",
+"tags": "salto retro brincar",
+"file": "k-salto-de-fase-3.ogg",
+"dur": 0.44,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-f-ser-hacia-abajo-1",
+"name": "Fáser hacia abajo 1",
+"cat": "videojuegos",
+"tags": "espacio láser bajar",
+"file": "k-f-ser-hacia-abajo-1.ogg",
+"dur": 0.47,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-f-ser-hacia-abajo-2",
+"name": "Fáser hacia abajo 2",
+"cat": "videojuegos",
+"tags": "espacio láser bajar",
+"file": "k-f-ser-hacia-abajo-2.ogg",
+"dur": 0.31,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-f-ser-hacia-arriba-1",
+"name": "Fáser hacia arriba 1",
+"cat": "videojuegos",
+"tags": "espacio láser subir",
+"file": "k-f-ser-hacia-arriba-1.ogg",
+"dur": 0.5,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-f-ser-hacia-arriba-2",
+"name": "Fáser hacia arriba 2",
+"cat": "videojuegos",
+"tags": "espacio láser subir",
+"file": "k-f-ser-hacia-arriba-2.ogg",
+"dur": 0.42,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-f-ser-hacia-arriba-3",
+"name": "Fáser hacia arriba 3",
+"cat": "videojuegos",
+"tags": "espacio láser subir",
+"file": "k-f-ser-hacia-arriba-3.ogg",
+"dur": 0.52,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-1",
+"name": "Power up 1",
+"cat": "celebracion",
+"tags": "mejora subir nivel bonus retro",
+"file": "k-power-up-1.ogg",
+"dur": 1.2,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-2",
+"name": "Power up 2",
+"cat": "celebracion",
+"tags": "mejora subir nivel bonus retro",
+"file": "k-power-up-2.ogg",
+"dur": 0.65,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-3",
+"name": "Power up 3",
+"cat": "celebracion",
+"tags": "mejora subir nivel bonus retro",
+"file": "k-power-up-3.ogg",
+"dur": 0.68,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-4",
+"name": "Power up 4",
+"cat": "celebracion",
+"tags": "mejora subir nivel bonus retro",
+"file": "k-power-up-4.ogg",
+"dur": 0.86,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-5",
+"name": "Power up 5",
+"cat": "celebracion",
+"tags": "mejora subir nivel bonus retro",
+"file": "k-power-up-5.ogg",
+"dur": 0.47,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-6",
+"name": "Power up 6",
+"cat": "celebracion",
+"tags": "mejora subir nivel bonus retro",
+"file": "k-power-up-6.ogg",
+"dur": 1.15,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-7",
+"name": "Power up 7",
+"cat": "celebracion",
+"tags": "mejora subir nivel bonus retro",
+"file": "k-power-up-7.ogg",
+"dur": 0.55,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-8",
+"name": "Power up 8",
+"cat": "celebracion",
+"tags": "mejora subir nivel bonus retro",
+"file": "k-power-up-8.ogg",
+"dur": 0.44,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-chatarra-espacial-1",
+"name": "Chatarra espacial 1",
+"cat": "sospechosos",
+"tags": "raro espacio extraño",
+"file": "k-chatarra-espacial-1.ogg",
+"dur": 1.45,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-chatarra-espacial-2",
+"name": "Chatarra espacial 2",
+"cat": "sospechosos",
+"tags": "raro espacio extraño",
+"file": "k-chatarra-espacial-2.ogg",
+"dur": 1.47,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-chatarra-espacial-3",
+"name": "Chatarra espacial 3",
+"cat": "sospechosos",
+"tags": "raro espacio extraño",
+"file": "k-chatarra-espacial-3.ogg",
+"dur": 1.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tres-tonos-1",
+"name": "Tres tonos 1",
+"cat": "alertas",
+"tags": "aviso campana",
+"file": "k-tres-tonos-1.ogg",
+"dur": 0.83,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tres-tonos-2",
+"name": "Tres tonos 2",
+"cat": "alertas",
+"tags": "aviso campana",
+"file": "k-tres-tonos-2.ogg",
+"dur": 0.87,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tono",
+"name": "Tono",
+"cat": "alertas",
+"tags": "aviso",
+"file": "k-tono.ogg",
+"dur": 0.66,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-dos-tonos-1",
+"name": "Dos tonos 1",
+"cat": "alertas",
+"tags": "aviso timbre",
+"file": "k-dos-tonos-1.ogg",
+"dur": 0.72,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-dos-tonos-2",
+"name": "Dos tonos 2",
+"cat": "alertas",
+"tags": "aviso timbre",
+"file": "k-dos-tonos-2.ogg",
+"dur": 0.73,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-zap-el-ctrico-1",
+"name": "Zap eléctrico 1",
+"cat": "videojuegos",
+"tags": "electricidad corriente",
+"file": "k-zap-el-ctrico-1.ogg",
+"dur": 1.02,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-zap-el-ctrico-2",
+"name": "Zap eléctrico 2",
+"cat": "videojuegos",
+"tags": "electricidad corriente",
+"file": "k-zap-el-ctrico-2.ogg",
+"dur": 1.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-zap-que-baja",
+"name": "Zap que baja",
+"cat": "fallos",
+"tags": "perder bajar retro",
+"file": "k-zap-que-baja.ogg",
+"dur": 1.33,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-zap-que-sube",
+"name": "Zap que sube",
+"cat": "celebracion",
+"tags": "ganar subir retro",
+"file": "k-zap-que-sube.ogg",
+"dur": 1.2,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-zap-doble-1",
+"name": "Zap doble 1",
+"cat": "videojuegos",
+"tags": "electricidad retro",
+"file": "k-zap-doble-1.ogg",
+"dur": 1.31,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-zap-doble-2",
+"name": "Zap doble 2",
+"cat": "videojuegos",
+"tags": "electricidad retro",
+"file": "k-zap-doble-2.ogg",
+"dur": 1.2,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-alfombra-1",
+"name": "Pasos en alfombra 1",
+"cat": "objetos",
+"tags": "pasos caminar",
+"file": "k-pasos-en-alfombra-1.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-alfombra-2",
+"name": "Pasos en alfombra 2",
+"cat": "objetos",
+"tags": "pasos caminar",
+"file": "k-pasos-en-alfombra-2.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-cemento-1",
+"name": "Pasos en cemento 1",
+"cat": "sospechosos",
+"tags": "pasos caminar alguien viene",
+"file": "k-pasos-en-cemento-1.ogg",
+"dur": 0.11,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-cemento-2",
+"name": "Pasos en cemento 2",
+"cat": "sospechosos",
+"tags": "pasos caminar alguien viene",
+"file": "k-pasos-en-cemento-2.ogg",
+"dur": 0.11,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-cemento-3",
+"name": "Pasos en cemento 3",
+"cat": "sospechosos",
+"tags": "pasos caminar alguien viene",
+"file": "k-pasos-en-cemento-3.ogg",
+"dur": 0.11,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-pasto-1",
+"name": "Pasos en pasto 1",
+"cat": "objetos",
+"tags": "pasos caminar",
+"file": "k-pasos-en-pasto-1.ogg",
+"dur": 0.78,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-pasto-2",
+"name": "Pasos en pasto 2",
+"cat": "objetos",
+"tags": "pasos caminar",
+"file": "k-pasos-en-pasto-2.ogg",
+"dur": 0.67,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-nieve-1",
+"name": "Pasos en nieve 1",
+"cat": "objetos",
+"tags": "pasos caminar",
+"file": "k-pasos-en-nieve-1.ogg",
+"dur": 0.37,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-nieve-2",
+"name": "Pasos en nieve 2",
+"cat": "objetos",
+"tags": "pasos caminar",
+"file": "k-pasos-en-nieve-2.ogg",
+"dur": 0.37,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-madera-1",
+"name": "Pasos en madera 1",
+"cat": "sospechosos",
+"tags": "pasos caminar crujir",
+"file": "k-pasos-en-madera-1.ogg",
+"dur": 0.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-madera-2",
+"name": "Pasos en madera 2",
+"cat": "sospechosos",
+"tags": "pasos caminar crujir",
+"file": "k-pasos-en-madera-2.ogg",
+"dur": 0.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-en-madera-3",
+"name": "Pasos en madera 3",
+"cat": "sospechosos",
+"tags": "pasos caminar crujir",
+"file": "k-pasos-en-madera-3.ogg",
+"dur": 0.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-campanazo-1",
+"name": "Campanazo 1",
+"cat": "dramaticos",
+"tags": "campana golpe gong",
+"file": "k-campanazo-1.ogg",
+"dur": 1.48,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-campanazo-2",
+"name": "Campanazo 2",
+"cat": "dramaticos",
+"tags": "campana golpe gong",
+"file": "k-campanazo-2.ogg",
+"dur": 1.74,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-campanazo-3",
+"name": "Campanazo 3",
+"cat": "dramaticos",
+"tags": "campana golpe gong",
+"file": "k-campanazo-3.ogg",
+"dur": 0.7,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpecito-1",
+"name": "Golpecito 1",
+"cat": "golpes",
+"tags": "golpe toque",
+"file": "k-golpecito-1.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpecito-2",
+"name": "Golpecito 2",
+"cat": "golpes",
+"tags": "golpe toque",
+"file": "k-golpecito-2.ogg",
+"dur": 0.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpecito-3",
+"name": "Golpecito 3",
+"cat": "golpes",
+"tags": "golpe toque",
+"file": "k-golpecito-3.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-vidrio-roto-1",
+"name": "Vidrio roto 1",
+"cat": "golpes",
+"tags": "romper cristal crash",
+"file": "k-vidrio-roto-1.ogg",
+"dur": 0.24,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-vidrio-roto-2",
+"name": "Vidrio roto 2",
+"cat": "golpes",
+"tags": "romper cristal crash",
+"file": "k-vidrio-roto-2.ogg",
+"dur": 0.43,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-vidrio-roto-3",
+"name": "Vidrio roto 3",
+"cat": "golpes",
+"tags": "romper cristal crash",
+"file": "k-vidrio-roto-3.ogg",
+"dur": 0.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tintineo-de-vidrio-1",
+"name": "Tintineo de vidrio 1",
+"cat": "objetos",
+"tags": "cristal brindis",
+"file": "k-tintineo-de-vidrio-1.ogg",
+"dur": 0.21,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tintineo-de-vidrio-2",
+"name": "Tintineo de vidrio 2",
+"cat": "objetos",
+"tags": "cristal brindis",
+"file": "k-tintineo-de-vidrio-2.ogg",
+"dur": 0.21,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-de-vidrio-1",
+"name": "Golpe de vidrio 1",
+"cat": "golpes",
+"tags": "cristal",
+"file": "k-golpe-de-vidrio-1.ogg",
+"dur": 0.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-de-vidrio-2",
+"name": "Golpe de vidrio 2",
+"cat": "golpes",
+"tags": "cristal",
+"file": "k-golpe-de-vidrio-2.ogg",
+"dur": 0.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-met-lico-fuerte-1",
+"name": "Golpe metálico fuerte 1",
+"cat": "golpes",
+"tags": "metal clang pum",
+"file": "k-golpe-met-lico-fuerte-1.ogg",
+"dur": 0.17,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-met-lico-fuerte-2",
+"name": "Golpe metálico fuerte 2",
+"cat": "golpes",
+"tags": "metal clang pum",
+"file": "k-golpe-met-lico-fuerte-2.ogg",
+"dur": 0.36,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-met-lico-fuerte-3",
+"name": "Golpe metálico fuerte 3",
+"cat": "golpes",
+"tags": "metal clang pum",
+"file": "k-golpe-met-lico-fuerte-3.ogg",
+"dur": 0.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-toque-met-lico-1",
+"name": "Toque metálico 1",
+"cat": "objetos",
+"tags": "metal",
+"file": "k-toque-met-lico-1.ogg",
+"dur": 0.35,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-toque-met-lico-2",
+"name": "Toque metálico 2",
+"cat": "objetos",
+"tags": "metal",
+"file": "k-toque-met-lico-2.ogg",
+"dur": 0.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-met-lico-1",
+"name": "Golpe metálico 1",
+"cat": "golpes",
+"tags": "metal clang",
+"file": "k-golpe-met-lico-1.ogg",
+"dur": 0.27,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-met-lico-2",
+"name": "Golpe metálico 2",
+"cat": "golpes",
+"tags": "metal clang",
+"file": "k-golpe-met-lico-2.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-picazo-de-mina-1",
+"name": "Picazo de mina 1",
+"cat": "videojuegos",
+"tags": "minar pico minecraft",
+"file": "k-picazo-de-mina-1.ogg",
+"dur": 0.94,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-picazo-de-mina-2",
+"name": "Picazo de mina 2",
+"cat": "videojuegos",
+"tags": "minar pico minecraft",
+"file": "k-picazo-de-mina-2.ogg",
+"dur": 0.87,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-picazo-de-mina-3",
+"name": "Picazo de mina 3",
+"cat": "videojuegos",
+"tags": "minar pico minecraft",
+"file": "k-picazo-de-mina-3.ogg",
+"dur": 0.8,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-de-tabla-1",
+"name": "Golpe de tabla 1",
+"cat": "golpes",
+"tags": "madera",
+"file": "k-golpe-de-tabla-1.ogg",
+"dur": 0.78,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-de-tabla-2",
+"name": "Golpe de tabla 2",
+"cat": "golpes",
+"tags": "madera",
+"file": "k-golpe-de-tabla-2.ogg",
+"dur": 0.78,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-plato-que-se-cae-1",
+"name": "Plato que se cae 1",
+"cat": "fallos",
+"tags": "romper plato crash torpe",
+"file": "k-plato-que-se-cae-1.ogg",
+"dur": 0.49,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-plato-que-se-cae-2",
+"name": "Plato que se cae 2",
+"cat": "fallos",
+"tags": "romper plato crash torpe",
+"file": "k-plato-que-se-cae-2.ogg",
+"dur": 0.35,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-plato-que-se-cae-3",
+"name": "Plato que se cae 3",
+"cat": "fallos",
+"tags": "romper plato crash torpe",
+"file": "k-plato-que-se-cae-3.ogg",
+"dur": 0.49,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-plato-1",
+"name": "Plato 1",
+"cat": "objetos",
+"tags": "plato",
+"file": "k-plato-1.ogg",
+"dur": 0.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-plato-2",
+"name": "Plato 2",
+"cat": "objetos",
+"tags": "plato",
+"file": "k-plato-2.ogg",
+"dur": 0.65,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-de-plato-1",
+"name": "Golpe de plato 1",
+"cat": "golpes",
+"tags": "plato",
+"file": "k-golpe-de-plato-1.ogg",
+"dur": 0.61,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-de-plato-2",
+"name": "Golpe de plato 2",
+"cat": "golpes",
+"tags": "plato",
+"file": "k-golpe-de-plato-2.ogg",
+"dur": 0.62,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-etazo-fuerte-1",
+"name": "Puñetazo fuerte 1",
+"cat": "golpes",
+"tags": "pelea golpe pum boxeo",
+"file": "k-pu-etazo-fuerte-1.ogg",
+"dur": 0.65,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-etazo-fuerte-2",
+"name": "Puñetazo fuerte 2",
+"cat": "golpes",
+"tags": "pelea golpe pum boxeo",
+"file": "k-pu-etazo-fuerte-2.ogg",
+"dur": 0.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-etazo-fuerte-3",
+"name": "Puñetazo fuerte 3",
+"cat": "golpes",
+"tags": "pelea golpe pum boxeo",
+"file": "k-pu-etazo-fuerte-3.ogg",
+"dur": 0.46,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-etazo-fuerte-4",
+"name": "Puñetazo fuerte 4",
+"cat": "golpes",
+"tags": "pelea golpe pum boxeo",
+"file": "k-pu-etazo-fuerte-4.ogg",
+"dur": 0.47,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-etazo-1",
+"name": "Puñetazo 1",
+"cat": "golpes",
+"tags": "pelea golpe boxeo",
+"file": "k-pu-etazo-1.ogg",
+"dur": 0.43,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-etazo-2",
+"name": "Puñetazo 2",
+"cat": "golpes",
+"tags": "pelea golpe boxeo",
+"file": "k-pu-etazo-2.ogg",
+"dur": 0.4,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-etazo-3",
+"name": "Puñetazo 3",
+"cat": "golpes",
+"tags": "pelea golpe boxeo",
+"file": "k-pu-etazo-3.ogg",
+"dur": 0.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pu-etazo-4",
+"name": "Puñetazo 4",
+"cat": "golpes",
+"tags": "pelea golpe boxeo",
+"file": "k-pu-etazo-4.ogg",
+"dur": 0.46,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-sordo-1",
+"name": "Golpe sordo 1",
+"cat": "dramaticos",
+"tags": "pum caída",
+"file": "k-golpe-sordo-1.ogg",
+"dur": 0.51,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-sordo-2",
+"name": "Golpe sordo 2",
+"cat": "dramaticos",
+"tags": "pum caída",
+"file": "k-golpe-sordo-2.ogg",
+"dur": 0.57,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-sordo-3",
+"name": "Golpe sordo 3",
+"cat": "dramaticos",
+"tags": "pum caída",
+"file": "k-golpe-sordo-3.ogg",
+"dur": 0.57,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-suave-1",
+"name": "Golpe suave 1",
+"cat": "golpes",
+"tags": "pum",
+"file": "k-golpe-suave-1.ogg",
+"dur": 0.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-suave-2",
+"name": "Golpe suave 2",
+"cat": "golpes",
+"tags": "pum",
+"file": "k-golpe-suave-2.ogg",
+"dur": 0.18,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-lata-1",
+"name": "Lata 1",
+"cat": "objetos",
+"tags": "metal lata",
+"file": "k-lata-1.ogg",
+"dur": 0.16,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-lata-2",
+"name": "Lata 2",
+"cat": "objetos",
+"tags": "metal lata",
+"file": "k-lata-2.ogg",
+"dur": 0.17,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-madera-fuerte-1",
+"name": "Madera fuerte 1",
+"cat": "golpes",
+"tags": "madera toc",
+"file": "k-madera-fuerte-1.ogg",
+"dur": 0.31,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-madera-fuerte-2",
+"name": "Madera fuerte 2",
+"cat": "golpes",
+"tags": "madera toc",
+"file": "k-madera-fuerte-2.ogg",
+"dur": 0.31,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-toc-toc-1",
+"name": "Toc toc 1",
+"cat": "objetos",
+"tags": "madera tocar puerta",
+"file": "k-toc-toc-1.ogg",
+"dur": 0.27,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-toc-toc-2",
+"name": "Toc toc 2",
+"cat": "objetos",
+"tags": "madera tocar puerta",
+"file": "k-toc-toc-2.ogg",
+"dur": 0.27,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-toc-toc-3",
+"name": "Toc toc 3",
+"cat": "objetos",
+"tags": "madera tocar puerta",
+"file": "k-toc-toc-3.ogg",
+"dur": 0.27,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-de-madera-1",
+"name": "Golpe de madera 1",
+"cat": "golpes",
+"tags": "madera",
+"file": "k-golpe-de-madera-1.ogg",
+"dur": 0.33,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-golpe-de-madera-2",
+"name": "Golpe de madera 2",
+"cat": "golpes",
+"tags": "madera",
+"file": "k-golpe-de-madera-2.ogg",
+"dur": 0.33,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-volver-1",
+"name": "Volver 1",
+"cat": "alertas",
+"tags": "interfaz clic",
+"file": "k-volver-1.ogg",
+"dur": 0.06,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-volver-2",
+"name": "Volver 2",
+"cat": "alertas",
+"tags": "interfaz clic",
+"file": "k-volver-2.ogg",
+"dur": 0.07,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-bong",
+"name": "Bong",
+"cat": "alertas",
+"tags": "campana aviso",
+"file": "k-bong.ogg",
+"dur": 0.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-clic-1",
+"name": "Clic 1",
+"cat": "alertas",
+"tags": "interfaz botón",
+"file": "k-clic-1.ogg",
+"dur": 0.1,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-clic-2",
+"name": "Clic 2",
+"cat": "alertas",
+"tags": "interfaz botón",
+"file": "k-clic-2.ogg",
+"dur": 0.01,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-clic-3",
+"name": "Clic 3",
+"cat": "alertas",
+"tags": "interfaz botón",
+"file": "k-clic-3.ogg",
+"dur": 0.01,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cerrar-1",
+"name": "Cerrar 1",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-cerrar-1.ogg",
+"dur": 0.15,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cerrar-2",
+"name": "Cerrar 2",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-cerrar-2.ogg",
+"dur": 0.31,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-confirmaci-n-1",
+"name": "Confirmación 1",
+"cat": "celebracion",
+"tags": "bien correcto listo",
+"file": "k-confirmaci-n-1.ogg",
+"dur": 0.29,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-confirmaci-n-2",
+"name": "Confirmación 2",
+"cat": "celebracion",
+"tags": "bien correcto listo",
+"file": "k-confirmaci-n-2.ogg",
+"dur": 0.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-confirmaci-n-3",
+"name": "Confirmación 3",
+"cat": "celebracion",
+"tags": "bien correcto listo",
+"file": "k-confirmaci-n-3.ogg",
+"dur": 0.32,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-confirmaci-n-4",
+"name": "Confirmación 4",
+"cat": "celebracion",
+"tags": "bien correcto listo",
+"file": "k-confirmaci-n-4.ogg",
+"dur": 0.49,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-gota-1",
+"name": "Gota 1",
+"cat": "alertas",
+"tags": "agua plop",
+"file": "k-gota-1.ogg",
+"dur": 0.11,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-gota-2",
+"name": "Gota 2",
+"cat": "alertas",
+"tags": "agua plop",
+"file": "k-gota-2.ogg",
+"dur": 0.19,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-gota-3",
+"name": "Gota 3",
+"cat": "alertas",
+"tags": "agua plop",
+"file": "k-gota-3.ogg",
+"dur": 0.19,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-error-1",
+"name": "Error 1",
+"cat": "fallos",
+"tags": "mal incorrecto no",
+"file": "k-error-1.ogg",
+"dur": 0.16,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-error-2",
+"name": "Error 2",
+"cat": "fallos",
+"tags": "mal incorrecto no",
+"file": "k-error-2.ogg",
+"dur": 0.16,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-error-3",
+"name": "Error 3",
+"cat": "fallos",
+"tags": "mal incorrecto no",
+"file": "k-error-3.ogg",
+"dur": 0.53,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-error-4",
+"name": "Error 4",
+"cat": "fallos",
+"tags": "mal incorrecto no",
+"file": "k-error-4.ogg",
+"dur": 0.1,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-error-5",
+"name": "Error 5",
+"cat": "fallos",
+"tags": "mal incorrecto no",
+"file": "k-error-5.ogg",
+"dur": 0.5,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-error-6",
+"name": "Error 6",
+"cat": "fallos",
+"tags": "mal incorrecto no",
+"file": "k-error-6.ogg",
+"dur": 0.5,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cristalito-1",
+"name": "Cristalito 1",
+"cat": "alertas",
+"tags": "campanita brillo",
+"file": "k-cristalito-1.ogg",
+"dur": 0.28,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cristalito-2",
+"name": "Cristalito 2",
+"cat": "alertas",
+"tags": "campanita brillo",
+"file": "k-cristalito-2.ogg",
+"dur": 0.13,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cristalito-3",
+"name": "Cristalito 3",
+"cat": "alertas",
+"tags": "campanita brillo",
+"file": "k-cristalito-3.ogg",
+"dur": 0.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cristalito-4",
+"name": "Cristalito 4",
+"cat": "alertas",
+"tags": "campanita brillo",
+"file": "k-cristalito-4.ogg",
+"dur": 0.69,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-glitch-1",
+"name": "Glitch 1",
+"cat": "sospechosos",
+"tags": "falla raro hackeo",
+"file": "k-glitch-1.ogg",
+"dur": 0.02,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-glitch-2",
+"name": "Glitch 2",
+"cat": "sospechosos",
+"tags": "falla raro hackeo",
+"file": "k-glitch-2.ogg",
+"dur": 0.03,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-glitch-3",
+"name": "Glitch 3",
+"cat": "sospechosos",
+"tags": "falla raro hackeo",
+"file": "k-glitch-3.ogg",
+"dur": 0.01,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-glitch-4",
+"name": "Glitch 4",
+"cat": "sospechosos",
+"tags": "falla raro hackeo",
+"file": "k-glitch-4.ogg",
+"dur": 0.02,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-agrandar-1",
+"name": "Agrandar 1",
+"cat": "alertas",
+"tags": "interfaz subir",
+"file": "k-agrandar-1.ogg",
+"dur": 0.26,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-agrandar-2",
+"name": "Agrandar 2",
+"cat": "alertas",
+"tags": "interfaz subir",
+"file": "k-agrandar-2.ogg",
+"dur": 0.26,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-agrandar-3",
+"name": "Agrandar 3",
+"cat": "alertas",
+"tags": "interfaz subir",
+"file": "k-agrandar-3.ogg",
+"dur": 0.21,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-achicar-1",
+"name": "Achicar 1",
+"cat": "alertas",
+"tags": "interfaz bajar",
+"file": "k-achicar-1.ogg",
+"dur": 0.26,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-achicar-2",
+"name": "Achicar 2",
+"cat": "alertas",
+"tags": "interfaz bajar",
+"file": "k-achicar-2.ogg",
+"dur": 0.26,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-achicar-3",
+"name": "Achicar 3",
+"cat": "alertas",
+"tags": "interfaz bajar",
+"file": "k-achicar-3.ogg",
+"dur": 0.21,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-abrir-1",
+"name": "Abrir 1",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-abrir-1.ogg",
+"dur": 0.15,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-abrir-2",
+"name": "Abrir 2",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-abrir-2.ogg",
+"dur": 0.31,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cuerda-pulsada-1",
+"name": "Cuerda pulsada 1",
+"cat": "alertas",
+"tags": "pluck musica",
+"file": "k-cuerda-pulsada-1.ogg",
+"dur": 0.1,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cuerda-pulsada-2",
+"name": "Cuerda pulsada 2",
+"cat": "alertas",
+"tags": "pluck musica",
+"file": "k-cuerda-pulsada-2.ogg",
+"dur": 0.16,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pregunta-1",
+"name": "Pregunta 1",
+"cat": "sospechosos",
+"tags": "duda qué hmm",
+"file": "k-pregunta-1.ogg",
+"dur": 0.49,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pregunta-2",
+"name": "Pregunta 2",
+"cat": "sospechosos",
+"tags": "duda qué hmm",
+"file": "k-pregunta-2.ogg",
+"dur": 0.33,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pregunta-3",
+"name": "Pregunta 3",
+"cat": "sospechosos",
+"tags": "duda qué hmm",
+"file": "k-pregunta-3.ogg",
+"dur": 0.33,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pregunta-4",
+"name": "Pregunta 4",
+"cat": "sospechosos",
+"tags": "duda qué hmm",
+"file": "k-pregunta-4.ogg",
+"dur": 0.33,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-rasp-n-1",
+"name": "Raspón 1",
+"cat": "golpes",
+"tags": "rayar disco",
+"file": "k-rasp-n-1.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-rasp-n-2",
+"name": "Raspón 2",
+"cat": "golpes",
+"tags": "rayar disco",
+"file": "k-rasp-n-2.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-rasp-n-3",
+"name": "Raspón 3",
+"cat": "golpes",
+"tags": "rayar disco",
+"file": "k-rasp-n-3.ogg",
+"dur": 0.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-desplazar-1",
+"name": "Desplazar 1",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-desplazar-1.ogg",
+"dur": 1.0,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-desplazar-2",
+"name": "Desplazar 2",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-desplazar-2.ogg",
+"dur": 1.0,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-seleccionar-1",
+"name": "Seleccionar 1",
+"cat": "alertas",
+"tags": "interfaz elegir",
+"file": "k-seleccionar-1.ogg",
+"dur": 0.04,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-seleccionar-2",
+"name": "Seleccionar 2",
+"cat": "alertas",
+"tags": "interfaz elegir",
+"file": "k-seleccionar-2.ogg",
+"dur": 0.04,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-seleccionar-3",
+"name": "Seleccionar 3",
+"cat": "alertas",
+"tags": "interfaz elegir",
+"file": "k-seleccionar-3.ogg",
+"dur": 0.38,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-seleccionar-4",
+"name": "Seleccionar 4",
+"cat": "alertas",
+"tags": "interfaz elegir",
+"file": "k-seleccionar-4.ogg",
+"dur": 0.38,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-interruptor-1",
+"name": "Interruptor 1",
+"cat": "alertas",
+"tags": "interfaz clic",
+"file": "k-interruptor-1.ogg",
+"dur": 0.62,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-interruptor-2",
+"name": "Interruptor 2",
+"cat": "alertas",
+"tags": "interfaz clic",
+"file": "k-interruptor-2.ogg",
+"dur": 0.61,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-interruptor-3",
+"name": "Interruptor 3",
+"cat": "alertas",
+"tags": "interfaz clic",
+"file": "k-interruptor-3.ogg",
+"dur": 0.5,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tic-1",
+"name": "Tic 1",
+"cat": "alertas",
+"tags": "reloj tiempo",
+"file": "k-tic-1.ogg",
+"dur": 0.02,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tic-2",
+"name": "Tic 2",
+"cat": "alertas",
+"tags": "reloj tiempo",
+"file": "k-tic-2.ogg",
+"dur": 0.02,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tic-3",
+"name": "Tic 3",
+"cat": "alertas",
+"tags": "reloj tiempo",
+"file": "k-tic-3.ogg",
+"dur": 0.05,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-palanca-1",
+"name": "Palanca 1",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-palanca-1.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-palanca-2",
+"name": "Palanca 2",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-palanca-2.ogg",
+"dur": 0.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fanfarria-de-golpes-1",
+"name": "Fanfarria de golpes 1",
+"cat": "celebracion",
+"tags": "victoria ganar música jingle",
+"file": "k-fanfarria-de-golpes-1.ogg",
+"dur": 0.28,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fanfarria-de-golpes-2",
+"name": "Fanfarria de golpes 2",
+"cat": "celebracion",
+"tags": "victoria ganar música jingle",
+"file": "k-fanfarria-de-golpes-2.ogg",
+"dur": 0.51,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fanfarria-de-golpes-3",
+"name": "Fanfarria de golpes 3",
+"cat": "celebracion",
+"tags": "victoria ganar música jingle",
+"file": "k-fanfarria-de-golpes-3.ogg",
+"dur": 0.52,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fanfarria-de-golpes-4",
+"name": "Fanfarria de golpes 4",
+"cat": "celebracion",
+"tags": "victoria ganar música jingle",
+"file": "k-fanfarria-de-golpes-4.ogg",
+"dur": 0.75,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fanfarria-de-golpes-5",
+"name": "Fanfarria de golpes 5",
+"cat": "celebracion",
+"tags": "victoria ganar música jingle",
+"file": "k-fanfarria-de-golpes-5.ogg",
+"dur": 0.64,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fanfarria-de-golpes-6",
+"name": "Fanfarria de golpes 6",
+"cat": "celebracion",
+"tags": "victoria ganar música jingle",
+"file": "k-fanfarria-de-golpes-6.ogg",
+"dur": 0.61,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fanfarria-de-golpes-7",
+"name": "Fanfarria de golpes 7",
+"cat": "celebracion",
+"tags": "victoria ganar música jingle",
+"file": "k-fanfarria-de-golpes-7.ogg",
+"dur": 0.51,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fanfarria-de-golpes-8",
+"name": "Fanfarria de golpes 8",
+"cat": "celebracion",
+"tags": "victoria ganar música jingle",
+"file": "k-fanfarria-de-golpes-8.ogg",
+"dur": 0.28,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-1",
+"name": "Melodía de 8 bits 1",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-1.ogg",
+"dur": 1.76,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-2",
+"name": "Melodía de 8 bits 2",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-2.ogg",
+"dur": 0.41,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-3",
+"name": "Melodía de 8 bits 3",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-3.ogg",
+"dur": 0.39,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-4",
+"name": "Melodía de 8 bits 4",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-4.ogg",
+"dur": 0.6,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-5",
+"name": "Melodía de 8 bits 5",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-5.ogg",
+"dur": 0.6,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-6",
+"name": "Melodía de 8 bits 6",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-6.ogg",
+"dur": 0.91,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-7",
+"name": "Melodía de 8 bits 7",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-7.ogg",
+"dur": 0.8,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-8",
+"name": "Melodía de 8 bits 8",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-8.ogg",
+"dur": 0.75,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-9",
+"name": "Melodía de 8 bits 9",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-9.ogg",
+"dur": 0.62,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-8-bits-10",
+"name": "Melodía de 8 bits 10",
+"cat": "videojuegos",
+"tags": "nintendo retro música jingle victoria",
+"file": "k-melod-a-de-8-bits-10.ogg",
+"dur": 0.44,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-cuerdas-1",
+"name": "Melodía de cuerdas 1",
+"cat": "celebracion",
+"tags": "música jingle",
+"file": "k-melod-a-de-cuerdas-1.ogg",
+"dur": 0.49,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-cuerdas-2",
+"name": "Melodía de cuerdas 2",
+"cat": "celebracion",
+"tags": "música jingle",
+"file": "k-melod-a-de-cuerdas-2.ogg",
+"dur": 1.0,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-cuerdas-3",
+"name": "Melodía de cuerdas 3",
+"cat": "celebracion",
+"tags": "música jingle",
+"file": "k-melod-a-de-cuerdas-3.ogg",
+"dur": 0.96,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-cuerdas-4",
+"name": "Melodía de cuerdas 4",
+"cat": "celebracion",
+"tags": "música jingle",
+"file": "k-melod-a-de-cuerdas-4.ogg",
+"dur": 1.15,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-cuerdas-5",
+"name": "Melodía de cuerdas 5",
+"cat": "celebracion",
+"tags": "música jingle",
+"file": "k-melod-a-de-cuerdas-5.ogg",
+"dur": 0.56,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-melod-a-de-cuerdas-6",
+"name": "Melodía de cuerdas 6",
+"cat": "celebracion",
+"tags": "música jingle",
+"file": "k-melod-a-de-cuerdas-6.ogg",
+"dur": 0.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-saxof-n-1",
+"name": "Saxofón 1",
+"cat": "graciosos",
+"tags": "música jingle sexy sax",
+"file": "k-saxof-n-1.ogg",
+"dur": 0.39,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-saxof-n-2",
+"name": "Saxofón 2",
+"cat": "graciosos",
+"tags": "música jingle sexy sax",
+"file": "k-saxof-n-2.ogg",
+"dur": 0.89,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-saxof-n-3",
+"name": "Saxofón 3",
+"cat": "graciosos",
+"tags": "música jingle sexy sax",
+"file": "k-saxof-n-3.ogg",
+"dur": 0.87,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-saxof-n-4",
+"name": "Saxofón 4",
+"cat": "graciosos",
+"tags": "música jingle sexy sax",
+"file": "k-saxof-n-4.ogg",
+"dur": 1.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-saxof-n-5",
+"name": "Saxofón 5",
+"cat": "graciosos",
+"tags": "música jingle sexy sax",
+"file": "k-saxof-n-5.ogg",
+"dur": 0.39,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-saxof-n-6",
+"name": "Saxofón 6",
+"cat": "graciosos",
+"tags": "música jingle sexy sax",
+"file": "k-saxof-n-6.ogg",
+"dur": 0.46,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-saxof-n-7",
+"name": "Saxofón 7",
+"cat": "graciosos",
+"tags": "música jingle sexy sax",
+"file": "k-saxof-n-7.ogg",
+"dur": 0.51,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-saxof-n-8",
+"name": "Saxofón 8",
+"cat": "graciosos",
+"tags": "música jingle sexy sax",
+"file": "k-saxof-n-8.ogg",
+"dur": 1.74,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tambor-met-lico-1",
+"name": "Tambor metálico 1",
+"cat": "celebracion",
+"tags": "caribe música jingle",
+"file": "k-tambor-met-lico-1.ogg",
+"dur": 0.93,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tambor-met-lico-2",
+"name": "Tambor metálico 2",
+"cat": "celebracion",
+"tags": "caribe música jingle",
+"file": "k-tambor-met-lico-2.ogg",
+"dur": 1.38,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tambor-met-lico-3",
+"name": "Tambor metálico 3",
+"cat": "celebracion",
+"tags": "caribe música jingle",
+"file": "k-tambor-met-lico-3.ogg",
+"dur": 1.39,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tambor-met-lico-4",
+"name": "Tambor metálico 4",
+"cat": "celebracion",
+"tags": "caribe música jingle",
+"file": "k-tambor-met-lico-4.ogg",
+"dur": 1.39,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tambor-met-lico-5",
+"name": "Tambor metálico 5",
+"cat": "celebracion",
+"tags": "caribe música jingle",
+"file": "k-tambor-met-lico-5.ogg",
+"dur": 0.91,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tambor-met-lico-6",
+"name": "Tambor metálico 6",
+"cat": "celebracion",
+"tags": "caribe música jingle",
+"file": "k-tambor-met-lico-6.ogg",
+"dur": 0.94,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-correa",
+"name": "Correa",
+"cat": "objetos",
+"tags": "cuero",
+"file": "k-correa.ogg",
+"dur": 0.28,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cerrar-libro",
+"name": "Cerrar libro",
+"cat": "objetos",
+"tags": "libro",
+"file": "k-cerrar-libro.ogg",
+"dur": 0.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasar-p-gina-1",
+"name": "Pasar página 1",
+"cat": "objetos",
+"tags": "libro hoja",
+"file": "k-pasar-p-gina-1.ogg",
+"dur": 0.77,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasar-p-gina-2",
+"name": "Pasar página 2",
+"cat": "objetos",
+"tags": "libro hoja",
+"file": "k-pasar-p-gina-2.ogg",
+"dur": 0.43,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-abrir-libro",
+"name": "Abrir libro",
+"cat": "objetos",
+"tags": "libro",
+"file": "k-abrir-libro.ogg",
+"dur": 0.15,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-dejar-libro",
+"name": "Dejar libro",
+"cat": "objetos",
+"tags": "libro",
+"file": "k-dejar-libro.ogg",
+"dur": 0.28,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-hachazo",
+"name": "Hachazo",
+"cat": "golpes",
+"tags": "cortar hacha",
+"file": "k-hachazo.ogg",
+"dur": 0.24,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tela-1",
+"name": "Tela 1",
+"cat": "objetos",
+"tags": "ropa",
+"file": "k-tela-1.ogg",
+"dur": 0.66,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tela-2",
+"name": "Tela 2",
+"cat": "objetos",
+"tags": "ropa",
+"file": "k-tela-2.ogg",
+"dur": 0.42,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cintur-n",
+"name": "Cinturón",
+"cat": "objetos",
+"tags": "ropa",
+"file": "k-cintur-n.ogg",
+"dur": 0.72,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-crujido-1",
+"name": "Crujido 1",
+"cat": "sospechosos",
+"tags": "puerta miedo terror crujir",
+"file": "k-crujido-1.ogg",
+"dur": 0.66,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-crujido-2",
+"name": "Crujido 2",
+"cat": "sospechosos",
+"tags": "puerta miedo terror crujir",
+"file": "k-crujido-2.ogg",
+"dur": 0.83,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-crujido-3",
+"name": "Crujido 3",
+"cat": "sospechosos",
+"tags": "puerta miedo terror crujir",
+"file": "k-crujido-3.ogg",
+"dur": 0.34,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-portazo-1",
+"name": "Portazo 1",
+"cat": "dramaticos",
+"tags": "puerta cerrar",
+"file": "k-portazo-1.ogg",
+"dur": 0.68,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-portazo-2",
+"name": "Portazo 2",
+"cat": "dramaticos",
+"tags": "puerta cerrar",
+"file": "k-portazo-2.ogg",
+"dur": 0.61,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-portazo-3",
+"name": "Portazo 3",
+"cat": "dramaticos",
+"tags": "puerta cerrar",
+"file": "k-portazo-3.ogg",
+"dur": 0.71,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-abrir-puerta-1",
+"name": "Abrir puerta 1",
+"cat": "sospechosos",
+"tags": "puerta alguien entra",
+"file": "k-abrir-puerta-1.ogg",
+"dur": 0.92,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-abrir-puerta-2",
+"name": "Abrir puerta 2",
+"cat": "sospechosos",
+"tags": "puerta alguien entra",
+"file": "k-abrir-puerta-2.ogg",
+"dur": 1.41,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-desenvainar-cuchillo-1",
+"name": "Desenvainar cuchillo 1",
+"cat": "sospechosos",
+"tags": "cuchillo amenaza",
+"file": "k-desenvainar-cuchillo-1.ogg",
+"dur": 0.4,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-desenvainar-cuchillo-2",
+"name": "Desenvainar cuchillo 2",
+"cat": "sospechosos",
+"tags": "cuchillo amenaza",
+"file": "k-desenvainar-cuchillo-2.ogg",
+"dur": 0.45,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-desenvainar-cuchillo-3",
+"name": "Desenvainar cuchillo 3",
+"cat": "sospechosos",
+"tags": "cuchillo amenaza",
+"file": "k-desenvainar-cuchillo-3.ogg",
+"dur": 0.48,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-soltar-bolso",
+"name": "Soltar bolso",
+"cat": "objetos",
+"tags": "cuero",
+"file": "k-soltar-bolso.ogg",
+"dur": 0.42,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-1",
+"name": "Pasos 1",
+"cat": "sospechosos",
+"tags": "pasos caminar alguien",
+"file": "k-pasos-1.ogg",
+"dur": 0.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-2",
+"name": "Pasos 2",
+"cat": "sospechosos",
+"tags": "pasos caminar alguien",
+"file": "k-pasos-2.ogg",
+"dur": 0.28,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasos-3",
+"name": "Pasos 3",
+"cat": "sospechosos",
+"tags": "pasos caminar alguien",
+"file": "k-pasos-3.ogg",
+"dur": 0.24,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-monedas-en-la-mano-1",
+"name": "Monedas en la mano 1",
+"cat": "celebracion",
+"tags": "dinero monedas regalo",
+"file": "k-monedas-en-la-mano-1.ogg",
+"dur": 0.85,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-monedas-en-la-mano-2",
+"name": "Monedas en la mano 2",
+"cat": "celebracion",
+"tags": "dinero monedas regalo",
+"file": "k-monedas-en-la-mano-2.ogg",
+"dur": 0.34,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-bolsita",
+"name": "Bolsita",
+"cat": "objetos",
+"tags": "cuero",
+"file": "k-bolsita.ogg",
+"dur": 0.34,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cuchillazo-1",
+"name": "Cuchillazo 1",
+"cat": "golpes",
+"tags": "cortar cuchillo",
+"file": "k-cuchillazo-1.ogg",
+"dur": 0.6,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cuchillazo-2",
+"name": "Cuchillazo 2",
+"cat": "golpes",
+"tags": "cortar cuchillo",
+"file": "k-cuchillazo-2.ogg",
+"dur": 0.57,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-clic-met-lico",
+"name": "Clic metálico",
+"cat": "objetos",
+"tags": "metal",
+"file": "k-clic-met-lico.ogg",
+"dur": 0.45,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cerrojo",
+"name": "Cerrojo",
+"cat": "sospechosos",
+"tags": "cerrar puerta encerrado",
+"file": "k-cerrojo.ogg",
+"dur": 0.26,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-olla-1",
+"name": "Olla 1",
+"cat": "graciosos",
+"tags": "cocina golpe olla",
+"file": "k-olla-1.ogg",
+"dur": 1.46,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-olla-2",
+"name": "Olla 2",
+"cat": "graciosos",
+"tags": "cocina golpe olla",
+"file": "k-olla-2.ogg",
+"dur": 0.94,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-olla-3",
+"name": "Olla 3",
+"cat": "graciosos",
+"tags": "cocina golpe olla",
+"file": "k-olla-3.ogg",
+"dur": 0.91,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-clic-suave-1",
+"name": "Clic suave 1",
+"cat": "alertas",
+"tags": "interfaz botón",
+"file": "k-clic-suave-1.ogg",
+"dur": 0.09,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-clic-suave-2",
+"name": "Clic suave 2",
+"cat": "alertas",
+"tags": "interfaz botón",
+"file": "k-clic-suave-2.ogg",
+"dur": 0.06,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-clic-suave-3",
+"name": "Clic suave 3",
+"cat": "alertas",
+"tags": "interfaz botón",
+"file": "k-clic-suave-3.ogg",
+"dur": 0.09,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-clic-de-rat-n",
+"name": "Clic de ratón",
+"cat": "alertas",
+"tags": "mouse",
+"file": "k-clic-de-rat-n.ogg",
+"dur": 0.06,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-soltar-rat-n",
+"name": "Soltar ratón",
+"cat": "alertas",
+"tags": "mouse",
+"file": "k-soltar-rat-n.ogg",
+"dur": 0.07,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasar-por-encima-1",
+"name": "Pasar por encima 1",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-pasar-por-encima-1.ogg",
+"dur": 0.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasar-por-encima-2",
+"name": "Pasar por encima 2",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-pasar-por-encima-2.ogg",
+"dur": 0.06,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-pasar-por-encima-3",
+"name": "Pasar por encima 3",
+"cat": "alertas",
+"tags": "interfaz",
+"file": "k-pasar-por-encima-3.ogg",
+"dur": 0.07,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-interruptor-suave-1",
+"name": "Interruptor suave 1",
+"cat": "alertas",
+"tags": "interfaz clic",
+"file": "k-interruptor-suave-1.ogg",
+"dur": 0.31,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-interruptor-suave-2",
+"name": "Interruptor suave 2",
+"cat": "alertas",
+"tags": "interfaz clic",
+"file": "k-interruptor-suave-2.ogg",
+"dur": 0.37,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-interruptor-suave-3",
+"name": "Interruptor suave 3",
+"cat": "alertas",
+"tags": "interfaz clic",
+"file": "k-interruptor-suave-3.ogg",
+"dur": 0.3,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-1-luchador",
+"name": "«1» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta uno 1 inglés voz luchador",
+"file": "k-1-luchador.ogg",
+"dur": 0.96,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-10-luchador",
+"name": "«10» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta diez 10 inglés voz luchador",
+"file": "k-10-luchador.ogg",
+"dur": 1.03,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-2-luchador",
+"name": "«2» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta dos 2 inglés voz luchador",
+"file": "k-2-luchador.ogg",
+"dur": 0.92,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-3-luchador",
+"name": "«3» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta tres 3 inglés voz luchador",
+"file": "k-3-luchador.ogg",
+"dur": 1.0,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-4-luchador",
+"name": "«4» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta cuatro 4 inglés voz luchador",
+"file": "k-4-luchador.ogg",
+"dur": 1.07,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-5-luchador",
+"name": "«5» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta cinco 5 inglés voz luchador",
+"file": "k-5-luchador.ogg",
+"dur": 1.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-6-luchador",
+"name": "«6» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta seis 6 inglés voz luchador",
+"file": "k-6-luchador.ogg",
+"dur": 1.09,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-7-luchador",
+"name": "«7» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta siete 7 inglés voz luchador",
+"file": "k-7-luchador.ogg",
+"dur": 1.17,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-8-luchador",
+"name": "«8» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta ocho 8 inglés voz luchador",
+"file": "k-8-luchador.ogg",
+"dur": 0.77,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-9-luchador",
+"name": "«9» (luchador)",
+"cat": "voces",
+"tags": "número contar cuenta nueve 9 inglés voz luchador",
+"file": "k-9-luchador.ogg",
+"dur": 1.03,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-arcade-mode-luchador",
+"name": "«Arcade mode» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador arcade mode pelea",
+"file": "k-arcade-mode-luchador.ogg",
+"dur": 1.63,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-battle-mode-luchador",
+"name": "«Battle mode» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador battle mode pelea",
+"file": "k-battle-mode-luchador.ogg",
+"dur": 1.51,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-begin-luchador",
+"name": "«Begin» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador begin pelea",
+"file": "k-begin-luchador.ogg",
+"dur": 1.22,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-championship-mode-luchador",
+"name": "«Championship mode» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador championship mode pelea",
+"file": "k-championship-mode-luchador.ogg",
+"dur": 1.65,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-choose-your-character-luchador",
+"name": "«Choose your character» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador choose your character pelea",
+"file": "k-choose-your-character-luchador.ogg",
+"dur": 2.08,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-combo-luchador",
+"name": "«Combo» (luchador)",
+"cat": "celebracion",
+"tags": "voz inglés luchador combo pelea",
+"file": "k-combo-luchador.ogg",
+"dur": 1.17,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-combo-breaker-luchador",
+"name": "«Combo breaker» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador combo breaker pelea",
+"file": "k-combo-breaker-luchador.ogg",
+"dur": 1.59,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-deathmatch-luchador",
+"name": "«Deathmatch» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador deathmatch pelea",
+"file": "k-deathmatch-luchador.ogg",
+"dur": 1.15,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fight-luchador",
+"name": "«Fight!» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador fight! pelea",
+"file": "k-fight-luchador.ogg",
+"dur": 0.93,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-final-round-luchador",
+"name": "«Final round» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador final round pelea",
+"file": "k-final-round-luchador.ogg",
+"dur": 1.69,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-flawless-victory-luchador",
+"name": "«Flawless victory» (luchador)",
+"cat": "celebracion",
+"tags": "voz inglés luchador flawless victory pelea",
+"file": "k-flawless-victory-luchador.ogg",
+"dur": 1.87,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-game-over-luchador",
+"name": "«Game over» (luchador)",
+"cat": "fallos",
+"tags": "voz inglés luchador game over pelea",
+"file": "k-game-over-luchador.ogg",
+"dur": 1.77,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-it-s-a-tie-luchador",
+"name": "«It's a tie» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador it's a tie pelea",
+"file": "k-it-s-a-tie-luchador.ogg",
+"dur": 1.35,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-kill-her-luchador",
+"name": "«Kill her» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador kill her pelea",
+"file": "k-kill-her-luchador.ogg",
+"dur": 1.18,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-kill-him-luchador",
+"name": "«Kill him» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador kill him pelea",
+"file": "k-kill-him-luchador.ogg",
+"dur": 1.13,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-kill-it-luchador",
+"name": "«Kill it» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador kill it pelea",
+"file": "k-kill-it-luchador.ogg",
+"dur": 0.96,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-loser-luchador",
+"name": "«Loser» (luchador)",
+"cat": "fallos",
+"tags": "voz inglés luchador loser pelea",
+"file": "k-loser-luchador.ogg",
+"dur": 1.45,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-multi-kill-luchador",
+"name": "«Multi kill» (luchador)",
+"cat": "celebracion",
+"tags": "voz inglés luchador multi kill pelea",
+"file": "k-multi-kill-luchador.ogg",
+"dur": 1.42,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-player-luchador-1",
+"name": "«Player» (luchador) 1",
+"cat": "voces",
+"tags": "voz inglés luchador player pelea",
+"file": "k-player-luchador-1.ogg",
+"dur": 1.34,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-player-luchador-2",
+"name": "«Player» (luchador) 2",
+"cat": "voces",
+"tags": "voz inglés luchador player pelea",
+"file": "k-player-luchador-2.ogg",
+"dur": 1.21,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-prepare-yourself-luchador",
+"name": "«Prepare yourself» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador prepare yourself pelea",
+"file": "k-prepare-yourself-luchador.ogg",
+"dur": 1.69,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-ready-luchador",
+"name": "«Ready» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador ready pelea",
+"file": "k-ready-luchador.ogg",
+"dur": 1.03,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-round-luchador-1",
+"name": "«Round» (luchador) 1",
+"cat": "voces",
+"tags": "voz inglés luchador round pelea",
+"file": "k-round-luchador-1.ogg",
+"dur": 1.35,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-round-luchador-2",
+"name": "«Round» (luchador) 2",
+"cat": "voces",
+"tags": "voz inglés luchador round pelea",
+"file": "k-round-luchador-2.ogg",
+"dur": 1.45,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-story-mode-luchador",
+"name": "«Story mode» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador story mode pelea",
+"file": "k-story-mode-luchador.ogg",
+"dur": 1.73,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-sudden-death-luchador",
+"name": "«Sudden death» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador sudden death pelea",
+"file": "k-sudden-death-luchador.ogg",
+"dur": 1.44,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-survival-mode-luchador",
+"name": "«Survival mode» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador survival mode pelea",
+"file": "k-survival-mode-luchador.ogg",
+"dur": 1.89,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tie-luchador",
+"name": "«Tie» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador tie pelea",
+"file": "k-tie-luchador.ogg",
+"dur": 1.11,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-tie-breaker-luchador",
+"name": "«Tie breaker» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador tie breaker pelea",
+"file": "k-tie-breaker-luchador.ogg",
+"dur": 1.35,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-time-luchador",
+"name": "«Time» (luchador)",
+"cat": "voces",
+"tags": "voz inglés luchador time pelea",
+"file": "k-time-luchador.ogg",
+"dur": 1.16,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-winner-luchador",
+"name": "«Winner» (luchador)",
+"cat": "celebracion",
+"tags": "voz inglés luchador winner pelea",
+"file": "k-winner-luchador.ogg",
+"dur": 1.42,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-you-lose-luchador",
+"name": "«You lose» (luchador)",
+"cat": "fallos",
+"tags": "voz inglés luchador you lose pelea",
+"file": "k-you-lose-luchador.ogg",
+"dur": 1.38,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-you-win-luchador",
+"name": "«You win» (luchador)",
+"cat": "celebracion",
+"tags": "voz inglés luchador you win pelea",
+"file": "k-you-win-luchador.ogg",
+"dur": 1.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-1-mujer",
+"name": "«1» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta uno 1 inglés voz mujer",
+"file": "k-1-mujer.ogg",
+"dur": 0.49,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-10-mujer",
+"name": "«10» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta diez 10 inglés voz mujer",
+"file": "k-10-mujer.ogg",
+"dur": 0.57,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-2-mujer",
+"name": "«2» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta dos 2 inglés voz mujer",
+"file": "k-2-mujer.ogg",
+"dur": 0.58,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-3-mujer",
+"name": "«3» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta tres 3 inglés voz mujer",
+"file": "k-3-mujer.ogg",
+"dur": 0.58,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-4-mujer",
+"name": "«4» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta cuatro 4 inglés voz mujer",
+"file": "k-4-mujer.ogg",
+"dur": 0.71,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-5-mujer",
+"name": "«5» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta cinco 5 inglés voz mujer",
+"file": "k-5-mujer.ogg",
+"dur": 0.61,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-6-mujer",
+"name": "«6» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta seis 6 inglés voz mujer",
+"file": "k-6-mujer.ogg",
+"dur": 0.7,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-7-mujer",
+"name": "«7» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta siete 7 inglés voz mujer",
+"file": "k-7-mujer.ogg",
+"dur": 0.67,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-8-mujer",
+"name": "«8» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta ocho 8 inglés voz mujer",
+"file": "k-8-mujer.ogg",
+"dur": 0.44,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-9-mujer",
+"name": "«9» (mujer)",
+"cat": "voces",
+"tags": "número contar cuenta nueve 9 inglés voz mujer",
+"file": "k-9-mujer.ogg",
+"dur": 0.62,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-1-hombre",
+"name": "«1» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta uno 1 inglés voz hombre",
+"file": "k-1-hombre.ogg",
+"dur": 0.66,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-10-hombre",
+"name": "«10» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta diez 10 inglés voz hombre",
+"file": "k-10-hombre.ogg",
+"dur": 0.67,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-2-hombre",
+"name": "«2» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta dos 2 inglés voz hombre",
+"file": "k-2-hombre.ogg",
+"dur": 0.63,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-3-hombre",
+"name": "«3» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta tres 3 inglés voz hombre",
+"file": "k-3-hombre.ogg",
+"dur": 0.77,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-4-hombre",
+"name": "«4» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta cuatro 4 inglés voz hombre",
+"file": "k-4-hombre.ogg",
+"dur": 0.75,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-5-hombre",
+"name": "«5» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta cinco 5 inglés voz hombre",
+"file": "k-5-hombre.ogg",
+"dur": 0.76,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-6-hombre",
+"name": "«6» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta seis 6 inglés voz hombre",
+"file": "k-6-hombre.ogg",
+"dur": 0.77,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-7-hombre",
+"name": "«7» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta siete 7 inglés voz hombre",
+"file": "k-7-hombre.ogg",
+"dur": 0.85,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-8-hombre",
+"name": "«8» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta ocho 8 inglés voz hombre",
+"file": "k-8-hombre.ogg",
+"dur": 0.57,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-9-hombre",
+"name": "«9» (hombre)",
+"cat": "voces",
+"tags": "número contar cuenta nueve 9 inglés voz hombre",
+"file": "k-9-hombre.ogg",
+"dur": 0.62,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-congratulations-mujer",
+"name": "«Congratulations» (mujer)",
+"cat": "celebracion",
+"tags": "voz inglés mujer congratulations",
+"file": "k-congratulations-mujer.ogg",
+"dur": 1.3,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-congratulations-hombre",
+"name": "«Congratulations» (hombre)",
+"cat": "celebracion",
+"tags": "voz inglés hombre congratulations",
+"file": "k-congratulations-hombre.ogg",
+"dur": 1.53,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-correct-mujer",
+"name": "«Correct» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer correct",
+"file": "k-correct-mujer.ogg",
+"dur": 0.63,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-correct-hombre",
+"name": "«Correct» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre correct",
+"file": "k-correct-hombre.ogg",
+"dur": 0.66,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-final-round-mujer",
+"name": "«Final round» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer final round",
+"file": "k-final-round-mujer.ogg",
+"dur": 1.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-final-round-hombre",
+"name": "«Final round» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre final round",
+"file": "k-final-round-hombre.ogg",
+"dur": 1.08,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-game-over-mujer",
+"name": "«Game over» (mujer)",
+"cat": "fallos",
+"tags": "voz inglés mujer game over",
+"file": "k-game-over-mujer.ogg",
+"dur": 1.28,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-game-over-hombre",
+"name": "«Game over» (hombre)",
+"cat": "fallos",
+"tags": "voz inglés hombre game over",
+"file": "k-game-over-hombre.ogg",
+"dur": 1.38,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-go-mujer",
+"name": "«Go!» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer go!",
+"file": "k-go-mujer.ogg",
+"dur": 0.6,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-go-hombre",
+"name": "«Go!» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre go!",
+"file": "k-go-hombre.ogg",
+"dur": 0.65,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-hold-hombre",
+"name": "«Hold» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre hold",
+"file": "k-hold-hombre.ogg",
+"dur": 0.7,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-hurry-up-mujer",
+"name": "«Hurry up» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer hurry up",
+"file": "k-hurry-up-mujer.ogg",
+"dur": 0.73,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-hurry-up-hombre",
+"name": "«Hurry up» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre hurry up",
+"file": "k-hurry-up-hombre.ogg",
+"dur": 0.68,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-it-s-a-tie-mujer",
+"name": "«It's a tie» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer it's a tie",
+"file": "k-it-s-a-tie-mujer.ogg",
+"dur": 0.89,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-it-s-a-tie-hombre",
+"name": "«It's a tie» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre it's a tie",
+"file": "k-it-s-a-tie-hombre.ogg",
+"dur": 1.05,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-level-mujer",
+"name": "«Level» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer level",
+"file": "k-level-mujer.ogg",
+"dur": 0.6,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-level-hombre",
+"name": "«Level» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre level",
+"file": "k-level-hombre.ogg",
+"dur": 0.75,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-level-up-mujer",
+"name": "«Level up» (mujer)",
+"cat": "celebracion",
+"tags": "voz inglés mujer level up",
+"file": "k-level-up-mujer.ogg",
+"dur": 0.78,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-level-up-hombre",
+"name": "«Level up» (hombre)",
+"cat": "celebracion",
+"tags": "voz inglés hombre level up",
+"file": "k-level-up-hombre.ogg",
+"dur": 0.81,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-mission-completed-mujer",
+"name": "«Mission completed» (mujer)",
+"cat": "celebracion",
+"tags": "voz inglés mujer mission completed",
+"file": "k-mission-completed-mujer.ogg",
+"dur": 1.34,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-mission-completed-hombre",
+"name": "«Mission completed» (hombre)",
+"cat": "celebracion",
+"tags": "voz inglés hombre mission completed",
+"file": "k-mission-completed-hombre.ogg",
+"dur": 1.26,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-mission-failed-mujer",
+"name": "«Mission failed» (mujer)",
+"cat": "fallos",
+"tags": "voz inglés mujer mission failed",
+"file": "k-mission-failed-mujer.ogg",
+"dur": 1.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-mission-failed-hombre",
+"name": "«Mission failed» (hombre)",
+"cat": "fallos",
+"tags": "voz inglés hombre mission failed",
+"file": "k-mission-failed-hombre.ogg",
+"dur": 1.11,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-new-highscore-mujer",
+"name": "«New highscore» (mujer)",
+"cat": "celebracion",
+"tags": "voz inglés mujer new highscore",
+"file": "k-new-highscore-mujer.ogg",
+"dur": 1.14,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-new-highscore-hombre",
+"name": "«New highscore» (hombre)",
+"cat": "celebracion",
+"tags": "voz inglés hombre new highscore",
+"file": "k-new-highscore-hombre.ogg",
+"dur": 1.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-objective-achieved-mujer",
+"name": "«Objective achieved» (mujer)",
+"cat": "celebracion",
+"tags": "voz inglés mujer objective achieved",
+"file": "k-objective-achieved-mujer.ogg",
+"dur": 1.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-objective-achieved-hombre",
+"name": "«Objective achieved» (hombre)",
+"cat": "celebracion",
+"tags": "voz inglés hombre objective achieved",
+"file": "k-objective-achieved-hombre.ogg",
+"dur": 1.42,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-mujer",
+"name": "«Power up» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer power up",
+"file": "k-power-up-mujer.ogg",
+"dur": 0.76,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-power-up-hombre",
+"name": "«Power up» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre power up",
+"file": "k-power-up-hombre.ogg",
+"dur": 0.8,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-ready-mujer",
+"name": "«Ready» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer ready",
+"file": "k-ready-mujer.ogg",
+"dur": 0.5,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-ready-hombre",
+"name": "«Ready» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre ready",
+"file": "k-ready-hombre.ogg",
+"dur": 0.69,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-round-mujer",
+"name": "«Round» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer round",
+"file": "k-round-mujer.ogg",
+"dur": 0.66,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-round-hombre",
+"name": "«Round» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre round",
+"file": "k-round-hombre.ogg",
+"dur": 0.74,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-set-mujer",
+"name": "«Set» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer set",
+"file": "k-set-mujer.ogg",
+"dur": 0.54,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-set-hombre",
+"name": "«Set» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre set",
+"file": "k-set-hombre.ogg",
+"dur": 0.55,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-time-over-mujer",
+"name": "«Time over» (mujer)",
+"cat": "fallos",
+"tags": "voz inglés mujer time over",
+"file": "k-time-over-mujer.ogg",
+"dur": 1.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-time-over-hombre",
+"name": "«Time over» (hombre)",
+"cat": "fallos",
+"tags": "voz inglés hombre time over",
+"file": "k-time-over-hombre.ogg",
+"dur": 0.95,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-call-for-backup-mujer",
+"name": "«Call for backup» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer call for backup guerra militar",
+"file": "k-call-for-backup-mujer.ogg",
+"dur": 0.87,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-call-for-backup-hombre",
+"name": "«Call for backup» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre call for backup guerra militar",
+"file": "k-call-for-backup-hombre.ogg",
+"dur": 1.03,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cover-me-mujer",
+"name": "«Cover me» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer cover me guerra militar",
+"file": "k-cover-me-mujer.ogg",
+"dur": 0.57,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-cover-me-hombre",
+"name": "«Cover me» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre cover me guerra militar",
+"file": "k-cover-me-hombre.ogg",
+"dur": 0.61,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fire-in-the-hole-mujer",
+"name": "«Fire in the hole» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer fire in the hole guerra militar",
+"file": "k-fire-in-the-hole-mujer.ogg",
+"dur": 1.01,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-fire-in-the-hole-hombre",
+"name": "«Fire in the hole» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre fire in the hole guerra militar",
+"file": "k-fire-in-the-hole-hombre.ogg",
+"dur": 1.38,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-get-down-mujer",
+"name": "«Get down» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer get down guerra militar",
+"file": "k-get-down-mujer.ogg",
+"dur": 0.62,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-get-down-hombre",
+"name": "«Get down» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre get down guerra militar",
+"file": "k-get-down-hombre.ogg",
+"dur": 0.85,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-go-go-go-mujer",
+"name": "«Go go go» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer go go go guerra militar",
+"file": "k-go-go-go-mujer.ogg",
+"dur": 1.23,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-go-go-go-hombre",
+"name": "«Go go go» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre go go go guerra militar",
+"file": "k-go-go-go-hombre.ogg",
+"dur": 0.98,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-hold-position-mujer",
+"name": "«Hold position» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer hold position guerra militar",
+"file": "k-hold-position-mujer.ogg",
+"dur": 0.5,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-look-out-mujer",
+"name": "«Look out» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer look out guerra militar",
+"file": "k-look-out-mujer.ogg",
+"dur": 0.65,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-look-out-hombre",
+"name": "«Look out» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre look out guerra militar",
+"file": "k-look-out-hombre.ogg",
+"dur": 0.61,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-medic-mujer",
+"name": "«Medic!» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer medic! guerra militar",
+"file": "k-medic-mujer.ogg",
+"dur": 0.67,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-medic-hombre",
+"name": "«Medic!» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre medic! guerra militar",
+"file": "k-medic-hombre.ogg",
+"dur": 0.67,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-reloading-mujer",
+"name": "«Reloading» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer reloading guerra militar",
+"file": "k-reloading-mujer.ogg",
+"dur": 0.71,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-reloading-hombre",
+"name": "«Reloading» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre reloading guerra militar",
+"file": "k-reloading-hombre.ogg",
+"dur": 0.92,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-rpg-mujer",
+"name": "«RPG!» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer rpg! guerra militar",
+"file": "k-rpg-mujer.ogg",
+"dur": 0.79,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-rpg-hombre",
+"name": "«RPG!» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre rpg! guerra militar",
+"file": "k-rpg-hombre.ogg",
+"dur": 0.97,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-sniper-mujer",
+"name": "«Sniper!» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer sniper! guerra militar",
+"file": "k-sniper-mujer.ogg",
+"dur": 0.73,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-sniper-hombre",
+"name": "«Sniper!» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre sniper! guerra militar",
+"file": "k-sniper-hombre.ogg",
+"dur": 0.82,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-suppressing-fire-hombre",
+"name": "«Suppressing fire» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre suppressing fire guerra militar",
+"file": "k-suppressing-fire-hombre.ogg",
+"dur": 1.24,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-suppressing-fire-mujer",
+"name": "«Suppressing fire» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer suppressing fire guerra militar",
+"file": "k-suppressing-fire-mujer.ogg",
+"dur": 1.25,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-target-destroyed-mujer",
+"name": "«Target destroyed» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer target destroyed guerra militar",
+"file": "k-target-destroyed-mujer.ogg",
+"dur": 1.29,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-target-destroyed-hombre",
+"name": "«Target destroyed» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre target destroyed guerra militar",
+"file": "k-target-destroyed-hombre.ogg",
+"dur": 1.34,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-target-engaged-mujer",
+"name": "«Target engaged» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer target engaged guerra militar",
+"file": "k-target-engaged-mujer.ogg",
+"dur": 1.08,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-target-engaged-hombre",
+"name": "«Target engaged» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre target engaged guerra militar",
+"file": "k-target-engaged-hombre.ogg",
+"dur": 1.12,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-watch-my-back-mujer",
+"name": "«Watch my back» (mujer)",
+"cat": "voces",
+"tags": "voz inglés mujer watch my back guerra militar",
+"file": "k-watch-my-back-mujer.ogg",
+"dur": 0.88,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-watch-my-back-hombre",
+"name": "«Watch my back» (hombre)",
+"cat": "voces",
+"tags": "voz inglés hombre watch my back guerra militar",
+"file": "k-watch-my-back-hombre.ogg",
+"dur": 0.96,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-wrong-mujer",
+"name": "«Wrong» (mujer)",
+"cat": "fallos",
+"tags": "voz inglés mujer wrong",
+"file": "k-wrong-mujer.ogg",
+"dur": 0.65,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-wrong-hombre",
+"name": "«Wrong» (hombre)",
+"cat": "fallos",
+"tags": "voz inglés hombre wrong",
+"file": "k-wrong-hombre.ogg",
+"dur": 0.71,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-you-lose-mujer",
+"name": "«You lose» (mujer)",
+"cat": "fallos",
+"tags": "voz inglés mujer you lose",
+"file": "k-you-lose-mujer.ogg",
+"dur": 1.19,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-you-lose-hombre",
+"name": "«You lose» (hombre)",
+"cat": "fallos",
+"tags": "voz inglés hombre you lose",
+"file": "k-you-lose-hombre.ogg",
+"dur": 1.37,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-you-win-mujer",
+"name": "«You win» (mujer)",
+"cat": "celebracion",
+"tags": "voz inglés mujer you win",
+"file": "k-you-win-mujer.ogg",
+"dur": 0.94,
+"by": "Kenney (CC0)"
+},
+{
+"id": "k-you-win-hombre",
+"name": "«You win» (hombre)",
+"cat": "celebracion",
+"tags": "voz inglés hombre you win",
+"file": "k-you-win-hombre.ogg",
+"dur": 1.01,
+"by": "Kenney (CC0)"
+}
+]
