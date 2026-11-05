@@ -50,6 +50,8 @@ const BASE_CSS = `
      se ve sobrio y se lee bien sobre cualquier juego o cámara. */
   body[data-theme="satronho"] .surface { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 9%, var(--bg)), var(--bg) 70%); box-shadow: 0 18px 44px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.04); }
   .k-shadow { text-shadow: 0 2px 10px rgba(0,0,0,.55); }
+  /* Estilos sin tarjeta: nada de sombra alrededor (se vería un halo). */
+  body[data-style="minimo"] .surface, body[data-style="cifra"] .surface, body[data-style="clasico"] .surface, body[data-style="marcador"] .surface, body[data-style="burbujas"] .lg, body[data-style="tarjetas"] :is(.q, .ac) { box-shadow: none !important; }
   @keyframes k-in { from { opacity: 0; transform: translateY(14px) scale(.96); } }
   @keyframes k-pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
 `;
@@ -260,11 +262,13 @@ const ranking = {
   .r-name { max-width: 100%; font-weight: 900; font-size: 19px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .r-val { font-weight: 800; font-size: 15px; color: var(--c); font-variant-numeric: tabular-nums; }
   .r-spot.free .r-name { opacity: .55; }
-  .r-block { width: 100%; border-radius: calc(14px * var(--r)) calc(14px * var(--r)) 0 0; display: grid; place-items: start center; padding-top: 8px; color: #1a1228; font-weight: 900; font-size: 32px; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 92%, #fff), color-mix(in srgb, var(--c) 62%, #1a1228)); box-shadow: inset 0 2px 0 rgba(255,255,255,.45); }
+  .r-block { width: 100%; border-radius: calc(14px * var(--r)) calc(14px * var(--r)) 0 0; display: grid; place-items: start center; padding-top: 8px; color: #1a1228; font-weight: 900; font-size: 32px; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 80%, #fff) 0%, var(--c) 30%, color-mix(in srgb, var(--c) 78%, #1a1228) 100%); box-shadow: inset 0 2px 0 rgba(255,255,255,.55), inset 0 -18px 30px -18px rgba(0,0,0,.35); text-shadow: 0 1px 0 rgba(255,255,255,.4); }
   .r-spot[data-p="1"] .r-block { height: 112px; } .r-spot[data-p="2"] .r-block { height: 84px; } .r-spot[data-p="3"] .r-block { height: 64px; } .r-spot[data-p="4"] .r-block, .r-spot[data-p="5"] .r-block { height: 46px; font-size: 24px; }
   .r-spot.free .r-block { opacity: .45; }
   /* Lista */
   .r.lista, .r.tarjetas, .r.tira { padding-bottom: 20px; }
+  .r-rest { display: grid; gap: 8px; width: 100%; margin-top: -18px; padding: 0 0 18px; }
+  .r .r-rest .r-row { --c: var(--other); }
   .r-list { display: grid; gap: 8px; width: 460px; }
   .r-row { --c: var(--other); display: grid; grid-template-columns: 36px 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 14px 8px 8px; border-radius: calc(14px * var(--r)); background: color-mix(in srgb, var(--ink) 6%, transparent); box-shadow: inset 3px 0 0 var(--c); animation: k-in .4s both; }
   .r-row:nth-child(1) { --c: var(--gold); } .r-row:nth-child(2) { --c: var(--silver); } .r-row:nth-child(3) { --c: var(--bronze); }
@@ -274,10 +278,11 @@ const ranking = {
   .r-cards { display: flex; gap: 12px; justify-content: center; }
   .r-card { --c: var(--other); width: 150px; padding: 14px 10px; display: grid; justify-items: center; gap: 6px; text-align: center; border-radius: calc(14px * var(--r)); background: color-mix(in srgb, var(--ink) 6%, transparent); box-shadow: inset 0 3px 0 var(--c); animation: k-in .5s both; }
   .r-card:nth-child(1) { --c: var(--gold); } .r-card:nth-child(2) { --c: var(--silver); } .r-card:nth-child(3) { --c: var(--bronze); }
-  .r-card .k-av { width: 64px; height: 64px; font-size: 26px; --avc: var(--c); }
+  .r-card .k-av { width: 64px; height: 64px; font-size: 26px; --avc: var(--c); box-shadow: 0 0 0 3px var(--c); }
+  .r-card .r-pos { font-size: 20px; line-height: 28px; }
   /* Tira: para fuentes bajas y anchas (se elige sola). */
   .r.tira { grid-auto-flow: column; align-items: center; gap: 16px; padding: 12px 18px; }
-  .r.tira .r-head { font-size: 22px; padding-right: 6px; }
+  .r.tira .r-head { font-size: 0; gap: 0; } .r.tira .r-head i { width: 46px; height: 46px; font-size: 22px; }
   .r-strip { display: flex; gap: 10px; }
   .r-chip { --c: var(--other); display: grid; grid-template-columns: auto 46px auto; gap: 10px; align-items: center; padding: 6px 16px 6px 8px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 7%, transparent); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 70%, transparent); animation: k-in .4s both; }
   .r-chip:nth-child(1) { --c: var(--gold); } .r-chip:nth-child(2) { --c: var(--silver); } .r-chip:nth-child(3) { --c: var(--bronze); }
@@ -303,9 +308,12 @@ const ranking = {
       return `<div class="r tira surface">${head}<div class="r-strip">${Array.from({ length: n }, (_, i) => { const u = at(i); return `<div class="r-chip ${u ? '' : 'free'}" data-key="c${i}"><span class="r-pos">${i === 0 && set.crown && u ? '👑' : i + 1}</span>${u ? avatar(u.name, set.avatars ? u.avatar : '') : '<span class="k-av"><b>?</b></span>'}<div><div class="r-name">${u ? esc(u.name) : 'Libre'}</div>${u ? val(u) : ''}</div></div>`; }).join('')}</div></div>`;
     }
     if (style === 'lista') return `<div class="r lista surface">${head}${empty}<div class="r-list">${list.map((u, i) => `<div class="r-row" data-key="${esc(u.platform + u.name)}"><span class="r-pos">${i === 0 && set.crown ? '👑' : i + 1}</span>${avatar(u.name, set.avatars ? u.avatar : '')}<span class="r-name">${plat(u.platform)} ${esc(u.name)}</span>${val(u)}</div>`).join('')}</div></div>`;
-    if (style === 'tarjetas') return `<div class="r tarjetas surface">${head}${empty}<div class="r-cards">${list.map((u, i) => `<div class="r-card" data-key="${esc(u.platform + u.name)}"><span class="r-pos">#${i + 1}</span>${av(u, i + 1)}<span class="r-name">${esc(u.name)}</span>${val(u)}</div>`).join('')}</div></div>`;
-    const order = [4, 2, 1, 3, 5].filter((p) => p <= slots);
-    return `<div class="r surface">${head}${empty}<div class="r-pod">${order.map((p) => { const u = at(p - 1); return `<div class="r-spot ${u ? '' : 'free'}" data-p="${p}" data-key="p${p}">${av(u, p)}<div class="r-name">${u ? esc(u.name) : 'Libre'}</div>${u ? val(u) : ''}<div class="r-block">${p}</div></div>`; }).join('')}</div></div>`;
+    if (style === 'tarjetas') return `<div class="r tarjetas surface">${head}${empty}<div class="r-cards">${list.map((u, i) => `<div class="r-card" data-key="${esc(u.platform + u.name)}"><span class="r-pos">${i === 0 && set.crown ? '👑' : `#${i + 1}`}</span>${avatar(u.name, set.avatars ? u.avatar : '')}<span class="r-name">${esc(u.name)}</span>${val(u)}</div>`).join('')}</div></div>`;
+    // Fuente cuadrada o vertical: el podio con los 3 primeros y el resto en filas.
+    const tall = shape === 'tall' && slots > 3;
+    const order = (tall ? [2, 1, 3] : [4, 2, 1, 3, 5]).filter((p) => p <= slots);
+    const rest = tall ? `<div class="r-rest">${list.slice(3, slots).map((u, i) => `<div class="r-row" data-key="${esc(u.platform + u.name)}"><span class="r-pos">${i + 4}</span>${avatar(u.name, set.avatars ? u.avatar : '')}<span class="r-name">${esc(u.name)}</span>${val(u)}</div>`).join('')}</div>` : '';
+    return `<div class="r surface">${head}${empty}<div class="r-pod">${order.map((p) => { const u = at(p - 1); return `<div class="r-spot ${u ? '' : 'free'}" data-p="${p}" data-key="p${p}">${av(u, p)}<div class="r-name">${u ? esc(u.name) : 'Libre'}</div>${u ? val(u) : ''}<div class="r-block">${p}</div></div>`; }).join('')}</div>${rest}</div>`;
   },
 };
 
@@ -318,6 +326,7 @@ const mvp = {
   .m-title { font-weight: 900; letter-spacing: .14em; font-size: 15px; color: #ffd23e; }
   .m-name { font-weight: 900; font-size: 28px; }
   .m-val { font-weight: 900; font-size: 24px; color: #ffd23e; }
+  body[data-style="alas"] .w { padding: 0 72px; }
   .m-wing { position: absolute; top: 18px; width: 120px; height: 90px; }
   .m-wing.l { left: -70px; } .m-wing.r { right: -70px; transform: scaleX(-1); }
   .m-wing path { fill: url(#mw); filter: drop-shadow(0 4px 10px rgba(0,0,0,.4)); }
@@ -482,9 +491,13 @@ const badges = (e) => {
 };
 const chat = {
   tick: true,
+  column: 460,
   css: BASE_CSS + `
-  #root { align-content: end; align-items: end; }
-  .w { width: 440px; }
+  .w { display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+  body.ch-top .w { justify-content: flex-start; }
+  /* Los mensajes viejos se desvanecen en el borde en vez de cortarse en seco. */
+  .w { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 70px); mask-image: linear-gradient(to bottom, transparent 0, #000 70px); }
+  body.ch-top .w { -webkit-mask-image: linear-gradient(to top, transparent 0, #000 70px); mask-image: linear-gradient(to top, transparent 0, #000 70px); }
   .ch { display: grid; gap: 8px; }
   .ch.top { align-content: start; }
   .ch-m { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; animation: ch-in .45s cubic-bezier(.2,1.2,.4,1) both; }
@@ -511,6 +524,7 @@ const chat = {
     if (set.fadeSec > 0) list = list.filter((e) => now - (e.ts || now) < set.fadeSec * 1000);
     list = list.slice(0, set.max);
     if (set.newest === 'bottom') list.reverse();
+    document.body.classList.toggle('ch-top', set.newest === 'top');
     return `<div class="ch ${set.newest === 'top' ? 'top' : ''}">${list.map((e) => `<div class="ch-m" data-key="${esc(e.id)}">${set.showAvatar ? avatar(e.user?.name, e.user?.avatar) : ''}<div class="ch-body surface"><div class="ch-name" ${e.extra?.color ? `style="color:${esc(e.extra.color)}"` : ''}>${set.showPlatform ? plat(e.platform) : ''}${set.showBadges ? badges(e) : ''}${esc(e.user?.name)}</div><div class="ch-text">${esc(e.message).replace(/\[emote:\d+:([^\]]*)\]/g, '$1')}</div></div></div>`).join('')}</div>`;
   },
 };

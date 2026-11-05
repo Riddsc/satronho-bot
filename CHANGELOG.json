@@ -1,5 +1,36 @@
 [
   {
+    "version": "0.22.1",
+    "date": "2026-11-05",
+    "title": "Podio y demás overlays, pulidos uno por uno",
+    "items": [
+      {
+        "type": "mejora",
+        "text": "Podio: en una fuente cuadrada muestra los 3 primeros en el podio y el 4.º y 5.º en filas debajo, en vez de quedar diminuto. Los bloques del podio brillan más (oro, plata y bronce limpios)."
+      },
+      {
+        "type": "arreglo",
+        "text": "Ranking en tarjetas: la corona ya no tapa el puesto; en la tira baja queda más espacio para los nombres."
+      },
+      {
+        "type": "arreglo",
+        "text": "Estilos sin tarjeta (Mínimo, Cifra, Marcador, Burbujas, Clásico) ya no dejan un halo de sombra alrededor."
+      },
+      {
+        "type": "arreglo",
+        "text": "«El más generoso» con alas: las alas ya no se cortan en los bordes."
+      },
+      {
+        "type": "mejora",
+        "text": "Chat en pantalla: llena la fuente a lo alto y la letra crece con el ancho; los mensajes viejos se desvanecen en el borde en vez de cortarse."
+      },
+      {
+        "type": "arreglo",
+        "text": "Ventana de overlays: si no cabe todo, la columna de la vista previa se desplaza y los enlaces siempre se ven."
+      }
+    ]
+  },
+  {
     "version": "0.22.0",
     "date": "2026-11-05",
     "title": "Overlays que se leen bien en cualquier tamaño",

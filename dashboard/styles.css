@@ -1944,3 +1944,6 @@ button.mu-ov { background: transparent; font: inherit; font-weight: 800; cursor:
 .ovq .ove-fields .field > span:first-child { font-weight: 800; }
 .ovq-right { padding-left: 2px; }
 .ovq-cols { border-top: 0; }
+/* La columna de la vista previa también se desplaza si no cabe (enlaces y tamaño siempre visibles). */
+.ovq-left { overflow-y: auto; max-height: calc(100vh - 230px); padding-right: 4px; }
+@media (max-width: 900px) { .ovq-left { max-height: none; } }
