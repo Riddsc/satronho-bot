@@ -135,12 +135,50 @@ function screen(text, cfg = {}) {
   return { text: out };
 }
 
+// Emojis que se dicen en palabras (los más usados en los chats). Cada uno
+// se dice una sola vez aunque venga repetido («❤️❤️❤️» → «corazón»); los
+// demás emojis se ignoran.
+const EMOJI_WORDS = [
+  [/[😂🤣😹]/u, 'jajaja'],
+  [/[❤♥💜💙💚🧡💛🖤🤍🤎💖💕💗💓💘💝💞😻🫶]/u, 'corazón'],
+  [/[😍🥰😘]/u, 'me encanta'],
+  [/🔥/u, 'fuego'],
+  [/[👍👌]/u, 'me gusta'],
+  [/👏/u, 'aplausos'],
+  [/[😭😢🥺]/u, 'qué triste'],
+  [/[😮😱🤯😲]/u, 'guau'],
+  [/[🎉🥳🎊]/u, 'fiesta'],
+  [/👋/u, 'hola'],
+  [/🙏/u, 'gracias'],
+  [/💯/u, 'cien por ciento'],
+];
+const foldText = (x) => String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function emojiWords(text) {
+  let out = String(text || '');
+  // Si el mensaje ya dice la palabra («jajaja 😂», «gracias 🙏»), el emoji
+  // no se repite en voz.
+  const plain = foldText(out.replace(EMOJI_RE, ' '));
+  const already = (word) => (word === 'jajaja' ? /\b(?:j[aeiou]){2,}|\bxd\b|\b(?:ha){2,}/.test(plain) : new RegExp(`\\b${foldText(word)}\\b`).test(plain));
+  for (const [re, word] of EMOJI_WORDS) {
+    const all = new RegExp(`(?:${re.source}[\\u{FE0F}\\u{200D}\\u{1F3FB}-\\u{1F3FF}]*\\s*)+`, 'gu');
+    let said = already(word);
+    out = out.replace(all, () => {
+      if (said) return ' ';
+      said = true;
+      return ` ${word} `;
+    });
+  }
+  return out;
+}
+
 function sanitize(text, cfg = {}) {
   let out = String(text || '')
     .replace(LINK_RE, cfg.links === 'remove' ? ' ' : ' enlace ')
     .replace(KICK_EMOTE_RE, ' ')
     .replace(COLON_EMOTE_RE, ' ')
     .replace(EMOJI_RE, ' ')
+    // Otros símbolos que la voz lee raro (♡, ✓, ™, letras privadas «□»…).
+    .replace(/[\p{So}\p{Co}\p{Cn}\u{1F3FB}-\u{1F3FF}]/gu, ' ')
     .replace(INVISIBLE_RE, '')
     .replace(/(\p{L}{2,3})\1{3,}/gu, '$1$1$1') // "jajajajaja" -> "jajaja"
     .replace(/(.)\1{3,}/gu, '$1$1$1') // "aaaaaaa" -> "aaa"
@@ -157,4 +195,4 @@ function sanitize(text, cfg = {}) {
 // Normaliza nombres de regalos para compararlos ("Quiéreme" == "quiereme").
 const normalizeName = (s) => lettersOnly(basic(s || ''));
 
-module.exports = { sanitize, screen, normalizeName, isBanned, buildMatcher };
+module.exports = { sanitize, screen, normalizeName, isBanned, buildMatcher, emojiWords };

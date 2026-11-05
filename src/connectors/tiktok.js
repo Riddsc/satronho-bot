@@ -18,14 +18,19 @@ async function loadLib() {
   return lib;
 }
 
+// La librería 2.x entrega los mensajes de TikTok en su formato nuevo
+// (displayId, avatarThumb, content, gift…). Leemos el nuevo y, por si
+// acaso, también el viejo (uniqueId, profilePicture, comment, giftDetails).
+const firstUrl = (m) => m?.urlList?.[0] || m?.url_list?.[0] || m?.url?.[0] || m?.urls?.[0] || '';
 function userOf(data) {
   const u = data?.user || {};
+  // El @usuario no cambia aunque cambie el apodo: lo usamos para recordar a
+  // la gente (regalo «Quiéreme», espectadores especiales).
+  const handle = u.displayId || u.uniqueId || '';
   return {
-    // uniqueId (@usuario) no cambia aunque cambie el apodo: lo usamos para
-    // recordar quién envió el regalo "Quiéreme".
-    id: u.uniqueId || u.userId || u.nickname,
-    name: u.nickname || u.uniqueId || 'Anónimo',
-    avatar: u.profilePicture?.url?.[0] || u.profilePicture?.urls?.[0],
+    id: handle || u.id || u.userId || u.nickname || '',
+    name: u.nickname || handle || 'Anónimo',
+    avatar: firstUrl(u.avatarThumb) || firstUrl(u.avatarMedium) || firstUrl(u.profilePicture),
   };
 }
 
@@ -90,7 +95,7 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
 
   function attach(c) {
     const { WebcastEvent, ControlEvent } = lib;
-    c.on(WebcastEvent.CHAT, (d) => base.emit({ type: 'chat', user: userOf(d), message: d.comment || '', extra: { roles: rolesOf(d, hostId) } }));
+    c.on(WebcastEvent.CHAT, (d) => base.emit({ type: 'chat', user: userOf(d), message: d.content ?? d.comment ?? '', extra: { roles: rolesOf(d, hostId) } }));
 
     c.on(WebcastEvent.FOLLOW, (d) => base.emit({ type: 'follow', user: userOf(d) }));
 
@@ -109,7 +114,7 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
 
     c.on(WebcastEvent.SHARE, (d) => base.emit({ type: 'share', user: userOf(d) }));
 
-    c.on(WebcastEvent.LIKE, (d) => base.emit({ type: 'like', user: userOf(d), amount: Number(d.likeCount) || 1, extra: { totalLikes: d.totalLikeCount } }));
+    c.on(WebcastEvent.LIKE, (d) => base.emit({ type: 'like', user: userOf(d), amount: Number(d.count ?? d.likeCount) || 1, extra: { totalLikes: Number(d.total ?? d.totalLikeCount) || undefined } }));
 
     // Suscripciones de TikTok: el nombre del evento cambia entre versiones
     // de la librería; usamos el que exista.
@@ -121,9 +126,9 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
     // Regalos en racha (giftType 1): TikTok repite el evento mientras la
     // racha sigue. Solo lo contamos cuando termina, con la cantidad final.
     c.on(WebcastEvent.GIFT, (d) => {
-      const g = d.giftDetails || {};
-      const streakable = g.giftType === 1;
-      if (streakable && !d.repeatEnd) return;
+      const g = d.gift || d.giftDetails || {};
+      const streakable = Number(g.type ?? g.giftType) === 1;
+      if (streakable && !Number(d.repeatEnd)) return;
       const count = Number(d.repeatCount) || 1;
       const unit = Number(g.diamondCount ?? d.extendedGiftInfo?.diamond_count ?? 0);
       base.emit({
@@ -132,19 +137,20 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
         amount: unit * count,
         message: '',
         extra: {
-          giftId: String(d.giftId ?? g.id ?? d.extendedGiftInfo?.id ?? ''),
-          giftName: g.giftName || d.extendedGiftInfo?.name || 'Regalo',
+          giftId: String(d.giftId || g.id || d.extendedGiftInfo?.id || ''),
+          giftName: g.name || g.giftName || d.extendedGiftInfo?.name || 'Regalo',
           count,
           unitValue: unit,
           currency: 'diamantes',
-          image: g.giftImage?.giftPictureUrl || d.extendedGiftInfo?.image?.url_list?.[0],
+          image: firstUrl(g.image) || firstUrl(g.icon) || g.giftImage?.giftPictureUrl || d.extendedGiftInfo?.image?.url_list?.[0],
         },
       });
     });
 
     // Espectadores en vivo (para el pico de las estadísticas).
     c.on(WebcastEvent.ROOM_USER, (d) => {
-      if (!base.stopped && d?.viewerCount != null) bus.emit('viewers', { platform: 'tiktok', count: Number(d.viewerCount) || 0 });
+      const n = d?.total ?? d?.viewerCount;
+      if (!base.stopped && n != null) bus.emit('viewers', { platform: 'tiktok', count: Number(n) || 0 });
     });
 
     c.on(WebcastEvent.STREAM_END, () => {
