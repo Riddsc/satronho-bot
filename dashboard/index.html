@@ -77,7 +77,7 @@
       <h6>TikTok</h6>
       <button data-sim="follow">♥ Follow</button>
       <button data-sim="gift">🎁 Regalo</button>
-      <button data-sim="gift" data-body='{"user":{"id":"rosalinda","name":"Rosalinda"},"amount":1,"extra":{"giftName":"Quiéreme","count":1,"currency":"diamantes"}}'>💗 Quiéreme</button>
+      <button data-sim="gift" data-body='{"user":{"id":"satronho","name":"Satronho"},"amount":1,"extra":{"giftName":"Quiéreme","count":1,"currency":"diamantes"}}'>💗 Quiéreme</button>
       <button data-sim="sub">★ Suscripción</button>
       <button data-sim="like">👍 Likes</button>
       <button data-sim="share">↗ Compartido</button>
@@ -437,10 +437,10 @@
 <section class="page" id="page-sonidos" data-page="sonidos" hidden>
   <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Sonidos</h1><p>Tu biblioteca de sonidos para alertas, regalos y el chat: cientos incluidos, tus memes, tus frases y tus archivos.</p></div>
     <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono" data-static><b>Ñoño:</b> Busca por nombre o por lo que sientes: «risa», «sus», «fail», «victoria». ▶ para escuchar, ★ para tenerlo a mano.</p><span class="guide" data-avatar="nono" data-size="hero"></span></div></div>
-  <div class="tabs" role="tablist" data-tabs="sonidos"><button data-tab="biblioteca">Biblioteca</button><button data-tab="memes">Memes</button><button data-tab="frases">Frases</button><button data-tab="mios">Mis sonidos</button><button data-tab="chat">Comando del chat</button></div>
-  <div class="tabpanel" data-tabpanel="biblioteca"><div class="card" id="snd-lib" style="--g:#4fd1c5"></div>
+  <div class="tabs" role="tablist" data-tabs="sonidos"><button data-tab="memes">🔥 Memes</button><button data-tab="mios">⭐ Mis sonidos</button><button data-tab="frases">💬 Frases</button><button data-tab="biblioteca">🎛 Básicos</button><button data-tab="chat">Comando del chat</button></div>
+  <div class="tabpanel" data-tabpanel="biblioteca" hidden><div class="card" id="snd-lib" style="--g:#4fd1c5"></div>
     <p class="hint">Los sonidos de juego, interfaz y voces en inglés son de <b>Kenney</b> (dominio público, CC0). Los graciosos, de suspenso y de 8 bits los hace Satronho por código.</p></div>
-  <div class="tabpanel" data-tabpanel="memes" hidden><div class="card" style="--g:#4fd1c5">
+  <div class="tabpanel" data-tabpanel="memes"><div class="card" style="--g:#4fd1c5">
     <form class="snd-bar" id="snd-meme-form"><label class="snd-find"><span>⌕</span><input id="snd-meme-q" name="q" placeholder="rosalía, bruh, sus, risa, gemido, se fue…" autocomplete="off"></label><button class="btn primary">Buscar</button><button type="button" class="btn ghost" data-meme-top>🔥 Lo más sonado</button></form>
     <p class="hint">Resultados de una página pública de sonidos de memes. «Añadir» lo descarga a tu PC para tu uso, igual que si lo bajaras tú.</p>
     <div class="snd-list" id="snd-memes-list"></div></div>
@@ -454,7 +454,7 @@
 <section class="page" id="page-musica" data-page="musica" hidden>
   <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Música</h1><p>Tu chat pide canciones con <code>!play</code> o <code>!temita</code>; Ñoño las pone en orden.</p></div>
     <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono"></p><span class="guide" data-avatar="nono" data-size="hero"></span></div></div>
-  <div class="mu-mode" id="mu-mode"><div class="mu-seg" role="group" aria-label="De dónde suena la música"><button type="button" data-mumode="youtube"><span class="mu-yt">▶</span>YouTube</button><button type="button" data-mumode="spotify"><span class="mu-sp">((·))</span>Spotify</button></div><span class="mu-sep"></span><a class="mu-ov" href="#/overlays/nowplaying">🖥 Overlay</a></div>
+  <div class="mu-mode" id="mu-mode"><div class="mu-seg" role="group" aria-label="De dónde suena la música"><button type="button" data-mumode="youtube"><span class="mu-yt">▶</span>YouTube</button><button type="button" data-mumode="spotify"><span class="mu-sp">((·))</span>Spotify</button></div><span class="mu-sep"></span><button type="button" class="mu-ov" data-ovquick="musica">🖥 Overlay</button></div>
   <div id="spotify-box" class="spf-wrap" hidden style="--g:#1ed760"></div>
   <div class="tabs" role="tablist" data-tabs="musica" id="mu-yt-tabs"><button data-tab="consola">Consola</button><button data-tab="permisos">Permisos y comandos</button></div>
   <div class="tabpanel" data-tabpanel="consola">
@@ -873,17 +873,19 @@
     <div class="vp-head"><div class="ar-mtitle"><span class="guide" data-avatar="troya" data-size="40"></span><div><h2 id="ar-modal-title">Nueva alerta</h2><small>Con Troya, en tres pasos</small></div></div><button type="button" class="btn small ghost" id="ar-close" aria-label="Cerrar">✕</button></div>
     <div class="ar-mbody">
       <div class="ar-steps">
-        <section class="ar-step"><h5><i>1</i>¿Cuándo suena?</h5>
+        <nav class="ar-jump" aria-label="Ir al paso"><button type="button" data-arjump="1"><i>1</i>Cuándo suena</button><button type="button" data-arjump="2"><i>2</i>Cómo se ve</button><button type="button" data-arjump="3"><i>3</i>🔊 Sonido</button></nav>
+        <section class="ar-step" data-arstep="1"><h5><i>1</i>¿Cuándo suena?</h5>
           <div class="ar-src" id="ar-src"></div>
           <div class="ar-trigs" id="ar-trigs"></div>
           <div id="ar-opts"></div>
           <div id="ar-picker" class="ar-picker"></div></section>
-        <section class="ar-step"><h5><i>2</i>¿Cómo se ve?</h5><div id="ar-look"></div></section>
-        <section class="ar-step"><h5><i>3</i>¿Cómo suena?</h5><div id="ar-sound"></div></section>
+        <section class="ar-step" data-arstep="2"><h5><i>2</i>¿Cómo se ve?</h5><div id="ar-look"></div></section>
+        <section class="ar-step" data-arstep="3"><h5><i>3</i>¿Cómo suena?</h5><div id="ar-sound"></div></section>
       </div>
       <aside class="ar-live">
         <div class="ar-stage"><iframe id="ar-prev" title="Vista previa de la alerta" tabindex="-1"></iframe><button type="button" class="btn small ar-replay" id="ar-test-prev">↻ Repetir</button></div>
         <p class="ar-sentence" id="ar-sentence"></p>
+        <div class="ar-qs" id="ar-qs"></div>
         <span class="field-label">Si ese evento también tiene alerta de serie</span>
         <div class="seg ar-excl-big"><button type="button" data-excl="1">Solo esta</button><button type="button" data-excl="0">Las dos</button></div>
         <p class="hint" id="ar-excl-hint"></p>

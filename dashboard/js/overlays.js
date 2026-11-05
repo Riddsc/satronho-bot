@@ -30,11 +30,6 @@ const THEMES = [
   { id: 'mecha', name: 'MechaRidds', desc: 'Pantalla de androide: verde Hulk y ojo violeta', guide: 'mecha', set: { font: 'jetbrains-mono', accent: '#74d14c', text: '#e8ffe0', card: 'solid', corners: 'square' }, bg: '#051209', fg: '#e8ffe0', bd: '#74d14c' },
   { id: 'colonizadora', name: 'Colonizadora', desc: 'Rosa chicle, lila, brillos y corazoncitos', set: { font: 'baloo-2', accent: '#ff3d9a', text: '#7a1650', card: 'solid', corners: 'round' }, bg: 'linear-gradient(135deg,#ffd1e8,#e8d2ff)', fg: '#7a1650', bd: '#ff6fb5' },
 ];
-// Lo que dice cada tema en su muestra (variado, nada de un nombre fijo).
-const SAMPLE = {
-  satronho: '¡Nuevo seguidor!', neon: 'Combo ×20', cristal: 'Meta al 80 %', papel: 'Gracias, de verdad', arcade: '¡Level up!', dulce: '¡Te quiero!', minimal: 'Sígueme',
-  samy: '¡Guau, gracias!', troya: 'Regalo real', nono: 'Sonando ahora', juana: 'Faltan 20', mecha: 'SISTEMA OK', colonizadora: '¡Divina! ✨',
-};
 const TYPE_NAMES = { follow: 'Seguidores', sub: 'Suscripciones', gift: 'Monedas', like: 'Likes', share: 'Compartidos' };
 // Lo que dice cada guía en el editor de su categoría.
 const GUIDE_TIP = {
@@ -164,25 +159,104 @@ function renderNavPins() {
 }
 // Cada apartado con algo que se puede poner en OBS lleva botones a su overlay.
 const SECTION_OVERLAYS = {
-  metas: ['goals', 'counters', 'countdown'],
   musica: ['nowplaying', 'queue'],
   actividad: ['chat', 'activity', 'viewers'],
-  alertas: ['giftspot', 'lastgifts', 'giftrain', 'bestgift'],
+  alertas: ['alerts', 'giftspot', 'lastgifts', 'giftrain', 'bestgift'],
   estadisticas: ['ranking', 'mvp', 'uptime'],
   chatbot: ['ticker', 'chat'],
-  inicio: ['goals', 'chat', 'nowplaying', 'screens'],
+  voz: ['chat'],
+  sonidos: ['alerts'],
 };
+const SECTION_NAME = { musica: 'música', actividad: 'chat', alertas: 'alertas', estadisticas: 'estadísticas', chatbot: 'Chat Bot', voz: 'voz', sonidos: 'sonidos' };
+// «Alertas» no es de la galería (tiene su propio editor), pero sí sale aquí.
+const ALERTS_KIND = { icon: '🔔', name: 'Alertas', size: [800, 300], desc: 'Regalos, stickers, seguidores y tus alertas propias, con su sonido.' };
+const quickInfo = (k) => (k === 'alerts' ? ALERTS_KIND : KINDS[k]);
+const quickPath = (k) => (k === 'alerts' ? '/overlays/alerts.html' : `/overlays/w.html?id=${encodeURIComponent(k)}`);
+
 function renderSectionLinks() {
   for (const [page, kinds] of Object.entries(SECTION_OVERLAYS)) {
     const t = $(`#page-${page} .ph .t`);
-    if (!t) continue;
+    if (!t || page === 'musica') continue; // Música tiene su botón «Overlay» arriba
     let box = t.querySelector('.ov-jump');
     if (!box) { box = document.createElement('div'); box.className = 'ov-jump'; t.append(box); }
-    box.innerHTML = `<span>En OBS:</span>${kinds.map((k) => `<a class="ov-jump-btn" href="#/overlays/${k}" style="--g:${GUIDES[catOf(k).guide].color}"><i>${KINDS[k].icon}</i>${esc(KINDS[k].name)}</a>`).join('')}<a class="ov-jump-btn more" href="#/overlays/galeria">Todos ›</a>`;
+    box.innerHTML = `<button type="button" class="ov-jump-main" data-ovquick="${page}"><i>🖥</i>Overlays</button>${kinds.map((k) => `<button type="button" class="ov-jump-btn" data-ovquick="${page}" data-kind="${k}" style="--g:${k === 'alerts' ? GUIDES.troya.color : GUIDES[catOf(k).guide].color}"><i>${quickInfo(k).icon}</i>${esc(quickInfo(k).name)}</button>`).join('')}`;
   }
 }
+
+// ---------- Ventana rápida de overlays (desde cada apartado) ----------
+// Se abre encima de la pantalla en la que estás; al cerrarla, sigues ahí.
+const quick = { page: '', kind: '' };
+function openOverlayQuick(page, kind) {
+  const kinds = SECTION_OVERLAYS[page] || ['nowplaying'];
+  quick.page = page;
+  quick.kind = kinds.includes(kind) ? kind : kinds[0];
+  let m = $('#ovq');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'ovq';
+    m.className = 'ovq';
+    document.body.append(m);
+    m.addEventListener('click', async (ev) => {
+      if (ev.target === m || ev.target.closest('[data-ovq-close]')) return closeQuick();
+      const tab = ev.target.closest('[data-ovq-kind]');
+      if (tab) { quick.kind = tab.dataset.ovqKind; return renderQuick(); }
+      if (ev.target.closest('[data-ovq-copy]')) {
+        try { await navigator.clipboard.writeText(origin() + quickPath(quick.kind)); guideToast('samy', 'URL copiada. En OBS: Fuentes → + → Navegador, y pégala.'); markStep('overlay'); } catch { toast('No se pudo copiar: selecciónala a mano'); }
+        return;
+      }
+      if (ev.target.closest('[data-ovq-open]')) return window.open(origin() + quickPath(quick.kind), '_blank');
+      if (ev.target.closest('[data-ovq-edit]')) { closeQuick(); return quick.kind === 'alerts' ? showPage('alertas') : go(quick.kind); }
+      if (ev.target.closest('[data-ovq-all]')) { closeQuick(); return go('galeria'); }
+    });
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !m.hidden) closeQuick(); });
+    window.addEventListener('resize', () => { if (!m.hidden) fitQuick(); });
+  }
+  renderQuick();
+  m.hidden = false;
+  requestAnimationFrame(() => m.classList.add('on'));
+}
+function closeQuick() {
+  const m = $('#ovq');
+  if (!m) return;
+  m.classList.remove('on');
+  setTimeout(() => { m.hidden = true; m.innerHTML = ''; }, 160);
+}
+function fitQuick() {
+  const pv = $('#ovq .ovq-stage');
+  if (!pv) return;
+  const [W, H] = quickInfo(quick.kind).size;
+  const k = Math.min(pv.clientWidth / W, 380 / H, 1.2);
+  pv.style.height = `${Math.round(H * k)}px`;
+  const f = pv.querySelector('iframe');
+  f.style.transform = `scale(${k})`;
+  f.style.left = `${Math.max(0, (pv.clientWidth - W * k) / 2)}px`;
+}
+function renderQuick() {
+  const m = $('#ovq');
+  const kinds = SECTION_OVERLAYS[quick.page] || [];
+  const info = quickInfo(quick.kind);
+  const [W, H] = info.size;
+  const color = quick.kind === 'alerts' ? GUIDES.troya.color : GUIDES[catOf(quick.kind).guide].color;
+  m.innerHTML = `<div class="ovq-card" role="dialog" aria-modal="true" aria-label="Overlays de ${esc(SECTION_NAME[quick.page] || '')}" style="--g:${color}">
+    <header class="ovq-head"><span class="ovq-ic">🖥</span><div><b>Overlays de ${esc(SECTION_NAME[quick.page] || 'este apartado')}</b><small>Esto es exactamente lo que se ve en tu fuente de navegador. Copia la URL en OBS, TikTok LIVE Studio o Streamlabs.</small></div><button type="button" class="ovq-x" data-ovq-close aria-label="Cerrar">✕</button></header>
+    ${kinds.length > 1 ? `<nav class="ovq-tabs">${kinds.map((k) => `<button type="button" data-ovq-kind="${k}" aria-selected="${k === quick.kind}"><i>${quickInfo(k).icon}</i>${esc(quickInfo(k).name)}</button>`).join('')}</nav>` : ''}
+    <div class="ovq-body">
+      <div class="ovq-stage checker"><iframe src="${quickPath(quick.kind)}${quick.kind === 'alerts' ? '?' : '&'}preview=1" width="${W}" height="${H}" title="Vista previa" tabindex="-1"></iframe></div>
+      <p class="ovq-desc">${esc(info.desc)} <span>Vista previa con datos de ejemplo.</span></p>
+      <div class="ovq-url"><span class="ovq-dot"></span><code>${esc(origin() + quickPath(quick.kind))}</code><button type="button" class="btn small primary" data-ovq-copy>Copiar</button><button type="button" class="ovq-icon" data-ovq-open title="Abrir en el navegador" aria-label="Abrir en el navegador">↗</button></div>
+      <p class="hint ovq-size">Fuente de navegador de <b>${W} × ${H}</b> · Funciona con la app abierta en este PC.</p>
+    </div>
+    <footer class="ovq-foot"><button type="button" class="ovq-link" data-ovq-edit>🎨 Personalizar el aspecto de este overlay</button><button type="button" class="btn ovq-all" data-ovq-all>Ir a todos los Overlays →</button></footer>
+  </div>`;
+  const f = m.querySelector('iframe');
+  f.addEventListener('load', () => pushStyle(f));
+  requestAnimationFrame(fitQuick);
+}
+
 function initNavTree() {
   document.addEventListener('click', (ev) => {
+    const q = ev.target.closest('[data-ovquick]');
+    if (q) { ev.preventDefault(); return openOverlayQuick(q.dataset.ovquick, q.dataset.kind); }
     const caret = ev.target.closest('.nav-caret');
     if (caret) {
       ev.preventDefault();
@@ -672,7 +746,7 @@ function setStyle(patch) {
 }
 function renderThemes() {
   $('#ov-themes').innerHTML = THEMES.map((t) => `<button type="button" class="ov-theme" data-theme-pick="${t.id}" title="${esc(t.desc)}">
-    <span class="ov-tprev" style="--tb:${t.bg};--tf:${t.fg};--td:${t.bd};font-family:'${esc(FONTS.find((f) => f.id === t.set.font)?.family || 'inherit')}'" data-k="${t.glow ? 'glow' : t.dashed ? 'dashed' : t.hard ? 'hard' : t.line ? 'line' : /gradient/.test(t.bg) ? 'grad' : ''}">${t.guide ? `<span class="ov-tguide">${avatarHTML(t.guide, 'xs')}</span>` : `<i>${t.id === 'colonizadora' ? '♡' : '♥'}</i>`}<b>${esc(SAMPLE[t.id] || '¡Gracias!')}</b></span>
+    <span class="ov-tprev" style="--tb:${t.bg};--tf:${t.fg};--td:${t.bd};font-family:'${esc(FONTS.find((f) => f.id === t.set.font)?.family || 'inherit')}'" data-k="${t.glow ? 'glow' : t.dashed ? 'dashed' : t.hard ? 'hard' : t.line ? 'line' : /gradient/.test(t.bg) ? 'grad' : ''}">${t.guide ? `<span class="ov-tguide">${avatarHTML(t.guide, 'xs')}</span>` : `<i>${t.id === 'colonizadora' ? '♡' : '♥'}</i>`}<b>Satronho</b></span>
     <span class="ov-tname">${esc(t.name)}</span></button>`).join('');
 }
 

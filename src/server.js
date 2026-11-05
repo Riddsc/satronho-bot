@@ -46,7 +46,7 @@ const PHOTO_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'we
 const SAMPLE = {
   follow: { platform: 'tiktok', user: { id: 'nuevo_fan', name: 'NuevoFan' } },
   sub: { platform: 'tiktok', user: { id: 'fiel', name: 'SuscriptorFiel' }, amount: 3 },
-  gift: { platform: 'tiktok', user: { id: 'rosalinda', name: 'Rosalinda' }, amount: 5, extra: { giftName: 'Rosa', count: 5, currency: 'diamantes' } },
+  gift: { platform: 'tiktok', user: { id: 'satronho', name: 'Satronho' }, amount: 5, extra: { giftName: 'Rosa', count: 5, currency: 'diamantes' } },
   like: { platform: 'tiktok', user: { id: 'corazones', name: 'Corazones' }, amount: 15 },
   share: { platform: 'tiktok', user: { id: 'compartidor', name: 'Compartidor' } },
   sticker: { platform: 'tiktok', user: { id: 'stickerfan', name: 'StickerFan' }, extra: { stickerId: 'demo', stickerName: 'Sticker' } },
@@ -123,7 +123,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const engine = createPiperEngine({ dataDir, fetch: fetchFn, onState: (s) => broadcast('tts-engine', s) });
   const goals = createGoals({ store, broadcast });
   const online = createMsOnlineEngine({ outDir: engine.outDir });
-  const soundLib = createSoundLibrary({ dataDir, fetchFn, engine, online, store });
+  const soundLib = createSoundLibrary({ dataDir, fetchFn, engine, online, store, renderPage: hooks.renderPage || null, mediaFetch: hooks.mediaFetch || null });
   const kickChat = createKickChat({
     store,
     fetch: fetchFn,

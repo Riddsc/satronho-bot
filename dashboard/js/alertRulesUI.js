@@ -232,7 +232,7 @@ function previewEvent() {
   const cat = catalogs[p] || {};
   const g = d.trigger === 'gift' ? (cat.gifts || []).find((x) => String(x.id) === String(d.gifts[0])) : null;
   const st = d.trigger === 'sticker' ? (cat.stickers || []).find((x) => !d.stickers.length || String(x.id) === String(d.stickers[0])) : null;
-  const name = 'Rosalinda';
+  const name = 'Satronho';
   const vars = { usuario: name, regalo: g?.name || 'Rosa', cantidad: 1, valor: g?.value ?? 1, likes: d.every || 100, sticker: 'un sticker', mensaje: String(d.keyword || 'hola').split(',')[0], plataforma: PLAT_NAME[p] || '' };
   const DEF = { gift: '{usuario} envió {regalo}', coins: '{usuario} envió {regalo}', likesPerson: '¡{usuario} lleva un montón de likes!', likesTotal: '¡Llegamos a más likes!', follow: '{usuario} te sigue', sub: '{usuario} se suscribió', share: '{usuario} compartió el directo', sticker: '{usuario}', join: '{usuario} llegó', superfan: '¡{usuario} es superfan!', keyword: '{usuario}: {mensaje}', liveStart: '¡Empezó el directo!', liveEnd: 'Gracias por acompañarme' };
   const title = String(d.text || DEF[d.trigger] || '{usuario}').replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
@@ -243,6 +243,12 @@ let prevTimer = null;
 function renderSummary() {
   const el = $('#ar-sentence');
   if (el) el.innerHTML = sentence();
+  // Sonido a la vista: escucharlo o cambiarlo sin bajar hasta el paso 3.
+  const qs = $('#ar-qs');
+  if (qs) {
+    const sn = draft.sound === 'none' ? 'Sin sonido' : draft.sound === 'file' ? (draft.fileName || 'Mi sonido') : soundLabel(draft.sound || 'campanita');
+    qs.innerHTML = `<span class="ar-qs-ic">🔊</span><div><small>Suena</small><b>${esc(sn)}</b></div>${draft.sound !== 'none' ? '<button type="button" class="ar-qs-btn" data-qs-play title="Escuchar">▶</button>' : ''}<button type="button" class="ar-qs-btn wide" data-snd-lib>Cambiar</button>`;
+  }
   clearTimeout(prevTimer);
   prevTimer = setTimeout(() => $('#ar-prev')?.contentWindow?.postMessage({ satronhoAlert: previewEvent() }, location.origin), 250);
 }
@@ -415,6 +421,12 @@ export function initAlertRules(cfg) {
     if (tr && !tr.disabled) { draft.trigger = tr.dataset.trig; return renderEditor(); }
     const tier = ev.target.closest('[data-tier]');
     if (tier) { pick.price = tier.dataset.tier; return renderPicker(); }
+    const jump = ev.target.closest('[data-arjump]');
+    if (jump) return $(`[data-arstep="${jump.dataset.arjump}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (ev.target.closest('[data-qs-play]')) {
+      const snd = draft.sound === 'file' ? { sound: 'file', url: draft.file ? `/alert-sounds/${draft.file}` : '' } : { sound: draft.sound || 'campanita' };
+      return playAlertSound({ ...snd, volume: draft.volume ?? 75, maxSeconds: Number(draft.maxSeconds) || 0 });
+    }
     if (ev.target.closest('[data-snd-lib]')) {
       return openSoundPicker(draft.sound, (ref) => { draft.sound = ref; playAlertSound({ sound: ref, volume: draft.volume ?? 75 }); renderEditor(); });
     }

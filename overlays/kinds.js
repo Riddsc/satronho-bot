@@ -634,7 +634,7 @@ const screens = {
 export const RENDER = { goals, counters, countdown, uptime, viewers, followers, ranking, mvp, lastgifts, giftspot, bestgift, giftrain, chat, activity, ticker, nowplaying, queue, screens };
 
 // ===================== Datos de ejemplo (vista previa) =====================
-const NAMES = ['Angélica', 'Dacreth', 'Aroa Malena', 'fabiosan622', 'Adriana', 'tinvalente', 'Rosalinda'];
+const NAMES = ['Angélica', 'Dacreth', 'Aroa Malena', 'fabiosan622', 'Adriana', 'tinvalente', 'Satronho'];
 const GIFTS = [['Rosa', 1, '🌹'], ['Quiéreme', 1, '💗'], ['Rosquilla', 30, '🍩'], ['Gafas de DJ', 500, '🕶'], ['Cisne', 699, '🦢'], ['Galaxia', 1000, '🌌']];
 const MSGS = ['buenas noches a todos 💜', 'qué buen directo', 'jajaja no puede ser', '!play la bicicleta', 'saludos desde Bogotá', 'vamos que se puede', 'esa jugada estuvo brutal'];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
@@ -658,7 +658,7 @@ export function demoState(S) {
     goals: [{ id: 'd1', title: 'Meta de seguidores', type: 'follow', current: 62, target: 100 }, { id: 'd2', title: 'Monedas del directo', type: 'gift', current: 3180, target: 5000 }],
     podium: { likes: people, gifts: people.map((u) => ({ ...u, value: Math.round(u.value / 20) })), chat: people.map((u) => ({ ...u, value: Math.round(u.value / 60) })) },
     live: { startedAt: t - 3 * 3600000 - 47 * 60000, viewersTotal: 1647, viewers: { tiktok: 1400, kick: 247 }, peak: 1820, follows: 17, likes: 48200, coins: 5300, gifts, best: gifts[5], streak: { ...gifts[2], count: 99 }, counters: [{ id: 'm', name: 'Muertes', icon: '💀', value: 27 }, { id: 'j', name: 'Jefes', icon: '⚔️', value: 3, goal: 5 }], countdown: { running: true, endsAt: t + 4 * 60000 + 54000, left: 0 } },
-    music: { current: { id: 'c1', videoId: 'dQw4w9WgXcQ', title: 'Luces de neón', author: 'Nova Ríos', requester: 'Rosalinda', durationSec: 205, startedAt: t - 43000, pausedMs: 0 }, queue: [['Medianoche en ruta', 'Dacreth'], ['Fuego lento', 'Angélica'], ['Ola dorada', 'Adriana'], ['Estrella fugaz', 'tinvalente']].map(([title, r], i) => ({ id: `q${i}`, videoId: 'dQw4w9WgXcQ', title, requester: r, durationSec: 180 + i * 17 })), paused: false },
+    music: { current: { id: 'c1', videoId: 'dQw4w9WgXcQ', title: 'Luces de neón', author: 'Nova Ríos', requester: 'Satronho', durationSec: 205, startedAt: t - 43000, pausedMs: 0 }, queue: [['Medianoche en ruta', 'Dacreth'], ['Fuego lento', 'Angélica'], ['Ola dorada', 'Adriana'], ['Estrella fugaz', 'tinvalente']].map(([title, r], i) => ({ id: `q${i}`, videoId: 'dQw4w9WgXcQ', title, requester: r, durationSec: 180 + i * 17 })), paused: false },
     recent,
   };
 }

@@ -67,7 +67,7 @@ const PAGES = {
 };
 
 const TAB_NAMES = {
-  sonidos: { biblioteca: 'Biblioteca', memes: 'Memes', frases: 'Frases', mios: 'Mis sonidos', chat: 'Comando del chat' },
+  sonidos: { memes: 'Memes', mios: 'Mis sonidos', frases: 'Frases', biblioteca: 'Básicos', chat: 'Comando del chat' },
   ayuda: { preguntas: 'Preguntas', reportar: 'Reportar un problema' },
   chatbot: { inicio: 'Inicio', comandos: 'Comandos', automaticos: 'Mensajes automáticos' },
   voz: { voces: 'Voces', quien: 'Quién se lee', filtros: 'Filtros y límites', especiales: 'Espectadores especiales', probar: 'Probar' },
