@@ -38,6 +38,13 @@ async function details(yt, videoId) {
   const info = await yt.getBasicInfo(videoId);
   const b = info.basic_info || {};
   const ps = info.playability_status || {};
+  const status = String(ps.status || 'OK');
+  const reason = String(ps.reason || '');
+  // YouTube a veces responde «inicia sesión para confirmar que no eres un
+  // bot» a la app aunque el video se vea normal en el reproductor del panel.
+  // Eso no es un video bloqueado: lo dejamos pasar y, si de verdad no suena,
+  // el reproductor avisa y salta a la siguiente.
+  const botCheck = status === 'LOGIN_REQUIRED' && !/edad|age|privado|private|members|miembros/i.test(reason);
   return {
     videoId,
     title: b.title || 'Sin título',
@@ -46,11 +53,13 @@ async function details(yt, videoId) {
     thumbnail: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,
     isLive: Boolean(b.is_live),
     embeddable: ps.embeddable !== false,
-    playable: !ps.status || ps.status === 'OK',
+    playable: status === 'OK' || botCheck,
+    unsure: botCheck || status === 'ERROR',
+    status,
   };
 }
 
-function createYoutubeResolver({ fetch: fetchFn = fetch } = {}) {
+function createYoutubeResolver({ fetch: fetchFn = fetch, client = null } = {}) {
   // Derechos de autor:
   //   off   cualquier canción (el riesgo de silencio o reclamo es tuyo)
   //   avoid evita videos oficiales de sellos (VEVO, «- Topic», «Official Video»),
@@ -68,12 +77,18 @@ function createYoutubeResolver({ fetch: fetchFn = fetch } = {}) {
   }
 
   async function resolve(query, { maxDurationSec = 600, copyright = 'off' } = {}) {
-    const yt = await getClient(fetchFn);
+    const yt = client || (await getClient(fetchFn));
     const usable = (v) => v.playable && v.embeddable && !v.isLive && v.durationSec > 0 && v.durationSec <= maxDurationSec && !copyrightCheck(v, copyright);
 
     const id = parseVideoId(query);
     if (id) {
-      const v = await details(yt, id);
+      let v;
+      try {
+        v = await details(yt, id);
+      } catch {
+        // Sin ficha: la ponemos igual y el reproductor dirá si no suena.
+        return { videoId: id, title: 'Video de YouTube', author: '', durationSec: 0, thumbnail: `https://i.ytimg.com/vi/${id}/mqdefault.jpg` };
+      }
       if (v.isLive) throw new Error('No se pueden pedir directos');
       if (!v.embeddable || !v.playable) throw new Error('Ese video no se puede reproducir fuera de YouTube');
       if (v.durationSec > maxDurationSec) throw new Error(`Es muy larga (máximo ${Math.round(maxDurationSec / 60)} min)`);
@@ -89,25 +104,34 @@ function createYoutubeResolver({ fetch: fetchFn = fetch } = {}) {
       .slice(0, 6);
     if (!candidates.length) throw new Error(copyright === 'off' ? 'No encontré esa canción' : copyright === 'free' ? 'No encontré una versión libre de derechos de esa canción' : 'Solo encontré versiones oficiales de sello; prueba con otra canción o con una versión en vivo, cover o letra');
 
-    // Revisamos los primeros resultados hasta dar con uno que se pueda
-    // incrustar y que no pase del límite de duración.
-    for (const c of candidates.slice(0, 4)) {
-      if ((c.duration?.seconds || 0) > maxDurationSec) continue;
+    // Revisamos los resultados hasta dar con uno que se pueda incrustar y
+    // que no pase del límite de duración. Si YouTube no deja revisar la
+    // ficha (pasa a menudo), usamos lo que dio la búsqueda: el reproductor
+    // del panel salta solo a la siguiente si ese video no suena.
+    const fromSearch = (c) => ({
+      videoId: c.video_id,
+      title: textOf(c.title),
+      author: textOf(c.author?.name),
+      durationSec: c.duration?.seconds || 0,
+      thumbnail: `https://i.ytimg.com/vi/${c.video_id}/mqdefault.jpg`,
+    });
+    const fits = candidates.filter((c) => (c.duration?.seconds || 0) <= maxDurationSec);
+    if (!fits.length) throw new Error(`Todas las versiones que encontré duran más de ${Math.round(maxDurationSec / 60)} min. Pide otra o sube el límite en Música → Permisos y comandos.`);
+    let backup = null;
+    for (const c of fits.slice(0, 5)) {
+      let v;
       try {
-        const v = await details(yt, c.video_id);
-        if (usable(v)) return v;
+        v = await details(yt, c.video_id);
       } catch {
-        // Si falla la ficha, usamos lo que dio la búsqueda.
-        return {
-          videoId: c.video_id,
-          title: textOf(c.title),
-          author: textOf(c.author?.name),
-          durationSec: c.duration?.seconds || 0,
-          thumbnail: `https://i.ytimg.com/vi/${c.video_id}/mqdefault.jpg`,
-        };
+        return fromSearch(c);
       }
+      if (usable(v)) return v;
+      // No se puede incrustar o tiene restricción de edad: esa no sirve.
+      if (!v.embeddable || v.status === 'AGE_CHECK_REQUIRED' || v.status === 'CONTENT_CHECK_REQUIRED') continue;
+      backup ??= v.durationSec ? v : fromSearch(c);
     }
-    throw new Error(`No encontré una versión de menos de ${Math.round(maxDurationSec / 60)} min que se pueda reproducir`);
+    if (backup) return backup;
+    throw new Error('YouTube no deja poner esa canción fuera de su página. Prueba con otra versión: en vivo, cover o con letra.');
   }
 
   // Varios resultados para el buscador del panel (sin revisar cada ficha).

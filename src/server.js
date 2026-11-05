@@ -59,6 +59,21 @@ const SAMPLE = {
 
 function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, resolver: customResolver, appInfo = {}, hooks = {} }) {
   const app = express();
+  // Enlace https para TikTok LIVE Studio: esa página (en GitHub Pages) muestra
+  // el overlay de este PC dentro de un marco. Chrome pide permiso para que
+  // una página de internet hable con el PC (red local): aquí se lo damos,
+  // solo para leer overlays.
+  const PAGES_ORIGIN = 'https://riddsc.github.io';
+  app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Private-Network', 'true');
+    if (req.headers.origin === PAGES_ORIGIN) res.setHeader('Access-Control-Allow-Origin', PAGES_ORIGIN);
+    if (req.method === 'OPTIONS' && req.headers['access-control-request-private-network']) {
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+      return res.sendStatus(204);
+    }
+    next();
+  });
+  app.get('/api/ping', (_req, res) => res.json({ ok: true }));
   const jsonBody = express.json();
   // Los packs de sonidos son grandes: los lee su propia ruta con más margen.
   app.use((req, res, next) => (req.path === '/api/sounds/pack' && req.method === 'POST' ? next() : jsonBody(req, res, next)));
@@ -402,7 +417,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     }
   };
 
-  app.get('/api/state', (_req, res) => ok(res, { config: publicConfig(store.get()), status, app: { name: 'Satronho Bot', author: 'RiddsSatronho', version: appInfo.version || require('../package.json').version, portable: Boolean(appInfo.portable) } }));
+  app.get('/api/state', (_req, res) => ok(res, { config: publicConfig(store.get()), status, app: { name: 'Satronho Bot', author: 'RiddsSatronho', version: appInfo.version || require('../package.json').version, portable: Boolean(appInfo.portable), pagesBase: `${PAGES_ORIGIN}/satronho-bot`, port: store.get('port') } }));
 
   // Actualizaciones (solo en la versión instalada con Velopack).
   let lastUpdate = null;

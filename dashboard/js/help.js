@@ -71,6 +71,12 @@ const KB = [
     go: '#mz-results',
   },
   {
+    guide: 'samy', q: '¿Cómo pongo los overlays en TikTok LIVE Studio?',
+    keys: ['tiktok live studio', 'live studio', 'enlace', 'url inválida', 'url invalida', 'introduce una url', 'link', 'tiktok overlay'],
+    answer: 'TikTok LIVE Studio no acepta los enlaces de tu PC (http://localhost). Por eso cada overlay trae un segundo enlace, <b>TikTok LIVE Studio</b>, que empieza por https. En TikTok LIVE Studio: <b>+ Agregar fuente → Enlace</b>, pégalo y pulsa Aplicar. Satronho Bot tiene que estar abierto en este PC.',
+    go: '#page-overlays',
+  },
+  {
     guide: 'samy', q: '¿Cómo escondo las plataformas que no uso?',
     keys: ['esconder', 'ocultar', 'quitar plataforma', 'no uso', 'plataformas que uso', 'twitch', 'starvios'],
     answer: 'En <b>Conexiones</b>, abre <b>Plataformas que uso</b> y desmarca las que no usas. Se esconden del panel y no se conectan solas. Puedes volver a marcarlas cuando quieras.',
