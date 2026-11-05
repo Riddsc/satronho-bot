@@ -206,7 +206,7 @@ const KB = [
   {
     guide: 'troya', q: '¿Por qué en TikTok no leo a todos?',
     keys: ['quiereme', 'permiso', 'tiktok', 'regalo', 'todos', 'hablar', 'leer', 'quien'],
-    answer: 'En TikTok solo leo a quien te envió un <b>Quiéreme</b>. Ese permiso dura lo que elijas (24 horas por defecto) y ves la lista de quién lo tiene. Puedes cambiar el regalo, apagar ese filtro o quitarle el permiso a alguien.',
+    answer: 'Depende de lo que elijas en <b>Voz del chat → Quién se lee</b>. Con <b>Todos</b> leo a todo el chat de TikTok. Con <b>Miembros de tu equipo que ya te mandaron Quiéreme</b> solo leo a quienes tienen la insignia de tu equipo y alguna vez te mandaron ese regalo; abajo ves la lista. En <b>Probar</b> te digo por qué no leí un mensaje.',
     go: '#allowed-list',
   },
   {

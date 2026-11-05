@@ -60,12 +60,12 @@ const DEFAULTS = {
     // En TikTok solo se lee a quien envió este regalo.
     tiktokGate: { enabled: true, giftNames: ['Quiéreme', 'Heart Me'], hours: 24 },
     // Quién puede hablar en cada plataforma (0.12). TikTok:
-    //   all · followers · subs · team · team-gift · gift · mods
+    //   all · followers · subs · team · team-gift · mods
     //   team-gift = Miembro de tu equipo que ya te mandó «Quiéreme» alguna vez.
     // Kick y Twitch: all · subs · vip · mods. Starvios no dice roles: all.
     // Moderadores y tú siempre pasan; «Espectadores especiales» manda sobre todo.
     who: {
-      tiktok: { mode: 'team-gift', teamMinLevel: 1 },
+      tiktok: { mode: 'all', teamMinLevel: 1 },
       kick: { mode: 'all' },
       twitch: { mode: 'all' },
       starvios: { mode: 'all' },
@@ -266,6 +266,11 @@ class Store {
     // 0.12: el filtro «solo quien envió Quiéreme» pasa a ser una regla de
     // «Quién puede hablar». Si lo tenías apagado, TikTok queda en «Todos».
     if (saved.tts && !saved.tts.who && saved.tts.tiktokGate?.enabled === false) {
+      const who = this.data.tts.who;
+      this.data.tts = { ...this.data.tts, who: { ...who, tiktok: { ...who.tiktok, mode: 'all' } } };
+    }
+    // 0.22.4: se quitó «Solo quien mandó Quiéreme»; quien la tenía pasa a «Todos».
+    if (this.data.tts?.who?.tiktok?.mode === 'gift') {
       const who = this.data.tts.who;
       this.data.tts = { ...this.data.tts, who: { ...who, tiktok: { ...who.tiktok, mode: 'all' } } };
     }
