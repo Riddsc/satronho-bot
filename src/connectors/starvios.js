@@ -9,6 +9,7 @@
 //   4. Si el tiempo real falla, leemos el chat cada pocos segundos.
 // No hace falta iniciar sesión.
 
+const fs = require('fs');
 const WebSocket = require('ws');
 const { createConnectorBase, cleanChannel, getJson } = require('./base');
 
@@ -27,7 +28,12 @@ async function discoverConfig(fetchFn) {
   return { url, key };
 }
 
-function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
+// Busca un número en varios nombres posibles de campo.
+const numOf = (o, keys) => { for (const k of keys) { const v = Number(o?.[k]); if (Number.isFinite(v) && v > 0) return v; } return 0; };
+const pickProfile = (row) => (Array.isArray(row?.profiles) ? row.profiles[0] : row?.profiles) || row?.profile || row?.user || row?.sender || null;
+const avatarOf = (p) => p?.avatar_url || p?.avatar || p?.image_url || p?.photo_url || p?.picture || '';
+
+function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch, logFile = '' }) {
   const base = createConnectorBase({ platform: 'starvios', bus, onStatus });
 
   let config = null;
@@ -48,8 +54,57 @@ function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
     return getJson(fetchFn, u.toString(), { headers: { apikey: config.key } });
   };
 
+  // Foto de perfil de quien escribe (una vez por persona).
+  async function fetchAvatar(uid) {
+    avatars.set(uid, '');
+    try {
+      const rows = await rest('profiles', { id: `eq.${uid}`, select: '*', limit: 1 });
+      const photo = avatarOf(rows[0]);
+      if (photo) avatars.set(uid, photo);
+    } catch { /* sin foto */ }
+  }
+
+  // Con todo el perfil: así llega también su foto.
   const CHAT_COLUMNS =
-    'id,user_id,body,is_deleted,created_at,profiles:profiles!live_chat_messages_user_id_fkey(username,display_name)';
+    'id,user_id,body,is_deleted,created_at,profiles:profiles!live_chat_messages_user_id_fkey(*)';
+  const avatars = new Map(); // user_id -> foto, para los mensajes en tiempo real que no la traen
+
+  // Lo que Starvios manda en tiempo real y todavía no conocemos (regalos,
+  // seguidores…) se guarda en un archivo para poder leerlo bien después.
+  let logged = 0;
+  function logUnknown(m) {
+    if (!logFile || logged >= 300) return;
+    logged += 1;
+    try { fs.appendFileSync(logFile, `${JSON.stringify({ ts: new Date().toISOString(), m })}\n`); } catch { /* sin disco */ }
+  }
+
+  // Regalos (Starvies), seguidores y espectadores: Starvios no publica su
+  // formato, así que reconocemos los nombres de campo más probables.
+  function deliverOther(inner) {
+    const name = String(inner?.event || '');
+    const body = inner?.payload?.msg || inner?.payload?.record || inner?.payload || {};
+    const kind = `${name} ${body.type || body.kind || ''}`.toLowerCase();
+    const p = pickProfile(body);
+    const user = { id: body.user_id || body.sender_id || p?.id || p?.username || '', name: p?.display_name || p?.username || body.username || body.sender_name || 'Starvios' };
+    const avatar = avatarOf(p) || avatars.get(user.id);
+    if (avatar) user.avatar = avatar;
+    if (/gift|starv|tip|donat|regalo|propina/.test(kind)) {
+      const count = numOf(body, ['quantity', 'count', 'amount_count']) || 1;
+      const amount = numOf(body, ['starvies', 'amount', 'value', 'coins', 'total', 'price']) || count;
+      const id = String(body.id || `${user.id}-${Date.now()}`);
+      if (seen.has(`g${id}`)) return;
+      seen.add(`g${id}`);
+      base.emit({ type: 'gift', user, amount, message: String(body.message || ''), extra: { giftName: body.gift_name || body.name || body.title || 'Starvies', count, unitValue: amount / count, currency: 'Starvies', image: body.image_url || body.icon_url || '' } });
+      return true;
+    }
+    if (/follow|seguid/.test(kind) && user.id) {
+      base.emit({ type: 'follow', user });
+      return true;
+    }
+    const viewers = numOf(body, ['viewer_count', 'viewers', 'viewers_count', 'current_viewers']);
+    if (viewers) { bus.emit('viewers', { platform: 'starvios', count: viewers }); return true; }
+    return false;
+  }
 
   function deliverChat(row) {
     if (!row?.id || row.is_deleted || typeof row.body !== 'string') return;
@@ -57,9 +112,13 @@ function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
     if (seen.has(id)) return;
     seen.add(id);
     if (seen.size > 3000) seen.delete(seen.values().next().value);
-    const p = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+    const p = pickProfile(row);
     const name = p?.display_name || p?.username || 'Starvios';
-    base.emit({ type: 'chat', user: { id: row.user_id || p?.username || name, name }, message: row.body });
+    const uid = row.user_id || p?.username || name;
+    const photo = avatarOf(p) || avatars.get(uid) || '';
+    if (photo) avatars.set(uid, photo);
+    else if (row.user_id && !avatars.has(uid)) fetchAvatar(uid);
+    base.emit({ type: 'chat', user: { id: p?.username || uid, name, ...(photo ? { avatar: photo } : {}) }, message: row.body });
   }
 
   // ---- Tiempo real (protocolo Phoenix de Supabase Realtime) ----
@@ -117,6 +176,8 @@ function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
         const op = inner.payload?.op;
         const row = inner.payload?.msg;
         if (op !== 'UPDATE') deliverChat(row);
+      } else if (!deliverOther(inner)) {
+        logUnknown(m);
       }
     });
 
@@ -146,12 +207,15 @@ function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
       if (Date.now() - lastStreamCheck > 15000) {
         const rows = await rest('live_streams', {
           channel_id: `eq.${profile.id}`,
-          select: 'id,status,started_at,chat_cleared_at',
+          select: '*',
           order: 'started_at.desc.nullslast',
           limit: 1,
         });
         lastStreamCheck = Date.now();
         const next = rows[0];
+        // Espectadores, si Starvios los guarda en el directo.
+        const viewers = numOf(next, ['viewer_count', 'viewers', 'viewers_count', 'current_viewers']);
+        if (viewers && next?.status === 'live') bus.emit('viewers', { platform: 'starvios', count: viewers });
         if (next && next.id !== stream?.id) {
           const firstLoad = !stream;
           stream = next;

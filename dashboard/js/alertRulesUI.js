@@ -110,7 +110,8 @@ function renderList() {
   const box = $('#ar-list');
   if (!box) return;
   const all = rules();
-  $('#ar-plats').innerHTML = PLATS.map(([id, n]) => `<button type="button" data-ar-plat="${id}" aria-pressed="${ui.plat === id}">${n} <small>${all.filter((r) => (r.platform || 'any') === id).length}</small></button>`).join('');
+  $('#ar-plats').innerHTML = PLATS.map(([id, n]) => `<button type="button" data-ar-plat="${id}" aria-pressed="${ui.plat === id}">${id === 'any' ? '<span class="ar-any">✳</span>' : `<span class="pl plogo" data-logo="${id}" aria-hidden="true"></span>`}${n} <small>${all.filter((r) => (r.platform || 'any') === id).length}</small></button>`).join('');
+  document.dispatchEvent(new CustomEvent('ar-plat', { detail: ui.plat }));
   const q = ui.q.toLowerCase();
   const list = all.filter((r) => (r.platform || 'any') === ui.plat && (!q || `${r.name} ${TRIG[r.trigger]?.name} ${(r.giftNames || []).join(' ')} ${r.keyword || ''} ${r.text || ''}`.toLowerCase().includes(q)));
   if (!list.length) {

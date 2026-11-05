@@ -59,6 +59,15 @@ function totals(list) {
     messages: list.reduce((a, s) => a + messagesOf(s), 0),
     inter: list.reduce((a, s) => a + interactions(s), 0),
     peak: list.reduce((a, s) => Math.max(a, s.peakViewers || 0), 0),
+    // Otras monedas (Starvies, Kicks, Bits), según la plataforma elegida.
+    currencies: list.reduce((acc, s) => {
+      for (const [cur, n] of Object.entries(s.currencies || {})) {
+        const plat = { Starvies: 'starvios', Kicks: 'kick', Bits: 'twitch' }[cur];
+        if (st.plat !== 'all' && plat && plat !== st.plat) continue;
+        acc[cur] = (acc[cur] || 0) + n;
+      }
+      return acc;
+    }, {}),
     chatters: list.length ? Math.round(list.reduce((a, s) => a + (st.plat === 'all' ? s.uniqueChatters || 0 : s.byPlatform?.[st.plat]?.chatters || 0), 0) / list.length) : 0,
   };
 }
@@ -216,6 +225,7 @@ function render() {
     tile('💬', 'Mensajes', compact(t.messages), `${compact(t.chatters)} personas por directo`, delta(t.messages, p?.messages)),
     tile('✨', 'Interacciones', compact(t.inter), 'seguidores, regalos, likes y compartidos', delta(t.inter, p?.inter)),
     tile('👀', 'Pico de espectadores', compact(t.peak), 'el más alto del periodo', delta(t.peak, p?.peak)),
+    ...Object.entries(t.currencies).filter(([, n]) => n > 0).map(([cur, n]) => tile({ Starvies: '⭐', Kicks: '🟢', Bits: '💠' }[cur] || '🪙', cur, compact(n), { Starvies: 'en Starvios', Kicks: 'en Kick', Bits: 'en Twitch' }[cur] || 'otras monedas', delta(n, p?.currencies?.[cur]))),
   ].join('');
   $('#ov-prev-note').textContent = p ? 'Los porcentajes comparan con el periodo anterior del mismo largo.' : '';
   chart(list);

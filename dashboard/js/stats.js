@@ -197,6 +197,22 @@ function renderTops(tops) {
   ].join('');
 }
 
+// Pestaña «Tops de siempre».
+export async function renderAllTops() {
+  const box = $('#alltops');
+  if (!box) return;
+  try {
+    const { tops } = await api('GET', '/api/stats/all-time');
+    $('#alltops-note').textContent = `${tops.sessions} ${tops.sessions === 1 ? 'directo guardado' : 'directos guardados'}`;
+    box.innerHTML = [
+      topList('Más diamantes', tops.gifters, 'diamantes'),
+      topList('Más activos en el chat', tops.chatters, 'mensajes'),
+      topList('Más likes', tops.likers, 'likes'),
+      topList('Regalos más enviados', tops.gifts, 'veces'),
+    ].join('');
+  } catch { box.innerHTML = '<p class="hint">No se pudieron leer los tops.</p>'; }
+}
+
 // ---------- Vista ----------
 async function show() {
   const isAll = selected === 'all';
@@ -246,6 +262,9 @@ export function openSession(id) {
 }
 
 export function initStats({ stats, statsHistory }) {
+  // Los tops se cargan al abrir su pestaña.
+  const tp = document.querySelector('[data-tabpanel="tops"]');
+  if (tp) new MutationObserver(() => { if (!tp.hidden) renderAllTops(); }).observe(tp, { attributes: true, attributeFilter: ['hidden'] });
   live = stats;
   history = statsHistory || [];
   renderSelect();

@@ -22,13 +22,15 @@ const { createGiftCatalog } = require('./modules/giftCatalog');
 const { createAlertRules } = require('./modules/alertRules');
 const { createSoundLibrary } = require('./modules/soundLibrary');
 const { createSpotify } = require('./connectors/spotify');
-const { whoReason } = require('./modules/roles');
+const { whoReason, configureStarvios } = require('./modules/roles');
 const { createLeaderboard } = require('./modules/leaderboard');
 const { createLive } = require('./modules/live');
 const { createYoutubeResolver } = require('./music/youtube');
 const { createKickConnector } = require('./connectors/kick');
 const { createTiktokConnector } = require('./connectors/tiktok');
 const { createStarviosConnector } = require('./connectors/starvios');
+const { createAvatars } = require('./modules/avatars');
+const { createFiles } = require('./modules/files');
 const { createTwitchConnector } = require('./connectors/twitch');
 const { createKickChat } = require('./connectors/kickChat');
 const { createStarviosChat } = require('./connectors/starviosChat');
@@ -107,6 +109,11 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
   function broadcast(kind, payload) {
+    // Volumen general de las alertas (Alertas → barra de arriba).
+    if (kind === 'alert' && payload?.sound) {
+      const mv = Math.max(0, Math.min(100, Number(store.get('alerts')?.masterVolume ?? 100)));
+      if (mv !== 100) payload = { ...payload, sound: { ...payload.sound, volume: Math.round((Number(payload.sound.volume ?? 70) * mv) / 100) } };
+    }
     const msg = JSON.stringify({ kind, payload });
     for (const ws of wss.clients) if (ws.readyState === ws.OPEN) ws.send(msg);
   }
@@ -124,6 +131,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   }
   const deps = { bus, onStatus, fetch: fetchFn };
   const catalog = createGiftCatalog({ dataDir, broadcast: (...a) => broadcast(...a), fetchFn });
+  // Starvios: tu canal, tus moderadores y tu lista de personas (roles a mano).
+  configureStarvios(() => ({ owner: store.get('platforms')?.starvios?.channel || '', ...(store.get('starviosPeople') || {}) }));
   const alertRules = createAlertRules({ store });
   const podium = createLeaderboard({ broadcast: (...a) => broadcast(...a) });
   const live = createLive({ store, broadcast: (...a) => broadcast(...a) });
@@ -131,7 +140,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }) }),
     kick: createKickConnector(deps),
     twitch: createTwitchConnector(deps),
-    starvios: createStarviosConnector(deps),
+    starvios: createStarviosConnector({ ...deps, logFile: path.join(dataDir, 'starvios-eventos.jsonl') }),
   };
 
   // ---- Módulos ----
@@ -183,6 +192,13 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     broadcast,
   });
   const stats = createStats({ store, dataDir, broadcast });
+  // Fotos de perfil (Espectadores especiales y el buscador de gente).
+  const avatars = createAvatars({
+    dataDir,
+    fetch: fetchFn,
+    kickPicture: (x) => kickChat.userPicture(x),
+    known: (p, who) => stats.people(who, 20).find((u) => u.platform === p && [u.id, u.name].some((x) => String(x).toLowerCase() === who))?.avatar || '',
+  });
   const resolver = customResolver || createYoutubeResolver({ fetch: fetchFn });
   const spotify = createSpotify({ store, fetchFn, broadcast: (...a) => broadcast(...a) });
   const music = createMusic({
@@ -234,6 +250,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   }
   const recent = [];
   bus.on('event', (e) => {
+    if (e.user?.avatar) avatars.remember(e.platform, e.user);
     if (e.type !== 'join') recent.unshift(e);
     recent.length = Math.min(recent.length, 100);
     broadcast('event', e);
@@ -248,7 +265,9 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const alerts = store.get('alerts');
     const bigEnough = e.type !== 'gift' || e.amount >= (alerts.minGift || 0);
     const hasDefault = Boolean(alerts.types?.[e.type]);
-    if (hasDefault && !exclusive && alerts.enabled[e.type] === true && bigEnough) {
+    // Alertas de serie encendidas o apagadas por plataforma.
+    const platOn = alerts.platforms?.[e.platform] !== false;
+    if (hasDefault && !exclusive && platOn && alerts.enabled[e.type] === true && bigEnough) {
       const a = alertFor(e);
       broadcast('alert', a);
       if (a.speak) tts.speak(alertText(e));
@@ -544,7 +563,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
   app.get('/api/stats/all-time', (_req, res) => ok(res, { tops: stats.allTimeTops() }));
   // Gente vista en tu chat, para buscarla al añadir espectadores especiales.
-  app.get('/api/people', (req, res) => ok(res, { people: stats.people(String(req.query.q || '').slice(0, 40), Math.min(20, Number(req.query.limit) || 8)) }));
+  app.get('/api/people', (req, res) => ok(res, { people: stats.people(String(req.query.q || '').slice(0, 40), Math.min(20, Number(req.query.limit) || 8)).map((u) => ({ ...u, avatar: u.avatar || avatars.cached(u.platform, u.id) || avatars.cached(u.platform, u.name) })) }));
+  app.get('/api/avatar', safe(async (req, res) => ok(res, { url: await avatars.resolve(String(req.query.platform || ''), String(req.query.user || '').slice(0, 60), String(req.query.id || '').slice(0, 30)) })));
   app.get('/api/stats/overview', (_req, res) => ok(res, { sessions: stats.overview(), usdPerDiamond: store.get('stats')?.usdPerDiamond }));
   app.post('/api/stats/end', (_req, res) => { podium.reset(); ok(res, { session: stats.end('manual') }); });
   app.post('/api/podium/reset', (_req, res) => { podium.reset(); ok(res, {}); });
@@ -802,6 +822,18 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     res.type(f.mime);
     res.sendFile(f.full, (err) => err && !res.headersSent && res.sendStatus(404));
   });
+  // ---------- Mis archivos ----------
+  const files = createFiles({ dataDir, store, soundLib });
+  app.use('/media', express.static(files.mediaDir, { maxAge: 0 }));
+  app.get('/api/files', (_req, res) => ok(res, { files: files.list() }));
+  app.post('/api/files/upload', express.raw({ type: [...Object.keys(soundLib.EXT), ...Object.keys(files.MEDIA)], limit: '25mb' }), safe(async (req, res) => {
+    const name = decodeURIComponent(String(req.headers['x-file-name'] || 'Archivo')).replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ');
+    const r = files.upload(req.body, String(req.headers['content-type'] || '').split(';')[0], name);
+    broadcast('sounds-changed', {});
+    ok(res, r);
+  }));
+  app.patch('/api/files/:id', safe(async (req, res) => { files.rename(String(req.params.id), String(req.body?.name || '')); broadcast('sounds-changed', {}); ok(res, {}); }));
+  app.delete('/api/files/:id', safe(async (req, res) => { files.remove(String(req.params.id)); broadcast('sounds-changed', {}); ok(res, {}); }));
   app.get('/api/sounds', (_req, res) => ok(res, soundLib.list()));
   app.post('/api/sounds/upload', express.raw({ type: Object.keys(soundLib.EXT), limit: '10mb' }), safe(async (req, res) => {
     const ext = soundLib.EXT[req.headers['content-type']];

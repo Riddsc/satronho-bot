@@ -1,5 +1,68 @@
 [
   {
+    "version": "0.23.0",
+    "date": "2026-11-05",
+    "title": "Más amplia, más sobria y con Mis archivos",
+    "items": [
+      {
+        "type": "mejora",
+        "text": "Toda la app aprovecha mejor la pantalla: empieza más arriba y a la izquierda, usa todo el ancho y los encabezados van en una franja (el guía pequeño, el título y lo que dice el guía). Letra y márgenes más finos."
+      },
+      {
+        "type": "mejora",
+        "text": "Colores más sobrios: los botones, burbujas y atajos toman el color de tu tema; el color de cada guía queda como detalle. Nuevo tema «Grafito», gris neutro."
+      },
+      {
+        "type": "mejora",
+        "text": "El aviso de novedades es más amplio y muestra todo lo que cambió desde tu versión anterior. La franja de «Actualizar» ya no chilla."
+      },
+      {
+        "type": "nuevo",
+        "text": "Mis archivos: tus sonidos, imágenes y videos en un solo sitio, con vista previa, cuántas veces se usa cada uno, renombrar, descargar, borrar y subir (también arrastrando). En el menú tiene su desplegable con los mismos filtros: Todos, Audios, Imágenes, Videos y Sin usar."
+      },
+      {
+        "type": "nuevo",
+        "text": "Chat en vivo: el panel tiene pestañas. Filtros (cuentas ocultas, censurar palabras prohibidas, suscripciones con los regalos), Destacar (moderadores, suscriptores, tu equipo, especiales, primer mensaje y cuando te nombran), Usuarios (quién escribe y cuánto, con silenciar, voz propia u ocultar) y Ventana (tamaño de letra, fotos, hora, compacto)."
+      },
+      {
+        "type": "nuevo",
+        "text": "Chat en una ventana aparte, para tenerlo encima del juego o en otra pantalla. Botón «Dividir» para ver una columna por plataforma."
+      },
+      {
+        "type": "nuevo",
+        "text": "Voz del chat → «Mensaje y plataformas»: cómo se lee cada mensaje (plantilla con usuario, mensaje y plataforma) y velocidad y volumen propios para TikTok, Kick, Twitch y Starvios."
+      },
+      {
+        "type": "nuevo",
+        "text": "Alertas: barra arriba con la plataforma, Personalizadas o De serie, volumen general, Probar y Detener todo. Las alertas de serie se encienden o apagan por plataforma."
+      },
+      {
+        "type": "nuevo",
+        "text": "Estadísticas: pestaña «Tops de siempre». Las monedas de cada plataforma ya no se mezclan: Starvies, Kicks y Bits salen aparte de los diamantes de TikTok."
+      },
+      {
+        "type": "nuevo",
+        "text": "Starvios: elige quién pide música y quién se lee (Todos, Tu lista y tus moderadores, o Solo moderadores). Como Starvios no dice quién es moderador, los escribes tú una vez y sirven para las dos cosas."
+      },
+      {
+        "type": "mejora",
+        "text": "Starvios trae la foto de perfil de quien escribe y, si Starvios los manda, los espectadores y los Starvies. Lo que todavía no reconocemos se guarda en starvios-eventos.jsonl para terminar de leerlo."
+      },
+      {
+        "type": "mejora",
+        "text": "Espectadores especiales con foto: TikTok y Starvios la traen en cada mensaje; las de Kick y Twitch se buscan solas."
+      },
+      {
+        "type": "mejora",
+        "text": "Conexiones: barra para ver todas las plataformas o solo una, con su estado."
+      },
+      {
+        "type": "nuevo",
+        "text": "Ícono nuevo: el planeta con Samy, Troya, Ñoño, Juana y MechaRidds en miniatura, en órbita. En tamaños muy pequeños se ve solo el planeta para que siga claro."
+      }
+    ]
+  },
+  {
     "version": "0.22.5",
     "date": "2026-11-05",
     "title": "TikTok se lee de verdad y los emojis suenan bien",

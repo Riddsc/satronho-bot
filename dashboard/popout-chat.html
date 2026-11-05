@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="author" content="RiddsSatronho">
+<title>Chat · Satronho Bot</title>
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* Chat en una ventana aparte: solo los mensajes, para tenerlo encima del juego. */
+  body { display: block; overflow: hidden; }
+  .po { height: 100vh; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+  .po-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--edge); }
+  .po-bar b { font-size: 13px; }
+  .po-bar .seg button { padding: 4px 8px; font-size: 12px; }
+  .po-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); margin-left: auto; }
+  .po-dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  .po-feed { list-style: none; margin: 0; padding: 8px; overflow-y: auto; display: grid; align-content: start; gap: 2px; }
+  .po-feed li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; padding: 4px 6px; border-radius: 8px; }
+  .po-feed .av { width: 26px; height: 26px; font-size: 11px; }
+  .po-feed .who { font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 5px; }
+  .po-feed .who img { width: 13px; height: 13px; border-radius: 4px; }
+  .po-feed .who i { font-style: normal; color: var(--muted); font-weight: 600; font-size: 11px; margin-left: auto; }
+  .po-feed p { margin: 1px 0 0; font-size: 14px; overflow-wrap: anywhere; }
+  .po-feed li.ev { display: block; color: var(--muted); font-size: 12.5px; }
+  .po-feed li.ev img { width: 13px; height: 13px; border-radius: 4px; vertical-align: -2px; }
+  .po-feed li.muted p { opacity: .65; }
+</style>
+</head>
+<body>
+<div class="po">
+  <div class="po-bar"><span class="logo"><span></span></span><b>Chat</b><div class="seg" id="po-plat"></div><i class="po-dot" id="po-dot" title="Conexión con la app"></i></div>
+  <ul class="po-feed" id="po-feed"></ul>
+</div>
+<script type="module">
+  import { connectSatronho } from '/overlays/client.js';
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const PLATS = { all: 'Todas', tiktok: 'TikTok', kick: 'Kick', twitch: 'Twitch', starvios: 'Starvios' };
+  const COLORS = ['#ff8fb5', '#9b8cff', '#74d14c', '#ffb23e', '#5fb8ff', '#ff7a59', '#c084fc', '#2dd4bf'];
+  let plat = 'all';
+  const items = [];
+  const decided = new Map();
+  // El mismo tema, color y letra que la app.
+  fetch('/api/state').then((r) => r.json()).then(({ config }) => {
+    const a = config?.appearance || {};
+    const root = document.documentElement;
+    root.dataset.theme = a.theme || 'noche';
+    if (a.accent) root.style.setProperty('--accent', a.accent);
+  }).catch(() => {});
+  function av(name, url) {
+    let h = 0; for (const ch of String(name || '?')) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+    const l = esc([...String(name || '?').replace(/[^\p{L}\p{N}]/gu, '')][0]?.toUpperCase() || '?');
+    return url ? `<span class="av"><img src="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()"></span>` : `<span class="av" style="--avc:${COLORS[h % COLORS.length]}"><b>${l}</b></span>`;
+  }
+  const EV = { follow: 'empezó a seguirte', sub: 'se suscribió', share: 'compartió el directo', gift: 'envió' };
+  function row(e) {
+    const logo = `<img src="/img/platforms/${esc(e.platform)}.png" alt="">`;
+    if (e.type !== 'chat') return `<li class="ev" data-id="${esc(e.id)}">${logo} <b>${esc(e.user?.name)}</b> ${EV[e.type] || ''} ${e.type === 'gift' ? `${esc(e.extra?.giftName || 'un regalo')} · ${Number(e.amount || 0).toLocaleString('es-CO')} ${esc(e.extra?.currency || '')}` : ''}</li>`;
+    const d = decided.get(e.id);
+    const t = new Date(e.ts || Date.now()).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    return `<li class="${d && !d.read ? 'muted' : ''}" data-id="${esc(e.id)}">${av(e.user?.name, e.user?.avatar)}<div><div class="who">${logo}${esc(e.user?.name)}${d ? (d.read ? ' 🔊' : ' 🔇') : ''}<i>${t}</i></div><p>${esc(e.message)}</p></div></li>`;
+  }
+  const shows = (e) => (plat === 'all' || e.platform === plat) && ['chat', 'follow', 'sub', 'share', 'gift'].includes(e.type);
+  function draw() {
+    $('#po-plat').innerHTML = Object.entries(PLATS).map(([id, n]) => `<button type="button" data-p="${id}" aria-pressed="${plat === id}">${n}</button>`).join('');
+    const ul = $('#po-feed');
+    ul.innerHTML = items.filter(shows).slice(-200).map(row).join('') || '<li class="ev">Cuando alguien escriba, aparece aquí.</li>';
+    ul.scrollTop = ul.scrollHeight;
+  }
+  $('#po-plat').addEventListener('click', (ev) => { const b = ev.target.closest('[data-p]'); if (b) { plat = b.dataset.p; draw(); } });
+  connectSatronho((k, p) => {
+    if (k === 'hello') { items.length = 0; items.push(...(p.recent || []).slice().reverse()); draw(); }
+    if (k === 'event') {
+      items.push(p); if (items.length > 600) items.shift();
+      if (!shows(p)) return;
+      const ul = $('#po-feed');
+      const atEnd = ul.scrollHeight - ul.scrollTop - ul.clientHeight < 60;
+      ul.querySelector('.ev:only-child')?.remove();
+      ul.insertAdjacentHTML('beforeend', row(p));
+      while (ul.children.length > 200) ul.firstElementChild.remove();
+      if (atEnd) ul.scrollTop = ul.scrollHeight;
+    }
+    if (k === 'tts-decision') {
+      decided.set(p.eventId, p);
+      const li = document.querySelector(`[data-id="${CSS.escape(p.eventId)}"]`);
+      const e = items.find((x) => x.id === p.eventId);
+      if (li && e) li.outerHTML = row(e);
+    }
+  }, (on) => $('#po-dot').classList.toggle('on', on));
+</script>
+</body>
+</html>

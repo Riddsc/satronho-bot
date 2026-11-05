@@ -341,6 +341,7 @@ function renderSpecial() {
     el.innerHTML = `<li class="sp-empty">${list.length ? 'Nadie con ese filtro.' : 'Nadie todavía. Pulsa «Añadir persona» o hazlo desde Chat en vivo.'}</li>`;
     return;
   }
+  setTimeout(fillSpecialAvatars, 50);
   el.innerHTML = rows.map(({ x, i }) => {
     const [p, who] = x.key.split(':');
     const muted = x.action === 'mute';
@@ -359,6 +360,29 @@ function renderSpecial() {
     </li>`;
   }).join('');
 }
+// Fotos que faltan (Kick y Twitch no las mandan con el mensaje): se buscan
+// una vez y quedan guardadas en la lista.
+const avatarAsked = new Set();
+async function fillSpecialAvatars() {
+  const list = config.tts.special || [];
+  for (const x of list) {
+    const [p, who] = x.key.split(':');
+    if (x.avatar || p === '*' || avatarAsked.has(x.key)) continue;
+    avatarAsked.add(x.key);
+    try {
+      const { url } = await api('GET', `/api/avatar?platform=${encodeURIComponent(p)}&user=${encodeURIComponent(who)}`);
+      if (!url) continue;
+      const cur = config.tts.special || [];
+      const i = cur.findIndex((y) => y.key === x.key);
+      if (i < 0) continue;
+      cur[i] = { ...cur[i], avatar: url };
+      saveConfig({ tts: { special: cur } });
+      const row = $(`#sp-list [data-sp="${i}"] .av`);
+      if (row) row.outerHTML = avatarHtml(cur[i].name || who, url);
+    } catch { /* sin foto: se queda la inicial */ }
+  }
+}
+
 function saveSpecial(list) {
   config.tts.special = list;
   saveConfig({ tts: { special: list } });
@@ -424,6 +448,16 @@ function initSpecialAdd() {
     }
     active = 0;
     draw();
+    // Fotos que faltan en las sugerencias (Kick y Twitch).
+    for (const [i, u] of items.entries()) {
+      if (u.avatar || !['kick', 'twitch'].includes(u.platform)) continue;
+      api('GET', `/api/avatar?platform=${u.platform}&user=${encodeURIComponent(u.name)}&id=${encodeURIComponent(u.id)}`).then(({ url }) => {
+        if (!url || my !== seq) return;
+        items[i] = { ...u, avatar: url };
+        const av = sug.querySelector(`[data-sug="${i}"] .av`);
+        if (av) av.outerHTML = avatarHtml(u.name, url);
+      }).catch(() => {});
+    }
   }
   function pick(which) {
     let entry;
@@ -573,6 +607,7 @@ function fillForm() {
   $('#tricks-row').classList.toggle('disabled', !t.filterProfanity);
   showWho();
   fillScripts();
+  showMessageTab();
 }
 
 // Escudo anti-trampas: alfabetos permitidos (casillas).
@@ -617,6 +652,32 @@ function showWho() {
   const mode = config.tts.who?.tiktok?.mode || 'all';
   const lvl = $('.who-level');
   if (lvl) lvl.hidden = !['team', 'team-gift'].includes(mode);
+}
+
+// Pestaña «Mensaje y plataformas»: atajos de plantilla, ejemplo y valores.
+const TPL_PRESETS = [['', 'Fulano dice: …'], ['{usuario}: {mensaje}', 'Fulano: …'], ['{usuario} desde {plataforma}: {mensaje}', 'Fulano desde TikTok: …'], ['{mensaje}', 'Solo el mensaje']];
+function showMessageTab() {
+  const t = config.tts;
+  const box = $('#tts-tpl-presets');
+  if (box && !box.childElementCount) {
+    box.innerHTML = TPL_PRESETS.map(([v, n]) => `<button type="button" class="chip-btn" data-tpl="${esc(v)}">${esc(n)}</button>`).join('');
+    box.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-tpl]');
+      if (!b) return;
+      const inp = $('[data-tts="template"]');
+      inp.value = b.dataset.tpl;
+      inp.dispatchEvent(new Event('input'));
+    });
+  }
+  for (const b of $$('#tts-tpl-presets [data-tpl]')) b.setAttribute('aria-pressed', String((t.template || '') === b.dataset.tpl));
+  const tpl = String(t.template || '').trim();
+  const sample = !t.sayName ? 'hola a todos' : tpl && /\{mensaje\}/i.test(tpl) ? tpl.replace(/\{usuario\}/gi, 'Camila').replace(/\{plataforma\}/gi, 'TikTok').replace(/\{mensaje\}/gi, 'hola a todos') : 'Camila dice: hola a todos';
+  if ($('#tts-tpl-sample')) $('#tts-tpl-sample').textContent = `«${sample}»`;
+  for (const el of $$('[data-ppv]')) {
+    const [p, k] = el.dataset.ppv.split('.');
+    const v = Number(t.perPlatform?.[p]?.[k] ?? 1);
+    el.textContent = `${Math.round(v * 100)}%`;
+  }
 }
 
 function showLevels() {
@@ -672,7 +733,13 @@ export function initVoice(cfg) {
       for (const p of path.slice(0, -1)) target = target[p];
       target[path.at(-1)] = value;
       saveConfig({ tts: partial });
+      // Otras copias del mismo ajuste (p. ej. «Leer el chat de…» está en dos pestañas).
+      for (const o of $$(`[data-tts="${el.dataset.tts}"]`)) {
+        if (o === el || o.type === 'radio') continue;
+        if (o.type === 'checkbox') o.checked = Boolean(value); else o.value = Array.isArray(value) ? value.join('\n') : value;
+      }
       showLevels();
+      showMessageTab();
       $('#tricks-row').classList.toggle('disabled', !config.tts.filterProfanity);
       showWho();
       updateTroya();

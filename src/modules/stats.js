@@ -17,6 +17,8 @@ const path = require('path');
 const MAX_HISTORY = 500;
 const COUNT_TYPES = ['chat', 'follow', 'sub', 'gift', 'like', 'share'];
 
+const PLAT_CURRENCY = { starvios: 'Starvies', kick: 'Kicks', twitch: 'Bits' };
+
 function newSession(now) {
   return {
     id: `s${now}`,
@@ -34,6 +36,7 @@ function newSession(now) {
     timeline: [], // por minuto: { m, chat, interactions, diamonds, viewers }
     users: {}, // clave -> { name, platform, messages, diamonds, likes, gifts }
     gifts: {}, // nombre -> { count, diamonds }
+    currencies: {}, // moneda -> total (Starvies, Kicks, Bits…); los diamantes de TikTok van en «diamonds»
   };
 }
 
@@ -86,6 +89,7 @@ function createStats({ store, dataDir, broadcast }) {
       diamonds: s.diamonds,
       usd: Math.round(s.diamonds * cfg().usdPerDiamond * 100) / 100,
       giftsSent: s.giftsSent,
+      currencies: s.currencies || {},
       uniqueChatters: Object.values(s.users).filter((u) => u.messages > 0).length,
       peakViewers: s.peakViewers,
       songs: s.songs,
@@ -213,6 +217,19 @@ function createStats({ store, dataDir, broadcast }) {
     }
     if (e.type === 'gift') {
       const count = Number(e.extra?.count) || 1;
+      // Cada plataforma tiene su moneda: no se mezclan con los diamantes.
+      const cur = e.platform === 'tiktok' ? '' : String(e.extra?.currency || PLAT_CURRENCY[e.platform] || 'Monedas');
+      if (cur) {
+        s.currencies ??= {};
+        s.currencies[cur] = (s.currencies[cur] || 0) + e.amount;
+        s.giftsSent += count;
+        u.gifts += count;
+        const name = e.extra?.giftName || 'Regalo';
+        const g = (s.gifts[name] ??= { count: 0, diamonds: 0 });
+        g.count += count;
+        touch();
+        return;
+      }
       s.diamonds += e.amount;
       s.giftsSent += count;
       u.diamonds += e.amount;

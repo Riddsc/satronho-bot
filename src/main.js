@@ -121,7 +121,7 @@ function showWindow() {
 
 function ensureTray() {
   if (tray) return tray;
-  const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'icon.png')).resize({ width: 16, height: 16 });
+  const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'icon-small.png')).resize({ width: 16, height: 16 });
   tray = new Tray(icon);
   tray.setToolTip('Satronho Bot');
   tray.setContextMenu(
@@ -365,6 +365,10 @@ if (!app.requestSingleInstanceLock()) {
 
     // Los enlaces externos se abren en el navegador, no dentro de la app.
     win.webContents.setWindowOpenHandler(({ url: target }) => {
+      // El chat en una ventana aparte (Chat en vivo → Ventana) se abre dentro de la app.
+      if (target.startsWith(url.replace(/\/$/, '')) && target.includes('/popout-chat.html')) {
+        return { action: 'allow', overrideBrowserWindowOptions: { width: 440, height: 720, minWidth: 300, minHeight: 300, autoHideMenuBar: true, title: 'Chat · Satronho Bot', backgroundColor: '#0f0d17' } };
+      }
       shell.openExternal(target);
       return { action: 'deny' };
     });

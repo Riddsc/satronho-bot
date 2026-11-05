@@ -117,9 +117,46 @@ async function upload(key, file) {
   }
 }
 
+// Barra de arriba: plataforma, Personalizadas / De serie, volumen general,
+// probar y detener todo. Las alertas de serie se encienden por plataforma.
+const PNAMES = { tiktok: 'TikTok', kick: 'Kick', twitch: 'Twitch', starvios: 'Starvios' };
+function renderTop() {
+  const mode = document.querySelector('[data-tabs="alertas"] [aria-selected="true"]')?.dataset.tab || 'propias';
+  for (const b of $$('#al-mode [data-al-mode]')) b.setAttribute('aria-pressed', String(b.dataset.alMode === mode));
+  $('#ar-plats').hidden = mode !== 'propias'; // las plataformas filtran tus alertas propias
+  const mv = Number(config.alerts.masterVolume ?? 100);
+  $('#al-master').value = mv;
+  $('#al-master-val').textContent = `${mv}%`;
+  const on = config.alerts.platforms || {};
+  $('#al-platsw').innerHTML = `<span class="field-label">Alertas de serie en</span><div class="row wrap">${Object.entries(PNAMES).map(([p, n]) => `<label class="chip-check al-psw"><input type="checkbox" data-al-plat="${p}" ${on[p] !== false ? 'checked' : ''}><span><span class="pl plogo" data-logo="${p}" aria-hidden="true"></span>${n}</span></label>`).join('')}</div>`;
+}
+
 export function initAlerts(cfg) {
   config = cfg;
   render();
+  renderTop();
+  $('#al-mode').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-al-mode]');
+    if (!b) return;
+    document.querySelector(`[data-tabs="alertas"] [data-tab="${b.dataset.alMode}"]`)?.click();
+    renderTop();
+  });
+  // Si la pestaña cambia por la dirección (#/alertas/serie), la barra se entera.
+  const mo = new MutationObserver(() => renderTop());
+  for (const t of $$('[data-tabs="alertas"] [data-tab]')) mo.observe(t, { attributes: true, attributeFilter: ['aria-selected'] });
+  $('#al-master').addEventListener('input', (ev) => { $('#al-master-val').textContent = `${ev.target.value}%`; });
+  $('#al-master').addEventListener('change', (ev) => {
+    config.alerts.masterVolume = Number(ev.target.value);
+    saveConfig({ alerts: { masterVolume: config.alerts.masterVolume } });
+  });
+  $('#al-test').addEventListener('click', () => api('POST', '/api/test/gift', {}).catch((e) => toast(e.message)));
+  $('#al-stop').addEventListener('click', () => api('POST', '/api/alerts/control', { action: 'clear' }).then(() => toast('Alertas detenidas')).catch((e) => toast(e.message)));
+  $('#al-platsw').addEventListener('change', (ev) => {
+    const el = ev.target.closest('[data-al-plat]');
+    if (!el) return;
+    config.alerts.platforms = { ...(config.alerts.platforms || {}), [el.dataset.alPlat]: el.checked };
+    saveConfig({ alerts: { platforms: { [el.dataset.alPlat]: el.checked } } });
+  });
   const page = $('#card-alertas');
 
   page.addEventListener('click', async (ev) => {

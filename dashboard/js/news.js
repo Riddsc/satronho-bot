@@ -3,9 +3,10 @@
 // versión nueva. El historial viene de CHANGELOG.json (incluido en la app).
 
 import { $, api, esc, saveConfig } from './util.js';
-import { mechaBust } from './mecharidds.js';
+import { mechaHead } from './mecharidds.js';
 
-const TYPE = { nuevo: 'Nuevo', mejora: 'Mejora', arreglo: 'Arreglo' };
+const TYPE = { nuevo: 'Nuevo', mejora: 'Mejora', arreglo: 'Arreglo', cambio: 'Cambio' };
+const cmpVer = (a, b) => { const pa = String(a).split('.').map(Number); const pb = String(b).split('.').map(Number); for (let i = 0; i < 3; i += 1) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) - (pb[i] || 0); return 0; };
 
 let config;
 let changelog = [];
@@ -45,11 +46,14 @@ function markSeen() {
   setUnseen(false);
 }
 
+// Todo lo que cambió desde la versión que tenías (no solo la última).
 function showModal(entry) {
-  $('#news-bust').innerHTML = mechaBust();
-  $('#news-modal-ver').textContent = `Actualizado a la versión ${entry.version}`;
-  $('#news-modal-title').textContent = entry.title;
-  $('#news-modal-items').innerHTML = items(entry.items || []);
+  const from = config.seenVersion || '';
+  const list = changelog.filter((v) => cmpVer(v.version, version) <= 0 && (!from || cmpVer(v.version, from) > 0)).slice(0, 8);
+  const show = list.length ? list : [entry];
+  $('#news-bust').innerHTML = mechaHead('');
+  $('#news-modal-ver').textContent = from ? `Esto cambió desde tu versión anterior (${from})` : `Versión ${entry.version}`;
+  $('#news-modal-items').innerHTML = show.map((v) => `<section class="nw-ver"><h3><span class="nw-v">v${esc(v.version)}</span>${esc(v.title)}</h3><ul class="news-items nw-items">${items(v.items || [])}</ul></section>`).join('');
   $('#news-modal').hidden = false;
   $('#news-modal-ok').focus();
 }
@@ -68,6 +72,7 @@ export async function initNews(cfg, appVersion) {
     markSeen();
   };
   $('#news-modal-ok').addEventListener('click', close);
+  $('#news-modal-x').addEventListener('click', close);
   $('#news-modal-all').addEventListener('click', close);
   $('#news-modal').addEventListener('click', (ev) => { if (ev.target.id === 'news-modal') close(); });
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !$('#news-modal').hidden) close(); });
