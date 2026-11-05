@@ -375,5 +375,6 @@ export function initNav(cfg) {
     if (go) showPage(go.dataset.goPage);
   });
   window.addEventListener('hashchange', fromHash);
-  fromHash();
+  // Al abrir la app siempre se empieza en el Inicio.
+  showPage('inicio');
 }

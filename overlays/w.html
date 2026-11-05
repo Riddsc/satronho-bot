@@ -73,7 +73,8 @@
   }
 
   // Que nada se salga del borde: si con el tema, la letra o el tamaño elegidos
-  // no cabe en la fuente de OBS, se achica lo justo.
+  // no cabe en la fuente de OBS, se achica lo justo; si sobra mucho espacio,
+  // crece para llenarla.
   const NOFIT = new Set(['giftrain', 'screens', 'giftspot', 'chat']);
   function fit() {
     const w = root.firstElementChild;
@@ -81,7 +82,11 @@
     const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
     const cw = Math.max(w.scrollWidth, w.offsetWidth);
     const ch = Math.max(w.scrollHeight, w.offsetHeight);
-    const k = Math.min(1, (innerWidth - 36) / (cw * s), (innerHeight - 40) / (ch * s));
+    const room = Math.min((innerWidth - 36) / (cw * s), (innerHeight - 40) / (ch * s));
+    // Si la fuente es mucho más grande que el overlay (TikTok LIVE Studio usa
+    // 1920 × 1080 si no le pones resolución), el overlay crece hasta llenarla
+    // para que se lea bien al achicar la fuente en la escena.
+    const k = room > 1.3 ? Math.min(room, 4) : Math.min(1, room);
     document.documentElement.style.setProperty('--fit', Math.max(0.3, k).toFixed(3));
   }
   window.addEventListener('resize', fit);

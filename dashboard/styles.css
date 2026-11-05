@@ -1895,3 +1895,28 @@ button.mu-ov { background: transparent; font: inherit; font-weight: 800; cursor:
 .ov-link-name .pl { width: 18px; height: 18px; border-radius: 5px; flex: none; }
 .ov-link.tt { border-color: color-mix(in srgb, #ff5d8f 30%, var(--edge)); }
 @media (max-width: 640px) { .ov-link { grid-template-columns: 1fr auto; } .ov-link-name { grid-column: 1 / -1; } }
+
+/* ---------- Ventana de overlays con editor completo ---------- */
+.ovq-card.ovq-wide { width: min(1240px, 100%); display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; }
+.ovq-cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr); gap: 18px; padding: 16px 20px; min-height: 0; overflow: hidden; }
+.ovq-left { display: grid; align-content: start; gap: 10px; min-width: 0; }
+.ovq-left .ove-stage { height: auto; min-height: 120px; }
+.ovq-pvbar { gap: 8px; }
+.ovq-right { min-width: 0; overflow-y: auto; max-height: calc(100vh - 230px); padding-right: 4px; }
+.ovq-ehead { margin-bottom: 8px; }
+.ovq-ehead .ove-actions [data-dup], .ovq-ehead .ove-actions [data-del] { display: none; }
+.ovq-right .ove-tabs { position: sticky; top: 0; z-index: 2; background: var(--panel); }
+.ovq-themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 6px; }
+.ovq-themes .ov-theme[aria-pressed="true"], .swatch[aria-pressed="true"] { outline: 2px solid var(--g); outline-offset: 2px; }
+@media (max-width: 900px) { .ovq-cols { grid-template-columns: 1fr; overflow: visible; } .ovq-right { max-height: none; } }
+
+/* ---------- Aviso de actualización en todas las pantallas ---------- */
+.update-banner { position: relative; z-index: 31; }
+.update-banner.ready { background: color-mix(in srgb, var(--ok) 20%, var(--panel)); border-bottom-color: var(--ok); }
+.upd-bar { width: 180px; height: 6px; border-radius: 9px; background: var(--well); overflow: hidden; }
+.upd-bar i { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+.update-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent) 60%, var(--edge)); background: color-mix(in srgb, var(--accent) 16%, var(--panel)); color: var(--ink); font: inherit; font-weight: 800; font-size: .84em; cursor: pointer; white-space: nowrap; }
+.update-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.update-pill.ready { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 18%, var(--panel)); }
+.update-pill.ready i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+@media (prefers-reduced-motion: no-preference) { .update-pill i { animation: upd-pulse 1.6s ease-in-out infinite; } @keyframes upd-pulse { 50% { opacity: .35; } } }
