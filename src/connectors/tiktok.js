@@ -67,6 +67,22 @@ function normalizeGifts(raw) {
     .filter((g) => g.id && g.name);
 }
 
+// Pide el catálogo con un tope de tiempo; nunca lanza error hacia afuera.
+async function loadGifts(c, onGifts) {
+  const { RouteConfig } = await loadLib();
+  const within = (p) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error('tiempo')), 10000))]);
+  const tries = [
+    () => RouteConfig.fetchRoomGiftsFromProvider({ apiClient: c.apiClient, webClient: c.webClient, roomId: c.roomId }),
+    () => c.fetchAvailableGifts(),
+  ];
+  for (const t of tries) {
+    try {
+      const gifts = normalizeGifts(await within(t()));
+      if (gifts.length) return onGifts(gifts);
+    } catch { /* probamos la siguiente */ }
+  }
+}
+
 function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGifts = () => {} }) {
   const base = createConnectorBase({ platform: 'tiktok', bus, onStatus });
   let conn = null;
@@ -171,7 +187,10 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
     const c = new TikTokLiveConnection(base.channel, {
       signApiKey: signApiKey || undefined,
       processInitialData: false, // no repetir el chat antiguo al conectar
-      enableExtendedGiftInfo: true,
+      // El catálogo «extendido» de regalos necesita firmar la petición, y el
+      // servicio de firmas ahora lo cobra (plan Business): si se pide al
+      // conectar, la conexión entera falla. Se pide aparte, después.
+      enableExtendedGiftInfo: false,
     });
     conn = c;
     attach(c);
@@ -189,18 +208,24 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
       if (base.stopped || conn !== c) return c.disconnect();
       const room = c.roomInfo || {};
       hostId = String(room.owner?.id_str || room.owner_user_id || room.data?.owner?.id_str || '');
-      // Catálogo de regalos: lo guardamos para «Alertas propias».
-      try {
-        const gifts = normalizeGifts(c.availableGifts || (await c.fetchAvailableGifts?.()));
-        if (gifts.length) onGifts(gifts);
-      } catch { /* sin catálogo: se llena con lo que llegue */ }
       base.resetBackoff();
       base.status('connected');
+      // Catálogo de regalos para «Alertas propias», sin frenar la conexión:
+      // primero el gratuito de Euler y, si no, el de TikTok. Si ninguno
+      // responde, se llena solo con los regalos que vayan llegando.
+      loadGifts(c, onGifts).catch(() => {});
     } catch (err) {
       if (conn !== c) return;
       const text = String(err?.message || err);
       const offline = /offline|not live|UserOffline/i.test(text) || err?.constructor?.name === 'UserOfflineError';
-      base.retry(run, offline ? 'El canal no está en directo' : text.slice(0, 140));
+      // Mensajes en español en vez del inglés técnico de la librería.
+      const why = offline ? 'El canal no está en directo'
+        : /rate ?limit|too many/i.test(text) ? 'TikTok está limitando las conexiones; se reintenta sola en un momento'
+        : /business plan|premium|permission|402|403/i.test(text) ? 'El servicio que conecta con TikTok rechazó la conexión; se reintenta sola'
+        : /room id|SIGI_STATE|captcha|blocked/i.test(text) ? 'No encontré tu directo. Revisa que estés en vivo y que el usuario esté bien escrito'
+        : /tiempo|timeout/i.test(text) ? 'TikTok no respondió a tiempo; se reintenta sola'
+        : text.slice(0, 140);
+      base.retry(run, why);
     }
   }
 
