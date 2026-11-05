@@ -1,5 +1,44 @@
 [
   {
+    "version": "0.18.0",
+    "date": "2026-11-04",
+    "title": "Memes en un clic, ventana de overlays y sonido a la vista",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "El selector de sonidos ya responde: las categorías, ▶ y «Elegir» funcionan. Había un choque con la lista de Espectadores especiales."
+      },
+      {
+        "type": "nuevo",
+        "text": "El selector de sonidos abre con 🔥 Populares, los memes que más suenan. ▶ para escuchar y «Elegir» lo descarga y lo deja puesto en un solo paso. También tiene 🔎 Buscar memes, ⭐ Mis sonidos y 🎛 Básicos."
+      },
+      {
+        "type": "mejora",
+        "text": "El buscador de memes usa el navegador de la app, así pasa las protecciones de la página de memes. En Sonidos, la pestaña Memes es la primera y carga lo más sonado al entrar."
+      },
+      {
+        "type": "nuevo",
+        "text": "Ventana de overlays desde cada apartado (Música, Chat en vivo, Alertas, Estadísticas, Chat Bot…): vista previa, URL para copiar, «Personalizar el aspecto» e «Ir a todos los Overlays». Al cerrarla sigues donde estabas."
+      },
+      {
+        "type": "nuevo",
+        "text": "Editor de alertas: atajos a los pasos 1, 2 y 3, y la tarjeta «Suena: …» junto a la vista previa, con ▶ y «Cambiar», sin tener que bajar."
+      },
+      {
+        "type": "mejora",
+        "text": "En las alertas de serie, el sonido va primero y trae «Elegir de la biblioteca»."
+      },
+      {
+        "type": "mejora",
+        "text": "Los overlays se ajustan solos para no salirse del borde con ningún tema, letra o tamaño."
+      },
+      {
+        "type": "mejora",
+        "text": "Las muestras de los temas y los ejemplos dicen «Satronho»."
+      }
+    ]
+  },
+  {
     "version": "0.17.0",
     "date": "2026-11-04",
     "title": "Spotify en un clic y cuenta regresiva a tu precio",

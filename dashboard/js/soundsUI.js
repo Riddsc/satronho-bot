@@ -12,6 +12,7 @@
 import { $, $$, api, esc, toast, saveConfig } from './util.js';
 import { SOUNDS, SYNTH_LIB, playAlertSound, stopAlertSound } from '/overlays/sounds.js';
 import { guideToast } from './guides.js';
+import { onPageChange } from './nav.js';
 
 const CATS = [
   ['graciosos', 'Graciosos', '😂'], ['memes', 'Memes', '🐸'], ['alertas', 'Alertas', '🔔'], ['videojuegos', 'Videojuegos', '🎮'],
@@ -94,7 +95,7 @@ function rows(list, pickMode, current) {
     <button type="button" class="snd-play" data-splay="${esc(x.ref)}" title="Escuchar" aria-label="Escuchar ${esc(x.name)}">▶</button>
     <div class="snd-main"><b>${esc(x.name)}</b><small>${esc(CAT_NAME[x.cat] || x.cat)}${x.dur ? ` · ${fmt(x.dur)}` : ''} · ${esc(x.by)}</small></div>
     <button type="button" class="snd-fav" data-sfav="${esc(x.ref)}" aria-pressed="${fav.has(x.ref)}" title="${fav.has(x.ref) ? 'Quitar de favoritos' : 'Favorito'}">${fav.has(x.ref) ? '★' : '☆'}</button>
-    ${pickMode ? `<button type="button" class="btn small ${current === x.ref ? 'primary' : ''}" data-spick="${esc(x.ref)}">${current === x.ref ? 'Elegido' : 'Elegir'}</button>` : ''}
+    ${pickMode ? `<button type="button" class="snd-pick ${current === x.ref ? 'on' : ''}" data-spick="${esc(x.ref)}">${current === x.ref ? '✓ Elegido' : 'Elegir'}</button>` : ''}
   </div>`).join('') + (list.length > 600 ? `<p class="hint">Y ${list.length - 600} más: afina la búsqueda.</p>` : '');
 }
 function renderLibrary() {
@@ -107,9 +108,8 @@ function renderLibrary() {
 function refreshList() {
   const l = $('#snd-list');
   if (l) l.innerHTML = rows(filtered(), false);
-  const p = $('#sp-list');
-  if (p) p.innerHTML = rows(filtered(), true, picker.current);
-  for (const bar of $$('[data-lib-cats], [data-pick-cats]')) bar.outerHTML = catsBar(bar.hasAttribute('data-lib-cats') ? 'lib' : 'pick');
+  for (const bar of $$('[data-lib-cats]')) bar.outerHTML = catsBar('lib');
+  if ($('#sndp-modal') && !$('#sndp-modal').hidden) renderPickerBody();
 }
 
 // ---------- Memes ----------
@@ -137,9 +137,9 @@ function renderMemes() {
   box.innerHTML = ui.memes.length
     ? ui.memes.map((m, i) => `<div class="snd-row"><button type="button" class="snd-play" data-mplay="${i}" title="Escuchar">▶</button>
         <div class="snd-main"><b>${esc(m.title)}</b><small>${esc(new URL(m.url).hostname.replace(/^www\./, ''))}</small></div>
-        ${have.has(m.url) || have.has(m.page) ? '<span class="snd-added">✓ En tu biblioteca</span>' : `<button type="button" class="btn small primary" data-madd="${i}">+ Añadir</button>`}</div>`).join('')
+        ${have.has(m.url) || have.has(m.page) ? '<span class="snd-added">✓ En tu biblioteca</span>' : `<button type="button" class="snd-pick" data-madd="${i}">+ Añadir</button>`}</div>`).join('')
       + (ui.memeMore ? `<button type="button" class="btn ghost small mt" id="snd-memes-more" ${ui.memeBusy ? 'disabled' : ''}>Ver más</button>` : '')
-    : `<p class="hint snd-empty">${ui.memeBusy ? 'Buscando…' : 'Escribe qué buscas (rosalía, bruh, sus, risa…) o toca «Lo más sonado» para ver lo popular.'}</p>`;
+    : `<p class="hint snd-empty">${ui.memeBusy ? 'Buscando…' : 'Escribe qué buscas (rosalía, bruh, sus, risa…) o toca «🔥 Lo más sonado».'}</p>`;
 }
 let memeAudio = null;
 function playUrl(url) {
@@ -210,31 +210,109 @@ function renderChat() {
 }
 
 // ---------- Selector (para alertas) ----------
-const picker = { current: '', cb: null };
+// Pestañas: 🔥 Populares (memes del momento) · 🔎 Memes (buscar) ·
+// ⭐ Mis sonidos · 🎛 Básicos (los incluidos). «Elegir» en un meme lo baja
+// a tu PC y lo deja elegido en un solo paso.
+const picker = { current: '', cb: null, tab: 'populares', q: '', results: [], busy: false, page: 1, more: false, err: '', loadedFor: null };
+const PICK_TABS = [['populares', '🔥 Populares'], ['memes', '🔎 Buscar memes'], ['mios', '⭐ Mis sonidos'], ['basicos', '🎛 Básicos']];
+function memeRows(list, pickMode) {
+  const have = new Map(lib.mine.map((x) => [x.source, x]));
+  return list.map((m, i) => {
+    const mine = have.get(m.url) || have.get(m.page);
+    return `<div class="snd-row ${mine && picker.current === `m:${mine.id}` ? 'on' : ''}"><button type="button" class="snd-play" data-mplay="${i}" title="Escuchar" aria-label="Escuchar ${esc(m.title)}">▶</button>
+      <div class="snd-main"><b>${esc(m.title)}</b><small>${mine ? '✓ En tu biblioteca' : 'Meme · se descarga al elegirlo'}</small></div><span></span>
+      ${pickMode ? `<button type="button" class="snd-pick" data-mpick="${i}">${mine && picker.current === `m:${mine.id}` ? 'Elegido' : 'Elegir'}</button>` : (mine ? '<span class="snd-added">✓ Añadido</span>' : `<button type="button" class="snd-pick" data-madd="${i}">+ Añadir</button>`)}</div>`;
+  }).join('');
+}
+async function pickerSearch(more = false) {
+  if (picker.busy) return;
+  picker.busy = true;
+  picker.err = '';
+  if (!more) { picker.page = 1; picker.results = []; }
+  renderPickerBody();
+  try {
+    const r = await api('POST', '/api/sounds/memes/search', { q: picker.tab === 'populares' ? '' : picker.q, page: picker.page });
+    picker.results = more ? [...picker.results, ...r.results] : r.results;
+    picker.more = r.more;
+    picker.page += 1;
+    picker.loadedFor = `${picker.tab}|${picker.q}`;
+  } catch (e) {
+    picker.err = e.message;
+  } finally {
+    picker.busy = false;
+    renderPickerBody();
+  }
+}
+function renderPickerBody() {
+  const m = $('#sndp-modal');
+  if (!m) return;
+  for (const t of $$('[data-ptab]', m)) t.setAttribute('aria-selected', String(t.dataset.ptab === picker.tab));
+  const top = $('#sndp-top', m);
+  const list = $('#sndp-list', m);
+  if (picker.tab === 'populares' || picker.tab === 'memes') {
+    top.innerHTML = picker.tab === 'memes'
+      ? `<form class="sndp-search" id="sndp-memeform"><label class="snd-find"><span>⌕</span><input id="sndp-mq" value="${esc(picker.q)}" placeholder="rosalía, bruh, sus, risa, se fue, gemido…" autocomplete="off"></label><button class="snd-pick big">Buscar</button></form>`
+      : '<p class="sndp-note">Los memes que más suenan ahora. ▶ para escuchar, «Elegir» y listo.</p>';
+    if (picker.busy && !picker.results.length) list.innerHTML = '<p class="snd-empty"><i class="spf-spin"></i> Buscando memes…</p>';
+    else if (picker.err) list.innerHTML = `<p class="snd-empty sndp-err">${esc(picker.err)}<br><button type="button" class="snd-pick" data-pretry>Intentar de nuevo</button></p>`;
+    else if (!picker.results.length) list.innerHTML = `<p class="snd-empty">${picker.tab === 'memes' ? (picker.loadedFor ? 'Nada con esa búsqueda. Prueba con otra palabra.' : 'Escribe qué buscas y pulsa «Buscar».') : 'Cargando…'}</p>`;
+    else list.innerHTML = memeRows(picker.results, true) + (picker.more ? `<button type="button" class="snd-more" data-pmore ${picker.busy ? 'disabled' : ''}>${picker.busy ? 'Cargando…' : 'Ver más'}</button>` : '');
+    if (picker.tab === 'populares' && picker.loadedFor !== 'populares|' && !picker.busy && !picker.err) pickerSearch();
+    return;
+  }
+  top.innerHTML = `<label class="snd-find"><span>⌕</span><input id="sndp-q" value="${esc(ui.q)}" placeholder="${picker.tab === 'mios' ? 'Busca en tus sonidos…' : 'Busca: golpe, victoria, moneda, campana…'}" autocomplete="off"></label>${picker.tab === 'basicos' ? catsBar('pick') : ''}`;
+  const all2 = filtered();
+  const shown = picker.tab === 'mios' ? all2.filter((x) => x.ref.startsWith('m:')) : all2.filter((x) => !x.ref.startsWith('m:'));
+  list.innerHTML = picker.tab === 'mios' && !shown.length
+    ? '<p class="snd-empty">Aún no tienes sonidos propios. Elige uno en «Populares» o «Buscar memes» y quedará aquí.</p>'
+    : rows(shown, true, picker.current);
+}
 export async function openSoundPicker(current, cb) {
   await loadSounds();
   picker.current = current || '';
   picker.cb = cb;
-  let m = $('#sp-modal');
+  if (/^m:/.test(picker.current)) picker.tab = 'mios';
+  let m = $('#sndp-modal');
   if (!m) {
     m = document.createElement('div');
-    m.id = 'sp-modal';
-    m.className = 'sp-modal';
-    m.innerHTML = `<div class="sp-card" role="dialog" aria-modal="true" aria-label="Elegir sonido"><div class="sp-head"><b>Elige un sonido</b><a class="btn small ghost" href="#/sonidos/memes" data-sp-close>🐸 Buscar memes</a><button type="button" class="btn small ghost" data-sp-close aria-label="Cerrar">✕</button></div>
-      <label class="snd-find"><span>⌕</span><input id="sp-q" placeholder="Busca: risa, sus, fail, golpe, victoria…" autocomplete="off"></label><div id="sp-cats"></div><div class="snd-list" id="sp-list"></div></div>`;
+    m.id = 'sndp-modal';
+    m.className = 'sndp-modal';
+    m.innerHTML = `<div class="sndp-card" role="dialog" aria-modal="true" aria-label="Elegir sonido">
+      <div class="sndp-head"><span class="sndp-ic">🔊</span><b>Elige un sonido</b><button type="button" class="ovq-x" data-sndp-close aria-label="Cerrar">✕</button></div>
+      <nav class="sndp-tabs">${PICK_TABS.map(([id, n]) => `<button type="button" data-ptab="${id}">${n}</button>`).join('')}</nav>
+      <div id="sndp-top" class="sndp-top"></div><div class="snd-list" id="sndp-list"></div></div>`;
     document.body.append(m);
-    m.addEventListener('click', (ev) => {
-      if (ev.target === m || ev.target.closest('[data-sp-close]')) { m.hidden = true; return; }
+    m.addEventListener('click', async (ev) => {
+      if (ev.target === m || ev.target.closest('[data-sndp-close]')) { m.hidden = true; memeAudio?.pause(); return; }
+      const t = ev.target.closest('[data-ptab]');
+      if (t) { picker.tab = t.dataset.ptab; ui.cat = 'all'; return renderPickerBody(); }
       const pk = ev.target.closest('[data-spick]');
-      if (pk) { remember(pk.dataset.spick); picker.cb?.(pk.dataset.spick); m.hidden = true; }
+      if (pk) { remember(pk.dataset.spick); picker.cb?.(pk.dataset.spick); m.hidden = true; return; }
+      const mp = ev.target.closest('[data-mplay]');
+      if (mp) return playUrl(picker.results[Number(mp.dataset.mplay)].url);
+      if (ev.target.closest('[data-pmore]')) return pickerSearch(true);
+      if (ev.target.closest('[data-pretry]')) { picker.err = ''; return pickerSearch(); }
+      const mk = ev.target.closest('[data-mpick]');
+      if (mk) {
+        const meme = picker.results[Number(mk.dataset.mpick)];
+        mk.disabled = true;
+        mk.textContent = 'Bajando…';
+        try {
+          const r = await api('POST', '/api/sounds/add-url', { url: meme.url, name: meme.title, cat: 'memes', tags: norm(meme.title) });
+          const ref = `m:${r.added[0].id}`;
+          await loadSounds(true);
+          remember(ref);
+          picker.cb?.(ref);
+          m.hidden = true;
+          memeAudio?.pause();
+        } catch (e) { toast(e.message); mk.disabled = false; mk.textContent = 'Elegir'; }
+      }
     });
-    m.querySelector('#sp-q').addEventListener('input', (ev) => { ui.q = ev.target.value; refreshList(); });
+    m.addEventListener('input', (ev) => { if (ev.target.id === 'sndp-q') { ui.q = ev.target.value; const pos = ev.target.selectionStart; renderPickerBody(); const n = $('#sndp-q'); n?.focus(); n?.setSelectionRange(pos, pos); } });
+    m.addEventListener('submit', (ev) => { ev.preventDefault(); if (ev.target.id === 'sndp-memeform') { picker.q = $('#sndp-mq').value.trim(); if (picker.q) pickerSearch(); } });
   }
-  m.querySelector('#sp-q').value = ui.q;
-  m.querySelector('#sp-cats').innerHTML = catsBar('pick');
-  m.querySelector('#sp-list').innerHTML = rows(filtered(), true, picker.current);
+  renderPickerBody();
   m.hidden = false;
-  m.querySelector('#sp-q').focus();
 }
 
 // ---------- Eventos compartidos ----------
@@ -255,6 +333,8 @@ export function initSounds(cfg) {
   const page = $('#page-sonidos');
   if (!page) return;
   loadSounds().then(() => { renderLibrary(); renderPhrases(); renderMine(); renderChat(); renderMemes(); });
+  // Al entrar, los memes que más suenan ya están cargados.
+  onPageChange((pg) => { if (pg === 'sonidos' && !ui.memes.length && !ui.memeBusy) searchMemes(); });
 
   page.addEventListener('input', (ev) => {
     if (ev.target.id === 'snd-q') { ui.q = ev.target.value; refreshList(); }

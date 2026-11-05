@@ -12,7 +12,7 @@
 <style>
   body { height: 100vh; }
   #root { position: fixed; inset: 0; display: grid; align-items: center; justify-items: center; padding: 14px; box-sizing: border-box; }
-  #root > .w { transform: scale(var(--scale, 1)); transform-origin: var(--origin, center); }
+  #root > .w { transform: scale(calc(var(--scale, 1) * var(--fit, 1))); transform-origin: var(--origin, center); max-width: 100%; box-sizing: border-box; }
   body[data-pos="left"] #root { justify-items: start; } body[data-pos="right"] #root { justify-items: end; }
   .missing { font-size: 18px; font-weight: 700; place-self: center; padding: 10px 16px; border-radius: 12px; background: var(--bg); }
 </style>
@@ -68,8 +68,24 @@
       const html = `<div class="w">${kind.render(ctx())}</div>`;
       if (!root.firstElementChild || root.firstElementChild.classList.contains('missing')) root.innerHTML = html;
       else morph(root, html);
+      fit();
     });
   }
+
+  // Que nada se salga del borde: si con el tema, la letra o el tamaño elegidos
+  // no cabe en la fuente de OBS, se achica lo justo.
+  const NOFIT = new Set(['giftrain', 'screens', 'giftspot', 'chat']);
+  function fit() {
+    const w = root.firstElementChild;
+    if (!w || NOFIT.has(widget?.kind)) { document.documentElement.style.setProperty('--fit', '1'); return; }
+    const s = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
+    const cw = Math.max(w.scrollWidth, w.offsetWidth);
+    const ch = Math.max(w.scrollHeight, w.offsetHeight);
+    const k = Math.min(1, (innerWidth - 36) / (cw * s), (innerHeight - 40) / (ch * s));
+    document.documentElement.style.setProperty('--fit', Math.max(0.3, k).toFixed(3));
+  }
+  window.addEventListener('resize', fit);
+  document.fonts?.addEventListener?.('loadingdone', fit);
 
   // Vista previa en la app: datos de ejemplo y cambios al instante.
   if (demo) {

@@ -33,7 +33,7 @@ const decodeHtml = (s) => String(s || '')
   .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
   .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 
-function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store }) {
+function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, renderPage = null, mediaFetch = null }) {
   const dir = path.join(dataDir, 'my-sounds');
   const listFile = path.join(dataDir, 'my-sounds.json');
   fs.mkdirSync(dir, { recursive: true });
@@ -87,7 +87,10 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store })
     const u = new URL(url);
     if (!/^https?:$/.test(u.protocol)) throw new Error('El enlace debe empezar por http o https');
     if (/^(localhost|127\.|10\.|192\.168\.|0\.)/.test(u.hostname)) throw new Error('Ese enlace no es de internet');
-    const res = await fetchFn(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' });
+    let res = await (mediaFetch || fetchFn)(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' }).catch(() => null);
+    // Si la página protege sus archivos, se prueba con el otro camino.
+    if ((!res || !res.ok) && mediaFetch) res = await fetchFn(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' }).catch(() => null);
+    if (!res) throw new Error('No hay conexión con esa página. Revisa tu internet.');
     if (!res.ok) throw new Error(`La página respondió ${res.status}`);
     const type = String(res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
     const len = Number(res.headers.get('content-length') || 0);
@@ -112,6 +115,8 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store })
   }
 
   async function addFromUrl({ url, name = '', tags = '', cat = 'memes' }) {
+    const have = mine.find((x) => x.source === url);
+    if (have) return have; // ya estaba: no se baja dos veces
     if (/youtu\.?be/.test(String(url))) throw new Error('YouTube no deja bajar audio desde aquí. Busca el sonido en «Memes» o sube el archivo.');
     let { buf, type, finalUrl } = await download(url);
     let ext = extFrom(type, finalUrl);
@@ -154,16 +159,36 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store })
     }
     return out;
   }
+  // Lee la página con el navegador de la app (pasa las protecciones anti-bot);
+  // si no estamos dentro de la app, con un fetch normal.
+  async function getHtml(url) {
+    let lastErr = null;
+    try {
+      const res = await fetchFn(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'es-CO,es;q=0.9', Accept: 'text/html' } });
+      if (res.ok) {
+        const html = await res.text();
+        if (/play\(\s*'/.test(html) || /class=["']instant/.test(html)) return html;
+      } else if (res.status === 404) return '';
+      else lastErr = new Error(`La página de memes respondió ${res.status}`);
+    } catch (err) { lastErr = err; }
+    if (renderPage) return renderPage(url);
+    throw lastErr || new Error('No pude leer la página de memes');
+  }
   async function searchMemes(q, page = 1) {
     const query = clean(q, 80);
     const p = Math.max(1, Math.min(20, Number(page) || 1));
-    const url = query
-      ? `${MEME_BASE}/es/search/?name=${encodeURIComponent(query)}&page=${p}`
-      : `${MEME_BASE}/es/index/co/?page=${p}`;
-    const res = await fetchFn(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'es-CO,es;q=0.9' } });
-    if (res.status === 404) return { results: [], more: false };
-    if (!res.ok) throw new Error(`El buscador de memes respondió ${res.status}`);
-    const results = parseMemes(await res.text());
+    const urls = query
+      ? [`${MEME_BASE}/es/search/?name=${encodeURIComponent(query)}&page=${p}`, `${MEME_BASE}/en/search/?name=${encodeURIComponent(query)}&page=${p}`]
+      : [`${MEME_BASE}/es/index/co/?page=${p}`, `${MEME_BASE}/es/index/mx/?page=${p}`, `${MEME_BASE}/en/index/us/?page=${p}`];
+    let results = [];
+    let lastErr = null;
+    for (const url of urls) {
+      try {
+        results = parseMemes(await getHtml(url));
+        if (results.length) break;
+      } catch (err) { lastErr = err; }
+    }
+    if (!results.length && lastErr) throw new Error(`No pude buscar memes: ${lastErr.message}`);
     return { results, more: results.length >= 20 };
   }
 

@@ -43,11 +43,11 @@ function settingsHTML(key, extra = '') {
   const fileName = t.fileName || (t.file ? t.file.replace(/\?.*$/, '') : '');
   return `<div class="al-set" data-key="${key}">
     ${extra}
+    <label class="field al-sound"><span>🔊 Sonido</span>
+      <span class="row"><select data-f="sound">${soundOptions(t)}</select><button type="button" class="btn small al-play" data-play="${key}" title="Escuchar">▶</button><button type="button" class="snd-pick" data-libpick="${key}">Elegir de la biblioteca</button></span></label>
     <label class="field"><span>Segundos en pantalla</span>
       <span class="al-num"><input type="range" min="1" max="30" step="1" data-f="seconds" value="${t.seconds ?? 5}" ${t.fitSound ? 'disabled' : ''}><output>${t.seconds ?? 5} s</output></span></label>
     <label class="switch"><input type="checkbox" data-f="fitSound" ${t.fitSound ? 'checked' : ''}><span></span> Que dure lo que dura el sonido</label>
-    <label class="field"><span>Sonido</span>
-      <span class="row"><select data-f="sound">${soundOptions(t)}</select><button type="button" class="btn small al-play" data-play="${key}" title="Escuchar">▶</button></span></label>
     <div class="al-file" ${t.sound === 'file' ? '' : 'hidden'}>
       <button type="button" class="btn small" data-upload="${key}">${fileName ? 'Cambiar sonido' : 'Subir sonido'}</button>
       <small>${fileName ? esc(fileName) : 'MP3, WAV u OGG, hasta 10 MB'}</small>
@@ -140,6 +140,21 @@ export function initAlerts(cfg) {
       tg.setAttribute('aria-expanded', String(open));
       if (open) openRows.add(tg.dataset.toggle); else openRows.delete(tg.dataset.toggle);
       return;
+    }
+    const lib = ev.target.closest('[data-libpick]');
+    if (lib) {
+      const key = lib.dataset.libpick;
+      const box = lib.closest('.al-set');
+      const sel = box.querySelector('[data-f="sound"]');
+      return openSoundPicker(settings(key).sound, (ref) => {
+        save(key, { sound: ref });
+        if (![...sel.options].some((o) => o.value === ref)) sel.insertAdjacentHTML('afterbegin', `<option value="${esc(ref)}">♪ ${esc(soundLabel(ref))}</option>`);
+        sel.value = ref;
+        box.querySelector('.al-file').hidden = true;
+        preview(key);
+        const meta = box.closest('.al-row')?.querySelector('.al-meta');
+        if (meta) meta.textContent = summaryOf(key);
+      });
     }
     const play = ev.target.closest('[data-play]');
     if (play) return preview(play.dataset.play);

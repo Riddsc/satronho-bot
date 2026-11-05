@@ -143,6 +143,35 @@ function applyWindowConfig(cfg) {
   }
 }
 
+// ---------- Páginas públicas (buscador de memes) ----------
+// Algunas webs piden que un navegador «de verdad» resuelva su protección.
+// Abrimos la página en una ventana oculta (sesión propia), esperamos a que
+// cargue y devolvemos su HTML. Las descargas usan esa misma sesión.
+function renderPage(url, { timeout = 20000 } = {}) {
+  return new Promise((resolve, reject) => {
+    const w = new BrowserWindow({ show: false, width: 1100, height: 900, webPreferences: { partition: 'persist:memes', contextIsolation: true, nodeIntegration: false, sandbox: true } });
+    let done = false;
+    const finish = (err, html) => {
+      if (done) return;
+      done = true;
+      clearInterval(iv);
+      clearTimeout(to);
+      if (!w.isDestroyed()) w.destroy();
+      if (err) reject(err); else resolve(html);
+    };
+    const to = setTimeout(() => finish(new Error('La página de memes tardó demasiado. Revisa tu internet e intenta de nuevo.')), timeout);
+    const iv = setInterval(async () => {
+      try {
+        if (w.isDestroyed()) return;
+        const r = await w.webContents.executeJavaScript('({ html: document.documentElement.outerHTML, ready: document.readyState, title: document.title })');
+        if (r.ready === 'complete' && !/just a moment|un momento|attention required|checking your browser/i.test(r.title)) finish(null, r.html);
+      } catch { /* aún cargando */ }
+    }, 600);
+    w.loadURL(url).catch(() => {});
+  });
+}
+const mediaFetch = (url, opts) => session.fromPartition('persist:memes').fetch(url, opts);
+
 // ---------- Autorizar cuentas de Kick ----------
 // Cada cuenta (SatronhoBot o la tuya) tiene su propia sesión guardada, así
 // entras como SatronhoBot aquí sin cerrar tu sesión en el navegador.
@@ -288,6 +317,8 @@ if (!app.requestSingleInstanceLock()) {
       appInfo: { version: app.getVersion(), portable: Boolean(velopack) },
       hooks: { applyUpdate, checkForUpdates: () => checkForUpdates(store), onWindowConfig: applyWindowConfig,
         openAuthWindow,
+        renderPage,
+        mediaFetch,
         openLogin: openLoginWindow,
         onHotkeys: applyHotkeys,
         clearLogin,
