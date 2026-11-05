@@ -539,7 +539,6 @@ export function updateTroya() {
     subs: 'en TikTok, a tus suscriptores',
     team: 'en TikTok, a los Miembros de tu equipo',
     'team-gift': `en TikTok, a los Miembros de tu equipo que ya te mandaron <b>${gift}</b>`,
-    gift: `en TikTok, solo a quien te mande un <b>${gift}</b>`,
     mods: 'en TikTok, solo a tus moderadores',
   }[mode] || 'en TikTok leo a todos';
   const others = ['kick', 'starvios', 'twitch'].every((p) => (config.tts.who?.[p]?.mode || 'all') === 'all') ? 'Leo todo el chat de Kick, Starvios y Twitch' : 'Leo el chat de Kick, Starvios y Twitch con tus reglas';

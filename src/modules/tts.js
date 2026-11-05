@@ -58,17 +58,13 @@ function createTts({ store, broadcast, engine, online = null }) {
 
   // ---------- Permisos de TikTok ----------
   function allowedList() {
-    // Las horas solo cuentan con la regla «Solo quien mandó Quiéreme»;
-    // en las demás, quien lo mandó queda en la lista para siempre.
-    const hours = cfg().who?.tiktok?.mode === 'gift' ? Number(cfg().tiktokGate.hours) || 0 : 0;
-    const now = Date.now();
+    // Quien te mandó el regalo queda en la lista para siempre (para «Miembros
+    // de tu equipo que ya te mandaron Quiéreme»).
     return Object.entries(store.get('ttsAllowed'))
-      .filter(([, v]) => !hours || now - v.ts < hours * 3600e3)
       .map(([id, v]) => ({ id, name: v.name, ts: v.ts }))
       .sort((a, b) => b.ts - a.ts);
   }
   const announceAllowed = () => broadcast('tts-allowed', allowedList());
-  const isAllowed = (user) => allowedList().some((u) => u.id === user.id);
 
   function allow(user) {
     store.set('ttsAllowed', { ...store.get('ttsAllowed'), [user.id]: { name: user.name, ts: Date.now() } });
@@ -110,7 +106,6 @@ function createTts({ store, broadcast, engine, online = null }) {
         case 'team-gift':
           if (!inTeam) return `no es ${teamText}`;
           return sentGiftEver ? '' : `no te ha enviado ${gift}`;
-        case 'gift': return isAllowed(e.user) ? '' : `no ha enviado ${gift}`;
         case 'mods': return 'solo leo a moderadores';
         default: return '';
       }
@@ -238,7 +233,10 @@ function createTts({ store, broadcast, engine, online = null }) {
       lastRead.set(key, now);
       lastText.set(key, { text: norm, ts: now });
     }
-    const spoken = special?.spokenName || e.user.name;
+    // Nombres con letras decorativas (𝓒𝓪𝓶𝓲𝓵𝓪 ✨) se dicen como letras normales y
+    // sin emojis; si no queda nada legible, se usa su @usuario.
+    const plainName = (n) => String(n || '').normalize('NFKC').replace(/[^\p{L}\p{N}\s._-]/gu, ' ').replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const spoken = special?.spokenName || plainName(e.user.name) || plainName(e.user.id) || 'Alguien';
     const voice = pickVoice(e.platform, e.user, special);
     // «dice» en el idioma de la voz (inglés y francés se dan a mano).
     const says = /^en_/.test(voice || '') ? 'says' : /^fr_/.test(voice || '') ? 'dit' : 'dice';

@@ -364,12 +364,10 @@
               <label class="who-opt"><input type="radio" name="who-tiktok" value="subs" data-tts="who.tiktok.mode"><span><b>Suscriptores</b></span></label>
               <label class="who-opt"><input type="radio" name="who-tiktok" value="team" data-tts="who.tiktok.mode"><span><b>Miembros de tu equipo</b><small>Llevan la insignia de tu equipo (club de fans)</small></span></label>
               <label class="who-opt"><input type="radio" name="who-tiktok" value="team-gift" data-tts="who.tiktok.mode"><span><b>Miembros de tu equipo que ya te mandaron Quiéreme</b><small>Recomendado: una vez que lo mandan, quedan para siempre</small></span></label>
-              <label class="who-opt"><input type="radio" name="who-tiktok" value="gift" data-tts="who.tiktok.mode"><span><b>Solo quien mandó Quiéreme</b><small>El permiso dura lo que elijas en «Quiéreme en TikTok»</small></span></label>
               <label class="who-opt"><input type="radio" name="who-tiktok" value="mods" data-tts="who.tiktok.mode"><span><b>Solo moderadores</b></span></label>
               <label class="field who-level"><span>Nivel mínimo en tu equipo</span><input type="number" min="1" max="50" step="1" data-tts="who.tiktok.teamMinLevel" data-num></label>
               <details class="who-gift"><summary>Regalo «Quiéreme» y quién ya lo mandó</summary>
                 <label class="field"><span>Nombres del regalo (separados por coma)</span><input data-tts="tiktokGate.giftNames" data-list="comma" list="dl-gifts"></label>
-                <label class="field who-hours"><span>Con «Solo quien mandó Quiéreme», el permiso dura</span><select data-tts="tiktokGate.hours" data-num><option value="3">3 horas</option><option value="12">12 horas</option><option value="24">24 horas</option><option value="168">7 días</option><option value="0">Siempre</option></select></label>
                 <div class="row space mt"><span class="hint">Ya te lo mandaron:</span><button type="button" class="btn small ghost" id="allowed-clear">Borrar la lista</button></div>
                 <ul id="allowed-list" class="mini-list"></ul>
               </details>

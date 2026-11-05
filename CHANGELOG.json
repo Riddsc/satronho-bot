@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.22.4",
+    "date": "2026-11-05",
+    "title": "Voz del chat en TikTok, sin trabas",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Se quitó «Solo quien mandó Quiéreme» de «Quién se lee» en TikTok. Si la tenías elegida, pasa sola a «Todos»."
+      },
+      {
+        "type": "cambio",
+        "text": "La app nueva empieza leyendo a todo el chat de TikTok (antes empezaba solo con Miembros de tu equipo que ya te mandaron Quiéreme)."
+      },
+      {
+        "type": "mejora",
+        "text": "Los nombres con letras decorativas de TikTok (𝓒𝓪𝓶𝓲𝓵𝓪 ✨) se leen como letras normales («Camila dice…») y sin emojis."
+      }
+    ]
+  },
+  {
     "version": "0.22.3",
     "date": "2026-11-05",
     "title": "Añadir espectadores especiales, fácil",
