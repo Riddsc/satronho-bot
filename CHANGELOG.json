@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.22.2",
+    "date": "2026-11-05",
+    "title": "TikTok vuelve a conectar",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "TikTok se quedaba en «Conectando…» con el error «requires a Business plan». Al conectar se pedía el catálogo completo de regalos, y el servicio que firma esas peticiones ahora lo cobra. Ya no se pide al conectar: la app conecta primero y luego busca el catálogo por otra vía, sin frenar nada."
+      },
+      {
+        "type": "mejora",
+        "text": "Los errores de conexión de TikTok salen en español y dicen qué hacer, en vez del mensaje técnico en inglés."
+      }
+    ]
+  },
+  {
     "version": "0.22.1",
     "date": "2026-11-05",
     "title": "Podio y demás overlays, pulidos uno por uno",
