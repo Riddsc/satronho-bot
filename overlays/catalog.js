@@ -57,17 +57,16 @@ export const KINDS = {
     cat: 'metas', icon: '⏳', name: 'Cuenta regresiva', size: [600, 220], extraTab: 'countdown',
     desc: 'Un reloj que baja y que tu público alarga con regalos, seguidores y suscripciones.',
     styles: [['reloj', 'Reloj'], ['neon', 'Luminoso'], ['minimo', 'Mínimo'], ['barra', 'Con barra']],
-    defaults: { title: '', showHours: true, showAdded: true, autoAdd: true, perCoin: 10, perFollow: 0, perSub: 60, perShare: 0, per100Likes: 0, endText: '¡Se acabó el tiempo!' },
+    defaults: {
+      title: '', showHours: true, showAdded: true, autoAdd: true, endText: '¡Se acabó el tiempo!',
+      // Cuánto suma cada cosa (se edita en la pestaña «⏳ Controles»).
+      rates: { tiktok: { on: true, perUnit: 10, minUnits: 1 }, kick: { on: true, perUnit: 0, minUnits: 1 }, twitch: { on: true, perUnit: 0, minUnits: 1 }, starvios: { on: true, perUnit: 0, minUnits: 1 } },
+      giftRules: [], perFollow: 0, perSub: 60, perShare: 0, likesEvery: 100, likesSeconds: 0, maxMin: 0, modCommand: 'tiempo',
+    },
     fields: [
       f('title', 'Título encima (vacío = sin título)', 'text'),
       f('showHours', 'Mostrar horas', 'toggle'),
       f('showAdded', 'Mostrar «+10 s» cuando suman tiempo', 'toggle'),
-      f('autoAdd', 'Que el público sume tiempo', 'toggle'),
-      f('perCoin', 'Segundos por cada moneda', 'number', { when: { autoAdd: true } }),
-      f('perFollow', 'Segundos por seguidor nuevo', 'number', { when: { autoAdd: true } }),
-      f('perSub', 'Segundos por suscripción', 'number', { when: { autoAdd: true } }),
-      f('perShare', 'Segundos por compartido', 'number', { when: { autoAdd: true } }),
-      f('per100Likes', 'Segundos por cada 100 likes', 'number', { when: { autoAdd: true } }),
       f('endText', 'Texto al llegar a cero', 'text'),
     ],
   },

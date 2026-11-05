@@ -45,6 +45,7 @@ const GUIDE_TIP = {
   samy: 'Las pantallas de empezamos, vuelvo y se acabó. Ponles tu título y tus redes.',
 };
 
+const nf = new Intl.NumberFormat('es-CO');
 let config;
 let style;
 let widgets = {};
@@ -408,7 +409,52 @@ function clockHTML() {
     <div class="row wrap" style="gap:8px;justify-content:center"><button type="button" class="btn primary" data-cd="${run ? 'pause' : 'start'}">${run ? '⏸ Pausar' : '▶ Empezar'}</button>
       <button type="button" class="btn small ghost" data-cdadd="-60">−1 min</button><button type="button" class="btn small ghost" data-cdadd="60">+1 min</button><button type="button" class="btn small ghost" data-cdadd="300">+5 min</button><button type="button" class="btn small ghost" data-cdadd="1800">+30 min</button></div>
     <form class="ove-cdset" id="ove-cdset"><span>Poner en</span><input type="number" name="h" min="0" max="99" value="1" aria-label="Horas"> h <input type="number" name="m" min="0" max="59" value="0" aria-label="Minutos"> min <button class="btn small">Poner</button></form>
-    <p class="hint">Cuánto tiempo suma cada regalo, seguidor o suscripción lo eliges en «Qué se muestra».</p>`;
+    ${ratesHTML()}`;
+}
+
+// --- Cuánto suma cada cosa (el streamer decide cuánto «cobra») ---
+const RATE_PLATS = [['tiktok', 'TikTok', 'moneda', 'monedas'], ['kick', 'Kick', 'Kick', 'Kicks'], ['twitch', 'Twitch', 'bit', 'bits'], ['starvios', 'Starvios', 'punto', 'puntos']];
+const dur = (sec) => {
+  sec = Math.round(sec);
+  if (sec < 60) return `${sec} s`;
+  if (sec < 3600) return `${Math.floor(sec / 60)} min${sec % 60 ? ` ${sec % 60} s` : ''}`;
+  return `${Math.floor(sec / 3600)} h${Math.floor((sec % 3600) / 60) ? ` ${Math.floor((sec % 3600) / 60)} min` : ''}`;
+};
+function ratesHTML() {
+  const s = editing.w.settings;
+  const r = s.rates || {};
+  const tk = r.tiktok?.perUnit ?? 10;
+  const sample = [[1, 'una Rosa'], [99, 'algo de 99'], [1000, 'una Galaxia'], [29999, 'un León']].map(([c, n]) => `<span><b>${dur(c * tk)}</b> por ${n} (${nf.format(c)})</span>`).join('');
+  const num = (path, v, extra = '') => `<input type="number" min="0" step="any" data-cr="${path}" value="${esc(v ?? 0)}" ${extra}>`;
+  return `<section class="ove-rates"><h4>¿Cuánto tiempo suma cada cosa?</h4>
+    <p class="hint">Tú decides cuánto «cobra» tu cuenta regresiva. Pon 0 en lo que no quieras que sume.</p>
+    <label class="switch"><input type="checkbox" data-cr="autoAdd" ${s.autoAdd !== false ? 'checked' : ''}><span></span> <em class="sw-t">Que tu público sume tiempo</em></label>
+    <div class="ove-rate-grid ${s.autoAdd === false ? 'off' : ''}">
+      <div class="ove-rate-head"><span>Regalos</span><span>Segundos por cada</span><span>Desde</span></div>
+      ${RATE_PLATS.map(([p, name, one, many]) => { const x = r[p] || {}; return `<div class="ove-rate"><label class="ove-plat"><input type="checkbox" data-cr="rates.${p}.on" ${x.on !== false ? 'checked' : ''}><img src="/img/platforms/${p}.png" alt="">${name}</label>
+        <span class="ove-rate-in">${num(`rates.${p}.perUnit`, x.perUnit ?? (p === 'tiktok' ? 10 : 0))} s / ${one}</span>
+        <span class="ove-rate-in">${num(`rates.${p}.minUnits`, x.minUnits ?? 1)} ${many}</span></div>`; }).join('')}
+      <p class="ove-rate-sample">TikTok: ${sample}</p>
+      <h5>Regalos con su propio precio</h5>
+      <div class="ove-gr-list">${(s.giftRules || []).map((g, i) => `<div class="ove-gr" data-gr="${i}"><input list="dl-gifts" data-grk="gift" value="${esc(g.gift || '')}" placeholder="Nombre del regalo (ej. Rosa)">
+        <select data-grk="platform">${[['any', 'Cualquiera'], ...RATE_PLATS.map(([p, n]) => [p, n])].map(([v, n]) => `<option value="${v}" ${(g.platform || 'any') === v ? 'selected' : ''}>${n}</option>`).join('')}</select>
+        <span class="ove-rate-in">+<input type="number" min="0" step="any" data-grk="seconds" value="${esc(g.seconds ?? 60)}"> s c/u</span>
+        <label class="ove-gr-plus" title="Además de este tiempo, suma lo normal por su valor"><input type="checkbox" data-grk="plus" ${g.plus ? 'checked' : ''}> + su valor</label>
+        <button type="button" class="btn small ghost danger" data-grdel title="Quitar">✕</button></div>`).join('') || '<p class="hint">Ninguno. Ejemplo: «Rosa = 1 minuto» aunque valga 1 moneda.</p>'}</div>
+      <button type="button" class="btn small" data-gradd>+ Ponerle precio a un regalo</button>
+      <h5>Comunidad</h5>
+      <div class="ove-rate-more">
+        <label>Seguidor nuevo <span class="ove-rate-in">+${num('perFollow', s.perFollow)} s</span></label>
+        <label>Suscripción <span class="ove-rate-in">+${num('perSub', s.perSub ?? 60)} s</span></label>
+        <label>Compartido <span class="ove-rate-in">+${num('perShare', s.perShare)} s</span></label>
+        <label>Cada ${num('likesEvery', s.likesEvery ?? 100, 'min="1"')} likes <span class="ove-rate-in">+${num('likesSeconds', s.likesSeconds ?? s.per100Likes ?? 0)} s</span></label>
+      </div>
+      <h5>Límites</h5>
+      <div class="ove-rate-more">
+        <label>Tope (nunca más de) <span class="ove-rate-in">${num('maxMin', s.maxMin)} min por delante</span><small>0 = sin tope</small></label>
+        <label>Comando para moderadores <span class="ove-cmd">!<input data-cr="modCommand" value="${esc(s.modCommand ?? 'tiempo')}" maxlength="20"></span><small>!${esc(s.modCommand || 'tiempo')} +5m · -30s · 1h</small></label>
+      </div>
+    </div></section>`;
 }
 
 // --- Guardar ---
@@ -534,6 +580,8 @@ async function onEditorClick(ev) {
       list.push({ id: `contador-${n}`, name: `Contador ${n}`, icon: '⭐', value: 0, step: 1, command: `c${n}`, gift: '', anyone: false });
       return saveCounters(list);
     }
+    if (b.dataset.gradd !== undefined) { s.giftRules = [...(s.giftRules || []), { gift: '', platform: 'any', seconds: 60, plus: false }]; return commit({ redraw: true }); }
+    if (b.dataset.grdel !== undefined) { const i = Number(b.closest('[data-gr]').dataset.gr); s.giftRules = (s.giftRules || []).filter((_, j) => j !== i); return commit({ redraw: true }); }
     // Cuenta regresiva
     if (b.dataset.cd) return api('POST', '/api/live/countdown', { action: b.dataset.cd });
     if (b.dataset.cdadd) return api('POST', '/api/live/countdown', { action: 'add', value: Number(b.dataset.cdadd) });
@@ -545,6 +593,25 @@ async function onEditorClick(ev) {
 function onEditorChange(ev) {
   const el = ev.target;
   if (!editing) return;
+  if (el.dataset.cr) {
+    const path = el.dataset.cr.split('.');
+    const v = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Number(el.value) || 0 : el.value.trim().replace(/^!/, '');
+    const st = editing.w.settings;
+    if (path[0] === 'rates') {
+      const def = KINDS.countdown.defaults.rates;
+      st.rates = JSON.parse(JSON.stringify(st.rates || def));
+      st.rates[path[1]] = { ...(def[path[1]] || {}), ...(st.rates[path[1]] || {}), [path[2]]: v };
+    } else st[path[0]] = v;
+    return commit({ redraw: path[0] === 'autoAdd' || path[2] === 'perUnit' || path[0] === 'modCommand' });
+  }
+  const gr = el.closest('[data-gr]');
+  if (gr && el.dataset.grk) {
+    const list = [...(editing.w.settings.giftRules || [])];
+    const i = Number(gr.dataset.gr);
+    list[i] = { ...list[i], [el.dataset.grk]: el.type === 'checkbox' ? el.checked : el.type === 'number' ? Number(el.value) || 0 : el.value.trim() };
+    editing.w.settings.giftRules = list;
+    return commit();
+  }
   if (el.dataset.gtitle !== undefined || el.dataset.gtarget !== undefined) {
     const gid = el.closest('[data-goal]').dataset.goal;
     const body = el.dataset.gtitle !== undefined ? { title: el.value.trim() || 'Meta' } : { target: Number(el.value) || 1 };

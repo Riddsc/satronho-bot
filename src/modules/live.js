@@ -54,9 +54,11 @@ function createLive({ store, broadcast }) {
     store.set('countdown', c);
     push();
   }
-  function addTime(ms) {
+  function addTime(ms, manual = false) {
+    if (!manual && ms > 0) ms = capped(ms);
+    if (!ms) return;
     const c = { ...clock() };
-    if (c.running) c.endsAt = Math.max(Date.now(), c.endsAt) + ms;
+    if (c.running) c.endsAt = ms >= 0 ? Math.max(Date.now(), c.endsAt) + ms : Math.max(Date.now(), c.endsAt + ms);
     else c.left = Math.max(0, (c.left || 0) + ms);
     setClock(c);
   }
@@ -65,20 +67,80 @@ function createLive({ store, broadcast }) {
     if (action === 'start' && !c.running) { c.endsAt = Date.now() + (c.left || 0); c.running = true; }
     if (action === 'pause' && c.running) { c.left = Math.max(0, c.endsAt - Date.now()); c.running = false; }
     if (action === 'set') { const ms = Math.max(0, Number(value) || 0) * 1000; if (c.running) c.endsAt = Date.now() + ms; else c.left = ms; }
-    if (action === 'add') return addTime((Number(value) || 0) * 1000);
+    if (action === 'add') return addTime((Number(value) || 0) * 1000, true);
     setClock(c);
   }
-  // Lo que suma tiempo sale de los ajustes del overlay «Cuenta regresiva».
+  // Lo que suma tiempo sale de los ajustes del overlay «Cuenta regresiva»
+  // (el streamer decide cuánto «cobra» cada cosa, por plataforma).
+  const PLATS = ['tiktok', 'kick', 'twitch', 'starvios'];
+  function cdSettings() {
+    const all = store.get('widgets') || {};
+    return all.countdown?.settings || Object.values(all).find((x) => x?.kind === 'countdown')?.settings || {};
+  }
+  function rules() {
+    const w = cdSettings();
+    const num = (v, d) => (v === undefined || v === '' || v === null ? d : Number(v) || 0);
+    const rates = {};
+    for (const p of PLATS) {
+      const r = w.rates?.[p] || {};
+      rates[p] = { on: r.on !== false, perUnit: num(r.perUnit, p === 'tiktok' ? num(w.perCoin, 10) : 0), minUnits: num(r.minUnits, 1) };
+    }
+    return {
+      auto: w.autoAdd !== false, rates,
+      gifts: Array.isArray(w.giftRules) ? w.giftRules : [],
+      perFollow: num(w.perFollow, 0), perSub: num(w.perSub, 60), perShare: num(w.perShare, 0),
+      likesEvery: Math.max(1, num(w.likesEvery, 100)), likesSeconds: num(w.likesSeconds, num(w.per100Likes, 0)),
+      maxMin: num(w.maxMin, 0), modCommand: String(w.modCommand ?? 'tiempo').replace(/^!/, '').trim(),
+    };
+  }
+  let likePool = 0;
   function timeFor(e) {
-    const w = Object.values(store.get('widgets') || {}).find((x) => x?.kind === 'countdown')?.settings || {};
-    if (!clock().running || w.autoAdd === false) return 0;
-    const sec = (k, d) => Number(w[k] ?? d) || 0;
-    if (e.type === 'gift') return (Number(e.amount) || 0) * sec('perCoin', 10);
-    if (e.type === 'follow') return sec('perFollow', 0);
-    if (e.type === 'sub') return sec('perSub', 60);
-    if (e.type === 'share') return sec('perShare', 0);
-    if (e.type === 'like') return Math.floor((Number(e.amount) || 0) / 100) * sec('per100Likes', 0);
+    if (!clock().running) return 0;
+    const r = rules();
+    if (!r.auto) return 0;
+    const rate = r.rates[e.platform] || { on: true, perUnit: 0, minUnits: 1 };
+    if (!rate.on) return 0;
+    if (e.type === 'gift') {
+      const x = e.extra || {};
+      const name = norm(x.giftName);
+      const hit = r.gifts.find((g) => g && norm(g.gift) === name && (!g.platform || g.platform === 'any' || g.platform === e.platform));
+      const count = Number(x.count) || 1;
+      if (hit) return (Number(hit.seconds) || 0) * count + (hit.plus ? (Number(e.amount) || 0) * rate.perUnit : 0);
+      const units = Number(e.amount) || 0;
+      if (units < rate.minUnits) return 0;
+      return units * rate.perUnit;
+    }
+    if (e.type === 'follow') return r.perFollow;
+    if (e.type === 'sub') return r.perSub;
+    if (e.type === 'share') return r.perShare;
+    if (e.type === 'like' && r.likesSeconds) {
+      likePool += Number(e.amount) || 0;
+      const n = Math.floor(likePool / r.likesEvery);
+      likePool -= n * r.likesEvery;
+      return n * r.likesSeconds;
+    }
     return 0;
+  }
+  // Tope: la cuenta nunca pasa de N minutos por delante.
+  function capped(ms) {
+    const max = rules().maxMin * 60000;
+    if (!max) return ms;
+    const c = clock();
+    const left = c.running ? Math.max(0, c.endsAt - Date.now()) : c.left || 0;
+    return Math.max(0, Math.min(ms, max - left));
+  }
+  // «!tiempo +5m», «!tiempo -30s», «!tiempo 1h» (tú y tus moderadores).
+  function modTime(e) {
+    const r = rules();
+    if (!r.modCommand) return;
+    const m = String(e.message || '').trim().match(/^!(\S+)\s+([+-]?)(\d+(?:[.,]\d+)?)\s*(h|m|min|s|seg)?\b/i);
+    if (!m || norm(m[1]) !== norm(r.modCommand)) return;
+    if (whoReason(e, 'mods')) return;
+    const n = Number(m[3].replace(',', '.'));
+    const unit = (m[4] || 'm').toLowerCase();
+    const sec = n * (unit === 'h' ? 3600 : unit.startsWith('s') ? 1 : 60);
+    if (m[2] === '-') addTime(-sec * 1000, true);
+    else addTime(sec * 1000, true);
   }
 
   // ---------- Contadores ----------
@@ -124,6 +186,7 @@ function createLive({ store, broadcast }) {
     }
     const add = timeFor(e);
     if (add) addTime(add * 1000);
+    if (e.type === 'chat') modTime(e);
     counterFromEvent(e);
     push();
   }

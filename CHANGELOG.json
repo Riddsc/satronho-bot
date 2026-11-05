@@ -1,5 +1,36 @@
 [
   {
+    "version": "0.17.0",
+    "date": "2026-11-04",
+    "title": "Spotify en un clic y cuenta regresiva a tu precio",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Música tiene arriba dos botones, YouTube o Spotify, y uno de Overlay. Al elegir Spotify sale una tarjeta para conectarlo: «Abrir Spotify para autorizar», aceptas en el navegador y la pantalla se actualiza sola."
+      },
+      {
+        "type": "nuevo",
+        "text": "Cuenta regresiva a tu precio: tú decides cuántos segundos suma cada regalo en cada plataforma (monedas de TikTok, Kicks, bits, Starvios), desde cuánto cuenta y qué plataformas suman."
+      },
+      {
+        "type": "nuevo",
+        "text": "Regalos con su propio precio: por ejemplo «Rosa = 1 minuto» aunque valga 1 moneda, con la opción de sumar además su valor."
+      },
+      {
+        "type": "nuevo",
+        "text": "Seguidor, suscripción, compartido y «cada N likes» suman lo que elijas. También hay un tope máximo para que el reloj no se dispare."
+      },
+      {
+        "type": "nuevo",
+        "text": "Comando para moderadores: «!tiempo +5m», «!tiempo -30s» o «!tiempo 1h» (el nombre se cambia)."
+      },
+      {
+        "type": "mejora",
+        "text": "Una calculadora muestra al instante cuánto tiempo daría una Rosa, una Galaxia o un León con tus precios."
+      }
+    ]
+  },
+  {
     "version": "0.16.0",
     "date": "2026-11-04",
     "title": "Biblioteca de sonidos, memes y Spotify",
