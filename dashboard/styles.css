@@ -2333,3 +2333,16 @@ body.rail .side:not(:hover):not(:focus-within):not(.peek) .nav-sub { display: no
 .ar-err { color: #ff8d98 !important; font-weight: 700; }
 .ar-shake { animation: ar-shake .5s; outline: 2px solid #ff8d98; outline-offset: 3px; border-radius: 10px; }
 @keyframes ar-shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+/* Cola de música: mover canciones (0.19) */
+#music-queue .mq-row { cursor: grab; transition: background .12s, opacity .12s; }
+#music-queue .mq-row.dragging { opacity: .4; }
+#music-queue .mq-row.drop-before { box-shadow: inset 0 3px 0 var(--accent); }
+#music-queue .mq-row.drop-after { box-shadow: inset 0 -3px 0 var(--accent); }
+.mq-grip { color: var(--muted); font-size: 12px; letter-spacing: -2px; padding: 0 4px; cursor: grab; user-select: none; }
+.mq-move { display: inline-flex; flex-direction: column; gap: 2px; }
+.mq-move .mq-btn { height: 16px; min-width: 26px; font-size: 9px; padding: 0; }
+.mq-btn { height: 32px; min-width: 32px; padding: 0 8px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; transition: background .12s, border-color .12s; }
+.mq-btn:hover:not(:disabled) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--panel-2)); }
+.mq-btn:disabled { opacity: .3; cursor: default; }
+.mq-btn.danger:hover { border-color: var(--bad); color: var(--bad); }
+#music-queue li.mq-row { grid-template-columns: 16px 20px 64px minmax(0, 1fr) auto; } #music-queue .row.tight { gap: 4px; align-items: center; }

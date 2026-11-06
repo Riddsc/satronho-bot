@@ -2,6 +2,9 @@
 @import url('/fonts.css');
 :root { --font: 'Bricolage Grotesque', system-ui, sans-serif; --ink: #fff7ec; --muted: #c9bfdc; --bg: rgba(18, 14, 30, 0.92); --r: 1; --scale: 1; }
 html, body { margin: 0; background: transparent; overflow: hidden; }
+/* Sin esto, TikTok LIVE Studio y algunos navegadores pintan un fondo opaco
+   detrás del overlay cuando el sistema está en modo oscuro. */
+:root { color-scheme: normal; }
 body { font-family: var(--font); color: var(--ink); }
 /* Fondo de las tarjetas: sólido, translúcido o sin fondo */
 body[data-card="glass"] { --bg: rgba(18, 14, 30, 0.5); }
