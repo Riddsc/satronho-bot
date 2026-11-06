@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.23.3",
+    "date": "2026-11-06",
+    "title": "Ordena la cola de música y overlays de verdad sin fondo",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Música → Consola → A continuación: ordena la cola como quieras. Arrastra cada canción (⋮⋮) al puesto que quieras, o usa ▲ y ▼ para subirla o bajarla un puesto. ⤒ la pone justo después de la que suena y ✕ la quita."
+      },
+      {
+        "type": "arreglo",
+        "text": "Overlays con «Sin fondo»: al elegir un tema en un overlay, el tema le volvía a poner fondo sólido y tapaba el «Sin fondo». Ahora el tema no toca el fondo. Los overlays a los que ya les había pasado se corrigen solos al abrir la app."
+      },
+      {
+        "type": "arreglo",
+        "text": "Overlays sin fondo en TikTok LIVE Studio y con Windows en modo oscuro: ya no aparece un recuadro opaco detrás del overlay."
+      }
+    ]
+  },
+  {
     "version": "0.23.2",
     "date": "2026-11-05",
     "title": "Una sola alerta por regalo",

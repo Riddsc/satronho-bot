@@ -714,7 +714,9 @@ async function onEditorClick(ev) {
     if (b.dataset.style) { editing.w.style = b.dataset.style; for (const x of $$('[data-style]')) x.setAttribute('aria-pressed', String(x === b)); return commit(); }
     if (b.dataset.ltheme !== undefined) {
       const th = THEMES.find((x) => x.id === b.dataset.ltheme);
-      editing.w.look = th ? { theme: th.id, ...th.set } : {};
+      // El tema no toca el fondo: si elegiste «Sin fondo», se queda sin fondo.
+      const keepCard = editing.w.look?.card ?? '';
+      if (th) { const { card: _c, ...rest } = th.set; editing.w.look = { theme: th.id, ...rest, card: keepCard }; } else editing.w.look = keepCard ? { card: keepCard } : {};
       return commit({ redraw: true });
     }
     if (b.dataset.lclear) { editing.w.look = { ...editing.w.look, [b.dataset.lclear]: '' }; return commit({ redraw: true }); }
@@ -893,6 +895,14 @@ export function initOverlays(cfg) {
   style = { ...DEFAULT, ...(cfg.overlayStyle || {}) };
   widgets = { ...(cfg.widgets || {}) };
   pins = (cfg.profile?.pinnedWidgets || []).filter((x) => typeof x === 'string');
+  // Arreglo 0.19: antes, elegir un tema en un overlay le ponía «fondo sólido»
+  // y tapaba el «Sin fondo» del estilo general. Se quita ese fondo heredado.
+  const fixed = {};
+  for (const [id, w] of Object.entries(widgets)) {
+    const th = THEMES.find((x) => x.id === w?.look?.theme);
+    if (th && w.look.card && w.look.card === th.set.card) { w.look = { ...w.look, card: '' }; fixed[id] = w; }
+  }
+  if (Object.keys(fixed).length) saveConfig({ widgets: fixed });
   $('#ovg-hosts').innerHTML = `<div class="ovg-team" title="Cada guía cuida su parte de los overlays">${['juana', 'troya', 'mecha', 'nono', 'samy'].map((g) => `<span title="${esc(GUIDES[g].name)}">${avatarHTML(g, 'md')}</span>`).join('')}</div>`;
 
   // Estilo general

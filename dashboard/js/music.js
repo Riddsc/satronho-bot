@@ -123,7 +123,7 @@ function songRow(s, i, actions) {
 function renderQueue() {
   const q = state.queue;
   $('#music-queue').innerHTML = q.length
-    ? q.map((s, i) => songRow(s, i, `${i > 0 ? `<button class="btn small ghost" data-top="${esc(s.id)}" title="Que suene después de la actual">⤒</button>` : ''}<button class="btn small ghost" data-remove="${esc(s.id)}" title="Quitar de la cola">✕</button>`)).join('')
+    ? q.map((s, i) => songRow(s, i, `<span class="mq-move"><button class="mq-btn" data-up="${esc(s.id)}" ${i === 0 ? 'disabled' : ''} title="Subir un puesto" aria-label="Subir">▲</button><button class="mq-btn" data-down="${esc(s.id)}" ${i === q.length - 1 ? 'disabled' : ''} title="Bajar un puesto" aria-label="Bajar">▼</button></span><button class="mq-btn" data-top="${esc(s.id)}" ${i === 0 ? 'disabled' : ''} title="Que suene justo después de la actual" aria-label="Poner primera">⤒</button><button class="mq-btn danger" data-remove="${esc(s.id)}" title="Quitar de la cola" aria-label="Quitar">✕</button>`).replace('<li data-id=', `<li draggable="true" class="mq-row" data-id=`).replace('<span class="n">', '<span class="mq-grip" title="Arrastra para mover" aria-hidden="true">⋮⋮</span><span class="n">')).join('')
     : '<li class="empty">La cola está vacía. Busca algo o espera a que pidan con <code>!play</code>.</li>';
   const total = q.reduce((a, s) => a + (s.durationSec || 0), 0);
   $('#queue-count').textContent = q.length ? `${q.length}${total ? ` · ${fmt(total)}` : ''}` : '';
@@ -261,7 +261,49 @@ export function initMusic(cfg, { clientId, sendWs }) {
     const rm = ev.target.closest('[data-remove]')?.dataset.remove;
     if (rm) return act('remove', { id: rm }).catch(() => {});
     const top = ev.target.closest('[data-top]')?.dataset.top;
-    if (top) act('move', { id: top, to: 0 }).catch(() => {});
+    if (top) return act('move', { id: top, to: 0 }).catch(() => {});
+    const up = ev.target.closest('[data-up]')?.dataset.up;
+    const down = ev.target.closest('[data-down]')?.dataset.down;
+    const id = up || down;
+    if (id) {
+      const i = state.queue.findIndex((x) => x.id === id);
+      if (i >= 0) act('move', { id, to: up ? i - 1 : i + 1 }).catch(() => {});
+    }
+  });
+  // Arrastrar y soltar para ordenar la cola.
+  let dragId = '';
+  const qbox = $('#music-queue');
+  qbox.addEventListener('dragstart', (ev) => {
+    const li = ev.target.closest('li[data-id]');
+    if (!li) return;
+    dragId = li.dataset.id;
+    li.classList.add('dragging');
+    ev.dataTransfer.effectAllowed = 'move';
+    ev.dataTransfer.setData('text/plain', dragId);
+  });
+  qbox.addEventListener('dragover', (ev) => {
+    if (!dragId) return;
+    ev.preventDefault();
+    const li = ev.target.closest('li[data-id]');
+    for (const x of qbox.querySelectorAll('.drop-before, .drop-after')) x.classList.remove('drop-before', 'drop-after');
+    if (!li || li.dataset.id === dragId) return;
+    const r = li.getBoundingClientRect();
+    li.classList.add(ev.clientY < r.top + r.height / 2 ? 'drop-before' : 'drop-after');
+  });
+  qbox.addEventListener('drop', (ev) => {
+    ev.preventDefault();
+    const li = ev.target.closest('li[data-id]');
+    const id = dragId;
+    if (!id || !li || li.dataset.id === id) return;
+    const from = state.queue.findIndex((x) => x.id === id);
+    let to = state.queue.findIndex((x) => x.id === li.dataset.id);
+    if (li.classList.contains('drop-after')) to += 1;
+    if (from < to) to -= 1;
+    act('move', { id, to }).catch(() => {});
+  });
+  qbox.addEventListener('dragend', () => {
+    dragId = '';
+    for (const x of qbox.querySelectorAll('.dragging, .drop-before, .drop-after')) x.classList.remove('dragging', 'drop-before', 'drop-after');
   });
   $('#mz-history').addEventListener('click', async (ev) => {
     if (ev.target.id === 'mz-clear-history') return act('clear-history').catch(() => {});
