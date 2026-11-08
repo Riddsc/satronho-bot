@@ -13,6 +13,7 @@ const { WebSocketServer } = require('ws');
 
 const { bus, makeEvent, EVENT_TYPES } = require('./eventBus');
 const { createGoals } = require('./modules/goals');
+const { createAccountStats } = require('./modules/accountStats');
 const { createTts } = require('./modules/tts');
 const { createMusic } = require('./modules/music');
 const { createStats } = require('./modules/stats');
@@ -137,7 +138,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const podium = createLeaderboard({ broadcast: (...a) => broadcast(...a) });
   const live = createLive({ store, broadcast: (...a) => broadcast(...a) });
   const connectors = {
-    tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }), onStickers: (s) => catalog.merge('stickers', 'tiktok', s), diagFile: path.join(dataDir, 'tiktok-diagnostico.json') }),
+    tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }), onStickers: (s) => catalog.merge('stickers', 'tiktok', s), onFollowers: (n) => accountRef?.set('tiktok', n), diagFile: path.join(dataDir, 'tiktok-diagnostico.json') }),
     kick: createKickConnector(deps),
     twitch: createTwitchConnector(deps),
     starvios: createStarviosConnector({ ...deps, logFile: path.join(dataDir, 'starvios-eventos.jsonl') }),
@@ -145,7 +146,31 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
 
   // ---- Módulos ----
   const engine = createPiperEngine({ dataDir, fetch: fetchFn, onState: (s) => broadcast('tts-engine', s) });
-  const goals = createGoals({ store, broadcast });
+  // Seguidores de tus cuentas (para las metas que leen tu total).
+  let accountRef = null;
+  let goalsRef = null;
+  const kickLive = { was: null };
+  const account = createAccountStats({
+    dataDir,
+    broadcast: (...a) => broadcast(...a),
+    getChannel: (p) => store.get('platforms')?.[p]?.channel || '',
+    readers: {
+      tiktok: () => connectors.tiktok.followers(),
+      kick: async (ch) => {
+        const s = await connectors.kick.channelStats(ch);
+        // Kick no avisa cuando empiezas: lo vemos al leer la ficha del canal.
+        if (kickLive.was === false && s.live) bus.emit('stream-start', { platform: 'kick' });
+        kickLive.was = s.live;
+        return s.followers;
+      },
+      starvios: (ch) => connectors.starvios.followers(ch),
+    },
+    onChange: () => goalsRef?.onTotals(),
+  });
+  accountRef = account;
+  const goals = createGoals({ store, broadcast, getTotals: () => account.totals() });
+  goalsRef = goals;
+  bus.on('stream-start', (x) => goals.onStreamStart(x?.platform || 'tiktok'));
   const online = createMsOnlineEngine({ outDir: engine.outDir });
   const soundLib = createSoundLibrary({ dataDir, fetchFn, engine, online, store, renderPage: hooks.renderPage || null, mediaFetch: hooks.mediaFetch || null });
   const kickChat = createKickChat({
@@ -279,6 +304,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
         if (rule.speak) tts.speak(a.plain);
       }
     }
+    account.onEvent(e);
+    if (e.type === 'live-start' && !e.test) bus.emit('stream-start', { platform: e.platform });
     goals.handleEvent(e);
     // Lo que escribe la propia app (con la cuenta aparte o con la tuya) no se lee en voz alta.
     const fromBot = e.type === 'chat' && Boolean(writers[e.platform]?.isOwnMessage(e.user?.name, e.message));
@@ -379,6 +406,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           alertOverlays: alertOverlays.size,
           spotify: spotify.status(),
           goals: goals.list(),
+          accountStats: account.snapshot(),
           status,
           recent: recent.slice(0, 80),
           ttsLog: tts.recentLog(),
@@ -473,6 +501,12 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
 
   // Metas
   app.get('/api/goals', (_req, res) => ok(res, { goals: goals.list() }));
+  app.get('/api/account-stats', (_req, res) => ok(res, { stats: account.snapshot() }));
+  app.post('/api/account-stats/refresh', async (req, res) => {
+    const p = req.body?.platform;
+    await (p ? account.refresh(p) : account.refreshAll()).catch(() => {});
+    ok(res, { stats: account.snapshot() });
+  });
   app.post('/api/goals', (req, res) => ok(res, { goal: goals.create(req.body || {}) }));
   app.patch('/api/goals/:id', (req, res) => {
     const g = goals.update(req.params.id, req.body || {});

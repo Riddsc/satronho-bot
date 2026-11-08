@@ -17,7 +17,7 @@ import { initAppearance, applyAppearance } from './appearance.js';
 import { setAlertOverlays, setAlertSoundEnabled, onAlert, onAlertControl } from './alertSound.js';
 import { initSounds, onSoundsChanged } from './soundsUI.js';
 import { initSpotify, onSpotify } from './spotifyUI.js';
-import { initOverlays, setOverlayGoals, setOverlayLive, setOverlayWidgets } from './overlays.js';
+import { initOverlays, setOverlayGoals, setOverlayLive, setOverlayWidgets, setAccountStats } from './overlays.js';
 import { initKickbot, renderKickbot } from './kickbot.js';
 import { initAlerts } from './alerts.js';
 import { initStarviosbot, renderStarviosbot } from './starviosbot.js';
@@ -453,6 +453,7 @@ async function init() {
           p.goals.forEach((g) => goals.set(g.id, g));
           renderGoals();
           setOverlayLive(p.live);
+          setAccountStats(p.accountStats);
           setAlertOverlays(p.alertOverlays);
           if (p.spotify) onSpotify(p.spotify);
           setAlertSoundEnabled(p.overlayStyle?.sound);
@@ -506,6 +507,7 @@ async function init() {
         case 'goal': goals.set(p.id, p); renderGoals(); break;
         case 'goal-removed': goals.delete(p.id); renderGoals(); break;
         case 'live': setOverlayLive(p); break;
+        case 'account-stats': setAccountStats(p); break;
         case 'alert': onAlert(p); break;
         case 'sounds-changed': onSoundsChanged(); homeRefreshExtras(); onFilesChanged(); break;
         case 'spotify': onSpotify(p); break;
