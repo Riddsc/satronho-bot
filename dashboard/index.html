@@ -966,6 +966,17 @@
     <div class="card span2"><div class="row space"><h3 class="card-title">Barra rápida</h3>
         <div class="seg" id="pf-rail-mode"><button type="button" data-rail-mode="fixed">Fija a la derecha</button><button type="button" data-rail-mode="floating">Flotante</button><button type="button" data-rail-mode="off">Apagada</button></div></div>
       <p class="hint">Botones a un clic para el directo. Marca los que quieres y ordénalos. La flotante la mueves arrastrando su asa ⠿.</p>
+      <div class="pf-rlook" id="pf-rlook">
+        <div class="pf-rlook-prev" aria-hidden="true"><span class="pf-rlook-scene"></span><span class="pf-rlook-bar" id="pf-rlook-bar"><i></i><i></i><i></i><i></i></span></div>
+        <div class="pf-rlook-ctl">
+          <h4>Cómo se ve la flotante</h4>
+          <label class="field"><span>Fondo <b id="pf-rbg-val"></b></span><input type="range" min="0" max="100" step="5" id="pf-rbg" aria-describedby="pf-rbg-hint"></label>
+          <p class="hint" id="pf-rbg-hint">A la izquierda queda solo con sus botones y deja ver lo que hay detrás.</p>
+          <label class="field"><span>Cuando no la usas <b id="pf-ridle-val"></b></span><input type="range" min="20" max="100" step="5" id="pf-ridle" aria-describedby="pf-ridle-hint"></label>
+          <p class="hint" id="pf-ridle-hint">Se aclara mientras no la tocas y vuelve a verse entera al pasar el ratón.</p>
+          <p class="hint pf-rlook-off" id="pf-rlook-off">Elige «Flotante» arriba para usar estos ajustes.</p>
+        </div>
+      </div>
       <div class="pf-rail" id="pf-rail"></div></div>
   </div>
 </section>

@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.25.1",
+    "date": "2026-11-07",
+    "title": "Barra flotante transparente",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Tu perfil → Barra rápida → «Cómo se ve la flotante»: elige cuánto se ve su fondo, hasta dejar solo los botones, y cuánto se aclara cuando no la usas. Al pasar el ratón vuelve a verse entera. Trae una vista previa sobre un fondo de ejemplo."
+      }
+    ]
+  },
+  {
     "version": "0.25.0",
     "date": "2026-11-07",
     "title": "Metas que leen tu cuenta y se reinician solas",
