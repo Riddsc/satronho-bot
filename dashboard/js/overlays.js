@@ -253,7 +253,7 @@ function openOverlayQuick(page, kind) {
       if (ev.target.closest('[data-ovq-sim]')) return api('POST', '/api/test/gift').catch((e) => toast(e.message));
       if (editing && ev.target.closest('#ovq-editor')) return onEditorClick(ev);
     });
-    m.addEventListener('input', (ev) => { if (editing && ev.target.closest('#ovq-editor') && !ev.target.dataset.c && ev.target.dataset.gtitle === undefined && ev.target.dataset.gtarget === undefined && ev.target.type !== 'checkbox') onEditorInput(ev); });
+    m.addEventListener('input', (ev) => { if (editing && ev.target.closest('#ovq-editor') && !ev.target.dataset.c && !ev.target.closest('[data-goal], #ove-newgoal') && ev.target.type !== 'checkbox') onEditorInput(ev); });
     m.addEventListener('change', (ev) => {
       if (ev.target.id === 'ovq-sound') {
         config.overlayStyle = { ...config.overlayStyle, sound: ev.target.checked };
@@ -529,24 +529,47 @@ function styleHTML() {
 }
 
 // --- Metas ---
+// De dónde cuenta cada meta: todas las plataformas juntas o solo una. Así
+// puedes tener «Seguidores de TikTok» y «Seguidores de Kick» por separado.
+const GOAL_PLATS = [['all', 'Todas'], ['tiktok', 'TikTok'], ['kick', 'Kick'], ['starvios', 'Starvios'], ['twitch', 'Twitch']];
+const GOAL_UNIT = { follow: 'seguidores', sub: 'suscripciones', gift: 'monedas', like: 'likes', share: 'compartidos' };
+const platSelect = (val, attr) => `<select ${attr} aria-label="De qué plataforma cuenta">${GOAL_PLATS.map(([v, n]) => `<option value="${v}" ${v === (val || 'all') ? 'selected' : ''}>${v === 'all' ? '🌐 ' : ''}${n}</option>`).join('')}</select>`;
 function goalsHTML() {
   const hidden = editing.w.settings.hidden || [];
   const rows = goals.map((g) => {
     const pct = g.target > 0 ? Math.min(100, (g.current / g.target) * 100) : 0;
     const off = hidden.includes(g.id);
-    return `<div class="ove-goal ${off ? 'off' : ''}" data-goal="${esc(g.id)}">
-      <button type="button" class="ove-eye" data-geye title="${off ? 'Mostrar en este overlay' : 'Ocultar en este overlay'}">${off ? '◌' : '◉'}</button>
-      <div class="ove-gmain"><input class="ove-gtitle" data-gtitle value="${esc(g.title)}" aria-label="Nombre de la meta"><small>${TYPE_NAMES[g.type] || g.type}</small>
-        <div class="ove-gbar"><i style="width:${pct.toFixed(1)}%"></i></div></div>
-      <div class="ove-gnums"><button type="button" class="btn small ghost" data-gstep="-1">−</button><b>${g.current}</b><button type="button" class="btn small ghost" data-gstep="1">+</button>
-        <span>/</span><input type="number" min="1" value="${g.target}" data-gtarget aria-label="Objetivo"></div>
-      <div class="ove-gact"><button type="button" class="btn small ghost" data-greset title="Volver a cero">↺</button><button type="button" class="btn small ghost danger" data-gdel title="Eliminar">✕</button></div></div>`;
+    const p = g.platform || 'all';
+    return `<div class="ove-goal ${off ? 'off' : ''}" data-goal="${esc(g.id)}" style="${g.color ? `--gc:${esc(g.color)}` : ''}">
+      <div class="ove-grow">
+        <button type="button" class="ove-eye" data-geye title="${off ? 'Mostrar en este overlay' : 'Ocultar en este overlay'}">${off ? '◌' : '◉'}</button>
+        ${p !== 'all' ? `<img class="ove-gpl" src="/img/platforms/${p}.png" alt="">` : '<span class="ove-gpl all">🌐</span>'}
+        <div class="ove-gmain"><input class="ove-gtitle" data-gtitle value="${esc(g.title)}" aria-label="Nombre de la meta"><small>${TYPE_NAMES[g.type] || g.type} · ${p === 'all' ? 'todas las plataformas' : `solo ${PLAT_NAMES[p] || p}`}</small></div>
+        ${platSelect(p, 'data-gplat')}
+        <label class="ove-gcolor" title="Color de esta barra (vacío = el del tema)"><input type="color" data-gcolor value="${esc(g.color || '#ffb23e')}"><span>${g.color ? '' : 'Tema'}</span></label>
+        <div class="ove-gact"><button type="button" class="btn small ghost" data-greset title="Volver a cero">↺</button><button type="button" class="btn small ghost danger" data-gdel title="Eliminar">✕</button></div>
+      </div>
+      <div class="ove-grow2">
+        <div class="ove-gbar"><i style="width:${pct.toFixed(1)}%"></i></div>
+        <div class="ove-gnums">
+          <button type="button" class="btn small ghost" data-gstep="-1" title="Restar 1">−</button>
+          <label class="ove-gnum" title="Lo que llevas: escríbelo a mano"><small>Llevas</small><input type="number" min="0" value="${g.current}" data-gcurrent aria-label="Progreso actual"></label>
+          <button type="button" class="btn small ghost" data-gstep="1" title="Sumar 1">+</button>
+          <span class="ove-gof">de</span>
+          <label class="ove-gnum" title="El objetivo"><small>Meta</small><input type="number" min="1" value="${g.target}" data-gtarget aria-label="Objetivo"></label>
+          <b class="ove-gpct">${Math.floor(pct)}%</b>
+        </div>
+      </div></div>`;
   }).join('');
-  return `<p class="hint">El ojo decide si esa meta sale en <b>este</b> overlay. Los números se mueven solos con lo que pasa en el directo.</p>
+  return `<p class="hint">El ojo decide si esa meta sale en <b>este</b> overlay. Los números suben solos con el directo, y puedes escribir a mano lo que llevas. Elige de qué plataforma cuenta cada meta para tener barras separadas (por ejemplo, seguidores de TikTok y de Kick).</p>
     <div class="ove-goals">${rows || '<p class="hint">Aún no tienes metas. Crea la primera aquí abajo.</p>'}</div>
-    <form class="ove-newgoal" id="ove-newgoal"><input name="title" placeholder="Nombre de la meta" required maxlength="40">
-      <select name="type">${Object.entries(TYPE_NAMES).map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select>
-      <input name="target" type="number" min="1" value="100" aria-label="Objetivo"><button class="btn small primary">Crear meta</button></form>`;
+    <form class="ove-newgoal" id="ove-newgoal">
+      <label class="field"><span>Nombre</span><input name="title" placeholder="Ej.: Seguidores de Kick" required maxlength="40"></label>
+      <label class="field"><span>Qué cuenta</span><select name="type">${Object.entries(TYPE_NAMES).map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select></label>
+      <label class="field"><span>De dónde</span>${platSelect('all', 'name="platform"')}</label>
+      <label class="field"><span>Ya llevas</span><input name="current" type="number" min="0" value="0"></label>
+      <label class="field"><span>Meta</span><input name="target" type="number" min="1" value="100"></label>
+      <button class="btn primary">Crear meta</button></form>`;
 }
 
 // --- Contadores ---
@@ -788,9 +811,14 @@ function onEditorChange(ev) {
     editing.w.settings.giftRules = list;
     return commit();
   }
-  if (el.dataset.gtitle !== undefined || el.dataset.gtarget !== undefined) {
-    const gid = el.closest('[data-goal]').dataset.goal;
-    const body = el.dataset.gtitle !== undefined ? { title: el.value.trim() || 'Meta' } : { target: Number(el.value) || 1 };
+  const gRow = el.closest('[data-goal]');
+  if (gRow && (el.dataset.gtitle !== undefined || el.dataset.gtarget !== undefined || el.dataset.gcurrent !== undefined || el.dataset.gplat !== undefined || el.dataset.gcolor !== undefined)) {
+    const gid = gRow.dataset.goal;
+    const body = el.dataset.gtitle !== undefined ? { title: el.value.trim() || 'Meta' }
+      : el.dataset.gtarget !== undefined ? { target: Math.max(1, Number(el.value) || 1) }
+      : el.dataset.gcurrent !== undefined ? { current: Math.max(0, Number(el.value) || 0) }
+      : el.dataset.gplat !== undefined ? { platform: el.value }
+      : { color: el.value };
     return api('PATCH', `/api/goals/${encodeURIComponent(gid)}`, body).catch((e) => toast(e.message));
   }
   if (el.dataset.c) {
@@ -809,8 +837,8 @@ async function onEditorSubmit(ev) {
   const f = Object.fromEntries(new FormData(ev.target));
   try {
     if (ev.target.id === 'ove-newgoal') {
-      await api('POST', '/api/goals', { title: f.title, type: f.type, target: Number(f.target) || 10, platform: 'all', countBy: f.type === 'gift' || f.type === 'like' ? 'amount' : 'events' });
-      guideToast('juana', 'Meta creada. Ya sale en este overlay.');
+      await api('POST', '/api/goals', { title: f.title, type: f.type, target: Number(f.target) || 10, current: Number(f.current) || 0, platform: f.platform || 'all', countBy: f.type === 'gift' || f.type === 'like' ? 'amount' : 'events' });
+      guideToast('juana', f.platform && f.platform !== 'all' ? `Meta creada: solo cuenta lo de ${PLAT_NAMES[f.platform]}. Ya sale en este overlay.` : 'Meta creada. Ya sale en este overlay.');
     }
     if (ev.target.id === 'ove-cdset') await api('POST', '/api/live/countdown', { action: 'set', value: (Number(f.h) || 0) * 3600 + (Number(f.m) || 0) * 60 });
   } catch (e) {
@@ -854,7 +882,15 @@ function renderThemes() {
 export function setOverlayGoals(list) {
   goals = list;
   renderClassic();
-  if (editing?.tab === 'metas') renderPanel();
+  if (editing?.tab !== 'metas') return;
+  // Mientras escribes en una meta o en «Crear meta» no se redibuja (perderías
+  // lo escrito); al salir del campo se pone al día.
+  const a = document.activeElement;
+  if (a && $('#ove-panel')?.contains(a) && /^(INPUT|SELECT)$/.test(a.tagName)) {
+    if (!a.dataset.goalsWait) { a.dataset.goalsWait = '1'; a.addEventListener('blur', () => { delete a.dataset.goalsWait; setTimeout(() => editing?.tab === 'metas' && !$('#ove-panel')?.contains(document.activeElement) && renderPanel(), 0); }, { once: true }); }
+    return;
+  }
+  renderPanel();
 }
 export function setOverlayLive(p) {
   live = p || {};
@@ -959,7 +995,7 @@ export function initOverlays(cfg) {
   // Editor
   const ove = $('#ove');
   ove.addEventListener('click', onEditorClick);
-  ove.addEventListener('input', (ev) => { if (!ev.target.dataset.c && ev.target.dataset.gtitle === undefined && ev.target.dataset.gtarget === undefined && ev.target.type !== 'checkbox') onEditorInput(ev); });
+  ove.addEventListener('input', (ev) => { if (!ev.target.dataset.c && !ev.target.closest('[data-goal], #ove-newgoal') && ev.target.type !== 'checkbox') onEditorInput(ev); });
   ove.addEventListener('change', onEditorChange);
   ove.addEventListener('submit', onEditorSubmit);
 

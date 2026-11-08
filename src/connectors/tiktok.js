@@ -8,6 +8,7 @@
 // en Ajustes) es más rápido y estable. Puede romperse cuando TikTok
 // cambia su sistema: hay que mantener la librería actualizada.
 
+const fs = require('fs');
 const { createConnectorBase, cleanChannel } = require('./base');
 
 // La librería es un módulo ES: se carga con import() la primera vez que se
@@ -59,6 +60,26 @@ function rolesOf(d, hostId) {
 
 const imgOf = (m) => m?.urlList?.[0] || m?.url_list?.[0] || m?.url?.[0] || m?.imageUrl || '';
 
+// Stickers. TikTok los manda de varias formas según la versión de la app:
+//   - WebcastEmoteChatMessage (evento «emote»): emoteList;
+//   - WebcastChatMessage: un comentario con stickers dentro (emotes[].emote);
+//   - otros mensajes que también traen el sticker por dentro.
+// Para no perder ninguno buscamos en todo el mensaje cualquier objeto con
+// emoteId e imagen (findEmotes) y lo guardamos en el catálogo.
+const emoteOf = (em) => (em && (em.emoteId || em.emote_id) ? {
+  id: String(em.emoteId || em.emote_id),
+  name: '',
+  image: imgOf(em.image),
+} : null);
+function findEmotes(obj, out = new Map(), depth = 0) {
+  if (!obj || typeof obj !== 'object' || depth > 8) return out;
+  if (Array.isArray(obj)) { for (const v of obj) findEmotes(v, out, depth + 1); return out; }
+  const em = emoteOf(obj);
+  if (em && em.image) out.set(em.id, em);
+  for (const [k, v] of Object.entries(obj)) if (k !== 'user' && v && typeof v === 'object') findEmotes(v, out, depth + 1);
+  return out;
+}
+
 // Catálogo de regalos de la sala (lo que TikTok tiene disponible en tu LIVE).
 function normalizeGifts(raw) {
   const list = Array.isArray(raw) ? raw : raw?.gifts || raw?.data?.gifts || [];
@@ -88,25 +109,82 @@ async function loadGifts(c, onGifts) {
   }
 }
 
-function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGifts = () => {} }) {
+function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGifts = () => {}, onStickers = () => {}, diagFile = '' }) {
   const base = createConnectorBase({ platform: 'tiktok', bus, onStatus });
   let conn = null;
   let hostId = ''; // id de tu cuenta de TikTok (dueña del LIVE)
 
+  // Diagnóstico: qué tipos de mensaje manda TikTok en tu LIVE y cuáles traen
+  // stickers. Se guarda en tiktok-diagnostico.json (va en «Reportar un
+  // problema») para ver qué cambió si algo deja de llegar.
+  const diag = { since: Date.now(), methods: {}, unknown: {}, stickerMethods: {}, samples: [] };
+  let diagTimer = null;
+  const saveDiag = () => {
+    if (!diagFile || diagTimer) return;
+    diagTimer = setTimeout(() => {
+      diagTimer = null;
+      try { fs.writeFileSync(diagFile, JSON.stringify(diag, null, 1)); } catch { /* sin disco */ }
+    }, 5000);
+  };
+
+  // Un sticker que llega: alerta (si no salió ya por otro camino en el
+  // mismo instante) y siempre al catálogo.
+  const recentStk = new Map();
+  function stickerFrom(d, em, via) {
+    if (!em) return;
+    const key = `${userOf(d).id}|${em.id}`;
+    const now = Date.now();
+    if (now - (recentStk.get(key) || 0) < 1500) return;
+    recentStk.set(key, now);
+    if (recentStk.size > 300) recentStk.clear();
+    base.emit({ type: 'sticker', user: userOf(d), extra: { stickerId: em.id, image: em.image, via, roles: rolesOf(d, hostId) } });
+  }
+
   function attach(c) {
     const { WebcastEvent, ControlEvent } = lib;
-    c.on(WebcastEvent.CHAT, (d) => base.emit({ type: 'chat', user: userOf(d), message: d.content ?? d.comment ?? '', extra: { roles: rolesOf(d, hostId) } }));
+    c.on(WebcastEvent.CHAT, (d) => {
+      const stickers = (d.emotes || []).map((x) => emoteOf(x?.emote || x)).filter(Boolean);
+      const text = d.content ?? d.comment ?? '';
+      // Un comentario que solo es un sticker no se lee ni sale como texto vacío.
+      if (String(text).trim() || !stickers.length) base.emit({ type: 'chat', user: userOf(d), message: text, extra: { roles: rolesOf(d, hostId), stickers: stickers.length || undefined } });
+      for (const em of stickers.slice(0, 3)) stickerFrom(d, em, 'chat');
+    });
 
     c.on(WebcastEvent.FOLLOW, (d) => base.emit({ type: 'follow', user: userOf(d) }));
 
     // Stickers (emotes) que manda el chat: alerta inmediata con su imagen.
     if (WebcastEvent.EMOTE) {
       c.on(WebcastEvent.EMOTE, (d) => {
-        for (const em of (d.emoteList || []).slice(0, 3)) {
-          base.emit({ type: 'sticker', user: userOf(d), extra: { stickerId: String(em.emoteId || ''), image: imgOf(em.image), roles: rolesOf(d, hostId) } });
-        }
+        for (const em of (d.emoteList || []).slice(0, 3)) stickerFrom(d, emoteOf(em), 'emote');
       });
     }
+
+    // Todo mensaje que traiga stickers por dentro entra al catálogo, venga
+    // por donde venga, y queda anotado en el diagnóstico.
+    c.on(ControlEvent.DECODED_DATA, (method, decoded) => {
+      diag.methods[method] = (diag.methods[method] || 0) + 1;
+      const found = [...findEmotes(decoded?.data).values()];
+      if (!found.length) return saveDiag();
+      diag.stickerMethods[method] = (diag.stickerMethods[method] || 0) + 1;
+      if (diag.samples.length < 15) diag.samples.push({ ts: new Date().toISOString(), method, stickers: found.slice(0, 3) });
+      // Solo al catálogo: las alertas salen del chat y del evento «emote»
+      // (otros mensajes traen listas de stickers que nadie mandó).
+      onStickers(found);
+      saveDiag();
+    });
+    // Mensajes que la librería no sabe leer (TikTok estrenó algo nuevo).
+    c.on(ControlEvent.WEBSOCKET_CONNECTED || 'websocketConnected', (ws) => {
+      ws?.on?.('protoMessageFetchResult', (r) => {
+        for (const m of r?.messages || []) {
+          if (m.decodedData) continue;
+          diag.unknown[m.method] = (diag.unknown[m.method] || 0) + 1;
+          if (/emote|sticker|emoji/i.test(m.method) && diag.samples.length < 15) {
+            diag.samples.push({ ts: new Date().toISOString(), method: m.method, unknown: true, payload: Buffer.from(m.payload || []).toString('base64').slice(0, 4000) });
+          }
+        }
+        saveDiag();
+      });
+    });
     // Alguien entra al LIVE.
     if (WebcastEvent.MEMBER) c.on(WebcastEvent.MEMBER, (d) => base.emit({ type: 'join', user: userOf(d) }));
     // Superfan nuevo.
@@ -216,6 +294,8 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
       hostId = String(room.owner?.id_str || room.owner_user_id || room.data?.owner?.id_str || '');
       base.resetBackoff();
       base.status('connected');
+      // Los stickers que la sala ya trae (los de tu equipo o suscripción).
+      try { const s = [...findEmotes(room).values()]; if (s.length) onStickers(s); } catch { /* sin datos */ }
       // Catálogo de regalos para «Alertas propias», sin frenar la conexión:
       // primero el gratuito de Euler y, si no, el de TikTok. Si ninguno
       // responde, se llena solo con los regalos que vayan llegando.
@@ -254,6 +334,16 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
     return normalizeGifts(res?.data?.gifts || res?.data || []);
   }
 
+  // «Buscar stickers»: vuelve a leer la sala si estás conectado.
+  async function scanStickers() {
+    if (!conn) return [];
+    let room = conn.roomInfo || {};
+    try { room = (await conn.fetchRoomInfo?.()) || room; } catch { /* nos quedamos con la que hay */ }
+    const s = [...findEmotes(room).values()];
+    if (s.length) onStickers(s);
+    return s;
+  }
+
   async function connect(channelName) {
     await disconnect();
     const user = cleanChannel(channelName);
@@ -277,7 +367,7 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
     base.status('disconnected');
   }
 
-  return { connect, disconnect, fetchGifts };
+  return { connect, disconnect, fetchGifts, scanStickers, diagnostics: () => diag };
 }
 
 module.exports = { createTiktokConnector };

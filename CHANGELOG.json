@@ -1,5 +1,48 @@
 [
   {
+    "version": "0.24.0",
+    "date": "2026-11-07",
+    "title": "Stickers de TikTok que sí llegan y metas por plataforma",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Stickers de TikTok: la app solo escuchaba una de las formas en que TikTok manda los stickers, así que en tus directos no llegaban ni se guardaban. Ahora también los reconoce cuando vienen dentro de un comentario del chat, y cualquier mensaje que traiga un sticker lo guarda en tu lista."
+      },
+      {
+        "type": "nuevo",
+        "text": "Alertas propias → Sticker: botón «🔄 Buscar stickers» que trae los stickers que ya llegaron a tus directos (y, si estás en LIVE, los de tu sala). Cada sticker muestra cuántas veces te lo han mandado, y los que llegan con la ventana abierta aparecen solos."
+      },
+      {
+        "type": "mejora",
+        "text": "Se quitó «Cualquier sticker» de las alertas propias: para que suene con cualquier sticker ya está la alerta de serie «Sticker». Una alerta propia de sticker ahora pide elegir al menos uno."
+      },
+      {
+        "type": "nuevo",
+        "text": "Metas: escribe a mano cuánto llevas (además de − y +). Si lo llevas hasta el objetivo, también se celebra."
+      },
+      {
+        "type": "nuevo",
+        "text": "Metas por plataforma: cada meta cuenta de todas las plataformas o solo de TikTok, Kick, Starvios o Twitch. Así puedes tener barras separadas, por ejemplo «Seguidores de TikTok» y «Seguidores de Kick», o monedas de cada una. El overlay muestra el logo de la plataforma."
+      },
+      {
+        "type": "nuevo",
+        "text": "Metas: cada barra puede tener su propio color, y al crear una meta ya puedes poner cuánto llevas."
+      },
+      {
+        "type": "mejora",
+        "text": "Overlay de Metas más bonito: barra con relieve, brillo que la recorre, punta luminosa y grosor a elegir (fina, normal o gruesa). Nuevo estilo «Píldora», con el nombre y los números dentro de la barra. Si ocultas todos los textos, queda solo la barra, sin huecos."
+      },
+      {
+        "type": "arreglo",
+        "text": "El panel derecho del editor de overlays ya no se sale de la pantalla ni queda tapado por la barra rápida."
+      },
+      {
+        "type": "mejora",
+        "text": "«Reportar un problema» incluye qué tipos de mensaje manda TikTok en tu LIVE y por dónde llegan los stickers, para encontrar más rápido lo que falle."
+      }
+    ]
+  },
+  {
     "version": "0.23.3",
     "date": "2026-11-06",
     "title": "Ordena la cola de música y overlays de verdad sin fondo",

@@ -137,7 +137,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const podium = createLeaderboard({ broadcast: (...a) => broadcast(...a) });
   const live = createLive({ store, broadcast: (...a) => broadcast(...a) });
   const connectors = {
-    tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }) }),
+    tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }), onStickers: (s) => catalog.merge('stickers', 'tiktok', s), diagFile: path.join(dataDir, 'tiktok-diagnostico.json') }),
     kick: createKickConnector(deps),
     twitch: createTwitchConnector(deps),
     starvios: createStarviosConnector({ ...deps, logFile: path.join(dataDir, 'starvios-eventos.jsonl') }),
@@ -717,7 +717,13 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   app.get('/api/changelog', (_req, res) => ok(res, { changelog }));
 
   // ---- Ayuda: reportar un problema (llega a Discord) ----
-  const support = createSupport({ fetch: fetchFn, logbook, appInfo: { version: appInfo.version || require('../package.json').version }, getStatus: () => status });
+  const support = createSupport({ fetch: fetchFn, logbook, appInfo: { version: appInfo.version || require('../package.json').version }, getStatus: () => status, getExtra: () => {
+    // Qué manda TikTok en tu LIVE y por dónde llegan los stickers.
+    const d = connectors.tiktok.diagnostics?.();
+    if (!d || !Object.keys(d.methods).length) return [];
+    const top = (o) => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([k, v]) => `${k}×${v}`).join(', ') || '—';
+    return ['TikTok (mensajes de esta sesión):', top(d.methods), `Con stickers: ${top(d.stickerMethods)}`, `Desconocidos: ${top(d.unknown)}`, `Stickers guardados: ${catalog.summary().tiktok.stickers}`];
+  } });
   app.get('/api/support', (_req, res) => ok(res, { available: support.available(), diagnostics: support.diagnostics() }));
   app.post('/api/support/report', async (req, res) => {
     try {
@@ -944,6 +950,16 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     } catch (err) {
       fail(res, `No pude hablar con TikTok (${String(err.message || err).slice(0, 120)}). Tienes igual los ${catalog.summary().tiktok.gifts} regalos de serie; vuelve a intentarlo estando en LIVE.`);
     }
+  });
+  // «Buscar stickers»: lo que ya llegó a tus directos más lo que trae tu
+  // sala de TikTok si estás conectado. TikTok no publica la lista completa.
+  app.post('/api/stickers/:platform/import', async (req, res) => {
+    const p = req.params.platform;
+    let found = 0;
+    if (p === 'tiktok' && status.tiktok?.state === 'connected') {
+      try { found = (await connectors.tiktok.scanStickers()).length; } catch { /* seguimos con lo guardado */ }
+    }
+    ok(res, { stickers: catalog.list('stickers', p), found, live: status[p]?.state === 'connected', diag: p === 'tiktok' ? connectors.tiktok.diagnostics?.() : null });
   });
   app.get('/gift-img', async (req, res) => {
     const url = String(req.query.u || '');

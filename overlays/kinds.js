@@ -59,22 +59,47 @@ const BASE_CSS = `
 
 // ===================== Metas =====================
 const GOAL_ICON = { follow: '➕', gift: '🪙', like: '👍', sub: '✦', share: '↗', chat: '💬' };
+const BAR_H = { fina: 10, normal: 22, gruesa: 34 };
 const goals = {
   tick: true,
   css: BASE_CSS + `
   .w { width: 640px; }
   .g-list { display: grid; gap: 12px; }
   .g-list.row { grid-auto-flow: column; grid-auto-columns: 1fr; }
-  .g { padding: 14px 16px; animation: k-in .5s both; border: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); }
-  .g-head { display: flex; align-items: center; gap: 10px; }
+  .g { --bh: 22px; padding: 14px 16px; animation: k-in .5s both; border: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+  .g.bare { padding: 10px 12px; }
+  .g-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .g-ic { width: 38px; height: 38px; border-radius: calc(12px * var(--r)); display: grid; place-items: center; font-size: 20px; background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .g-head .k-pl { width: 24px; height: 24px; border-radius: 7px; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
   .g-name { font-weight: 800; font-size: 20px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .g-pct { font-weight: 900; font-size: 20px; color: var(--accent); }
-  .g-bar { position: relative; height: 20px; margin-top: 10px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 12%, transparent); overflow: hidden; }
-  .g-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, #fff), var(--accent)); box-shadow: 0 0 16px var(--accent); transition: width 1s cubic-bezier(.2,.9,.3,1); }
+  /* La barra: riel hundido, relleno con degradado y brillo, y una punta que
+     resplandece. Con poco avance igual se ve (ancho mínimo = su alto). */
+  .g-bar { position: relative; height: var(--bh); border-radius: 99px; overflow: hidden;
+    background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(255,255,255,.04)), color-mix(in srgb, var(--ink) 10%, transparent);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,.45), inset 0 -1px 0 rgba(255,255,255,.06), 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .g-fill { position: relative; height: 100%; min-width: var(--bh); border-radius: inherit; overflow: hidden;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 45%, #000) 0%, var(--accent) 70%, color-mix(in srgb, var(--accent) 65%, #fff) 100%);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 70%, transparent), inset 0 -3px 6px rgba(0,0,0,.18);
+    transition: width 1.1s cubic-bezier(.2,.9,.3,1); }
+  .g-fill.zero { min-width: 0; width: 0 !important; }
+  .g-fill::before { content: ''; position: absolute; left: 6px; right: 6px; top: 2px; height: 38%; border-radius: 99px; background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0)); }
+  .g-fill::after { content: ''; position: absolute; top: 0; bottom: 0; right: 0; width: var(--bh); border-radius: 50%; background: radial-gradient(circle at 60% 50%, rgba(255,255,255,.85), rgba(255,255,255,0) 65%); opacity: .55; }
+  .g.shine .g-fill > i { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 0 35%, rgba(255,255,255,.45) 50%, transparent 65% 100%); background-size: 250% 100%; animation: g-shine 2.8s ease-in-out infinite; }
+  @keyframes g-shine { from { background-position: 130% 0; } to { background-position: -30% 0; } }
   .g-foot { display: flex; justify-content: space-between; margin-top: 8px; font-weight: 800; font-size: 17px; }
   .g-foot .k-num { font-size: 20px; } .g-foot small { opacity: .75; font-weight: 700; }
+  /* Píldora: todo dentro de la barra. */
+  body[data-style="pildora"] .g { padding: 6px; border-radius: 99px; }
+  body[data-style="pildora"] .g-bar { --bh: 52px; height: var(--bh); }
+  body[data-style="pildora"] .g-in { position: absolute; inset: 0; display: flex; align-items: center; gap: 10px; padding: 0 18px 0 8px; font-weight: 800; text-shadow: 0 1px 4px rgba(0,0,0,.65); }
+  body[data-style="pildora"] .g-in .g-ic { width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.28); }
+  body[data-style="pildora"] .g-in .g-name { font-size: 19px; }
+  body[data-style="pildora"] .g-in .g-nums { font-size: 19px; white-space: nowrap; } .g-in .g-nums small { opacity: .8; }
+  body[data-style="pildora"] .g-in .g-pct { color: #fff; font-size: 19px; }
+  body[data-theme="minimal"] .g.bare, body[data-style="pildora"][data-theme="minimal"] .g { border-left: 0 !important; padding-left: 0; }
   body[data-style="anillo"] .g, body[data-style="pastel"] .g { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+  body[data-style="anillo"] .g-head, body[data-style="pastel"] .g-head { margin-bottom: 0; }
   .g-dial { position: relative; width: 120px; height: 120px; display: grid; place-items: center; }
   .g-dial .k-ring, .g-pie { position: absolute; inset: 0; }
   .g-pie { border-radius: 50%; background: conic-gradient(var(--accent) var(--p), color-mix(in srgb, var(--ink) 12%, transparent) 0); box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 45%, transparent); }
@@ -82,10 +107,10 @@ const goals = {
   .g-dial .g-pct { position: relative; font-size: 26px; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
   body[data-style="pastel"] .g-dial .g-pct { color: #fff; }
   body[data-style="tarjeta"] .g { text-align: center; padding: 18px; }
-  body[data-style="tarjeta"] .g-head { justify-content: center; }
-  body[data-style="tarjeta"] .g-big { font-size: 46px; margin-top: 6px; }
-  body[data-style="tarjeta"] .g-bar { height: 8px; }
+  body[data-style="tarjeta"] .g-head { justify-content: center; margin-bottom: 0; }
+  body[data-style="tarjeta"] .g-big { font-size: 46px; margin: 6px 0 10px; }
   body[data-style="cifra"] .g { background: transparent !important; border: 0; text-shadow: 0 3px 10px rgba(0,0,0,.8); padding: 4px 0; }
+  body[data-style="cifra"] .g-head { margin-bottom: 0; }
   body[data-style="cifra"] .g-big { font-size: 64px; line-height: 1; }
   body[data-style="cifra"] .g-big small { font-size: .5em; opacity: .8; }
   .g.done { animation: g-done 1.2s ease-in-out 3; }
@@ -97,23 +122,34 @@ const goals = {
     if (!list.length) return S.preview ? '<div class="g surface">Crea una meta en la pestaña «Metas».</div>' : '';
     const show = set.layout === 'one' ? [list[Math.floor(Date.now() / 7000) % list.length]] : list;
     const done = goals.doneId;
+    const bh = BAR_H[set.barSize] || BAR_H.normal;
     return `<div class="g-list ${set.layout === 'row' ? 'row' : ''}">${show.map((g) => {
       const pct = g.target > 0 ? Math.min(100, (g.current / g.target) * 100) : 0;
       const left = Math.max(0, g.target - g.current);
       const icon = set.showIcon ? `<span class="g-ic">${GOAL_ICON[g.type] || '🎯'}</span>` : '';
-      const name = set.showTitle ? `<span class="g-name">${esc(g.title)}</span>` : '<span class="g-name"></span>';
+      const logo = set.showPlatform !== false && g.platform && g.platform !== 'all' ? plat(g.platform) : '';
+      const name = set.showTitle ? `<span class="g-name">${esc(g.title)}</span>` : '';
       const pctT = set.showPercent ? `<span class="g-pct k-num">${Math.floor(pct)}%</span>` : '';
       const nums = `${set.showCurrent ? `<span class="k-num">${cmp(g.current)}</span>` : ''}${set.showTarget ? `<small> / ${cmp(g.target)}</small>` : ''}`;
       const rem = set.showRemaining && left ? `<small>Faltan ${cmp(left)}</small>` : '';
-      const cls = `g surface ${done === g.id ? 'done' : ''}`;
+      const headIn = `${icon}${logo}${name}`;
+      const bare = !headIn && !pctT && !nums && !rem;
+      const cls = `g surface ${done === g.id ? 'done' : ''} ${set.shine !== false ? 'shine' : ''} ${bare ? 'bare' : ''}`;
+      const vars = `--bh:${bh}px;${/^#[0-9a-f]{6}$/i.test(g.color || '') ? `--accent:${g.color};` : ''}`;
+      const bar = `<div class="g-bar"><div class="g-fill ${pct <= 0 ? 'zero' : ''}" style="width:${pct.toFixed(1)}%"><i></i></div>`;
+      if (style === 'pildora') {
+        return `<div class="${cls}" data-key="${esc(g.id)}" style="${vars}">${bar}<div class="g-in">${icon}${logo}${name || '<span class="g-name"></span>'}<span class="g-nums k-num">${nums}</span>${pctT}</div></div></div>`;
+      }
       if (style === 'anillo' || style === 'pastel') {
         const dial = style === 'anillo' ? ring(pct) : `<span class="g-pie" style="--p:${pct.toFixed(1)}%"></span>`;
-        return `<div class="${cls}" data-key="${esc(g.id)}"><div class="g-dial">${dial}${set.showPercent ? `<span class="g-pct k-num">${Math.floor(pct)}%</span>` : ''}</div><div><div class="g-head">${icon}${name}</div><div class="g-foot"><span>${nums}</span>${rem}</div></div></div>`;
+        return `<div class="${cls}" data-key="${esc(g.id)}" style="${vars}"><div class="g-dial">${dial}${pctT}</div><div>${headIn ? `<div class="g-head">${headIn}</div>` : ''}<div class="g-foot"><span>${nums}</span>${rem}</div></div></div>`;
       }
       if (style === 'tarjeta' || style === 'cifra') {
-        return `<div class="${cls}" data-key="${esc(g.id)}"><div class="g-head">${icon}${name}${style === 'cifra' ? pctT : ''}</div><div class="g-big k-num">${set.showCurrent ? cmp(g.current) : ''}${set.showTarget ? `<small> / ${cmp(g.target)}</small>` : ''}</div>${style === 'tarjeta' ? `<div class="g-bar"><div class="g-fill" style="width:${pct.toFixed(1)}%"></div></div><div class="g-foot" style="justify-content:center;gap:12px">${pctT}${rem}</div>` : rem}</div>`;
+        return `<div class="${cls}" data-key="${esc(g.id)}" style="${vars}">${headIn || (style === 'cifra' && pctT) ? `<div class="g-head">${headIn}${style === 'cifra' ? pctT : ''}</div>` : ''}<div class="g-big k-num">${nums}</div>${style === 'tarjeta' ? `${bar}</div><div class="g-foot" style="justify-content:center;gap:12px">${pctT}${rem}</div>` : rem}</div>`;
       }
-      return `<div class="${cls}" data-key="${esc(g.id)}"><div class="g-head">${icon}${name}${pctT}</div><div class="g-bar"><div class="g-fill" style="width:${pct.toFixed(1)}%"></div></div><div class="g-foot"><span>${nums}</span>${rem}</div></div>`;
+      const head = headIn || pctT ? `<div class="g-head">${headIn}${headIn ? '' : '<span class="g-name"></span>'}${pctT}</div>` : '';
+      const foot = nums || rem ? `<div class="g-foot"><span>${nums}</span>${rem}</div>` : '';
+      return `<div class="${cls}" data-key="${esc(g.id)}" style="${vars}">${head}${bar}</div>${foot}</div>`;
     }).join('')}</div>`;
   },
   onGoalDone(g, { set }) {

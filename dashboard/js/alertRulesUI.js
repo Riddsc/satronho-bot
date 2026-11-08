@@ -76,7 +76,33 @@ function updateImportBadge(sum) {
 export function onCatalogChange(sum) {
   updateImportBadge(sum);
   for (const p of Object.keys(catalogs)) delete catalogs[p];
-  loadCatalog('tiktok');
+  loadCatalog('tiktok').then(() => {
+    // Si estás eligiendo stickers, los nuevos aparecen sin cerrar la ventana.
+    if (draft && !$('#ar-modal')?.hidden && ['gift', 'sticker'].includes(draft.trigger)) renderPicker();
+  });
+}
+
+// «Buscar stickers»: pregunta al servidor por los que llegaron a tus directos
+// (y, si estás en LIVE, los que trae tu sala).
+async function importStickers(btn) {
+  const p = draft.platform === 'any' ? 'tiktok' : draft.platform;
+  if (btn) btn.disabled = true;
+  try {
+    const before = (catalogs[p]?.stickers || []).length;
+    const r = await api('POST', `/api/stickers/${p}/import`);
+    delete catalogs[p];
+    await loadCatalog(p);
+    const n = (r.stickers || []).length;
+    const nuevos = Math.max(0, n - before);
+    sayFor('troya', n
+      ? `Tienes <b>${nf.format(n)}</b> sticker${n === 1 ? '' : 's'} guardado${n === 1 ? '' : 's'}${nuevos ? `, <b>${nf.format(nuevos)}</b> nuevo${nuevos === 1 ? '' : 's'}` : ''}. Toca los que quieras para esta alerta.`
+      : r.live ? 'Todavía no ha llegado ningún sticker a este directo. Apenas alguien mande uno, aparece aquí solo.' : 'Aún no hay stickers guardados. Conéctate a tu LIVE: cada sticker que te manden se guarda aquí solo, y este botón vuelve a buscarlos.', 8000, n ? 'ok' : 'warn');
+  } catch (e) {
+    sayFor('troya', esc(e.message), 8000, 'warn');
+  } finally {
+    if (btn) btn.disabled = false;
+    renderPicker();
+  }
 }
 
 // ---------- Lista ----------
@@ -167,7 +193,7 @@ const TIERS = [
 ];
 const giftCard = (g, on, isGift) => `<button type="button" class="vt-cell ${on ? 'on' : ''}" data-pick="${esc(g.id)}" title="${esc(g.nameEn && g.nameEn !== g.name ? `${g.name} · ${g.nameEn}` : g.name)} · ID ${esc(g.id)}">
   <span class="vt-img">${g.image ? `<img src="${esc(imgUrl(g.image))}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('i'),{textContent:'${isGift ? '🎁' : '✨'}'}))">` : `<i>${isGift ? '🎁' : '✨'}</i>`}</span>
-  <b>${esc(g.name || `#${g.id}`)}</b>${isGift ? `<small>🪙 ${nf.format(Number(g.value) || 0)}</small>` : ''}${g.mine ? '<em class="vt-mine" title="De tu cuenta o de tus directos">tuyo</em>' : ''}</button>`;
+  ${isGift ? `<b>${esc(g.name || `#${g.id}`)}</b><small>🪙 ${nf.format(Number(g.value) || 0)}</small>${g.mine ? '<em class="vt-mine" title="De tu cuenta o de tus directos">tuyo</em>' : ''}` : `<b>${esc(g.name || 'Sticker')}</b><small>${g.seen ? `${nf.format(g.seen)} ${g.seen === 1 ? 'vez' : 'veces'}` : 'de tu sala'}</small>`}</button>`;
 
 async function renderPicker() {
   const box = $('#ar-picker');
@@ -182,11 +208,11 @@ async function renderPicker() {
   const match = (g) => !q || `${g.name} ${g.nameEn || ''} ${g.id} ${g.value ?? ''}`.toLowerCase().includes(q);
   const sel = items.filter((g) => chosen.has(String(g.id)));
   const head = `<div class="vt-bar"><div class="mz-search-form"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="ar-pick-q" placeholder="${isGift ? 'Busca por nombre (español o inglés), ID o valor' : 'Busca un sticker'}" value="${esc(pick.q)}" autocomplete="off"></div>
-    ${isGift ? `<div class="seg vt-tiers">${[['all', 'Todos'], ...TIERS.map((t) => [t.id, `${t.icon} ${t.name}`])].map(([id, n]) => `<button type="button" data-tier="${id}" aria-pressed="${pick.price === id}">${n}</button>`).join('')}</div>` : `<label class="switch"><input type="checkbox" id="ar-any-sticker" ${!draft.stickers.length ? 'checked' : ''}><span></span> Cualquier sticker</label>`}</div>
+    ${isGift ? `<div class="seg vt-tiers">${[['all', 'Todos'], ...TIERS.map((t) => [t.id, `${t.icon} ${t.name}`])].map(([id, n]) => `<button type="button" data-tier="${id}" aria-pressed="${pick.price === id}">${n}</button>`).join('')}</div>` : `<button type="button" class="btn small" id="ar-stk-import" title="Trae los stickers que ya llegaron a tus directos">🔄 Buscar stickers <small>${items.length ? nf.format(items.length) : ''}</small></button>`}</div>
     ${sel.length ? `<div class="vt-chosen"><span>Elegidos</span>${sel.map((g) => `<button type="button" class="vt-chip" data-pick="${esc(g.id)}">${g.image ? `<img src="${esc(imgUrl(g.image))}" alt="">` : ''}${esc(g.name)} ✕</button>`).join('')}</div>` : ''}`;
   let body;
   if (!items.length) {
-    body = `<p class="hint vt-empty">${isGift ? 'Kick y Starvios no publican su lista de regalos: los que te manden en tus directos aparecen aquí. Mientras, escribe el nombre abajo.' : 'TikTok no deja descargar la lista de stickers de un canal: cada sticker queda guardado aquí la primera vez que alguien lo manda en tu directo. Mientras, deja «Cualquier sticker».'}</p>`;
+    body = `<p class="hint vt-empty">${isGift ? 'Kick y Starvios no publican su lista de regalos: los que te manden en tus directos aparecen aquí. Mientras, escribe el nombre abajo.' : 'Todavía no hay stickers guardados. TikTok no publica la lista de stickers de un canal: cada uno se guarda aquí solo la primera vez que alguien lo manda en tu directo. Después de tu LIVE, toca «🔄 Buscar stickers».<br><small>¿Quieres que suene con cualquier sticker? Eso ya lo hace la alerta de serie «Sticker», en Alertas.</small>'}</p>`;
   } else if (isGift) {
     const tiers = TIERS.filter((t) => pick.price === 'all' || pick.price === t.id);
     body = tiers.map((t) => {
@@ -216,7 +242,7 @@ function sentence() {
   const what = {
     gift: d.gifts.length ? `mande <b>${esc(list(names(d.gifts, cat.gifts || [])))}</b>` : 'mande <i>(elige un regalo)</i>',
     coins: `mande un regalo de <b>${nf.format(Number(d.min) || 0)}</b> a <b>${d.max ? nf.format(d.max) : 'más'}</b> monedas`,
-    sticker: d.stickers.length ? `mande el sticker <b>${esc(list(names(d.stickers, cat.stickers || [])))}</b>` : 'mande <b>cualquier sticker</b>',
+    sticker: d.stickers.length === 1 ? 'mande <b>el sticker elegido</b>' : d.stickers.length ? `mande <b>uno de los ${d.stickers.length} stickers elegidos</b>` : 'mande <b>el sticker que elijas abajo</b>',
     likesPerson: `llegue a <b>${nf.format(Number(d.every) || 100)}</b> likes (cada vez)`,
     likesTotal: `entre todos sumen <b>${nf.format(Number(d.every) || 1000)}</b> likes más`,
     follow: 'te siga', sub: 'se suscriba', share: 'comparta tu directo', join: 'llegue al directo', superfan: 'se vuelva superfan',
@@ -320,6 +346,7 @@ function validate() {
     d.gifts = [...new Set([...d.gifts, ...names])];
     if (!d.gifts.length) return 'Elige al menos un regalo.';
   }
+  if (d.trigger === 'sticker' && !d.stickers.length) return 'Elige al menos un sticker. Para que suene con cualquiera ya está la alerta de serie «Sticker».';
   if (d.trigger === 'keyword' && !String(d.keyword || '').trim()) return 'Escribe al menos una palabra.';
   if (d.sound === 'file' && !d.file) return 'Sube tu sonido o elige uno de la lista.';
   if (!d.name) d.name = d.trigger === 'gift' ? (d.giftNames[0] || 'Regalo') : TRIG[d.trigger]?.name || 'Alerta';
@@ -332,7 +359,7 @@ function saveDraft() {
     // El error se ve dentro de la ventana (no detrás) y la lleva a lo que falta.
     const h = $('#ar-foot-hint');
     if (h) { h.textContent = `⚠ ${err}`; h.classList.add('ar-err'); setTimeout(() => { h.textContent = 'Lo que no tenga alerta propia suena con la de serie.'; h.classList.remove('ar-err'); }, 5000); }
-    const target = /regalo/.test(err) ? ($('.vt-shelves') || $('#ar-giftnames')) : /palabra/.test(err) ? $('#ar-keyword') : null;
+    const target = /regalo|sticker/.test(err) ? ($('.vt-shelves') || $('#ar-giftnames')) : /palabra/.test(err) ? $('#ar-keyword') : null;
     target?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     target?.classList.add('ar-shake'); setTimeout(() => target?.classList.remove('ar-shake'), 700);
     return toast(err);
@@ -446,6 +473,8 @@ export function initAlertRules(cfg) {
       return renderEditor();
     }
     if (ev.target.closest('#ar-test-prev')) return renderSummary();
+    const stk = ev.target.closest('#ar-stk-import');
+    if (stk) return importStickers(stk);
     const cell = ev.target.closest('[data-pick]');
     if (cell) {
       const key = draft.trigger === 'gift' ? 'gifts' : 'stickers';
@@ -465,7 +494,6 @@ export function initAlertRules(cfg) {
   modal.addEventListener('input', (ev) => { const el = ev.target.closest('[data-d]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') readDraftField(el); });
   modal.addEventListener('change', (ev) => {
     if (ev.target.id === 'ar-up-file') return uploadSound(ev.target.files[0]);
-    if (ev.target.id === 'ar-any-sticker') { if (ev.target.checked) draft.stickers = []; return renderPicker(); }
     const el = ev.target.closest('[data-d]');
     if (el && (el.type === 'checkbox' || el.tagName === 'SELECT' || el.type === 'color')) readDraftField(el);
   });
