@@ -169,6 +169,8 @@ const DEFAULTS = {
       buttons: ['voice', 'skipVoice', 'music', 'musicSkip', 'requests', 'alertsSkip', 'alertsMute', 'podiumReset', 'chat', 'news', 'report'],
       x: null,
       y: null,
+      bg: 92, // flotante: cuánto se ve el fondo (0 = solo los botones)
+      idle: 100, // flotante: opacidad cuando no la usas (vuelve a 100 al pasar el ratón)
     },
   },
   // Overlays de la galería: { id: { kind, name, style, settings, look } }

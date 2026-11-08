@@ -1384,6 +1384,19 @@ kbd { font: 700 .82em var(--font); padding: 3px 8px; border-radius: 6px; backgro
 .qrail.fixed { grid-column: 3; grid-row: 1 / 4; border-left: 1px solid var(--edge); background: color-mix(in srgb, var(--side) 92%, transparent); overflow-y: auto; min-height: 0; }
 .qrail.floating { position: fixed; padding: 8px 6px; border-radius: 18px; border: 1px solid var(--edge); background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(12px); box-shadow: var(--lift), 0 20px 50px rgb(0 0 0 / .5); max-height: calc(100vh - 16px); overflow-y: auto; }
 .qrail.floating.dragging { opacity: .85; cursor: grabbing; }
+/* Transparencia elegida en Tu perfil: --qr-bg (fondo, 0-100) y --qr-idle
+   (opacidad cuando no la usas). Los botones siempre se leen. */
+.qrail.floating { --qr-bg: 92; --qr-idle: 1;
+  background: color-mix(in srgb, var(--panel) calc(var(--qr-bg) * 1%), transparent) !important;
+  border-color: color-mix(in srgb, var(--edge) calc(min(100, var(--qr-bg) * 1.6) * 1%), transparent) !important;
+  backdrop-filter: blur(calc(var(--qr-bg) * .14px));
+  box-shadow: 0 20px 50px rgb(0 0 0 / calc(var(--qr-bg) * .005)) !important;
+  opacity: var(--qr-idle); transition: opacity .3s ease, background .2s; }
+.qrail.floating:hover, .qrail.floating:focus-within, .qrail.floating.dragging { opacity: 1; }
+.qrail.floating.previewing { opacity: var(--qr-idle) !important; }
+.qrail.floating .qr-btn { text-shadow: 0 1px 3px rgb(0 0 0 / calc((1 - var(--qr-bg) / 100) * .8)); }
+.qrail.floating .qr-btn svg { filter: drop-shadow(0 1px 2px rgb(0 0 0 / calc((1 - var(--qr-bg) / 100) * .9))); }
+@media (prefers-reduced-motion: reduce) { .qrail.floating { transition: none; } }
 .qr-grip { cursor: grab; color: var(--muted); font-size: 16px; line-height: 1; padding: 2px 0 6px; user-select: none; touch-action: none; }
 .qr-btn { position: relative; width: 40px; height: 40px; border-radius: 12px; border: 1px solid transparent; background: transparent; color: var(--muted); display: grid; place-items: center; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
 .qr-btn:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--ink); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
@@ -1414,6 +1427,22 @@ kbd { font: 700 .82em var(--font); padding: 3px 8px; border-radius: 6px; backgro
 .pf-item button, .pf-qb button { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--edge); background: var(--well); color: var(--ink); cursor: pointer; }
 .pf-item button:disabled, .pf-qb button:disabled { opacity: .3; cursor: default; }
 .pf-item .switch, .pf-qb .switch { margin: 0; }
+.pf-rlook { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: center; margin-top: 12px; padding: 14px; border-radius: var(--radius-sm); background: var(--panel-2); }
+.pf-rlook.disabled .pf-rlook-ctl label, .pf-rlook.disabled .pf-rlook-prev { opacity: .45; }
+.pf-rlook-ctl { display: grid; gap: 4px; max-width: 520px; }
+.pf-rlook-ctl h4 { margin: 0 0 4px; font-size: .95em; }
+.pf-rlook-ctl .field { margin: 6px 0 0; }
+.pf-rlook-ctl .field span { display: flex; justify-content: space-between; }
+.pf-rlook-ctl .field b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.pf-rlook-ctl .hint { margin: 0; font-size: .8em; }
+.pf-rlook-off { color: var(--accent) !important; margin-top: 6px !important; }
+/* Vista previa: la barra sobre un pedazo de «directo». */
+.pf-rlook-prev { position: relative; height: 150px; border-radius: 12px; overflow: hidden; display: grid; place-items: center; }
+.pf-rlook-scene { position: absolute; inset: 0; background: radial-gradient(circle at 25% 30%, #ff4f8b 0 18%, transparent 19%), radial-gradient(circle at 75% 70%, #5fb8ff 0 22%, transparent 23%), repeating-linear-gradient(45deg, #2a2345 0 12px, #1e1934 12px 24px); }
+.pf-rlook-bar { --qr-bg: 92; --qr-idle: 1; position: relative; display: grid; gap: 7px; padding: 10px 7px; border-radius: 14px; background: color-mix(in srgb, var(--panel) calc(var(--qr-bg) * 1%), transparent); border: 1px solid color-mix(in srgb, var(--edge) calc(min(100, var(--qr-bg) * 1.6) * 1%), transparent); backdrop-filter: blur(calc(var(--qr-bg) * .14px)); opacity: var(--qr-idle); transition: opacity .2s, background .2s; }
+.pf-rlook-bar i { width: 18px; height: 18px; border-radius: 6px; background: var(--ink); opacity: .85; box-shadow: 0 1px 3px rgb(0 0 0 / .5); }
+.pf-rlook-bar i:first-child { background: var(--accent); opacity: 1; }
+@media (max-width: 700px) { .pf-rlook { grid-template-columns: 1fr; } }
 .pf-rail { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 4px 12px; margin-top: 10px; }
 .pf-qb.on { border-color: color-mix(in srgb, var(--accent) 35%, var(--edge)); }
 .pf-qb.on .pf-qic { color: var(--accent); }

@@ -237,6 +237,7 @@ function renderRail() {
     const on = a.on ? a.on() : null;
     return `<button type="button" class="qr-btn ${on === false ? 'off' : on ? 'on' : ''}" data-q="${k}" aria-label="${esc(val(a.name))}" data-tip="${esc(val(a.name))}">${iconSVG(val(a.icon), 19)}${a.badge?.() ? '<i class="qr-dot"></i>' : ''}</button>`;
   }).join('')}<span class="qr-sp"></span><button type="button" class="qr-btn qr-edit" data-q="__mode" data-tip="${mode === 'floating' ? 'Fijarla a la derecha' : 'Hacerla flotante'}" aria-label="${mode === 'floating' ? 'Fijarla a la derecha' : 'Hacerla flotante'}">${iconSVG(mode === 'floating' ? 'dock' : 'move', 17)}</button><button type="button" class="qr-btn qr-edit" data-q="__edit" data-tip="Elegir botones" aria-label="Elegir botones">${iconSVG('gear', 17)}</button><button type="button" class="qr-btn qr-edit qr-hide" data-q="__hide" data-tip="Ocultar la barra (vuelve con la pestañita del borde)" aria-label="Ocultar la barra">✕</button>`;
+  applyRailLook();
   if (mode === 'floating') {
     const x = r.x ?? innerWidth - 80;
     const y = r.y ?? 120;
@@ -247,6 +248,38 @@ function renderRail() {
     el.style.top = '';
   }
 }
+// Transparencia de la flotante: fondo (0-100) y opacidad cuando no la usas.
+const railBg = () => Math.max(0, Math.min(100, Number(rail().bg ?? 92)));
+const railIdle = () => Math.max(20, Math.min(100, Number(rail().idle ?? 100)));
+function applyRailLook() {
+  const el = $('#qrail');
+  if (!el) return;
+  el.style.setProperty('--qr-bg', railBg());
+  el.style.setProperty('--qr-idle', railIdle() / 100);
+  const bar = $('#pf-rlook-bar');
+  if (bar) { bar.style.setProperty('--qr-bg', railBg()); bar.style.setProperty('--qr-idle', railIdle() / 100); }
+}
+function renderRailLook() {
+  const box = $('#pf-rlook');
+  if (!box) return;
+  const floating = (rail().mode || 'fixed') === 'floating';
+  box.classList.toggle('disabled', !floating);
+  for (const id of ['pf-rbg', 'pf-ridle']) $(`#${id}`).disabled = !floating;
+  $('#pf-rbg').value = railBg();
+  $('#pf-ridle').value = railIdle();
+  $('#pf-rbg-val').textContent = railBg() === 0 ? 'invisible' : `${railBg()}%`;
+  $('#pf-ridle-val').textContent = railIdle() === 100 ? 'siempre entera' : `${railIdle()}%`;
+  $('#pf-rlook-off').hidden = floating;
+  applyRailLook();
+}
+let lookTimer = null;
+function setRailLook(patch) {
+  Object.assign(rail(), patch);
+  renderRailLook();
+  clearTimeout(lookTimer);
+  lookTimer = setTimeout(() => saveConfig({ profile: { rail: { bg: railBg(), idle: railIdle() } } }), 250);
+}
+
 function setRailMode(mode) {
   const prev = rail().mode || 'fixed';
   if (mode === 'off' && prev !== 'off') rail().lastMode = prev;
@@ -370,6 +403,7 @@ function renderProfile() {
   renderAccounts();
   renderMenuPrefs();
   renderRailPrefs();
+  renderRailLook();
 }
 
 function initProfile() {
@@ -428,6 +462,11 @@ function initProfile() {
     location.reload();
   });
 
+  $('#pf-rbg').addEventListener('input', (ev) => setRailLook({ bg: Number(ev.target.value) }));
+  $('#pf-ridle').addEventListener('input', (ev) => setRailLook({ idle: Number(ev.target.value) }));
+  // Mientras mueves «Cuando no la usas», la barra muestra cómo queda.
+  $('#pf-ridle').addEventListener('pointerdown', () => $('#qrail')?.classList.add('previewing'));
+  addEventListener('pointerup', () => $('#qrail')?.classList.remove('previewing'));
   $('#pf-rail-mode').addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-rail-mode]');
     if (b) setRailMode(b.dataset.railMode);
