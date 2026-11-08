@@ -529,45 +529,101 @@ function styleHTML() {
 }
 
 // --- Metas ---
-// De dónde cuenta cada meta: todas las plataformas juntas o solo una. Así
-// puedes tener «Seguidores de TikTok» y «Seguidores de Kick» por separado.
+// Cada meta: una fila corta (nombre, barra, números) y «Ajustar», que abre
+// sus opciones ordenadas por pregunta: qué cuenta, de dónde, cómo y cuándo
+// vuelve a empezar. Así la lista no se llena de selectores.
 const GOAL_PLATS = [['all', 'Todas'], ['tiktok', 'TikTok'], ['kick', 'Kick'], ['starvios', 'Starvios'], ['twitch', 'Twitch']];
-const GOAL_UNIT = { follow: 'seguidores', sub: 'suscripciones', gift: 'monedas', like: 'likes', share: 'compartidos' };
-const platSelect = (val, attr) => `<select ${attr} aria-label="De qué plataforma cuenta">${GOAL_PLATS.map(([v, n]) => `<option value="${v}" ${v === (val || 'all') ? 'selected' : ''}>${v === 'all' ? '🌐 ' : ''}${n}</option>`).join('')}</select>`;
+const READABLE = ['tiktok', 'kick', 'starvios'];
+const SOURCE_INFO = {
+  events: ['Lo que pase en el directo', 'Suma cada seguidor nuevo mientras la app está conectada.'],
+  account: ['Total de tu cuenta', 'Tus seguidores de verdad, por ejemplo 159 de 200. Se lee solo.'],
+  gained: ['Nuevos en el periodo', 'Cuántos seguidores ganaste desde que empezó el periodo, aunque la app haya estado cerrada.'],
+};
+const PERIOD_INFO = [['none', 'Nunca'], ['stream', 'Cada directo'], ['day', 'Cada día'], ['week', 'Cada semana'], ['month', 'Cada mes']];
+const SWATCHES = ['#ffb23e', '#ff4f8b', '#9b8cff', '#5fb8ff', '#2dd4bf', '#74d14c', '#ff7a59', '#ffffff'];
+const goalOpen = new Set(); // metas con «Ajustar» abierto
+let accountStats = {};
+const platLogo = (p, cls = 'ove-gpl') => (p === 'all' ? `<span class="${cls} all" aria-hidden="true">🌐</span>` : `<img class="${cls}" src="/img/platforms/${p}.png" alt="">`);
+const platsOfGoal = (g) => (g.platform !== 'all' ? [g.platform] : g.platforms?.length ? g.platforms : GOAL_PLATS.slice(1).map(([p]) => p));
+const ago = (ts) => { const m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : `hace ${Math.round(m / 60)} h`; };
+
+function goalSummary(g) {
+  const where = g.platform === 'all' ? (g.platforms?.length ? g.platforms.map((p) => PLAT_NAMES[p]).join(' + ') : 'Todas las plataformas') : PLAT_NAMES[g.platform];
+  const how = g.type === 'follow' ? SOURCE_INFO[g.source || 'events'][0] : TYPE_NAMES[g.type];
+  const when = g.source === 'account' ? '' : { none: '', stream: 'se reinicia cada directo', day: 'se reinicia cada día', week: `se reinicia cada semana (desde el ${g.weekStart === 0 ? 'domingo' : 'lunes'})`, month: 'se reinicia cada mes' }[g.period || 'none'];
+  return [g.type === 'follow' ? `Seguidores: ${how.toLowerCase()}` : how, where, when].filter(Boolean).join(' · ');
+}
+
+// Lo que se sabe de cada cuenta que usa esta meta.
+function accountLines(g) {
+  if (g.type !== 'follow' || g.source === 'events') return '';
+  const lines = platsOfGoal(g).filter((p) => READABLE.includes(p)).map((p) => {
+    const a = accountStats[p] || {};
+    const val = Number.isFinite(a.followers) ? `<b>${new Intl.NumberFormat('es-CO').format(a.followers)}</b> seguidores <small>${ago(a.ts)}</small>`
+      : !a.channel ? '<span class="ove-acc-warn">Pon tu canal en Conexiones</span>'
+      : `<span class="ove-acc-warn">${esc(a.error || (p === 'tiktok' ? 'Se lee al conectarte a tu LIVE' : 'Leyendo…'))}</span>`;
+    return `<li>${platLogo(p)}<span>${val}</span></li>`;
+  }).join('');
+  const twitch = platsOfGoal(g).includes('twitch') ? '<li class="ove-acc-note">Twitch no da su total: no se suma.</li>' : '';
+  return `<div class="ove-acc"><ul>${lines}${twitch}</ul><button type="button" class="btn small ghost" data-gread>Leer ahora</button></div>`;
+}
+
+function goalDrawer(g) {
+  const p = g.platform || 'all';
+  const isFollow = g.type === 'follow';
+  const src = isFollow ? g.source || 'events' : 'events';
+  const chosen = new Set(g.platforms?.length ? g.platforms : GOAL_PLATS.slice(1).map(([x]) => x));
+  const row = (label, body, hint = '') => `<div class="ove-gq"><div class="ove-gq-l">${label}</div><div class="ove-gq-r">${body}${hint ? `<p class="ove-gq-hint">${hint}</p>` : ''}</div></div>`;
+  return `<div class="ove-gdrawer">
+    ${row('Qué cuenta', `<div class="seg">${Object.entries(TYPE_NAMES).map(([v, n]) => `<button type="button" data-gset="type" data-v="${v}" aria-pressed="${g.type === v}">${n}</button>`).join('')}</div>`)}
+    ${row('De dónde', `<div class="ove-gplats">${GOAL_PLATS.map(([v, n]) => `<button type="button" class="ove-gplat" data-gset="platform" data-v="${v}" aria-pressed="${p === v}">${platLogo(v, 'ove-gpl sm')}${n}</button>`).join('')}</div>
+      ${p === 'all' ? `<div class="ove-gsum"><span>Sumar</span>${GOAL_PLATS.slice(1).map(([v, n]) => `<label class="chip-check"><input type="checkbox" data-gsum="${v}" ${chosen.has(v) ? 'checked' : ''}><span>${n}</span></label>`).join('')}</div>` : ''}`)}
+    ${isFollow ? row('Cómo cuenta', `<div class="ove-gsrc">${Object.entries(SOURCE_INFO).map(([v, [n, d]]) => `<button type="button" data-gset="source" data-v="${v}" aria-pressed="${src === v}"><b>${n}</b><small>${d}</small></button>`).join('')}</div>`) : ''}
+    ${src === 'account' ? '' : row('Vuelve a empezar', `<div class="seg">${PERIOD_INFO.map(([v, n]) => `<button type="button" data-gset="period" data-v="${v}" aria-pressed="${(g.period || 'none') === v}">${n}</button>`).join('')}</div>
+      ${g.period === 'week' ? `<div class="ove-gweek"><span>La semana empieza el</span><div class="seg">${[[1, 'Lunes'], [0, 'Domingo']].map(([v, n]) => `<button type="button" data-gset="weekStart" data-v="${v}" aria-pressed="${(g.weekStart === 0 ? 0 : 1) === v}">${n}</button>`).join('')}</div></div>` : ''}`,
+      g.period === 'stream' ? 'Con TikTok y Kick empieza sola cuando sales en vivo. En Starvios, usa ↺ al empezar.' : g.period && g.period !== 'none' ? 'Usa la hora de tu PC. ↺ la reinicia cuando quieras.' : '')}
+    ${row('Color', `<div class="ove-gswatches"><button type="button" class="ove-gsw theme" data-gset="color" data-v="" aria-pressed="${!g.color}" title="El color del tema">Tema</button>${SWATCHES.map((c) => `<button type="button" class="ove-gsw" data-gset="color" data-v="${c}" aria-pressed="${g.color === c}" style="--c:${c}" title="${c}"></button>`).join('')}<label class="ove-gsw custom" title="Otro color"><input type="color" data-gcolor value="${esc(g.color || '#ffb23e')}">＋</label></div>`)}
+    ${accountLines(g)}
+  </div>`;
+}
+
 function goalsHTML() {
   const hidden = editing.w.settings.hidden || [];
   const rows = goals.map((g) => {
     const pct = g.target > 0 ? Math.min(100, (g.current / g.target) * 100) : 0;
     const off = hidden.includes(g.id);
+    const open = goalOpen.has(g.id);
     const p = g.platform || 'all';
-    return `<div class="ove-goal ${off ? 'off' : ''}" data-goal="${esc(g.id)}" style="${g.color ? `--gc:${esc(g.color)}` : ''}">
+    return `<div class="ove-goal ${off ? 'off' : ''} ${open ? 'open' : ''}" data-goal="${esc(g.id)}" style="${g.color ? `--gc:${esc(g.color)}` : ''}">
       <div class="ove-grow">
-        <button type="button" class="ove-eye" data-geye title="${off ? 'Mostrar en este overlay' : 'Ocultar en este overlay'}">${off ? '◌' : '◉'}</button>
-        ${p !== 'all' ? `<img class="ove-gpl" src="/img/platforms/${p}.png" alt="">` : '<span class="ove-gpl all">🌐</span>'}
-        <div class="ove-gmain"><input class="ove-gtitle" data-gtitle value="${esc(g.title)}" aria-label="Nombre de la meta"><small>${TYPE_NAMES[g.type] || g.type} · ${p === 'all' ? 'todas las plataformas' : `solo ${PLAT_NAMES[p] || p}`}</small></div>
-        ${platSelect(p, 'data-gplat')}
-        <label class="ove-gcolor" title="Color de esta barra (vacío = el del tema)"><input type="color" data-gcolor value="${esc(g.color || '#ffb23e')}"><span>${g.color ? '' : 'Tema'}</span></label>
-        <div class="ove-gact"><button type="button" class="btn small ghost" data-greset title="Volver a cero">↺</button><button type="button" class="btn small ghost danger" data-gdel title="Eliminar">✕</button></div>
+        <button type="button" class="ove-eye" data-geye title="${off ? 'Mostrar en este overlay' : 'Ocultar en este overlay'}" aria-label="${off ? 'Mostrar en este overlay' : 'Ocultar en este overlay'}">${off ? '◌' : '◉'}</button>
+        ${platLogo(p)}
+        <div class="ove-gmain"><input class="ove-gtitle" data-gtitle value="${esc(g.title)}" aria-label="Nombre de la meta"><small>${esc(goalSummary(g))}</small></div>
+        <b class="ove-gpct">${Math.floor(pct)}%</b>
+        <div class="ove-gact">
+          <button type="button" class="btn small ${open ? 'primary' : 'ghost'} ove-gtoggle" data-gopen aria-expanded="${open}">⚙ Ajustar</button>
+          <button type="button" class="btn small ghost" data-greset title="Empezar de nuevo" aria-label="Empezar de nuevo">↺</button>
+          <button type="button" class="btn small ghost danger" data-gdel title="Eliminar" aria-label="Eliminar">✕</button>
+        </div>
       </div>
       <div class="ove-grow2">
         <div class="ove-gbar"><i style="width:${pct.toFixed(1)}%"></i></div>
         <div class="ove-gnums">
-          <button type="button" class="btn small ghost" data-gstep="-1" title="Restar 1">−</button>
-          <label class="ove-gnum" title="Lo que llevas: escríbelo a mano"><small>Llevas</small><input type="number" min="0" value="${g.current}" data-gcurrent aria-label="Progreso actual"></label>
-          <button type="button" class="btn small ghost" data-gstep="1" title="Sumar 1">+</button>
+          <button type="button" class="btn small ghost" data-gstep="-1" aria-label="Restar 1">−</button>
+          <label class="ove-gnum" title="Escribe cuánto llevas"><small>Llevas</small><input type="number" min="0" value="${g.current}" data-gcurrent></label>
+          <button type="button" class="btn small ghost" data-gstep="1" aria-label="Sumar 1">+</button>
           <span class="ove-gof">de</span>
-          <label class="ove-gnum" title="El objetivo"><small>Meta</small><input type="number" min="1" value="${g.target}" data-gtarget aria-label="Objetivo"></label>
-          <b class="ove-gpct">${Math.floor(pct)}%</b>
+          <label class="ove-gnum" title="El objetivo"><small>Meta</small><input type="number" min="1" value="${g.target}" data-gtarget></label>
         </div>
-      </div></div>`;
+      </div>
+      ${open ? goalDrawer(g) : ''}</div>`;
   }).join('');
-  return `<p class="hint">El ojo decide si esa meta sale en <b>este</b> overlay. Los números suben solos con el directo, y puedes escribir a mano lo que llevas. Elige de qué plataforma cuenta cada meta para tener barras separadas (por ejemplo, seguidores de TikTok y de Kick).</p>
+  return `<p class="hint">El ojo decide si la meta sale en <b>este</b> overlay. En <b>⚙ Ajustar</b> eliges de dónde cuenta, si lee el total de tu cuenta y cuándo vuelve a empezar.</p>
     <div class="ove-goals">${rows || '<p class="hint">Aún no tienes metas. Crea la primera aquí abajo.</p>'}</div>
     <form class="ove-newgoal" id="ove-newgoal">
       <label class="field"><span>Nombre</span><input name="title" placeholder="Ej.: Seguidores de Kick" required maxlength="40"></label>
       <label class="field"><span>Qué cuenta</span><select name="type">${Object.entries(TYPE_NAMES).map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select></label>
-      <label class="field"><span>De dónde</span>${platSelect('all', 'name="platform"')}</label>
-      <label class="field"><span>Ya llevas</span><input name="current" type="number" min="0" value="0"></label>
+      <label class="field"><span>De dónde</span><select name="platform">${GOAL_PLATS.map(([v, n]) => `<option value="${v}">${n}</option>`).join('')}</select></label>
       <label class="field"><span>Meta</span><input name="target" type="number" min="1" value="100"></label>
       <button class="btn primary">Crear meta</button></form>`;
 }
@@ -757,8 +813,24 @@ async function onEditorClick(ev) {
       const g = goals.find((x) => x.id === gid);
       const patch = (body) => api('PATCH', `/api/goals/${encodeURIComponent(gid)}`, body);
       if (b.dataset.geye !== undefined) { const h = new Set(s.hidden || []); if (h.has(gid)) h.delete(gid); else h.add(gid); s.hidden = [...h]; return commit({ redraw: true }); }
+      if (b.dataset.gopen !== undefined) { if (goalOpen.has(gid)) goalOpen.delete(gid); else goalOpen.add(gid); return renderPanel(); }
+      if (b.dataset.gset) {
+        const k = b.dataset.gset;
+        const v = k === 'weekStart' ? Number(b.dataset.v) : b.dataset.v;
+        const body = { [k]: v };
+        if (k === 'type') body.countBy = v === 'gift' || v === 'like' ? 'amount' : 'events';
+        if (k === 'source' && v === 'account') body.period = 'none';
+        if (k === 'platform' && v !== 'all') body.platforms = [];
+        await patch(body);
+        if (k === 'source' && v !== 'events') api('POST', '/api/account-stats/refresh').catch(() => {});
+        return;
+      }
+      if (b.dataset.gread !== undefined) { b.disabled = true; try { const r = await api('POST', '/api/account-stats/refresh'); setAccountStats(r.stats); } finally { b.disabled = false; } return; }
       if (b.dataset.gstep) await patch({ current: Math.max(0, g.current + Number(b.dataset.gstep)) });
-      if (b.dataset.greset !== undefined) await patch({ current: 0 });
+      if (b.dataset.greset !== undefined) {
+        await patch({ reset: true });
+        guideToast('juana', g.source === 'account' ? 'Esta meta muestra el total de tu cuenta: se vuelve a leer, no empieza en cero.' : 'La meta empezó de nuevo.');
+      }
       if (b.dataset.gdel !== undefined && confirm(`¿Eliminar la meta «${g.title}»?`)) await api('DELETE', `/api/goals/${encodeURIComponent(gid)}`);
       return;
     }
@@ -812,12 +884,16 @@ function onEditorChange(ev) {
     return commit();
   }
   const gRow = el.closest('[data-goal]');
-  if (gRow && (el.dataset.gtitle !== undefined || el.dataset.gtarget !== undefined || el.dataset.gcurrent !== undefined || el.dataset.gplat !== undefined || el.dataset.gcolor !== undefined)) {
+  if (gRow && (el.dataset.gtitle !== undefined || el.dataset.gtarget !== undefined || el.dataset.gcurrent !== undefined || el.dataset.gcolor !== undefined || el.dataset.gsum !== undefined)) {
     const gid = gRow.dataset.goal;
+    if (el.dataset.gsum !== undefined) {
+      const picked = [...gRow.querySelectorAll('[data-gsum]')].filter((x) => x.checked).map((x) => x.dataset.gsum);
+      if (!picked.length) { el.checked = true; return toast('Deja al menos una plataforma'); }
+      return api('PATCH', `/api/goals/${encodeURIComponent(gid)}`, { platforms: picked.length === GOAL_PLATS.length - 1 ? [] : picked }).catch((e) => toast(e.message));
+    }
     const body = el.dataset.gtitle !== undefined ? { title: el.value.trim() || 'Meta' }
       : el.dataset.gtarget !== undefined ? { target: Math.max(1, Number(el.value) || 1) }
       : el.dataset.gcurrent !== undefined ? { current: Math.max(0, Number(el.value) || 0) }
-      : el.dataset.gplat !== undefined ? { platform: el.value }
       : { color: el.value };
     return api('PATCH', `/api/goals/${encodeURIComponent(gid)}`, body).catch((e) => toast(e.message));
   }
@@ -837,8 +913,10 @@ async function onEditorSubmit(ev) {
   const f = Object.fromEntries(new FormData(ev.target));
   try {
     if (ev.target.id === 'ove-newgoal') {
-      await api('POST', '/api/goals', { title: f.title, type: f.type, target: Number(f.target) || 10, current: Number(f.current) || 0, platform: f.platform || 'all', countBy: f.type === 'gift' || f.type === 'like' ? 'amount' : 'events' });
-      guideToast('juana', f.platform && f.platform !== 'all' ? `Meta creada: solo cuenta lo de ${PLAT_NAMES[f.platform]}. Ya sale en este overlay.` : 'Meta creada. Ya sale en este overlay.');
+      const r = await api('POST', '/api/goals', { title: f.title, type: f.type, target: Number(f.target) || 10, platform: f.platform || 'all', countBy: f.type === 'gift' || f.type === 'like' ? 'amount' : 'events' });
+      // Recién creada: abre sus ajustes para terminar de elegir cómo cuenta.
+      if (r.goal?.id) { goalOpen.add(r.goal.id); renderPanel(); }
+      guideToast('juana', 'Meta creada. En «⚙ Ajustar» eliges cómo cuenta y cuándo vuelve a empezar.');
     }
     if (ev.target.id === 'ove-cdset') await api('POST', '/api/live/countdown', { action: 'set', value: (Number(f.h) || 0) * 3600 + (Number(f.m) || 0) * 60 });
   } catch (e) {
@@ -891,6 +969,10 @@ export function setOverlayGoals(list) {
     return;
   }
   renderPanel();
+}
+export function setAccountStats(s) {
+  accountStats = s || {};
+  if (editing?.tab === 'metas' && goalOpen.size && !$('#ove-panel')?.contains(document.activeElement)) renderPanel();
 }
 export function setOverlayLive(p) {
   live = p || {};

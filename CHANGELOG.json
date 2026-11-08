@@ -1,5 +1,40 @@
 [
   {
+    "version": "0.25.0",
+    "date": "2026-11-07",
+    "title": "Metas que leen tu cuenta y se reinician solas",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Metas de seguidores que leen tu cuenta: elige «Total de tu cuenta» (por ejemplo 159 de 200) y el número se lee solo. Kick lo lee de la ficha de tu canal aunque no estés en vivo; TikTok, al conectarte a tu LIVE; Starvios, de tu perfil si lo publica. Se vuelve a leer cada 5 minutos y cada seguidor nuevo suma 1 al instante."
+      },
+      {
+        "type": "nuevo",
+        "text": "«Nuevos en el periodo»: cuenta los seguidores que ganaste desde que empezó el día, la semana, el mes o el directo, comparando con tu total. Cuenta bien aunque la app haya estado cerrada."
+      },
+      {
+        "type": "nuevo",
+        "text": "Metas que vuelven a empezar solas: nunca, cada directo, cada día, cada semana (desde el lunes o el domingo, tú eliges) o cada mes, con la hora de tu PC. Sirve para seguidores, monedas, likes, suscripciones y compartidos. ↺ la reinicia cuando quieras."
+      },
+      {
+        "type": "nuevo",
+        "text": "Metas de «Todas» las plataformas: elige cuáles se suman (por ejemplo, solo TikTok y Kick)."
+      },
+      {
+        "type": "mejora",
+        "text": "Editor de metas más despejado: cada meta muestra su nombre, un resumen de cómo cuenta, la barra y los números. Todo lo demás está en «⚙ Ajustar», ordenado por pregunta: qué cuenta, de dónde, cómo cuenta, cuándo vuelve a empezar y color. Al crear una meta se abren sus ajustes."
+      },
+      {
+        "type": "mejora",
+        "text": "En las metas que leen tu cuenta ves el total de cada plataforma, cuándo se leyó y un botón «Leer ahora». Si una plataforma no da el número, te dice por qué."
+      },
+      {
+        "type": "mejora",
+        "text": "Kick: si la app lee que empezaste un directo, las metas «Cada directo» empiezan de nuevo solas."
+      }
+    ]
+  },
+  {
     "version": "0.24.0",
     "date": "2026-11-07",
     "title": "Stickers de TikTok que sí llegan y metas por plataforma",

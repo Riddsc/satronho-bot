@@ -109,7 +109,7 @@ async function loadGifts(c, onGifts) {
   }
 }
 
-function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGifts = () => {}, onStickers = () => {}, diagFile = '' }) {
+function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGifts = () => {}, onStickers = () => {}, onFollowers = () => {}, diagFile = '' }) {
   const base = createConnectorBase({ platform: 'tiktok', bus, onStatus });
   let conn = null;
   let hostId = ''; // id de tu cuenta de TikTok (dueña del LIVE)
@@ -294,6 +294,7 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
       hostId = String(room.owner?.id_str || room.owner_user_id || room.data?.owner?.id_str || '');
       base.resetBackoff();
       base.status('connected');
+      { const n = followersIn(room); if (n != null) onFollowers(n); }
       // Los stickers que la sala ya trae (los de tu equipo o suscripción).
       try { const s = [...findEmotes(room).values()]; if (s.length) onStickers(s); } catch { /* sin datos */ }
       // Catálogo de regalos para «Alertas propias», sin frenar la conexión:
@@ -334,6 +335,21 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
     return normalizeGifts(res?.data?.gifts || res?.data || []);
   }
 
+  // Tu total de seguidores: viene en los datos de la sala (solo en LIVE).
+  function followersIn(room) {
+    const owner = room?.owner || room?.data?.owner || {};
+    const n = Number(owner.follow_info?.follower_count ?? owner.followInfo?.followerCount ?? owner.stats?.followerCount);
+    return Number.isFinite(n) && n >= 0 ? n : null;
+  }
+  async function followers() {
+    if (!conn) throw new Error('Se lee al conectarte a tu LIVE');
+    let room = conn.roomInfo || {};
+    try { room = (await conn.fetchRoomInfo?.()) || room; } catch { /* nos quedamos con la que hay */ }
+    const n = followersIn(room);
+    if (n == null) throw new Error('TikTok no mandó el número en esta sala');
+    return n;
+  }
+
   // «Buscar stickers»: vuelve a leer la sala si estás conectado.
   async function scanStickers() {
     if (!conn) return [];
@@ -367,7 +383,7 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
     base.status('disconnected');
   }
 
-  return { connect, disconnect, fetchGifts, scanStickers, diagnostics: () => diag };
+  return { connect, disconnect, fetchGifts, scanStickers, followers, diagnostics: () => diag };
 }
 
 module.exports = { createTiktokConnector };

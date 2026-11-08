@@ -274,7 +274,41 @@ function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch, logFil
     base.status('disconnected');
   }
 
-  return { connect, disconnect };
+  // Tu total de seguidores. Starvios no publica cómo lo guarda: primero se
+  // busca en tu perfil público (followers_count o parecido) y, si no está,
+  // se cuentan las filas de la tabla de seguidores más probable. La forma
+  // que funcione se recuerda; lo que no, queda anotado en el registro.
+  let followWay = null;
+  async function countRows(table, column, id) {
+    const u = new URL(`${config.url}/rest/v1/${table}`);
+    u.searchParams.set('select', column);
+    u.searchParams.set(column, `eq.${id}`);
+    const res = await fetchFn(u.toString(), { headers: { apikey: config.key, Prefer: 'count=exact', Range: '0-0' }, signal: AbortSignal.timeout(10000) });
+    if (!res.ok && res.status !== 206) return null;
+    const total = Number(String(res.headers.get('content-range') || '').split('/')[1]);
+    return Number.isFinite(total) ? total : null;
+  }
+  async function followers(channel) {
+    config ||= await discoverConfig(fetchFn);
+    const rows = await rest('profiles', { username: `eq.${cleanChannel(channel)}`, select: '*', limit: 1 });
+    const me = rows[0];
+    if (!me) throw new Error(`No encontré el canal «${channel}» en Starvios`);
+    const key = Object.keys(me).find((k) => /follow/i.test(k) && !/following|seguidos/i.test(k) && Number.isFinite(Number(me[k])) && me[k] !== null && me[k] !== '');
+    if (key) return Number(me[key]);
+    if (followWay) { const n = await countRows(followWay.table, followWay.column, me.id); if (n != null) return n; }
+    const tries = [['follows', 'following_id'], ['follows', 'followed_id'], ['follows', 'streamer_id'], ['follows', 'channel_id'], ['followers', 'channel_id'], ['followers', 'user_id'], ['channel_followers', 'channel_id'], ['user_follows', 'following_id']];
+    for (const [table, column] of tries) {
+      try {
+        const n = await countRows(table, column, me.id);
+        // 0 puede ser «no te dejo ver la tabla»: solo vale si hay alguno.
+        if (n) { followWay = { table, column }; return n; }
+      } catch { /* la siguiente */ }
+    }
+    logUnknown({ followersProbe: true, profileKeys: Object.keys(me) });
+    throw new Error('Starvios no publica tu número de seguidores');
+  }
+
+  return { connect, disconnect, followers };
 }
 
 module.exports = { createStarviosConnector, discoverConfig };

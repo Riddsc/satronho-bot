@@ -225,7 +225,14 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
     base.status('disconnected');
   }
 
-  return { connect, disconnect };
+  // Tu total de seguidores y si estás en directo (ficha pública del canal).
+  async function channelStats(slug) {
+    const data = await getJson(fetchFn, `https://kick.com/api/v2/channels/${encodeURIComponent(cleanChannel(slug))}`);
+    const n = Number(data?.followers_count ?? data?.followersCount ?? data?.followers);
+    return { followers: Number.isFinite(n) ? n : null, live: Boolean(data?.livestream?.is_live ?? data?.livestream) };
+  }
+
+  return { connect, disconnect, channelStats };
 }
 
 module.exports = { createKickConnector };
