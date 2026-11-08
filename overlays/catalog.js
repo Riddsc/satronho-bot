@@ -30,12 +30,15 @@ export const KINDS = {
   goals: {
     cat: 'metas', icon: '🎯', name: 'Metas', size: [700, 360], extraTab: 'goals',
     desc: 'Seguidores, monedas o likes que se llenan solos y celebran al cumplirse.',
-    styles: [['barra', 'Barra'], ['anillo', 'Anillo'], ['pastel', 'Pastel'], ['tarjeta', 'Tarjeta'], ['cifra', 'Solo la cifra']],
-    defaults: { layout: 'stack', showTitle: true, showIcon: true, showCurrent: true, showTarget: true, showPercent: true, showRemaining: false, celebrate: true, hidden: [] },
+    styles: [['barra', 'Barra'], ['pildora', 'Píldora'], ['anillo', 'Anillo'], ['pastel', 'Pastel'], ['tarjeta', 'Tarjeta'], ['cifra', 'Solo la cifra']],
+    defaults: { layout: 'stack', barSize: 'normal', shine: true, showTitle: true, showIcon: true, showPlatform: true, showCurrent: true, showTarget: true, showPercent: true, showRemaining: false, celebrate: true, hidden: [] },
     fields: [
       f('layout', 'Cómo se acomodan', 'seg', [['stack', 'Una debajo de otra'], ['row', 'En fila'], ['one', 'De a una (rotan)']]),
+      f('barSize', 'Grosor de la barra', 'seg', [['fina', 'Fina'], ['normal', 'Normal'], ['gruesa', 'Gruesa']]),
+      f('shine', 'Brillo que recorre la barra', 'toggle'),
       f('showTitle', 'Nombre de la meta', 'toggle'),
       f('showIcon', 'Ícono', 'toggle'),
+      f('showPlatform', 'Logo de la plataforma (si la meta es de una sola)', 'toggle'),
       f('showCurrent', 'Lo que llevas', 'toggle'),
       f('showTarget', 'El objetivo', 'toggle'),
       f('showPercent', 'Porcentaje', 'toggle'),

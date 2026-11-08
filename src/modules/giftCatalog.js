@@ -87,6 +87,7 @@ function createGiftCatalog({ dataDir, broadcast = () => {}, fetchFn = fetch }) {
     const all = new Map();
     if (kind === 'gifts' && platform === 'tiktok') for (const g of BUILTIN) all.set(g.id, { ...g, builtin: true });
     for (const g of Object.values(mine)) all.set(g.id, { ...(all.get(g.id) || {}), ...g, builtin: false, mine: true });
+    if (kind === 'stickers') return [...all.values()].sort((a, b) => (b.seen || 0) - (a.seen || 0));
     return [...all.values()].sort((a, b) => (a.value || 0) - (b.value || 0) || String(a.name).localeCompare(String(b.name)));
   }
   function summary() {

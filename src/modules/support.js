@@ -53,7 +53,7 @@ const KINDS = {
   idea: { title: '💡 Tengo una idea', color: 0xffb23e },
 };
 
-function createSupport({ fetch: fetchFn = fetch, logbook, appInfo = {}, getStatus = () => ({}), webhook = builtinWebhook() }) {
+function createSupport({ fetch: fetchFn = fetch, logbook, appInfo = {}, getStatus = () => ({}), getExtra = () => [], webhook = builtinWebhook() }) {
   let lastSent = 0;
   let sentToday = { day: '', n: 0 };
 
@@ -71,6 +71,7 @@ function createSupport({ fetch: fetchFn = fetch, logbook, appInfo = {}, getStatu
       'Plataformas:',
       plats,
       '',
+      ...(() => { try { const x = getExtra() || []; return x.length ? [...x, ''] : []; } catch { return []; } })(),
       'Últimos errores:',
       ...(logbook?.recent(60) || []),
     ].join('\n');
