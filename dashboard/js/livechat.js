@@ -5,10 +5,14 @@
 //   - Acciones al pasar el mouse: leer ahora, silenciar o darle voz propia.
 //   - Columna de regalos con el total por moneda.
 //   - Panel de ajustes: plataformas, ruido y regalos (se recuerda en este PC).
+//   - Emotes de Kick y Twitch como imagen, canjes de la tienda de Kick y
+//     «📺 En pantalla» para mostrar un mensaje en el overlay.
+// La ventana aparte (popout-chat.html) lee estos mismos ajustes.
 
 import { $, $$, api, esc, toast, timeOf, PLATFORM_NAMES } from './util.js';
 import { avatarHtml, upsertSpecial, specialFor } from './voice.js';
 import { sayFor } from './guides.js';
+import { messageHtml, onlyEmotes } from './emotes.js';
 
 const PLATS = ['tiktok', 'kick', 'twitch', 'starvios'];
 let config = null; // la configuración de la app (palabras prohibidas, tus canales)
@@ -24,6 +28,8 @@ const DEFAULTS = {
   showEvents: true,
   showStickers: true,
   showJoins: false,
+  showRewards: true,
+  emotes: true,
   giftsInline: false,
   giftsColumn: true,
   minGift: 0,
@@ -89,6 +95,7 @@ function describe(e) {
     case 'sticker': return 'mandó un sticker';
     case 'join': return 'llegó al directo';
     case 'superfan': return 'ahora es superfan ⭐';
+    case 'reward': return `canjeó <b class="lc-reward" ${/^#[0-9a-f]{3,8}$/i.test(x.color || '') ? `style="--rw:${x.color}"` : ''}>${esc(x.rewardTitle || 'una recompensa')}</b>${e.amount ? ` <small class="lc-pts">${Number(e.amount).toLocaleString('es-CO')} pts</small>` : ''}${e.message ? `<span class="lc-rwmsg">«${messageHtml(e, { emotes: prefs.emotes, transform: censor })}»</span>` : ''}`;
     case 'live-start': return '· empezó tu directo';
     case 'live-end': return '· terminó tu directo';
     default: return '';
@@ -146,8 +153,9 @@ function nodeFor(e) {
   if (e.type === 'chat') {
     li.innerHTML = `<span class="lc-avw">${avatarHtml(e.user?.name, e.user?.avatar, color)}${LOGO(e.platform)}</span>
       <div class="lc-body"><div class="lc-meta">${badgesHtml(e)}<b class="lc-name" ${color ? `style="color:${esc(color)}"` : ''}>${name}</b>${sp?.voice || sp?.spokenName ? '<i class="bd voz" title="Tiene voz propia">🎙</i>' : ''}<time>${timeOf(e.ts)}</time>${e.test ? '<small class="lc-test">prueba</small>' : ''}${tts}</div>
-      <p class="lc-text">${esc(censor(e.message || ''))}</p></div>
+      <p class="lc-text${prefs.emotes && onlyEmotes(e) ? ' only-emotes' : ''}">${messageHtml(e, { emotes: prefs.emotes, transform: censor })}</p></div>
       <div class="lc-act" role="group" aria-label="Acciones">
+        <button type="button" data-lc="spot" title="Mostrar en pantalla (overlay «Mensaje en pantalla»)">📺</button>
         <button type="button" data-lc="read" title="Leer ahora">🔊</button>
         <button type="button" data-lc="voice" title="Darle voz propia">🎙</button>
         <button type="button" data-lc="mute" title="${sp?.action === 'mute' ? 'Devolverle la voz' : 'Silenciar su voz'}">${sp?.action === 'mute' ? '🔈' : '🔇'}</button>
@@ -155,7 +163,7 @@ function nodeFor(e) {
   } else {
     const img = (e.type === 'gift' || e.type === 'sticker') && e.extra?.image ? `<img class="lc-giftimg ${e.type === 'sticker' ? 'lc-sticker' : ''}" src="/gift-img?u=${encodeURIComponent(e.extra.image)}" alt="" loading="lazy">` : '';
     const amount = e.type === 'gift' ? `<span class="lc-amount">${Number(e.amount || 0).toLocaleString('es-CO')} ${esc(e.extra?.currency || '')}</span>` : '';
-    li.innerHTML = `<span class="lc-evicon">${{ follow: '♥', sub: '✦', gift: '🎁', like: '👍', share: '↗', sticker: '✨', join: '👋', superfan: '⭐', 'live-start': '🔴', 'live-end': '⏹' }[e.type] || '•'}</span>
+    li.innerHTML = `<span class="lc-evicon">${{ follow: '♥', sub: '✦', gift: '🎁', like: '👍', share: '↗', sticker: '✨', join: '👋', superfan: '⭐', reward: '🎟', 'live-start': '🔴', 'live-end': '⏹' }[e.type] || '•'}</span>
       <p class="lc-evtext">${LOGO(e.platform)}<b>${name}</b> ${describe(e)} ${img}${amount}</p><time>${timeOf(e.ts)}</time>`;
   }
   return li;
@@ -174,6 +182,7 @@ function visible(e) {
     }
     if (e.type === 'sticker') return prefs.showStickers !== false;
     if (e.type === 'join') return Boolean(prefs.showJoins);
+    if (e.type === 'reward') return prefs.showRewards !== false;
     if (e.type === 'live-start' || e.type === 'live-end') return true;
     return prefs.showEvents && e.type !== 'like';
   }
@@ -390,6 +399,7 @@ export function initLiveChat() {
       location.hash = '#/voz/especiales';
     }
   });
+  $('#lc-unspot').addEventListener('click', () => api('POST', '/api/chat/spotlight', { clear: true }).then(() => { $('#lc-unspot').hidden = true; }).catch((err) => toast(err.message)));
   $('#lc-order').addEventListener('click', () => { prefs.newestBottom = !prefs.newestBottom; savePrefs(); fillPanel(); renderFeeds(); });
   $('#lc-clear').addEventListener('click', () => {
     items.length = 0;
@@ -437,7 +447,11 @@ export function initLiveChat() {
     const who = String(e.user?.name || e.user?.id || '').toLowerCase();
     const key = `${e.platform}:${who}`;
     const sp = specialFor(e.platform, e.user);
-    if (btn.dataset.lc === 'read') {
+    if (btn.dataset.lc === 'spot') {
+      api('POST', '/api/chat/spotlight', { event: e })
+        .then(() => { $('#lc-unspot').hidden = false; toast('En pantalla. Si no lo ves, agrega el overlay «Mensaje en pantalla» en Overlays.'); })
+        .catch((err) => toast(err.message));
+    } else if (btn.dataset.lc === 'read') {
       api('POST', '/api/tts/say', { text: `${sp?.spokenName || e.user?.name} dice: ${e.message}`, voice: sp?.voice || undefined, rate: sp?.rate, pitch: sp?.pitch }).catch((err) => toast(err.message));
     } else if (btn.dataset.lc === 'mute') {
       const muted = sp?.action === 'mute';

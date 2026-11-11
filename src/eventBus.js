@@ -16,11 +16,11 @@
 //   ts:       number
 // }
 //
-// Hoy TikTok emite todos los tipos; Kick, Starvios y Twitch solo 'chat'.
+// reward: canje de la tienda del canal de Kick (extra.rewardTitle; message = lo que escribió).
 
 const { EventEmitter } = require('events');
 
-const EVENT_TYPES = ['follow', 'sub', 'gift', 'like', 'share', 'chat', 'sticker', 'join', 'superfan', 'live-start', 'live-end'];
+const EVENT_TYPES = ['follow', 'sub', 'gift', 'like', 'share', 'chat', 'sticker', 'join', 'superfan', 'reward', 'live-start', 'live-end'];
 
 const bus = new EventEmitter();
 bus.setMaxListeners(50);

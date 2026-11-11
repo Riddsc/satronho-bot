@@ -156,7 +156,9 @@ const DEFAULTS = {
     },
   },
   // Ventana: nunca se abre sola. Opcionalmente se esconde junto al reloj al minimizar.
-  window: { minimizeToTray: false },
+  // popout: la ventana aparte del chat (Chat en vivo → Ventana). bounds
+  // guarda dónde la dejaste (monitor, posición y tamaño); la pone la app.
+  window: { minimizeToTray: false, popout: { onTop: false, opacity: 100, idleOpacity: 100, bounds: null } },
   // Tu perfil: cómo te llaman las guías, tu foto, el menú y la barra derecha.
   profile: {
     name: '',

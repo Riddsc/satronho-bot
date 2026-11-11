@@ -80,7 +80,7 @@
   // Que nada se salga del borde: si con el tema, la letra o el tamaño elegidos
   // no cabe en la fuente de OBS, se achica lo justo; si sobra mucho espacio,
   // crece para llenarla.
-  const NOFIT = new Set(['giftrain', 'screens', 'giftspot']);
+  const NOFIT = new Set(['giftrain', 'screens', 'giftspot', 'spotlight']);
   // Forma de la fuente: «wide» (tira baja), «box» (rectángulo) o «tall»
   // (cuadrada o vertical). Cada overlay acomoda su diseño a esa forma para
   // aprovechar el espacio en vez de quedar diminuto en medio.
@@ -165,6 +165,7 @@
     if (k === 'live') { const prev = S.live; S.live = p; kind?.onLive?.(prev, p, ctx()); }
     if (k === 'music') S.music = p;
     if (k === 'spotify') S.spotify = p;
+    if (k === 'chat-spotlight') return kind?.onSpot?.(p, ctx());
     if (k === 'event') { S.recent.unshift(p); S.recent.length = Math.min(S.recent.length, 80); kind?.onEvent?.(p, ctx()); }
     if (['goal', 'goal-removed', 'podium', 'live', 'music', 'event', 'spotify'].includes(k)) draw();
   });

@@ -16,7 +16,7 @@
 export const CATEGORIES = [
   { id: 'metas', name: 'Metas y contadores', desc: 'Objetivos, tiempos y cifras que se llenan solos.', guide: 'juana' },
   { id: 'regalos', name: 'Regalos y apoyo', desc: 'Quién te apoya y cómo: podios, regalos en pantalla y el más generoso.', guide: 'troya' },
-  { id: 'chat', name: 'Chat y comunidad', desc: 'Lo que dice y hace tu gente, a la vista de todos.', guide: 'mecha' },
+  { id: 'chat', name: 'Chat y comunidad', desc: 'Lo que dice y hace tu gente, a la vista de todos.', guide: 'mechanizer' },
   { id: 'musica', name: 'Música', desc: 'La canción que suena y lo que viene.', guide: 'nono' },
   { id: 'pantallas', name: 'Pantallas del directo', desc: 'Empezamos, vuelvo enseguida y se acabó, con tu identidad.', guide: 'samy' },
 ];
@@ -157,6 +157,13 @@ export const KINDS = {
     styles: [['burbujas', 'Burbujas'], ['clasico', 'Clásico'], ['tarjetas', 'Tarjetas'], ['minimo', 'Mínimo']],
     defaults: { platforms: ['tiktok', 'kick', 'twitch', 'starvios'], max: 8, fadeSec: 0, hideCommands: true, hideBots: true, showPlatform: true, showBadges: true, showAvatar: true, newest: 'bottom' },
     fields: [f('platforms', 'Plataformas', 'plats'), f('max', 'Mensajes a la vez', 'range', { min: 3, max: 20, step: 1 }), f('fadeSec', 'Desaparecen después de (s, 0 = nunca)', 'range', { min: 0, max: 120, step: 5, unit: ' s' }), f('newest', 'Lo nuevo', 'seg', [['bottom', 'Abajo'], ['top', 'Arriba']]), f('hideCommands', 'Ocultar comandos (!play…)', 'toggle'), f('hideBots', 'Ocultar bots', 'toggle'), f('showAvatar', 'Fotos o iniciales', 'toggle'), f('showPlatform', 'Logo de la plataforma', 'toggle'), f('showBadges', 'Insignias (moderador, equipo…)', 'toggle')],
+  },
+  spotlight: {
+    cat: 'chat', icon: '📺', name: 'Mensaje en pantalla', size: [1280, 360],
+    desc: 'En Chat en vivo pasas el mouse por un mensaje, tocas 📺 y sale en grande en tu directo.',
+    styles: [['tarjeta', 'Tarjeta'], ['burbuja', 'Burbuja'], ['minimo', 'Mínimo']],
+    defaults: { seconds: 12, pos: 'center', showAvatar: true, showPlatform: true, showBadges: true, useNameColor: true },
+    fields: [f('seconds', 'Cuánto dura (s, 0 = hasta quitarlo)', 'range', { min: 0, max: 60, step: 1, unit: ' s' }), f(POS[0], POS[1], POS[2], POS[3]), f('showAvatar', 'Foto o inicial', 'toggle'), f('showPlatform', 'Logo de la plataforma', 'toggle'), f('showBadges', 'Insignias', 'toggle'), f('useNameColor', 'Color del nombre de la persona', 'toggle')],
   },
   activity: {
     cat: 'chat', icon: '📋', name: 'Actividad', size: [440, 460],

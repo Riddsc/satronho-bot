@@ -19,7 +19,7 @@ try {
 }
 
 const path = require('path');
-const { app, BrowserWindow, shell, dialog, net, Tray, Menu, nativeImage, safeStorage, session, globalShortcut } = require('electron');
+const { app, BrowserWindow, shell, dialog, net, Tray, Menu, nativeImage, safeStorage, session, globalShortcut, screen } = require('electron');
 const { Store } = require('./store');
 const { createServer } = require('./server');
 
@@ -141,6 +141,59 @@ function applyWindowConfig(cfg) {
     tray = null;
     if (win && !win.isVisible()) showWindow();
   }
+  if (cfg?.popout) {
+    popoutCfg = cfg.popout;
+    applyPopout();
+  }
+}
+
+// ---------- Ventana aparte del chat ----------
+// Pensada para un segundo monitor: se abre donde la dejaste (monitor,
+// posición y tamaño), puede quedar encima de todo y tener transparencia.
+let popout = null;
+let popoutCfg = {};
+let popoutInside = true;
+const pct = (v, def = 100) => Math.max(20, Math.min(100, Number(v) || def)) / 100;
+
+function applyPopout() {
+  if (!popout || popout.isDestroyed()) return;
+  popout.setAlwaysOnTop(Boolean(popoutCfg.onTop), 'floating');
+  const full = pct(popoutCfg.opacity);
+  // «Más transparente cuando no la usas»: nunca más opaca que la normal.
+  popout.setOpacity(popoutInside ? full : Math.min(full, pct(popoutCfg.idleOpacity)));
+}
+function popoutHover(inside) {
+  popoutInside = inside;
+  applyPopout();
+}
+
+// Solo usamos la posición guardada si sigue cayendo en un monitor conectado.
+function savedPopoutBounds(b) {
+  if (!b || ![b.x, b.y, b.width, b.height].every(Number.isFinite)) return null;
+  const fits = screen.getAllDisplays().some(({ workArea: a }) => b.x < a.x + a.width - 80 && b.x + b.width > a.x + 80 && b.y >= a.y - 20 && b.y < a.y + a.height - 80);
+  return fits ? { x: Math.round(b.x), y: Math.round(b.y), width: Math.max(300, Math.round(b.width)), height: Math.max(300, Math.round(b.height)) } : null;
+}
+
+function trackPopout(child, store) {
+  popout = child;
+  popoutInside = true;
+  popoutCfg = store.get('window')?.popout || {};
+  if (popoutCfg.maximized) child.maximize();
+  applyPopout();
+  let t = null;
+  const save = () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      if (child.isDestroyed() || child.isMinimized()) return;
+      const maximized = child.isMaximized();
+      store.update({ window: { popout: { bounds: maximized ? child.getNormalBounds() : child.getBounds(), maximized } } });
+    }, 400);
+  };
+  for (const ev of ['move', 'resize', 'maximize', 'unmaximize']) child.on(ev, save);
+  child.on('closed', () => {
+    clearTimeout(t);
+    if (popout === child) popout = null;
+  });
 }
 
 // ---------- Páginas públicas (buscador de memes) ----------
@@ -321,6 +374,7 @@ if (!app.requestSingleInstanceLock()) {
         mediaFetch,
         openLogin: openLoginWindow,
         onHotkeys: applyHotkeys,
+        popoutHover,
         clearLogin,
         // Cifrado de Windows (DPAPI) para el Client Secret y los permisos de Kick.
         vault: safeStorage.isEncryptionAvailable()
@@ -367,10 +421,22 @@ if (!app.requestSingleInstanceLock()) {
     win.webContents.setWindowOpenHandler(({ url: target }) => {
       // El chat en una ventana aparte (Chat en vivo → Ventana) se abre dentro de la app.
       if (target.startsWith(url.replace(/\/$/, '')) && target.includes('/popout-chat.html')) {
-        return { action: 'allow', overrideBrowserWindowOptions: { width: 440, height: 720, minWidth: 300, minHeight: 300, autoHideMenuBar: true, title: 'Chat · Satronho Bot', backgroundColor: '#0f0d17' } };
+        // Ya abierta: la traemos al frente en vez de abrir otra.
+        if (popout && !popout.isDestroyed()) {
+          if (popout.isMinimized()) popout.restore();
+          popout.focus();
+          return { action: 'deny' };
+        }
+        const cfg = store.get('window')?.popout || {};
+        const bounds = savedPopoutBounds(cfg.bounds) || { width: 440, height: 720 };
+        return { action: 'allow', overrideBrowserWindowOptions: { ...bounds, minWidth: 300, minHeight: 300, autoHideMenuBar: true, alwaysOnTop: Boolean(cfg.onTop), title: 'Chat · Satronho Bot', backgroundColor: '#0f0d17', icon: path.join(__dirname, '..', 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png') } };
       }
       shell.openExternal(target);
       return { action: 'deny' };
+    });
+
+    win.webContents.on('did-create-window', (child, { url: target }) => {
+      if (String(target).includes('/popout-chat.html')) trackPopout(child, store);
     });
 
     win.on('minimize', (ev) => {

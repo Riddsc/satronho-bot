@@ -117,10 +117,26 @@ const KB = [
     go: '#card-conexiones',
   },
   {
-    guide: 'samy', q: '¿Dónde veo lo que está pasando en el chat?',
+    guide: 'mechanizer', q: '¿Dónde veo lo que está pasando en el chat?',
     keys: ['actividad', 'registro', 'mensajes', 'chat', 'eventos', 'log', 'pasando', 'ver'],
     answer: 'En <b>Chat en vivo</b> ves todo lo que llega: chat, regalos, seguidores… Cada mensaje lleva 🔊 si Troya lo leyó o 🔇 con el motivo si no. Ahí mismo puedes <b>simular un mensaje</b> para probar sin estar en directo.',
     go: '#card-actividad',
+  },
+  {
+    guide: 'mechanizer', q: '¿Cómo pongo el chat en mi segundo monitor?',
+    keys: ['ventana', 'aparte', 'popout', 'monitor', 'segundo', 'pantalla', 'encima', 'transparente', 'opacidad'],
+    answer: 'En <b>Chat en vivo → Ajustes → Ventana</b> toca <b>Abrir el chat en una ventana aparte</b> y llévala a tu otro monitor: la próxima vez se abre ahí mismo, con su tamaño. Su botón ⚙ tiene la letra (hasta 30 px), el fondo, la opacidad, «más transparente cuando no la usas» y «siempre encima». Usa las mismas plataformas y filtros del Chat en vivo.',
+    go: '#lc-popout',
+  },
+  {
+    guide: 'mechanizer', q: '¿Cómo muestro un mensaje del chat en pantalla?',
+    keys: ['pantalla', 'destacar', 'mostrar', 'mensaje', 'overlay', 'tv', '📺', 'resaltar'],
+    answer: 'Pasa el mouse por el mensaje y toca <b>📺</b> (en el Chat en vivo o en su ventana aparte). Sale en el overlay <b>Mensaje en pantalla</b> de Overlays → Chat y comunidad; agrégalo una vez a OBS. Lo quitas con <b>Quitar de pantalla</b>.',
+  },
+  {
+    guide: 'mechanizer', q: '¿Se ven los emotes y los canjes de Kick?',
+    keys: ['emote', 'emotes', 'emoji', 'canje', 'canjes', 'puntos', 'tienda', 'recompensa', 'kick'],
+    answer: 'Sí: los emotes de Kick y Twitch salen como imagen (se apaga en Ajustes → Ventana → «Emotes como imagen»). Los canjes de la tienda de Kick salen con el nombre de la recompensa y lo que escribió la persona; se ocultan en Ajustes → Filtros. Si un canje no te llega, repórtalo y miramos qué mandó Kick.',
   },
   {
     guide: 'samy', q: '¿Cómo pruebo sin estar en directo?',
@@ -343,6 +359,7 @@ const GREET = {
   nono: '¡Epa! Soy <b>Ñoño</b>, el DJ. Pregúntame cómo pedir, saltar o quitar canciones.',
   juana: 'Hola, soy <b>Juana</b>. Llevo las metas y las cuentas de tus directos. ¿Qué quieres saber?',
   mecha: 'Sistema en línea. Soy <b>MechaRidds</b>, la versión androide de Ridds. Llevo el Chat Bot, los comandos y las novedades de cada versión. ¿En qué te ayudo?',
+  mechanizer: '¡Hola, girlie! Soy <b>Mechanizer</b>, la Colonizadora en versión androide. Cuido tu <b>Chat en vivo</b>: la ventana aparte, los emotes, los canjes y los mensajes en pantalla. ¿Qué quieres saber?',
 };
 
 const HANDOFF = {
@@ -351,6 +368,7 @@ const HANDOFF = {
   nono: (to) => `Uy, eso es cosa de ${GUIDES[to].name}:`,
   juana: (to) => `Eso lo lleva ${GUIDES[to].name}:`,
   mecha: (to) => `Redirigiendo a ${GUIDES[to].name}…`,
+  mechanizer: (to) => `Eso lo sabe ${GUIDES[to].name}, te paso con ella o él:`,
 };
 
 const DONT_KNOW = {
@@ -359,6 +377,7 @@ const DONT_KNOW = {
   nono: 'Ni idea, parce. ¿Querías decir alguna de estas?',
   juana: 'No encontré eso. Quizá te sirva alguna de estas:',
   mecha: 'No tengo eso en mi memoria. ¿Era alguna de estas? Si es un error, repórtalo en Ayuda.',
+  mechanizer: 'Mmm, eso no lo tengo. ¿Era alguna de estas?',
 };
 
 // ---------- Búsqueda ----------
@@ -503,7 +522,7 @@ export function initHelp() {
   panel.innerHTML = `
     <header class="h-head"><div id="help-who" class="h-who"></div><button type="button" class="btn small ghost" id="help-close" aria-label="Cerrar">✕</button></header>
     <div id="help-switch" class="h-switch">
-      ${['samy', 'troya', 'nono', 'juana', 'mecha'].map((id) => `<button type="button" data-switch="${id}" class="${GUIDES[id].lead ? 'lead' : ''}" title="${esc(GUIDES[id].name)} · ${esc(GUIDES[id].role)}">${avatarHTML(id, 'xs')}<span>${esc(GUIDES[id].name)}</span></button>`).join('')}
+      ${['samy', 'troya', 'nono', 'juana', 'mecha', 'mechanizer'].map((id) => `<button type="button" data-switch="${id}" class="${GUIDES[id].lead ? 'lead' : ''}" title="${esc(GUIDES[id].name)} · ${esc(GUIDES[id].role)}">${avatarHTML(id, 'xs')}<span>${esc(GUIDES[id].name)}</span></button>`).join('')}
     </div>
     <div id="help-log" class="h-log" aria-live="polite"></div>
     <form id="help-form" class="h-form"><input id="help-input" autocomplete="off"><button class="btn primary">Preguntar</button></form>
