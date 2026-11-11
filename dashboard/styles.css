@@ -2430,3 +2430,12 @@ body.rail .side:not(:hover):not(:focus-within):not(.peek) .nav-sub { display: no
 .mq-btn:disabled { opacity: .3; cursor: default; }
 .mq-btn.danger:hover { border-color: var(--bad); color: var(--bad); }
 #music-queue li.mq-row { grid-template-columns: 16px 20px 64px minmax(0, 1fr) auto; } #music-queue .row.tight { gap: 4px; align-items: center; }
+
+/* ---------- Emotes y canjes dentro del chat (0.26) ---------- */
+.emote { height: 1.7em; width: auto; max-width: 6em; vertical-align: middle; margin: -.35em 1px -.25em; object-fit: contain; }
+.emote.sticker { height: 2.4em; margin: 0 2px; border-radius: 6px; }
+.only-emotes .emote { height: 2.6em; margin: 2px 2px 0; }
+.lc-reward { --rw: #53fc18; padding: 1px 8px; border-radius: 99px; background: color-mix(in srgb, var(--rw) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rw) 55%, transparent); color: var(--ink); }
+.lc-pts { color: var(--muted); font-weight: 700; }
+.lc-rwmsg { flex-basis: 100%; color: var(--ink); font-style: italic; }
+.lc-event.t-reward { background: color-mix(in srgb, #53fc18 7%, transparent); border-color: color-mix(in srgb, #53fc18 35%, transparent); }

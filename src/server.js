@@ -40,9 +40,9 @@ const { createSupport, createLogbook } = require('./modules/support');
 
 const ROOT = path.join(__dirname, '..');
 const PLATFORMS = ['tiktok', 'kick', 'starvios', 'twitch'];
-const GUIDES = ['samy', 'troya', 'nono', 'juana', 'mecha'];
+const GUIDES = ['samy', 'troya', 'nono', 'juana', 'mecha', 'mechanizer'];
 // Nombre visible de cada guía (las fotos se guardan con él: "Ñoño.png").
-const GUIDE_NAMES = { samy: 'Samy', troya: 'Troya', nono: 'Ñoño', juana: 'Juana', mecha: 'MechaRidds' };
+const GUIDE_NAMES = { samy: 'Samy', troya: 'Troya', nono: 'Ñoño', juana: 'Juana', mecha: 'MechaRidds', mechanizer: 'Mechanizer' };
 const PHOTO_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' };
 
 // Eventos de prueba del panel.
@@ -58,6 +58,7 @@ const SAMPLE = {
   'live-start': { platform: 'tiktok', user: { id: 'tu', name: 'Tu directo' } },
   'live-end': { platform: 'tiktok', user: { id: 'tu', name: 'Tu directo' } },
   chat: { platform: 'kick', user: { id: 'espectador', name: 'Espectador' }, amount: 0, message: 'Hola, saludos desde Colombia' },
+  reward: { platform: 'kick', user: { id: 'canjeador', name: 'Canjeador' }, amount: 500, message: 'Pon la de la bicicleta', extra: { rewardTitle: 'Elegir canción', color: '#53fc18' } },
 };
 
 function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, resolver: customResolver, appInfo = {}, hooks = {} }) {
@@ -139,7 +140,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const live = createLive({ store, broadcast: (...a) => broadcast(...a) });
   const connectors = {
     tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }), onStickers: (s) => catalog.merge('stickers', 'tiktok', s), onFollowers: (n) => accountRef?.set('tiktok', n), diagFile: path.join(dataDir, 'tiktok-diagnostico.json') }),
-    kick: createKickConnector(deps),
+    kick: createKickConnector({ ...deps, diagFile: path.join(dataDir, 'kick-diagnostico.json') }),
     twitch: createTwitchConnector(deps),
     starvios: createStarviosConnector({ ...deps, logFile: path.join(dataDir, 'starvios-eventos.jsonl') }),
   };
@@ -753,10 +754,14 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   // ---- Ayuda: reportar un problema (llega a Discord) ----
   const support = createSupport({ fetch: fetchFn, logbook, appInfo: { version: appInfo.version || require('../package.json').version }, getStatus: () => status, getExtra: () => {
     // Qué manda TikTok en tu LIVE y por dónde llegan los stickers.
-    const d = connectors.tiktok.diagnostics?.();
-    if (!d || !Object.keys(d.methods).length) return [];
     const top = (o) => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([k, v]) => `${k}×${v}`).join(', ') || '—';
-    return ['TikTok (mensajes de esta sesión):', top(d.methods), `Con stickers: ${top(d.stickerMethods)}`, `Desconocidos: ${top(d.unknown)}`, `Stickers guardados: ${catalog.summary().tiktok.stickers}`];
+    const out = [];
+    const d = connectors.tiktok.diagnostics?.();
+    if (d && Object.keys(d.methods).length) out.push('TikTok (mensajes de esta sesión):', top(d.methods), `Con stickers: ${top(d.stickerMethods)}`, `Desconocidos: ${top(d.unknown)}`, `Stickers guardados: ${catalog.summary().tiktok.stickers}`);
+    // Qué eventos manda Kick (para confirmar los canjes de la tienda).
+    const k = connectors.kick.diagnostics?.();
+    if (k && Object.keys(k.events).length) out.push('Kick (eventos de esta sesión):', top(k.events), `Canjes: ${k.rewards.map((r) => `${r.event}[${r.keys.join(',')}]`).join(' · ') || '—'}`);
+    return out;
   } });
   app.get('/api/support', (_req, res) => ok(res, { available: support.available(), diagnostics: support.diagnostics() }));
   app.post('/api/support/report', async (req, res) => {
@@ -783,6 +788,40 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     if (!sent.length) return fail(res, 'No pude escribir: conecta la plataforma en Escuchar y autoriza una cuenta en Escribir');
     ok(res, { sent });
   });
+
+  // ---- Chat en vivo: un mensaje en pantalla (overlay «Mensaje en pantalla») ----
+  app.post('/api/chat/spotlight', (req, res) => {
+    const e = req.body?.event;
+    if (req.body?.clear || !e) {
+      broadcast('chat-spotlight', { clear: true });
+      return ok(res);
+    }
+    const x = e.extra || {};
+    // Solo lo necesario para dibujarlo (nada de lo que manda el panel se ejecuta).
+    broadcast('chat-spotlight', {
+      id: String(e.id || Date.now()).slice(0, 60),
+      platform: PLATFORMS.includes(e.platform) ? e.platform : '',
+      user: { name: String(e.user?.name || 'Anónimo').slice(0, 60), avatar: /^https:\/\//.test(e.user?.avatar || '') ? e.user.avatar : '' },
+      message: String(e.message || '').slice(0, 500),
+      extra: {
+        color: /^#[0-9a-f]{3,8}$/i.test(x.color || '') ? x.color : '',
+        emotes: Array.isArray(x.emotes) ? x.emotes.slice(0, 60) : [],
+        stickerImgs: Array.isArray(x.stickerImgs) ? x.stickerImgs.slice(0, 3) : [],
+        roles: { host: Boolean(x.roles?.host), mod: Boolean(x.roles?.mod), sub: Boolean(x.roles?.sub), team: Number(x.roles?.team) || 0 },
+        badges: Array.isArray(x.badges) ? x.badges.slice(0, 10) : [],
+      },
+      ts: Date.now(),
+    });
+    ok(res);
+  });
+
+  // ---- Ventana aparte del chat (solo en la app de escritorio) ----
+  // Encima de todo, opacidad y «más transparente cuando no la usas».
+  app.post('/api/popout/hover', (req, res) => {
+    hooks.popoutHover?.(Boolean(req.body?.inside));
+    ok(res);
+  });
+  app.get('/api/popout', (_req, res) => ok(res, { desktop: Boolean(hooks.popoutHover) }));
 
   // ---- Comandos del chat ----
   const wrap = (fn) => (req, res) => {

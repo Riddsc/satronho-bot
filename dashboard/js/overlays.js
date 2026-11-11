@@ -36,6 +36,7 @@ const GUIDE_TIP = {
   juana: 'Las metas y contadores son lo mío. Elige si se ve el porcentaje, el objetivo o solo la cifra.',
   troya: 'Los regalos se lucen aquí. Prueba los estilos: la vista previa cambia al instante.',
   mecha: 'Tu comunidad en pantalla. Calibra qué se muestra y qué no: comandos, bots, insignias.',
+  mechanizer: 'Tu comunidad en pantalla, bonita y a tu gusto: qué se muestra, emotes, insignias y el mensaje que destaques con 📺.',
   nono: 'Que se vea qué suena y quién lo pidió. Con el estilo vinilo, la portada gira.',
   samy: 'Las pantallas de empezamos, vuelvo y se acabó. Ponles tu título y tus redes.',
 };
@@ -1021,7 +1022,7 @@ export function initOverlays(cfg) {
     if (th && w.look.card && w.look.card === th.set.card) { w.look = { ...w.look, card: '' }; fixed[id] = w; }
   }
   if (Object.keys(fixed).length) saveConfig({ widgets: fixed });
-  $('#ovg-hosts').innerHTML = `<div class="ovg-team" title="Cada guía cuida su parte de los overlays">${['juana', 'troya', 'mecha', 'nono', 'samy'].map((g) => `<span title="${esc(GUIDES[g].name)}">${avatarHTML(g, 'md')}</span>`).join('')}</div>`;
+  $('#ovg-hosts').innerHTML = `<div class="ovg-team" title="Cada guía cuida su parte de los overlays">${['juana', 'troya', 'mechanizer', 'mecha', 'nono', 'samy'].map((g) => `<span title="${esc(GUIDES[g].name)}">${avatarHTML(g, 'md')}</span>`).join('')}</div>`;
 
   // Estilo general
   renderThemes();

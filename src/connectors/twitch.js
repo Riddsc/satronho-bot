@@ -39,6 +39,21 @@ function parseLine(line) {
   return { tags, prefix, command, params, trailing };
 }
 
+// Etiqueta «emotes»: "25:0-4,12-16/1902:6-10" -> [{ id, start, end }]
+// (posiciones por carácter, para dibujar cada emote como imagen en el panel).
+function parseEmotes(tag) {
+  const out = [];
+  for (const part of String(tag || '').split('/')) {
+    const [id, ranges] = part.split(':');
+    if (!/^[\w-]+$/.test(id || '')) continue;
+    for (const r of String(ranges || '').split(',')) {
+      const [start, end] = r.split('-').map(Number);
+      if (Number.isInteger(start) && Number.isInteger(end) && end >= start) out.push({ id, start, end });
+    }
+  }
+  return out.slice(0, 60);
+}
+
 function createTwitchConnector({ bus, onStatus, url = URL }) {
   const base = createConnectorBase({ platform: 'twitch', bus, onStatus });
   let socket = null;
@@ -71,7 +86,7 @@ function createTwitchConnector({ bus, onStatus, url = URL }) {
           type: 'chat',
           user: { id: m.tags['user-id'] || login, name: m.tags['display-name'] || login },
           message: text,
-          extra: { color: m.tags.color || '', badges: String(m.tags.badges || '').split(',').map((b) => b.split('/')[0]).filter(Boolean) },
+          extra: { color: m.tags.color || '', badges: String(m.tags.badges || '').split(',').map((b) => b.split('/')[0]).filter(Boolean), emotes: parseEmotes(m.tags.emotes) },
         });
         break;
       }
@@ -123,4 +138,4 @@ function createTwitchConnector({ bus, onStatus, url = URL }) {
   return { connect, disconnect };
 }
 
-module.exports = { createTwitchConnector, parseLine };
+module.exports = { createTwitchConnector, parseLine, parseEmotes };

@@ -20,7 +20,8 @@ const compact = (n) => (Number(n) || 0).toLocaleString('es-CO', { notation: 'com
 export function homeEvent(e) {
   if (['join', 'live-start', 'live-end'].includes(e.type)) return;
   let what;
-  if (e.type === 'chat') what = `: ${esc(String(e.message || '').slice(0, 60))}`;
+  if (e.type === 'chat') what = `: ${esc(String(e.message || '').replace(/\[emote:\d+:([^\]]*)\]/g, '$1').slice(0, 60))}`;
+  else if (e.type === 'reward') what = ` canjeó ${esc(e.extra?.rewardTitle || 'una recompensa')}`;
   else if (e.type === 'gift') what = ` envió ${esc(e.extra?.giftName || 'un regalo')}${e.extra?.count > 1 ? ` ×${e.extra.count}` : ''}`;
   else if (e.type === 'like') what = ` dio ${e.amount} likes`;
   else if (e.type === 'sticker') what = ' mandó un sticker';

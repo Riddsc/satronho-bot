@@ -7,6 +7,7 @@
 import { $, $$, api, esc, toast, saveConfig } from './util.js';
 import { mascotSVG } from './mascots.js';
 import { mechaHead } from './mecharidds.js';
+import { mechanizerHead } from './mechanizer.js';
 
 export const GUIDES = {
   samy: { name: 'Samy', role: 'Conexiones y ayuda general', color: '#ffb23e', lead: true },
@@ -15,10 +16,13 @@ export const GUIDES = {
   juana: { name: 'Juana', role: 'Metas y estadísticas', color: '#ff8fb5', lead: false },
   // MechaRidds: Ridds en versión androide, el creador de la app. Lleva el Chat Bot.
   mecha: { name: 'MechaRidds', role: 'Chat Bot, comunidad y novedades', color: '#74d14c', lead: false },
+  // Mechanizer: la Colonizadora en versión androide. Lleva el Chat en vivo.
+  mechanizer: { name: 'Mechanizer', role: 'Chat en vivo y comunidad', color: '#ff79bd', lead: false },
 };
 
 export function avatarSVG(id) {
   if (id === 'mecha') return mechaHead(esc(GUIDES[id].name));
+  if (id === 'mechanizer') return mechanizerHead(esc(GUIDES[id].name));
   return mascotSVG(id, esc(GUIDES[id].name));
 }
 
@@ -27,7 +31,7 @@ export const hasPhoto = (id) => Boolean(photos[id]);
 
 // Tamaños: Ñoño XL, Troya L+, Samy L y Juana XS (es enanita y está viejita).
 // El protagonismo de Samy y Troya se nota en cuántas veces aparecen, no en el tamaño.
-export const SIZE_RATIO = { nono: 1, troya: 0.86, samy: 0.76, juana: 0.52, mecha: 0.86 };
+export const SIZE_RATIO = { nono: 1, troya: 0.86, samy: 0.76, juana: 0.52, mecha: 0.86, mechanizer: 0.86 };
 const SIZE_BASE = { hero: 96, mini: 46 };
 
 // size: 'xs' | 'md' (iconos fijos de la ayuda), 'hero' | 'mini' | número (tamaño de Ñoño).

@@ -383,7 +383,7 @@ function initUpdatePill() {
 
 // ---------- Ayuda: preguntas por guía ----------
 function renderHelpPage() {
-  $('#help-guides').innerHTML = ['samy', 'troya', 'nono', 'juana', 'mecha']
+  $('#help-guides').innerHTML = ['samy', 'troya', 'nono', 'juana', 'mecha', 'mechanizer']
     .map((id) => {
       const qs = helpKb.KB.filter((e) => e.guide === id);
       return `<div class="card help-guide" style="--g:${GUIDES[id].color}">

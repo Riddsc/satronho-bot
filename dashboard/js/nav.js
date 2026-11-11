@@ -53,7 +53,7 @@ export const iconSVG = (name, size = 18) => `<svg viewBox="0 0 24 24" width="${s
 const PAGES = {
   inicio: { title: 'Inicio', guide: 'samy', words: 'resumen inicio principal en vivo' },
   conexiones: { title: 'Conexiones', guide: 'samy', words: 'conectar tiktok kick starvios usuario canal cuenta bot' },
-  actividad: { title: 'Chat en vivo', guide: 'samy', words: 'chat en vivo actividad registro mensajes eventos simular regalos insignias silenciar' },
+  actividad: { title: 'Chat en vivo', guide: 'mechanizer', words: 'chat en vivo actividad registro mensajes eventos simular regalos insignias silenciar' },
   voz: { title: 'Voz del chat', guide: 'troya', words: 'voz voces tts leer piper filtro groserías quiéreme' },
   musica: { title: 'Música', guide: 'nono', words: 'música canción cola play temita skip quitar youtube spotify' },
   sonidos: { title: 'Sonidos', guide: 'nono', words: 'sonidos efectos memes biblioteca frases soundboard groseros graciosos sospechoso rosalía packs' },

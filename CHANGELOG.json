@@ -1,5 +1,40 @@
 [
   {
+    "version": "0.26.0",
+    "date": "2026-11-11",
+    "title": "Mechanizer y un Chat en vivo con emotes, canjes de Kick y ventana para tu segundo monitor",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "Llega Mechanizer, la Colonizadora en versión androide: melena corta, sus gafas rosadas, headset lila con manchitas de jirafa y un ojo biónico. Cuida el Chat en vivo, su ventana aparte y los overlays de Chat y comunidad, y está en el inicio junto a MechaRidds. Tócala para preguntarle por la ventana, los emotes, los canjes o cómo poner un mensaje en pantalla."
+      },
+      {
+        "type": "nuevo",
+        "text": "Los emotes de Kick y Twitch se ven como imagen en Chat en vivo, en su ventana aparte y en el Chat en pantalla de OBS; los stickers de un comentario de TikTok salen al final del mensaje. Si un mensaje es solo emotes, se ven más grandes. Se apaga en Ajustes → Ventana → «Emotes como imagen»."
+      },
+      {
+        "type": "nuevo",
+        "text": "Canjes de la tienda de Kick: lo que tu gente canjea con los puntos del canal sale en el chat con el nombre de la recompensa, los puntos y lo que escribió. Se muestra u oculta en Ajustes → Filtros. Kick no publica este evento: si no te llega en un directo, usa «Reportar un problema» y vemos qué manda."
+      },
+      {
+        "type": "nuevo",
+        "text": "📺 Mensaje en pantalla: pasa el mouse por un mensaje, toca 📺 y sale en grande en tu directo con el overlay nuevo «Mensaje en pantalla» (Overlays → Chat y comunidad). Eliges cuánto dura, la posición y el estilo, y lo quitas con «Quitar de pantalla»."
+      },
+      {
+        "type": "mejora",
+        "text": "La ventana aparte del chat ya no muestra las plataformas que apagaste en Chat en vivo ni las que ocultaste en Conexiones, y usa tus mismos filtros, cuentas ocultas y destacados (menciones, moderadores, suscriptores…). Con una ventana angosta quedan solo los logos."
+      },
+      {
+        "type": "nuevo",
+        "text": "La ventana aparte se abre en el monitor, la posición y el tamaño donde la dejaste, y tiene su propio ⚙: letra hasta 30 px para leer de lejos, fotos, hora, insignias, compacto, qué eventos salen, fondo (como la app, sólido o negro), opacidad, «más transparente cuando no la usas» y «siempre encima» (apagado de serie)."
+      },
+      {
+        "type": "nuevo",
+        "text": "En la ventana aparte: insignias y color del nombre como en el chat principal, un aviso «X mensajes nuevos ↓» cuando subes a leer, y un campo opcional para responder en Kick o Starvios sin cambiar de pantalla."
+      }
+    ]
+  },
+  {
     "version": "0.25.1",
     "date": "2026-11-07",
     "title": "Barra flotante transparente",

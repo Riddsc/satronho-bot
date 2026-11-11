@@ -91,6 +91,8 @@
       <button data-sim="chat" data-body='{"platform":"starvios","user":{"id":"estrella","name":"Estrella"},"message":"Hola desde Starvios"}'>💬 Mensaje en Starvios</button>
       <button data-sim="chat" data-body='{"platform":"twitch","user":{"id":"morado","name":"Morado"},"message":"Hola desde Twitch"}'>💬 Mensaje en Twitch</button>
       <button data-sim="chat" data-body='{"platform":"kick","user":{"id":"dj_fan","name":"DJ_Fan"},"message":"!play la bicicleta carlos vives"}'>♪ !play en Kick</button>
+      <button data-sim="chat" data-body='{"platform":"kick","user":{"id":"emotero","name":"Emotero"},"message":"jajaja [emote:37226:KEKW] qué jugada [emote:39251:beeBobble]"}'>😀 Emotes en Kick</button>
+      <button data-sim="reward">🎟 Canje en Kick</button>
     </div>
   </div>
   <div class="menu-wrap me-wrap">
@@ -116,7 +118,7 @@
   <section id="welcome" class="welcome" hidden>
     <div>
       <h2><span id="welcome-hello">¡Hola!</span> Somos Samy, Troya, Ñoño y Juana</h2>
-      <p>Cada uno cuida una parte de tu directo: Samy te conecta y te ayuda a encontrar todo, Troya le pone voz al chat y luce tus regalos, Ñoño pone la música y Juana lleva las metas y las cuentas. Y MechaRidds, el creador de la app en versión androide, maneja tu Chat Bot.</p>
+      <p>Cada uno cuida una parte de tu directo: Samy te conecta y te ayuda a encontrar todo, Troya le pone voz al chat y luce tus regalos, Ñoño pone la música y Juana lleva las metas y las cuentas. Y en versión androide, MechaRidds, el creador de la app, maneja tu Chat Bot, y Mechanizer cuida tu Chat en vivo.</p>
       <p class="tip">💬 <b>Toca a cualquiera de nosotros</b> para preguntarnos dónde está algo o cómo funciona.</p>
     </div>
     <ul class="crew">
@@ -124,7 +126,8 @@
       <li><span data-avatar="troya" data-size="110"></span><b>Troya</b><small>Voz y alertas</small></li>
       <li><span data-avatar="nono" data-size="110"></span><b>Ñoño</b><small>Música</small></li>
       <li><span data-avatar="juana" data-size="110"></span><b>Juana</b><small>Metas y números</small></li>
-      <li class="crew-mecha"><span data-avatar="mecha" data-size="110"></span><b>MechaRidds</b><small>Chat Bot y comunidad</small></li>
+      <li class="crew-mecha"><span data-avatar="mecha" data-size="110"></span><b>MechaRidds</b><small>Chat Bot</small></li>
+      <li class="crew-mecha"><span data-avatar="mechanizer" data-size="110"></span><b>Mechanizer</b><small>Chat en vivo y comunidad</small></li>
     </ul>
     <div class="welcome-cta"><button class="btn primary" id="welcome-done">¡Empecemos!</button><button type="button" class="btn ghost" data-open-help="samy">Pregúntanos algo</button></div>
   </section>
@@ -269,10 +272,10 @@
   </div>
 </section>
 
-<!-- ---------- Chat en vivo (Samy) ---------- -->
+<!-- ---------- Chat en vivo (Mechanizer) ---------- -->
 <section class="page" id="page-actividad" data-page="actividad" hidden>
   <div class="ph"><div class="t"><small>Tu directo</small><h1>Chat en vivo</h1><p>Todas tus plataformas en un solo chat, con 🔊 si se leyó en voz alta o 🔇 y el motivo si no.</p></div>
-    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Aquí llega todo tu directo. Pasa el mouse por un mensaje para leerlo en voz alta, quitarle la voz a esa persona o darle una voz propia.</p><span class="guide" data-avatar="samy" data-size="mini"></span></div></div>
+    <div class="host" style="--g:#ff79bd"><p class="bubble" data-bubble="mechanizer" data-static><b>Mechanizer:</b> Aquí llega todo tu directo. Pasa el mouse por un mensaje para leerlo, ponerlo en pantalla con 📺 o darle voz propia.</p><span class="guide" data-avatar="mechanizer" data-size="mini"></span></div></div>
   <div class="lc-layout" id="lc-layout">
     <div class="card lc-main">
       <div class="lc-bar">
@@ -280,6 +283,7 @@
         <div class="mz-search-form lc-search"><span class="ic" data-icon="search" aria-hidden="true"></span><input id="lc-q" placeholder="Buscar en el chat…" autocomplete="off"></div>
         <button type="button" class="btn small ghost" id="lc-split" title="Una columna por plataforma">▥ Dividir</button>
         <button type="button" class="btn small ghost" id="lc-order"></button>
+        <button type="button" class="btn small ghost" id="lc-unspot" title="Quitar el mensaje del overlay «Mensaje en pantalla»" hidden>📺 Quitar de pantalla</button>
         <button type="button" class="btn small ghost" id="lc-clear" title="Vaciar lo que se ve (no borra nada del directo)">Vaciar</button>
         <button type="button" class="btn small" id="lc-panel-btn" aria-pressed="true" title="Ajustes del chat">⚙ Ajustes</button>
       </div>
@@ -312,6 +316,7 @@
         <details open><summary>Eventos</summary>
           <label class="switch"><input type="checkbox" data-lcp="showEvents"><span></span> <em class="sw-t">Seguidores, suscripciones y compartidos</em></label>
           <label class="switch"><input type="checkbox" data-lcp="showStickers"><span></span> <em class="sw-t">Stickers</em></label>
+          <label class="switch"><input type="checkbox" data-lcp="showRewards"><span></span> <em class="sw-t">Canjes de la tienda de Kick<small>Lo que canjean con los puntos de tu canal</small></em></label>
           <label class="switch"><input type="checkbox" data-lcp="showJoins"><span></span> <em class="sw-t">Quién llega<small>Puede ser mucho en directos grandes</small></em></label></details>
         <details open><summary>Regalos y apoyo</summary>
           <label class="switch"><input type="checkbox" data-lcp="giftsColumn"><span></span> <em class="sw-t">Columna de regalos<small>Con el total de cada moneda</small></em></label>
@@ -338,8 +343,9 @@
         <label class="switch"><input type="checkbox" data-lcp="showAvatars"><span></span> <em class="sw-t">Fotos de perfil</em></label>
         <label class="switch"><input type="checkbox" data-lcp="showTime"><span></span> <em class="sw-t">Hora de cada mensaje</em></label>
         <label class="switch"><input type="checkbox" data-lcp="compact"><span></span> <em class="sw-t">Compacto<small>Más mensajes en pantalla</small></em></label>
+        <label class="switch"><input type="checkbox" data-lcp="emotes"><span></span> <em class="sw-t">Emotes como imagen<small>Kick, Twitch y stickers de TikTok</small></em></label>
         <button type="button" class="btn mt" id="lc-popout">⧉ Abrir el chat en una ventana aparte</button>
-        <p class="hint">Útil para tenerlo encima del juego o en otra pantalla.</p>
+        <p class="hint">Para tenerlo en tu segundo monitor o encima del juego. Se abre donde la dejaste la última vez, y sus ajustes (letra, fondo, transparencia…) están en su propio botón ⚙. Usa las mismas plataformas, filtros y destacados de aquí.</p>
       </div>
       <p class="hint lc-pfoot">Estos ajustes se guardan en este PC.</p>
     </aside>

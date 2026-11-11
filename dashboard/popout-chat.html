@@ -7,85 +7,417 @@
 <link rel="stylesheet" href="/fonts.css">
 <link rel="stylesheet" href="styles.css">
 <style>
-  /* Chat en una ventana aparte: solo los mensajes, para tenerlo encima del juego. */
+  /* Chat en una ventana aparte: pensado para un segundo monitor (o encima
+     del juego). Usa las plataformas, filtros y destacados de Chat en vivo;
+     lo visual (letra, fondo, transparencia…) se ajusta en su propio ⚙. */
   body { display: block; overflow: hidden; }
-  .po { height: 100vh; display: grid; grid-template-rows: auto minmax(0, 1fr); }
-  .po-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--edge); }
-  .po-bar b { font-size: 13px; }
-  .po-bar .seg button { padding: 4px 8px; font-size: 12px; }
-  .po-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); margin-left: auto; }
-  .po-dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
-  .po-feed { list-style: none; margin: 0; padding: 8px; overflow-y: auto; display: grid; align-content: start; gap: 2px; }
-  .po-feed li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; padding: 4px 6px; border-radius: 8px; }
-  .po-feed .av { width: 26px; height: 26px; font-size: 11px; }
-  .po-feed .who { font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 5px; }
-  .po-feed .who img { width: 13px; height: 13px; border-radius: 4px; }
-  .po-feed .who i { font-style: normal; color: var(--muted); font-weight: 600; font-size: 11px; margin-left: auto; }
-  .po-feed p { margin: 1px 0 0; font-size: 14px; overflow-wrap: anywhere; }
-  .po-feed li.ev { display: block; color: var(--muted); font-size: 12.5px; }
-  .po-feed li.ev img { width: 13px; height: 13px; border-radius: 4px; vertical-align: -2px; }
+  html[data-pobg="solido"] body { background: var(--panel); }
+  html[data-pobg="negro"] body, html[data-pobg="negro"] .po-bar, html[data-pobg="negro"] .po-reply { background: #000; }
+  .po { --po-fs: 15px; height: 100vh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; position: relative; }
+  .po-bar { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--line); min-width: 0; }
+  .po-bar > b { font-size: 13px; flex: none; }
+  .po-plats { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+  .po-plats button { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .po-plats button img { width: 13px; height: 13px; border-radius: 4px; }
+  /* Ventana angosta: solo los logos (el nombre queda en el globo). */
+  @media (max-width: 520px) { .po-plats button:not([data-p="all"]) span { display: none; } .po-plats button { padding: 4px 7px; } }
+  .po-plats button[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 22%, transparent); border-color: var(--accent); color: var(--ink); }
+  .po-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--bad, #ff6b5e); margin-left: auto; }
+  .po-dot.on { background: var(--ok, #74d14c); box-shadow: 0 0 8px var(--ok, #74d14c); }
+  .po-gear { flex: none; width: 30px; height: 30px; border-radius: 9px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; font-size: 15px; }
+  .po-gear[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 22%, transparent); border-color: var(--accent); }
+
+  .po-main { position: relative; min-height: 0; }
+  .po-feed { list-style: none; margin: 0; padding: 8px; height: 100%; overflow-y: auto; display: grid; align-content: start; gap: 2px; font-size: var(--po-fs); }
+  .po-feed li { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; padding: 5px 8px; border-radius: 10px; }
+  .po-feed li:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+  .po-feed .av { width: 1.9em; height: 1.9em; font-size: .75em; }
+  .po-feed .who { font-weight: 800; font-size: .9em; display: flex; align-items: center; gap: 5px; min-width: 0; }
+  .po-feed .who .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .po-feed .who img.pl { width: .95em; height: .95em; border-radius: 4px; flex: none; }
+  .po-feed .who time { font-style: normal; color: var(--muted); font-weight: 600; font-size: .78em; margin-left: auto; flex: none; }
+  .po-feed p { margin: 1px 0 0; overflow-wrap: anywhere; line-height: 1.45; }
+  .po-feed li.ev { display: block; color: var(--muted); font-size: .85em; padding: 6px 10px; }
+  .po-feed li.ev img.pl { width: 1em; height: 1em; border-radius: 4px; vertical-align: -2px; }
+  .po-feed li.ev b { color: var(--ink); }
+  .po-feed li.ev .gimg { height: 1.6em; vertical-align: middle; }
+  .po-feed li.t-reward { background: color-mix(in srgb, #53fc18 8%, transparent); box-shadow: inset 3px 0 0 #53fc18; }
+  .po-feed li.t-gift { background: color-mix(in srgb, #ffb23e 8%, transparent); box-shadow: inset 3px 0 0 #ffb23e; }
   .po-feed li.muted p { opacity: .65; }
+  .po-feed li.hl-mention { background: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: inset 3px 0 0 var(--accent); }
+  .po-feed li.hl-mod { box-shadow: inset 3px 0 0 #74d14c; }
+  .po-feed li.hl-sub { box-shadow: inset 3px 0 0 #9b8cff; }
+  .po-feed li.hl-team { box-shadow: inset 3px 0 0 #ff4d7a; }
+  .po-feed li.hl-first { box-shadow: inset 3px 0 0 #5ab0ff; }
+  .po-act { position: absolute; top: 3px; right: 6px; display: none; gap: 3px; }
+  .po-feed li:hover .po-act { display: flex; }
+  .po-act button { border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); border-radius: 8px; padding: 2px 6px; cursor: pointer; font-size: 12px; }
+  .po.compact .po-feed li { padding: 2px 6px; }
+  .po.compact .po-feed li:not(.ev) > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; }
+  .po.compact .po-feed p { display: inline; margin: 0; }
+  .po.no-av .po-feed li { grid-template-columns: minmax(0, 1fr); }
+  .po.no-av .po-feed .av { display: none; }
+  .po.no-time .po-feed time { display: none; }
+  .po.no-badges .po-feed .bd { display: none; }
+  .po-new { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); padding: 6px 14px; border-radius: 99px; border: 0; background: var(--accent); color: var(--on-accent, #160f22); font: inherit; font-weight: 800; font-size: 12.5px; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+
+  .po-reply { display: flex; gap: 6px; padding: 8px; border-top: 1px solid var(--line); background: var(--bg); }
+  .po-reply select, .po-reply input { min-width: 0; border-radius: 10px; border: 1px solid var(--line); background: var(--well); color: var(--ink); font: inherit; font-size: 13px; padding: 7px 9px; }
+  .po-reply input { flex: 1; }
+  .po-reply button { flex: none; border-radius: 10px; border: 0; padding: 0 12px; background: var(--accent); color: var(--on-accent, #160f22); font-weight: 800; cursor: pointer; }
+  .po-reply small { display: none; }
+  .po-msg { padding: 4px 10px 0; font-size: 12px; color: var(--muted); }
+  .po-msg.err { color: var(--bad, #ff6b5e); }
+  .po-feed li.po-empty { display: flex; align-items: center; gap: 12px; padding: 14px; color: var(--ink); }
+  .po-mz { flex: none; width: 64px; height: 64px; border-radius: 50%; overflow: hidden; background: color-mix(in srgb, #ff79bd 18%, var(--panel-2)); box-shadow: 0 0 0 2px #ff79bd; }
+  .po-mz svg { width: 100%; height: 100%; display: block; }
+  .po-unspot { margin-left: 6px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); border-radius: 8px; padding: 1px 8px; cursor: pointer; font: inherit; font-size: 12px; }
+
+  .po-panel { position: absolute; inset: 0 0 0 auto; width: min(330px, 100%); z-index: 5; background: var(--panel); border-left: 1px solid var(--line); box-shadow: -16px 0 40px rgba(0,0,0,.35); overflow-y: auto; padding: 12px 14px 20px; }
+  .po-panel h4 { margin: 16px 0 4px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .po-panel h4:first-child { margin-top: 0; }
+  .po-panel .switch { font-size: 13.5px; margin: 7px 0; }
+  .po-panel .sw-t small { display: block; color: var(--muted); font-size: 11.5px; font-weight: 500; }
+  .po-panel .field input[type="range"] { width: 100%; }
+  .po-seg { display: flex; gap: 4px; flex-wrap: wrap; }
+  .po-seg button { flex: 1; padding: 6px 8px; border-radius: 9px; border: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .po-seg button[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 22%, transparent); border-color: var(--accent); color: var(--ink); }
+  .po-panel .hint { font-size: 12px; color: var(--muted); margin: 6px 0; }
 </style>
 </head>
 <body>
-<div class="po">
-  <div class="po-bar"><img src="img/logo.png" alt="" width="26" height="26" style="border-radius:7px"><b>Chat</b><div class="seg" id="po-plat"></div><i class="po-dot" id="po-dot" title="Conexión con la app"></i></div>
-  <ul class="po-feed" id="po-feed"></ul>
+<div class="po" id="po">
+  <div class="po-bar">
+    <img src="img/logo.png" alt="" width="24" height="24" style="border-radius:7px;flex:none"><b>Chat</b>
+    <div class="po-plats" id="po-plat"></div>
+    <i class="po-dot" id="po-dot" title="Conexión con la app"></i>
+    <button type="button" class="po-gear" id="po-gear" title="Ajustes de esta ventana" aria-pressed="false">⚙</button>
+  </div>
+  <div class="po-main">
+    <ul class="po-feed" id="po-feed"></ul>
+    <button type="button" class="po-new" id="po-new" hidden></button>
+    <aside class="po-panel" id="po-panel" hidden>
+      <h4>Letra y mensajes</h4>
+      <label class="field"><span>Tamaño de la letra <b id="po-fs-val"></b></span><input type="range" min="12" max="30" step="1" data-pp="fontSize"></label>
+      <label class="switch"><input type="checkbox" data-pp="avatars"><span></span> <em class="sw-t">Fotos de perfil</em></label>
+      <label class="switch"><input type="checkbox" data-pp="time"><span></span> <em class="sw-t">Hora de cada mensaje</em></label>
+      <label class="switch"><input type="checkbox" data-pp="badges"><span></span> <em class="sw-t">Insignias<small>Moderador, suscriptor, VIP y tu equipo</small></em></label>
+      <label class="switch"><input type="checkbox" data-pp="emotes"><span></span> <em class="sw-t">Emotes como imagen<small>Kick, Twitch y stickers de TikTok</small></em></label>
+      <label class="switch"><input type="checkbox" data-pp="compact"><span></span> <em class="sw-t">Compacto<small>Nombre y mensaje en la misma línea</small></em></label>
+      <h4>Qué sale</h4>
+      <label class="switch"><input type="checkbox" data-pp="events"><span></span> <em class="sw-t">Seguidores, suscripciones y compartidos</em></label>
+      <label class="switch"><input type="checkbox" data-pp="gifts"><span></span> <em class="sw-t">Regalos</em></label>
+      <label class="switch"><input type="checkbox" data-pp="stickers"><span></span> <em class="sw-t">Stickers</em></label>
+      <label class="switch"><input type="checkbox" data-pp="rewards"><span></span> <em class="sw-t">Canjes de la tienda de Kick</em></label>
+      <p class="hint">Las plataformas, cuentas ocultas, comandos y destacados se eligen en Chat en vivo → Ajustes, y aquí se aplican solos.</p>
+      <h4>Fondo</h4>
+      <div class="po-seg" id="po-bg"><button type="button" data-bg="tema">Como la app</button><button type="button" data-bg="solido">Sólido</button><button type="button" data-bg="negro">Negro</button></div>
+      <h4>Responder</h4>
+      <label class="switch"><input type="checkbox" data-pp="reply"><span></span> <em class="sw-t">Campo para escribir en el chat<small>Con la cuenta autorizada en Chat Bot → Escribir</small></em></label>
+      <div id="po-desk" hidden>
+        <h4>Ventana</h4>
+        <label class="switch"><input type="checkbox" data-pw="onTop"><span></span> <em class="sw-t">Siempre encima<small>Útil si la usas en el mismo monitor del juego</small></em></label>
+        <label class="field"><span>Opacidad <b id="po-op-val"></b></span><input type="range" min="30" max="100" step="5" data-pw="opacity"></label>
+        <label class="field"><span>Cuando no la usas <b id="po-idle-val"></b></span><input type="range" min="20" max="100" step="5" data-pw="idleOpacity"></label>
+        <p class="hint">Al quitar el mouse de la ventana baja a esa opacidad; al volver, se ve normal. Se abre en el monitor, la posición y el tamaño donde la dejaste.</p>
+      </div>
+    </aside>
+  </div>
+  <div>
+    <p class="po-msg" id="po-msg" hidden></p>
+    <form class="po-reply" id="po-reply" hidden autocomplete="off">
+      <select id="po-to" title="Dónde escribir"></select>
+      <input id="po-text" maxlength="450" placeholder="Escribe en el chat…">
+      <button type="submit" title="Enviar">➤</button>
+    </form>
+  </div>
 </div>
 <script type="module">
   import { connectSatronho } from '/overlays/client.js';
+  import { applyAppearance } from '/js/appearance.js';
+  import { messageHtml, onlyEmotes } from '/js/emotes.js';
+  import { mechanizerHead } from '/js/mechanizer.js';
+
   const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const PLATS = { all: 'Todas', tiktok: 'TikTok', kick: 'Kick', twitch: 'Twitch', starvios: 'Starvios' };
+  const PLATS = ['tiktok', 'kick', 'twitch', 'starvios'];
+  const NAMES = { all: 'Todas', tiktok: 'TikTok', kick: 'Kick', twitch: 'Twitch', starvios: 'Starvios' };
+  const WRITERS = ['kick', 'starvios']; // donde Satronho Bot puede escribir
   const COLORS = ['#ff8fb5', '#9b8cff', '#74d14c', '#ffb23e', '#5fb8ff', '#ff7a59', '#c084fc', '#2dd4bf'];
-  let plat = 'all';
+  const TYPES = ['chat', 'follow', 'sub', 'share', 'gift', 'sticker', 'superfan', 'reward'];
+
+  // Ajustes propios de esta ventana (se recuerdan en este PC).
+  const PO_KEY = 'satronho.popout';
+  const PO_DEF = { plat: 'all', fontSize: 15, avatars: true, time: true, badges: true, emotes: true, compact: false, events: true, gifts: true, stickers: true, rewards: true, bg: 'tema', reply: false, replyTo: 'kick' };
+  const load = (k, def) => { try { return { ...def, ...JSON.parse(localStorage.getItem(k) || '{}') }; } catch { return { ...def }; } };
+  let pp = load(PO_KEY, PO_DEF);
+  const savePp = () => { try { localStorage.setItem(PO_KEY, JSON.stringify(pp)); } catch { /* sin almacenamiento */ } };
+  // Los de Chat en vivo: plataformas, filtros y destacados.
+  let lc = readLc();
+  function readLc() {
+    const x = load('satronho.livechat', {});
+    return { platforms: { tiktok: true, kick: true, twitch: true, starvios: true, ...(x.platforms || {}) }, hl: { mods: true, mentions: true, ...(x.hl || {}) }, hiddenAccounts: x.hiddenAccounts || '', hideCommands: Boolean(x.hideCommands), hideBots: Boolean(x.hideBots), censor: Boolean(x.censor), mentionWords: x.mentionWords || '' };
+  }
+
+  let config = null;
+  let desktop = false;
+  let win = { onTop: false, opacity: 100, idleOpacity: 100 };
   const items = [];
   const decided = new Map();
-  // El mismo tema, color y letra que la app.
-  fetch('/api/state').then((r) => r.json()).then(({ config }) => {
-    const a = config?.appearance || {};
-    const root = document.documentElement;
-    root.dataset.theme = a.theme || 'noche';
-    if (a.accent) root.style.setProperty('--accent', a.accent);
-  }).catch(() => {});
-  function av(name, url) {
+  const firstSeen = new Set();
+  let unseen = 0;
+
+  // ---------- Qué plataformas se muestran ----------
+  // Solo las que tienes encendidas en Chat en vivo y no ocultaste en
+  // Conexiones → «Plataformas que uso».
+  const platOn = (p) => lc.platforms[p] !== false && config?.platforms?.[p]?.hidden !== true;
+  const activePlats = () => PLATS.filter(platOn);
+
+  // ---------- Filtros y destacados (los de Chat en vivo) ----------
+  const listOf = (txt) => String(txt || '').split(',').map((x) => x.trim().replace(/^@/, '').toLowerCase()).filter(Boolean);
+  const reEsc = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function censor(text) {
+    if (!lc.censor) return text;
+    const words = (config?.tts?.bannedWords || []).map((w) => String(w).trim()).filter((w) => w.length > 1);
+    return words.length ? text.replace(new RegExp(`(${words.map(reEsc).join('|')})`, 'giu'), (m) => '✱'.repeat(Math.min(6, m.length))) : text;
+  }
+  function mentionRe() {
+    const mine = Object.values(config?.platforms || {}).map((p) => String(p?.channel || '').replace(/^@/, '')).filter(Boolean);
+    const words = [...mine, ...listOf(lc.mentionWords)];
+    return words.length ? new RegExp(`(^|[^\\p{L}\\p{N}])@?(${words.map(reEsc).join('|')})(?![\\p{L}\\p{N}])`, 'iu') : null;
+  }
+  const isBot = (e) => decided.get(e.id)?.reason === 'es un bot' || (e.extra?.badges || []).includes('bot');
+  function shows(e) {
+    if (!TYPES.includes(e.type)) return false;
+    if (PLATS.includes(e.platform) && !platOn(e.platform)) return false;
+    if (pp.plat !== 'all' && e.platform !== pp.plat) return false;
+    const hidden = listOf(lc.hiddenAccounts);
+    if (hidden.length && [e.user?.name, e.user?.id].some((x) => hidden.includes(String(x || '').toLowerCase()))) return false;
+    if (e.type === 'chat') {
+      if (lc.hideCommands && /^\s*!/.test(e.message || '')) return false;
+      if (lc.hideBots && isBot(e)) return false;
+      return true;
+    }
+    if (e.type === 'gift') return pp.gifts;
+    if (e.type === 'sticker') return pp.stickers;
+    if (e.type === 'reward') return pp.rewards;
+    return pp.events;
+  }
+  function highlight(e) {
+    if (e.type !== 'chat') return '';
+    const r = e.extra?.roles || {};
+    const b = new Set(e.extra?.badges || []);
+    const h = lc.hl;
+    const re = h.mentions ? mentionRe() : null;
+    if (re && re.test(e.message || '')) return 'hl-mention';
+    if (h.mods && (r.mod || b.has('moderator'))) return 'hl-mod';
+    if (h.subs && (r.sub || b.has('subscriber') || b.has('vip') || b.has('founder'))) return 'hl-sub';
+    if (h.team && r.team) return 'hl-team';
+    if (h.first && e._first) return 'hl-first';
+    return '';
+  }
+
+  // ---------- Cómo se ve cada fila ----------
+  function av(name, url, color) {
     let h = 0; for (const ch of String(name || '?')) h = (h * 31 + ch.codePointAt(0)) >>> 0;
     const l = esc([...String(name || '?').replace(/[^\p{L}\p{N}]/gu, '')][0]?.toUpperCase() || '?');
-    return url ? `<span class="av"><img src="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()"></span>` : `<span class="av" style="--avc:${COLORS[h % COLORS.length]}"><b>${l}</b></span>`;
+    return url ? `<span class="av"><img src="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()"></span>` : `<span class="av" style="--avc:${esc(color || COLORS[h % COLORS.length])}"><b>${l}</b></span>`;
   }
-  const EV = { follow: 'empezó a seguirte', sub: 'se suscribió', share: 'compartió el directo', gift: 'envió' };
+  function badges(e) {
+    const out = [];
+    const r = e.extra?.roles || {};
+    const b = new Set(e.extra?.badges || []);
+    if (r.host || b.has('broadcaster')) out.push('<i class="bd host" title="Tú">★</i>');
+    if (r.mod || b.has('moderator')) out.push('<i class="bd mod" title="Moderador">🛡</i>');
+    if (b.has('vip')) out.push('<i class="bd vip" title="VIP">◆</i>');
+    if (r.sub || b.has('subscriber') || b.has('founder') || b.has('og')) out.push('<i class="bd sub" title="Suscriptor">✦</i>');
+    if (r.team) out.push(`<i class="bd team" title="Miembro de tu equipo, nivel ${Number(r.team) || ''}">♥${Number(r.team) || ''}</i>`);
+    return out.join('');
+  }
+  const logo = (p) => (PLATS.includes(p) ? `<img class="pl" src="/img/platforms/${p}.png" alt="">` : '');
+  const gimg = (u) => (/^https:\/\//.test(u || '') ? `<img class="gimg" src="/gift-img?u=${encodeURIComponent(u)}" alt="" loading="lazy">` : '');
+  const nf = (n) => Number(n || 0).toLocaleString('es-CO');
+  const msg = (e) => messageHtml(e, { emotes: pp.emotes, transform: censor });
+  function evText(e) {
+    const x = e.extra || {};
+    switch (e.type) {
+      case 'follow': return 'empezó a seguirte';
+      case 'sub': return e.amount > 1 ? `se suscribió (${e.amount} meses)` : 'se suscribió';
+      case 'share': return 'compartió el directo';
+      case 'superfan': return 'ahora es superfan ⭐';
+      case 'gift': return `envió ${x.count > 1 ? `${x.count}× ` : ''}<b>${esc(x.giftName || 'un regalo')}</b> ${gimg(x.image)} · ${nf(e.amount)} ${esc(x.currency || '')}`;
+      case 'sticker': return `mandó ${gimg(x.image) || 'un sticker'}`;
+      case 'reward': return `canjeó <b class="lc-reward" ${/^#[0-9a-f]{3,8}$/i.test(x.color || '') ? `style="--rw:${x.color}"` : ''}>${esc(x.rewardTitle || 'una recompensa')}</b>${e.amount ? ` <small class="lc-pts">${nf(e.amount)} pts</small>` : ''}${e.message ? `<br>«${msg(e)}»` : ''}`;
+      default: return '';
+    }
+  }
+  const ACT = '<span class="po-act"><button type="button" data-spot title="Mostrar en pantalla (overlay «Mensaje en pantalla»)">📺</button></span>';
   function row(e) {
-    const logo = `<img src="/img/platforms/${esc(e.platform)}.png" alt="">`;
-    if (e.type !== 'chat') return `<li class="ev" data-id="${esc(e.id)}">${logo} <b>${esc(e.user?.name)}</b> ${EV[e.type] || ''} ${e.type === 'gift' ? `${esc(e.extra?.giftName || 'un regalo')} · ${Number(e.amount || 0).toLocaleString('es-CO')} ${esc(e.extra?.currency || '')}` : ''}</li>`;
+    if (e.type !== 'chat') return `<li class="ev t-${esc(e.type)}" data-id="${esc(e.id)}">${logo(e.platform)} <b>${esc(e.user?.name)}</b> ${evText(e)}</li>`;
     const d = decided.get(e.id);
     const t = new Date(e.ts || Date.now()).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-    return `<li class="${d && !d.read ? 'muted' : ''}" data-id="${esc(e.id)}">${av(e.user?.name, e.user?.avatar)}<div><div class="who">${logo}${esc(e.user?.name)}${d ? (d.read ? ' 🔊' : ' 🔇') : ''}<i>${t}</i></div><p>${esc(e.message)}</p></div></li>`;
+    const color = /^#[0-9a-f]{3,8}$/i.test(e.extra?.color || '') ? e.extra.color : '';
+    const cls = [d && !d.read ? 'muted' : '', highlight(e)].filter(Boolean).join(' ');
+    return `<li class="${cls}" data-id="${esc(e.id)}">${av(e.user?.name, e.user?.avatar)}<div><div class="who">${logo(e.platform)}${badges(e)}<span class="nm" ${color ? `style="color:${color}"` : ''}>${esc(e.user?.name)}</span>${d ? (d.read ? ' 🔊' : ' 🔇') : ''}<time>${t}</time></div><p class="${pp.emotes && onlyEmotes(e) ? 'only-emotes' : ''}">${msg(e)}</p></div>${ACT}</li>`;
   }
-  const shows = (e) => (plat === 'all' || e.platform === plat) && ['chat', 'follow', 'sub', 'share', 'gift'].includes(e.type);
+
+  // ---------- Dibujar ----------
+  const feed = $('#po-feed');
+  const atEnd = () => feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60;
+  function showNew() {
+    const b = $('#po-new');
+    b.hidden = unseen === 0;
+    b.textContent = `${unseen} ${unseen === 1 ? 'mensaje nuevo' : 'mensajes nuevos'} ↓`;
+  }
+  function toEnd() { feed.scrollTop = feed.scrollHeight; unseen = 0; showNew(); }
+  function drawBar() {
+    const plats = activePlats();
+    if (pp.plat !== 'all' && !plats.includes(pp.plat)) pp.plat = 'all';
+    // Con una sola plataforma no hacen falta botones.
+    $('#po-plat').innerHTML = plats.length > 1 ? ['all', ...plats].map((id) => `<button type="button" data-p="${id}" aria-pressed="${pp.plat === id}" title="${NAMES[id]}">${id === 'all' ? '' : logo(id)}<span>${NAMES[id]}</span></button>`).join('') : '';
+    const to = WRITERS.filter(platOn);
+    $('#po-to').innerHTML = to.map((p) => `<option value="${p}" ${pp.replyTo === p ? 'selected' : ''}>${NAMES[p]}</option>`).join('');
+    $('#po-reply').hidden = !pp.reply || !to.length;
+  }
   function draw() {
-    $('#po-plat').innerHTML = Object.entries(PLATS).map(([id, n]) => `<button type="button" data-p="${id}" aria-pressed="${plat === id}">${n}</button>`).join('');
-    const ul = $('#po-feed');
-    ul.innerHTML = items.filter(shows).slice(-200).map(row).join('') || '<li class="ev">Cuando alguien escriba, aparece aquí.</li>';
-    ul.scrollTop = ul.scrollHeight;
+    const po = $('#po');
+    po.style.setProperty('--po-fs', `${pp.fontSize}px`);
+    po.classList.toggle('compact', pp.compact);
+    po.classList.toggle('no-av', !pp.avatars);
+    po.classList.toggle('no-time', !pp.time);
+    po.classList.toggle('no-badges', !pp.badges);
+    document.documentElement.dataset.pobg = pp.bg;
+    drawBar();
+    feed.innerHTML = items.filter(shows).slice(-250).map(row).join('') || `<li class="ev po-empty"><span class="po-mz">${mechanizerHead()}</span><span><b>Mechanizer:</b> cuando alguien escriba, aparece aquí. Mi ⚙ tiene la letra, el fondo y la transparencia.</span></li>`;
+    toEnd();
   }
-  $('#po-plat').addEventListener('click', (ev) => { const b = ev.target.closest('[data-p]'); if (b) { plat = b.dataset.p; draw(); } });
+  function fillPanel() {
+    for (const el of $$('[data-pp]')) { const v = pp[el.dataset.pp]; if (el.type === 'checkbox') el.checked = Boolean(v); else el.value = v; }
+    for (const el of $$('[data-pw]')) { const v = win[el.dataset.pw]; if (el.type === 'checkbox') el.checked = Boolean(v); else el.value = v; }
+    for (const b of $$('#po-bg [data-bg]')) b.setAttribute('aria-pressed', String(b.dataset.bg === pp.bg));
+    $('#po-fs-val').textContent = `${pp.fontSize} px`;
+    $('#po-op-val').textContent = `${win.opacity} %`;
+    $('#po-idle-val').textContent = `${win.idleOpacity} %`;
+    $('#po-desk').hidden = !desktop;
+  }
+
+  // ---------- Ajustes ----------
+  $('#po-gear').addEventListener('click', () => {
+    const p = $('#po-panel');
+    p.hidden = !p.hidden;
+    $('#po-gear').setAttribute('aria-pressed', String(!p.hidden));
+    fillPanel();
+  });
+  $('#po-panel').addEventListener('input', (ev) => {
+    const el = ev.target;
+    if (el.dataset.pp === 'fontSize') { pp.fontSize = Number(el.value) || 15; $('#po-fs-val').textContent = `${pp.fontSize} px`; $('#po').style.setProperty('--po-fs', `${pp.fontSize}px`); savePp(); }
+    if (el.dataset.pw === 'opacity' || el.dataset.pw === 'idleOpacity') {
+      win[el.dataset.pw] = Number(el.value) || 100;
+      fillPanel();
+      saveWin();
+    }
+  });
+  $('#po-panel').addEventListener('change', (ev) => {
+    const el = ev.target;
+    if (el.dataset.pp && el.type === 'checkbox') { pp[el.dataset.pp] = el.checked; savePp(); draw(); }
+    if (el.dataset.pw === 'onTop') { win.onTop = el.checked; saveWin(); }
+  });
+  $('#po-bg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-bg]'); if (!b) return; pp.bg = b.dataset.bg; savePp(); fillPanel(); document.documentElement.dataset.pobg = pp.bg; });
+  let winTimer;
+  function saveWin() {
+    clearTimeout(winTimer);
+    winTimer = setTimeout(() => fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ window: { popout: { onTop: win.onTop, opacity: win.opacity, idleOpacity: win.idleOpacity } } }) }).catch(() => {}), 200);
+  }
+  // Más transparente cuando el mouse sale de la ventana.
+  document.documentElement.addEventListener('mouseenter', () => desktop && fetch('/api/popout/hover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"inside":true}' }).catch(() => {}));
+  document.documentElement.addEventListener('mouseleave', () => desktop && fetch('/api/popout/hover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"inside":false}' }).catch(() => {}));
+
+  // Si cambias algo en Chat en vivo (plataformas, filtros…), se aplica aquí al momento.
+  window.addEventListener('storage', (ev) => {
+    if (ev.key === 'satronho.livechat') { lc = readLc(); draw(); }
+    if (ev.key === PO_KEY) { pp = load(PO_KEY, PO_DEF); draw(); fillPanel(); }
+  });
+
+  $('#po-plat').addEventListener('click', (ev) => { const b = ev.target.closest('[data-p]'); if (b) { pp.plat = b.dataset.p; savePp(); draw(); } });
+  feed.addEventListener('scroll', () => { if (atEnd()) { unseen = 0; showNew(); } });
+  $('#po-new').addEventListener('click', toEnd);
+
+  // 📺 Mostrar un mensaje en pantalla.
+  function note(text, err = false, unspot = false) {
+    const m = $('#po-msg');
+    m.innerHTML = `${esc(text)}${unspot ? ' <button type="button" data-unspot class="po-unspot">Quitar</button>' : ''}`;
+    m.classList.toggle('err', err);
+    m.hidden = false;
+    clearTimeout(note.t);
+    note.t = setTimeout(() => { m.hidden = true; }, unspot ? 12000 : 4000);
+  }
+  feed.addEventListener('click', async (ev) => {
+    const b = ev.target.closest('[data-spot]');
+    const e = b && items.find((x) => x.id === b.closest('[data-id]')?.dataset.id);
+    if (!e) return;
+    const r = await fetch('/api/chat/spotlight', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: e }) }).then((x) => x.json()).catch(() => null);
+    if (!r?.ok) return note('No se pudo mostrar.', true);
+    note('En pantalla, en el overlay «Mensaje en pantalla».', false, true);
+  });
+  $('#po-msg').addEventListener('click', (ev) => {
+    if (!ev.target.closest('[data-unspot]')) return;
+    fetch('/api/chat/spotlight', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"clear":true}' }).catch(() => {});
+    $('#po-msg').hidden = true;
+  });
+
+  // Responder en el chat.
+  $('#po-to').addEventListener('change', (ev) => { pp.replyTo = ev.target.value; savePp(); });
+  $('#po-reply').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const text = $('#po-text').value.trim();
+    if (!text) return;
+    const r = await fetch('/api/chatbot/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, platforms: [$('#po-to').value] }) }).then((x) => x.json()).catch(() => ({ ok: false, error: 'La app no respondió' }));
+    if (r.ok) $('#po-text').value = '';
+    else note(r.error || 'No se pudo enviar', true);
+  });
+
+  // ---------- Datos ----------
+  function loadState() {
+    return fetch('/api/state').then((r) => r.json()).then(({ config: c }) => {
+      config = c || {};
+      applyAppearance(config);
+      win = { onTop: false, opacity: 100, idleOpacity: 100, ...(config.window?.popout || {}) };
+    }).catch(() => {});
+  }
+  const mark = (e) => {
+    if (e.type !== 'chat' || !e.user) return;
+    const k = `${e.platform}:${String(e.user.id || e.user.name).toLowerCase()}`;
+    if (!firstSeen.has(k)) { firstSeen.add(k); e._first = true; }
+  };
+  Promise.all([loadState(), fetch('/api/popout').then((r) => r.json()).then((r) => { desktop = Boolean(r.desktop); }).catch(() => {})]).then(() => { draw(); fillPanel(); });
+
   connectSatronho((k, p) => {
-    if (k === 'hello') { items.length = 0; items.push(...(p.recent || []).slice().reverse()); draw(); }
+    if (k === 'hello') {
+      items.length = 0;
+      firstSeen.clear();
+      for (const e of (p.recent || []).slice().reverse()) { mark(e); items.push(e); }
+      loadState().then(draw);
+    }
     if (k === 'event') {
-      items.push(p); if (items.length > 600) items.shift();
+      mark(p);
+      items.push(p);
+      if (items.length > 800) items.shift();
       if (!shows(p)) return;
-      const ul = $('#po-feed');
-      const atEnd = ul.scrollHeight - ul.scrollTop - ul.clientHeight < 60;
-      ul.querySelector('.ev:only-child')?.remove();
-      ul.insertAdjacentHTML('beforeend', row(p));
-      while (ul.children.length > 200) ul.firstElementChild.remove();
-      if (atEnd) ul.scrollTop = ul.scrollHeight;
+      const end = atEnd();
+      feed.querySelector('.po-empty')?.remove();
+      feed.insertAdjacentHTML('beforeend', row(p));
+      while (feed.children.length > 250) feed.firstElementChild.remove();
+      // Si subiste a leer algo, no te movemos: avisamos cuántos llegaron.
+      if (end) feed.scrollTop = feed.scrollHeight;
+      else { unseen += 1; showNew(); }
     }
     if (k === 'tts-decision') {
       decided.set(p.eventId, p);
-      const li = document.querySelector(`[data-id="${CSS.escape(p.eventId)}"]`);
+      const li = feed.querySelector(`[data-id="${CSS.escape(p.eventId)}"]`);
       const e = items.find((x) => x.id === p.eventId);
-      if (li && e) li.outerHTML = row(e);
+      if (!li || !e) return;
+      if (!shows(e)) li.remove(); else li.outerHTML = row(e);
     }
   }, (on) => $('#po-dot').classList.toggle('on', on));
 </script>

@@ -146,7 +146,7 @@ function createTiktokConnector({ bus, onStatus, getSettings = () => ({}), onGift
       const stickers = (d.emotes || []).map((x) => emoteOf(x?.emote || x)).filter(Boolean);
       const text = d.content ?? d.comment ?? '';
       // Un comentario que solo es un sticker no se lee ni sale como texto vacío.
-      if (String(text).trim() || !stickers.length) base.emit({ type: 'chat', user: userOf(d), message: text, extra: { roles: rolesOf(d, hostId), stickers: stickers.length || undefined } });
+      if (String(text).trim() || !stickers.length) base.emit({ type: 'chat', user: userOf(d), message: text, extra: { roles: rolesOf(d, hostId), stickers: stickers.length || undefined, stickerImgs: stickers.filter((s) => s.image).slice(0, 3).map((s) => ({ id: s.id, image: s.image })) } });
       for (const em of stickers.slice(0, 3)) stickerFrom(d, em, 'chat');
     });
 

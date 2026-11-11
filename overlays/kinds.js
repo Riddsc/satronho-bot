@@ -6,6 +6,7 @@
 
 import { mascotSVG } from '/js/mascots.js';
 import { mechaBust } from '/js/mecharidds.js';
+import { messageHtml } from '/js/emotes.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nf = new Intl.NumberFormat('es-CO');
@@ -542,6 +543,8 @@ const chat = {
   .ch-body { padding: 8px 12px; border-radius: calc(16px * var(--r)) !important; border-top-left-radius: 4px !important; min-width: 0; }
   .ch-name { font-weight: 900; font-size: 15px; display: flex; align-items: center; gap: 5px; }
   .ch-text { font-size: 18px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+  .emote { height: 1.6em; width: auto; max-width: 6em; vertical-align: middle; margin: -.3em 1px -.2em; object-fit: contain; }
+  .emote.sticker { height: 2.2em; }
   .ch-b { font-style: normal; font-size: 11px; font-weight: 900; padding: 1px 5px; border-radius: 6px; background: color-mix(in srgb, var(--ink) 18%, transparent); }
   .ch-b.mod { background: rgba(116,209,76,.3); } .ch-b.team { background: rgba(255,77,122,.3); } .ch-b.sub { background: rgba(155,140,255,.35); }
   .ch-m.gone { animation: ch-out .5s ease-in forwards; }
@@ -562,7 +565,59 @@ const chat = {
     list = list.slice(0, set.max);
     if (set.newest === 'bottom') list.reverse();
     document.body.classList.toggle('ch-top', set.newest === 'top');
-    return `<div class="ch ${set.newest === 'top' ? 'top' : ''}">${list.map((e) => `<div class="ch-m" data-key="${esc(e.id)}">${set.showAvatar ? avatar(e.user?.name, e.user?.avatar) : ''}<div class="ch-body surface"><div class="ch-name" ${e.extra?.color ? `style="color:${esc(e.extra.color)}"` : ''}>${set.showPlatform ? plat(e.platform) : ''}${set.showBadges ? badges(e) : ''}${esc(e.user?.name)}</div><div class="ch-text">${esc(e.message).replace(/\[emote:\d+:([^\]]*)\]/g, '$1')}</div></div></div>`).join('')}</div>`;
+    return `<div class="ch ${set.newest === 'top' ? 'top' : ''}">${list.map((e) => `<div class="ch-m" data-key="${esc(e.id)}">${set.showAvatar ? avatar(e.user?.name, e.user?.avatar) : ''}<div class="ch-body surface"><div class="ch-name" ${e.extra?.color ? `style="color:${esc(e.extra.color)}"` : ''}>${set.showPlatform ? plat(e.platform) : ''}${set.showBadges ? badges(e) : ''}${esc(e.user?.name)}</div><div class="ch-text">${messageHtml(e)}</div></div></div>`).join('')}</div>`;
+  },
+};
+
+// ===================== Mensaje en pantalla =====================
+// Desde Chat en vivo (o su ventana aparte) eliges un mensaje con 📺 y sale aquí.
+const spotlight = {
+  css: BASE_CSS + `
+  #root { padding: 0; }
+  .w { width: 100%; height: 100%; }
+  .sp { position: absolute; inset: 0; display: grid; place-items: center; padding: 30px; pointer-events: none; }
+  body[data-pos="left"] .sp { justify-items: start; } body[data-pos="right"] .sp { justify-items: end; }
+  .sp-card { --sc: var(--accent); position: relative; max-width: min(92%, 980px); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; padding: 22px 30px 24px 22px; border-radius: calc(26px * var(--r)); animation: sp-in .7s cubic-bezier(.2,1.4,.4,1) both; }
+  .sp-card.out { animation: sp-out .45s ease-in both; }
+  .sp-card .k-av { width: 84px; height: 84px; font-size: 34px; box-shadow: 0 0 0 4px var(--sc); }
+  .sp-name { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 26px; color: var(--sc); }
+  .sp-name .k-pl { width: 24px; height: 24px; }
+  .sp-text { margin-top: 4px; font-size: 34px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; color: var(--ink); }
+  .sp-text .emote { height: 1.5em; width: auto; vertical-align: middle; margin: -.25em 2px; }
+  .sp-text .emote.sticker { height: 2em; }
+  body[data-style="tarjeta"] .sp-card { border: 3px solid var(--sc); }
+  body[data-style="burbuja"] .sp-card { border-bottom-left-radius: 6px; }
+  body[data-style="burbuja"] .sp-card::after { content: ''; position: absolute; left: 34px; bottom: -14px; border: 14px solid transparent; border-top-color: var(--bg); border-bottom: 0; }
+  body[data-style="minimo"] .sp-card { background: transparent !important; box-shadow: none !important; }
+  body[data-style="minimo"] .sp-text, body[data-style="minimo"] .sp-name { text-shadow: 0 3px 10px rgba(0,0,0,.9); }
+  @keyframes sp-in { from { opacity: 0; transform: translateY(60px) scale(.85); } }
+  @keyframes sp-out { to { opacity: 0; transform: translateY(-30px) scale(.95); } }
+  `,
+  timer: 0,
+  render() { return '<div class="sp" data-own="1" id="sp"></div>'; },
+  show(e, ctx) {
+    const box = document.getElementById('sp');
+    if (!box) return;
+    clearTimeout(spotlight.timer);
+    const { set } = ctx;
+    const color = set.useNameColor && /^#[0-9a-f]{3,8}$/i.test(e.extra?.color || '') ? e.extra.color : '';
+    box.innerHTML = `<div class="sp-card surface" ${color ? `style="--sc:${color}"` : ''}>${set.showAvatar ? avatar(e.user?.name, e.user?.avatar) : '<span></span>'}<div><div class="sp-name">${set.showPlatform ? plat(e.platform) : ''}${set.showBadges ? badges(e) : ''}${esc(e.user?.name)}</div><div class="sp-text">${messageHtml(e)}</div></div></div>`;
+    const secs = ctx.preview ? 4 : Number(set.seconds) || 0;
+    if (secs > 0) spotlight.timer = setTimeout(() => spotlight.hide(), secs * 1000);
+  },
+  hide() {
+    const card = document.querySelector('#sp .sp-card');
+    if (!card) return;
+    card.classList.add('out');
+    setTimeout(() => { if (card.isConnected) card.remove(); }, 460);
+  },
+  onSpot(p, ctx) {
+    if (p?.clear) return spotlight.hide();
+    spotlight.show(p, ctx);
+  },
+  // Vista previa: va mostrando mensajes de ejemplo.
+  onEvent(e, ctx) {
+    if (ctx.preview && e.type === 'chat') spotlight.show(e, ctx);
   },
 };
 
@@ -745,7 +800,7 @@ const screens = {
   },
 };
 
-export const RENDER = { goals, counters, countdown, uptime, viewers, followers, ranking, mvp, lastgifts, giftspot, bestgift, giftrain, chat, activity, ticker, nowplaying, queue, screens };
+export const RENDER = { goals, counters, countdown, uptime, viewers, followers, ranking, mvp, lastgifts, giftspot, bestgift, giftrain, chat, spotlight, activity, ticker, nowplaying, queue, screens };
 
 // ===================== Datos de ejemplo (vista previa) =====================
 const NAMES = ['Angélica', 'Dacreth', 'Aroa Malena', 'fabiosan622', 'Adriana', 'tinvalente', 'Satronho'];

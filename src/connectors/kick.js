@@ -1,4 +1,5 @@
-// Conector de Kick: solo lee el chat (para la voz y la música).
+// Conector de Kick: lee el chat (para la voz y la música), los Kicks y los
+// canjes de la tienda del canal (puntos del canal).
 //
 // Cómo funciona: Kick usa un servicio de tiempo real (Pusher, y está
 // migrando a Centrifugo) para su propio chat web. Pedimos a Kick qué
@@ -7,6 +8,7 @@
 // No hace falta iniciar sesión.
 
 const crypto = require('crypto');
+const fs = require('fs');
 const WebSocket = require('ws');
 const { createConnectorBase, cleanChannel, getJson } = require('./base');
 
@@ -14,14 +16,79 @@ const { createConnectorBase, cleanChannel, getJson } = require('./base');
 // descubrimiento falla. Puede dejar de funcionar en cualquier momento.
 const LEGACY_PUSHER = { app_key: '32cbd69e4b950bf97679', cluster: 'us2' };
 
-function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
+// Canje de la tienda del canal. Kick no documenta este evento en su chat
+// público: aceptamos las formas conocidas y, si cambia, simplemente no sale.
+//   { reward_title, username, user_input, reward_background_color, … }
+//   o { reward: { title, cost, background_color }, redeemer|user: { username }, user_input }
+function rewardOf(g) {
+  if (!g || typeof g !== 'object') return null;
+  const r = g.reward && typeof g.reward === 'object' ? g.reward : {};
+  const who = g.redeemer || g.user || g.sender || {};
+  const title = String(g.reward_title || r.title || r.name || g.title || '').trim();
+  const user = String(g.username || g.user_name || who.username || who.slug || '').trim();
+  if (!title || !user) return null;
+  return {
+    user: { id: g.user_id || who.id || user, name: user },
+    title: title.slice(0, 80),
+    input: String(g.user_input ?? g.input ?? g.message ?? '').slice(0, 300),
+    color: String(g.reward_background_color || r.background_color || r.color || ''),
+    cost: Number(r.cost ?? g.cost ?? g.points ?? 0) || 0,
+    id: String(r.id || g.reward_id || ''),
+  };
+}
+
+function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch, diagFile = '' }) {
   const base = createConnectorBase({ platform: 'kick', bus, onStatus });
   let socket = null;
   let refreshTimer = null;
   let info = null; // { channelId, chatroomId }
 
-  function handle(eventName, rawData) {
+  // Diagnóstico: qué eventos manda Kick y una muestra de los canjes (sin
+  // mensajes del chat). Va en «Reportar un problema» para ver qué cambió.
+  const diag = { since: Date.now(), events: {}, rewards: [] };
+  let diagTimer = null;
+  function note(name, data) {
+    const short = name.split('\\').pop();
+    diag.events[short] = (diag.events[short] || 0) + 1;
+    if (/reward|redeem|redemption/i.test(short) && diag.rewards.length < 5) diag.rewards.push({ ts: new Date().toISOString(), event: short, keys: Object.keys(data || {}) });
+    if (!diagFile || diagTimer) return;
+    diagTimer = setTimeout(() => {
+      diagTimer = null;
+      try { fs.writeFileSync(diagFile, JSON.stringify(diag, null, 1)); } catch { /* sin disco */ }
+    }, 5000);
+  }
+
+  // Un mismo mensaje puede llegar por dos canales: no lo repetimos.
+  const seen = new Map();
+  function dupe(key) {
+    const now = Date.now();
+    if (now - (seen.get(key) || 0) < 4000) return true;
+    seen.set(key, now);
+    if (seen.size > 400) for (const [k, t] of seen) if (now - t > 4000) seen.delete(k);
+    return false;
+  }
+
+  // «from»: el canal por donde llegó. Chat y Kicks solo se toman del canal
+  // del chat de siempre (así nada sale repetido); los canjes, de cualquiera.
+  function handle(eventName, rawData, from = '') {
     const name = String(eventName || '');
+    if (name.startsWith('pusher')) return;
+    let parsed = rawData;
+    try { if (typeof parsed === 'string') parsed = JSON.parse(parsed); } catch { parsed = null; }
+    note(name, parsed);
+    if (/reward|redeem|redemption/i.test(name)) {
+      const r = rewardOf(parsed);
+      if (!r || dupe(`r|${r.user.name}|${r.title}|${r.input}`)) return;
+      base.emit({
+        type: 'reward',
+        user: r.user,
+        amount: r.cost,
+        message: r.input,
+        extra: { rewardTitle: r.title, rewardId: r.id, color: r.color },
+      });
+      return;
+    }
+    if (from && extraTopics().includes(from)) return;
     // Kicks (regalos de Kick). Kick no publica cómo es este evento: lo leemos
     // con cuidado y, si cambia, simplemente no sale.
     if (name.endsWith('KicksGifted')) {
@@ -49,6 +116,7 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
       }
     }
     if (!d?.sender) return;
+    if (d.id && dupe(`m|${d.id}`)) return;
     base.emit({
       type: 'chat',
       user: { id: d.sender.id || d.sender.username, name: d.sender.username },
@@ -96,6 +164,9 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
   }
 
   const topic = () => `chatrooms.${info.chatroomId}.v2`;
+  // Canales extra del canal (canjes de la tienda, etc.). Si Kick rechaza
+  // alguno, el chat sigue funcionando igual.
+  const extraTopics = () => [`chatroom_${info.chatroomId}`, `channel_${info.channelId}`, `channel.${info.channelId}`];
 
   function openPusher(creds) {
     if (!/^[a-z0-9]+$/i.test(creds.app_key) || !/^[a-z0-9-]+$/i.test(creds.cluster)) {
@@ -111,16 +182,20 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
       }
       if (m.event === 'pusher:connection_established') {
         ws.send(JSON.stringify({ event: 'pusher:subscribe', data: { channel: topic() } }));
+        for (const channel of extraTopics()) ws.send(JSON.stringify({ event: 'pusher:subscribe', data: { channel } }));
       } else if (m.event === 'pusher_internal:subscription_succeeded') {
+        if (m.channel && m.channel !== topic()) return;
         base.resetBackoff();
         base.status('connected');
       } else if (m.event === 'pusher:ping') {
         ws.send(JSON.stringify({ event: 'pusher:pong', data: {} }));
       } else if (m.event === 'pusher:error') {
+        // Un canal extra rechazado no tumba el chat.
+        if (m.channel && m.channel !== topic()) return;
         base.status('error', 'Kick rechazó la conexión');
         ws.close();
       } else {
-        handle(m.event, m.data);
+        handle(m.event, m.data, m.channel);
       }
     });
     return ws;
@@ -153,6 +228,8 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
           ws.send('{}'); // ping -> pong
           continue;
         }
+        // Error al suscribir un canal extra (id 3 en adelante): se ignora.
+        if (r.error && r.id >= 3) continue;
         if (r.error) {
           base.status('error', `Kick: ${r.error.message || r.error.code}`);
           ws.close();
@@ -160,6 +237,7 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
         }
         if (r.id === 1 && r.connect) {
           ws.send(JSON.stringify({ id: 2, subscribe: { channel: topic() } }));
+          extraTopics().forEach((channel, i) => ws.send(JSON.stringify({ id: 3 + i, subscribe: { channel } })));
           // El token caduca: reconectamos un minuto antes.
           if (r.connect.ttl) {
             clearTimeout(refreshTimer);
@@ -171,7 +249,7 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
           base.status('connected');
         }
         const pub = r.push?.pub?.data;
-        if (pub) handle(pub.event, pub.data);
+        if (pub) handle(pub.event, pub.data, r.push?.channel);
         if (r.push?.disconnect) ws.close();
       }
     });
@@ -232,7 +310,7 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch }) {
     return { followers: Number.isFinite(n) ? n : null, live: Boolean(data?.livestream?.is_live ?? data?.livestream) };
   }
 
-  return { connect, disconnect, channelStats };
+  return { connect, disconnect, channelStats, diagnostics: () => diag };
 }
 
-module.exports = { createKickConnector };
+module.exports = { createKickConnector, rewardOf };
