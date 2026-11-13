@@ -761,6 +761,9 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     // Qué eventos manda Kick (para confirmar los canjes de la tienda).
     const k = connectors.kick.diagnostics?.();
     if (k && Object.keys(k.events).length) out.push('Kick (eventos de esta sesión):', top(k.events), `Canjes: ${k.rewards.map((r) => `${r.event}[${r.keys.join(',')}]`).join(' · ') || '—'}`);
+    // Historial de actualizaciones (para ver por qué una no se instaló).
+    const upd = hooks.updateLog?.() || [];
+    if (upd.length) out.push('Actualizaciones (lo último):', ...upd);
     return out;
   } });
   app.get('/api/support', (_req, res) => ok(res, { available: support.available(), diagnostics: support.diagnostics() }));
@@ -1123,7 +1126,12 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     stats.stop();
     store.saveNow();
     for (const ws of wss.clients) ws.terminate();
-    await new Promise((r) => httpServer.close(r));
+    // OBS y TikTok LIVE Studio dejan conexiones abiertas (keep-alive): si no
+    // las cortamos, el servidor nunca termina de cerrar, la app no se cierra
+    // y la actualización no se puede aplicar.
+    const closed = new Promise((r) => httpServer.close(r));
+    httpServer.closeAllConnections?.();
+    await Promise.race([closed, new Promise((r) => setTimeout(r, 2000))]);
   }
 
   // ---- Atajos de teclado (los registra main.js con globalShortcut) ----

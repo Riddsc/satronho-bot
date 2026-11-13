@@ -2439,3 +2439,8 @@ body.rail .side:not(:hover):not(:focus-within):not(.peek) .nav-sub { display: no
 .lc-pts { color: var(--muted); font-weight: 700; }
 .lc-rwmsg { flex-basis: 100%; color: var(--ink); font-style: italic; }
 .lc-event.t-reward { background: color-mix(in srgb, #53fc18 7%, transparent); border-color: color-mix(in srgb, #53fc18 35%, transparent); }
+
+/* Actualización que no se pudo instalar: explica por qué y cómo seguir. */
+.update-banner.failed { background: color-mix(in srgb, var(--warn, #ffb23e) 18%, var(--panel)); border-bottom-color: var(--warn, #ffb23e); font-weight: 600; }
+.update-banner .upd-fail { display: flex; flex-direction: column; gap: 4px; max-width: 760px; text-align: left; }
+.update-banner .upd-fail code { user-select: all; padding: 1px 6px; border-radius: 6px; background: color-mix(in srgb, var(--ink) 10%, transparent); font-size: .9em; word-break: break-all; }

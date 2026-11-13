@@ -156,8 +156,8 @@ const KB = [
   },
   {
     guide: 'samy', q: '¿Cómo se actualiza la app?',
-    keys: ['actualizar', 'actualizacion', 'version', 'update', 'nueva'],
-    answer: () => `Estás usando <b>${esc(ctx().version || '')}</b>. Al abrir y cada 6 horas reviso si hay una versión nueva publicada. Si instalaste con el instalador, la descargo sola y arriba sale <b>«Reiniciar y actualizar»</b>; con el .zip portable sale <b>«Hay una versión nueva»</b> con un botón para descargarla. Tus ajustes nunca se pierden.`,
+    keys: ['actualizar', 'actualizacion', 'version', 'update', 'nueva', 'no se instala', 'reintentar', 'antivirus'],
+    answer: () => `Estás usando <b>${esc(ctx().version || '')}</b>. Al abrir y cada 6 horas reviso si hay una versión nueva publicada. Si instalaste con el instalador, la descargo sola y arriba sale <b>«Reiniciar y actualizar»</b>; con el .zip portable sale <b>«Hay una versión nueva»</b> con un botón para descargarla. Tus ajustes nunca se pierden. Si una versión no se puede instalar, te digo por qué y qué hacer, con un botón para reintentar.`,
     go: '#update-auto',
   },
   {

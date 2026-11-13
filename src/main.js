@@ -29,6 +29,7 @@ let win = null;
 let pendingUpdate = null;
 let tray = null;
 let quitting = false;
+let appStore = null; // para guardar antes de actualizar
 
 app.setName('Satronho Bot');
 if (process.platform === 'win32') app.setAppUserModelId(APP_ID);
@@ -50,6 +51,77 @@ const newer = (a, b) => {
   for (let i = 0; i < 3; i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0);
   return false;
 };
+
+// Registro propio de actualizaciones (%APPDATA%/Satronho Bot/actualizaciones.log).
+// Va incluido en «Reportar un problema».
+const fs = require('fs');
+const updLogFile = () => path.join(app.getPath('userData'), 'actualizaciones.log');
+function updLog(line) {
+  try {
+    const file = updLogFile();
+    const stamp = new Date().toLocaleString('es-CO', { hour12: false });
+    fs.appendFileSync(file, `[${stamp}] ${line}\n`);
+    const st = fs.statSync(file);
+    if (st.size > 200 * 1024) fs.writeFileSync(file, fs.readFileSync(file, 'utf8').slice(-100 * 1024));
+  } catch { /* sin disco: no frenamos nada */ }
+}
+function updLogTail(n = 40) {
+  try { return fs.readFileSync(updLogFile(), 'utf8').trim().split('\n').slice(-n); } catch { return []; }
+}
+
+// Lo que dijo el instalador de Velopack la última vez que intentó aplicar.
+function velopackLogTail() {
+  try {
+    const file = path.join(process.env.LOCALAPPDATA || '', 'velopack', 'velopack_SatronhoBot.log');
+    const st = fs.statSync(file);
+    const fd = fs.openSync(file, 'r');
+    const len = Math.min(st.size, 96 * 1024);
+    const buf = Buffer.alloc(len);
+    fs.readSync(fd, buf, 0, len, st.size - len);
+    fs.closeSync(fd);
+    const lines = buf.toString('utf8').split('\n');
+    const start = lines.map((l) => /Command: Apply/.test(l)).lastIndexOf(true);
+    return start >= 0 ? lines.slice(start) : [];
+  } catch {
+    return [];
+  }
+}
+
+// ¿Por qué falló? Explicación para el streamer, sin jerga.
+function failureReason(lines) {
+  const text = lines.join('\n');
+  if (/Acceso denegado|PermissionDenied|Access is denied/i.test(text)) {
+    return 'Windows no dejó reemplazar los archivos de Satronho Bot (acceso denegado). Casi siempre es el antivirus revisándolos justo en ese momento, o una ventana del Explorador abierta en la carpeta de la app.';
+  }
+  if (/running processes prevented/i.test(text)) return 'Otro programa estaba usando los archivos de Satronho Bot al momento de actualizar.';
+  if (/not enough space|espacio/i.test(text)) return 'No hay espacio suficiente en el disco.';
+  const err = lines.filter((l) => /\[ERROR\]/.test(l)).pop();
+  return err ? `El instalador respondió: ${err.replace(/^.*\[ERROR\]\s*/, '').slice(0, 200)}` : 'El instalador no terminó y no dejó el motivo.';
+}
+// Carpeta donde vive la app (la que conviene excluir del antivirus).
+const installDir = () => (path.basename(path.dirname(process.execPath)).toLowerCase() === 'current' ? path.dirname(path.dirname(process.execPath)) : path.dirname(process.execPath));
+
+// Si el último intento no se instaló, lo recordamos para avisarlo claro.
+let lastFailure = null; // { version, reason, count, dir }
+function reviewLastAttempt(store) {
+  const a = store.get('updates').attempt;
+  if (!a?.version) return;
+  const now = app.getVersion();
+  if (!newer(a.version, now)) {
+    updLog(`Actualizada: ${a.from || '?'} → ${now}`);
+    store.update({ updates: { attempt: null, failures: 0 } });
+    return;
+  }
+  const tail = velopackLogTail();
+  const reason = failureReason(tail);
+  const count = (Number(store.get('updates').failures) || 0) + 1;
+  store.update({ updates: { attempt: null, failures: count } });
+  lastFailure = { version: a.version, reason, count, dir: installDir() };
+  updLog(`NO se instaló la ${a.version} (sigue la ${now}, intento ${count}). ${reason}`);
+  for (const l of tail.filter((x) => /WARN|ERROR/.test(x)).slice(-6)) updLog(`  velopack: ${l.trim().slice(0, 300)}`);
+}
+// Aviso «lista para instalar»; si el intento anterior falló, lleva el motivo.
+const readyPayload = (version) => ({ state: 'ready', version, ...(lastFailure && lastFailure.version === version ? { failed: lastFailure } : {}) });
 
 // Aviso para el portable: mira la última versión publicada en GitHub.
 async function checkNotice(feed) {
@@ -86,6 +158,7 @@ async function checkForUpdates(store) {
     const info = await um.checkForUpdatesAsync();
     if (!info) return;
     const version = info.targetFullRelease?.version || 'nueva';
+    updLog(`Hay versión nueva: ${version} (tienes ${app.getVersion()})`);
     if (!auto) {
       server.notify('update', { state: 'available', version, url: '' });
       return;
@@ -93,19 +166,45 @@ async function checkForUpdates(store) {
     server.notify('update', { state: 'downloading', version, pct: 0 });
     await um.downloadUpdateAsync(info, (pct) => server.notify('update', { state: 'downloading', version, pct }));
     pendingUpdate = { um, info, version };
-    server.notify('update', { state: 'ready', version });
+    updLog(`Descargada la ${version}: lista para instalar`);
+    server.notify('update', readyPayload(version));
   } catch (err) {
+    updLog(`Error al buscar o descargar: ${String(err?.message || err).slice(0, 300)}`);
     server?.notify('update', { state: 'error', message: String(err?.message || err) });
   } finally {
     checking = false;
   }
 }
 
+// El instalador de Velopack no logra «esperar» a que la app se cierre en
+// todos los equipos (Windows le niega el permiso) y sigue de una: por eso
+// la app se cierra de inmediato, sin esperar a nada, para dejarle libres
+// los archivos. Antes guardamos todo y anotamos el intento.
+let applying = false;
 function applyUpdate() {
-  if (!pendingUpdate) return false;
-  // Velopack espera a que cerremos, aplica la versión y vuelve a abrir.
-  pendingUpdate.um.waitExitThenApplyUpdate(pendingUpdate.info, false, true);
-  setTimeout(() => app.quit(), 200);
+  if (!pendingUpdate || applying) return false;
+  applying = true;
+  quitting = true;
+  const { um, info, version } = pendingUpdate;
+  try {
+    appStore?.update({ updates: { attempt: { version, from: app.getVersion(), at: Date.now() } } });
+    appStore?.saveNow();
+  } catch { /* seguimos igual */ }
+  updLog(`Instalando la ${version} (desde la ${app.getVersion()})…`);
+  try {
+    um.waitExitThenApplyUpdate(info, false, true);
+  } catch (err) {
+    applying = false;
+    quitting = false;
+    updLog(`No se pudo iniciar el instalador: ${String(err?.message || err).slice(0, 300)}`);
+    return false;
+  }
+  // Cierre rápido: ventanas fuera, servidor con máximo 1 s, y salida.
+  setTimeout(async () => {
+    for (const w of BrowserWindow.getAllWindows()) { try { w.destroy(); } catch { /* ya cerrada */ } }
+    try { await Promise.race([server?.stop(), new Promise((r) => setTimeout(r, 1000))]); } catch { /* da igual */ }
+    app.exit(0);
+  }, 100);
   return true;
 }
 
@@ -361,6 +460,8 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(async () => {
     const store = new Store(app.getPath('userData'));
+    appStore = store;
+    if (velopack) reviewLastAttempt(store);
     // net.fetch usa la red de Chromium (como un navegador real). Kick y
     // Starvios protegen sus webs contra bots y suelen bloquear el fetch
     // normal de Node, así que dentro de la app usamos este.
@@ -369,6 +470,7 @@ if (!app.requestSingleInstanceLock()) {
       fetch: (url, opts) => net.fetch(url, opts),
       appInfo: { version: app.getVersion(), portable: Boolean(velopack) },
       hooks: { applyUpdate, checkForUpdates: () => checkForUpdates(store), onWindowConfig: applyWindowConfig,
+        updateLog: () => updLogTail(25),
         openAuthWindow,
         renderPage,
         mediaFetch,
@@ -453,7 +555,8 @@ if (!app.requestSingleInstanceLock()) {
   });
 
   app.on('window-all-closed', async () => {
-    if (server) await server.stop().catch(() => {});
+    if (applying) return; // applyUpdate ya se encarga de salir
+    if (server) await Promise.race([server.stop().catch(() => {}), new Promise((r) => setTimeout(r, 4000))]);
     app.quit();
   });
 }
