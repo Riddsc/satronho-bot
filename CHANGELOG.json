@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.26.1",
+    "date": "2026-11-13",
+    "title": "Las alertas de seguidores y suscripciones de Kick ya salen",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "La alerta de Nuevo seguidor de Kick no salía en pantalla: Satronho Bot no escuchaba ese aviso de Kick. Ya sale, y si alguien sigue, deja de seguir y vuelve, no se repite en el mismo directo. Cuando Kick no manda el nombre, sale como «Alguien nuevo te sigue». Kick no publica este evento: si no te llega en un directo, usa «Reportar un problema» y vemos qué manda."
+      },
+      {
+        "type": "arreglo",
+        "text": "Las suscripciones de Kick ya salen como alerta: «se suscribió» con los meses, y «regaló N suscripciones» cuando alguien regala suscripciones."
+      }
+    ]
+  },
+  {
     "version": "0.26.0",
     "date": "2026-11-11",
     "title": "Mechanizer y un Chat en vivo con emotes, canjes de Kick y ventana para tu segundo monitor",

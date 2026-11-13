@@ -1,5 +1,5 @@
-// Conector de Kick: lee el chat (para la voz y la música), los Kicks y los
-// canjes de la tienda del canal (puntos del canal).
+// Conector de Kick: lee el chat (para la voz y la música), los Kicks, los
+// seguidores nuevos, las suscripciones y los canjes de la tienda del canal.
 //
 // Cómo funciona: Kick usa un servicio de tiempo real (Pusher, y está
 // migrando a Centrifugo) para su propio chat web. Pedimos a Kick qué
@@ -58,6 +58,30 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch, diagFile =
     }, 5000);
   }
 
+  // Seguidores: cada persona cuenta una vez por sesión (seguir, dejar de
+  // seguir y volver a seguir no repite la alerta). Sin nombre, usamos el
+  // total para saber si de verdad subió.
+  const followed = new Set();
+  let lastFollowers = null;
+  function followOf(g) {
+    if (!g || typeof g !== 'object') return null;
+    const count = Number(g.followersCount ?? g.followers_count);
+    const hasCount = Number.isFinite(count);
+    const up = hasCount && lastFollowers != null ? count > lastFollowers : null;
+    if (hasCount) lastFollowers = count;
+    if (g.followed === false || up === false) return null;
+    const user = String(g.username || g.user?.username || '').trim();
+    if (user) {
+      const key = user.toLowerCase();
+      if (followed.has(key)) return null;
+      followed.add(key);
+      return { user: { id: g.user_id || g.user?.id || user, name: user }, count: hasCount ? count : null };
+    }
+    if (g.followed !== true && up !== true) return null;
+    if (dupe(`f|${hasCount ? count : Date.now()}`)) return null;
+    return { user: { id: `kick-follow-${hasCount ? count : Date.now()}`, name: 'Alguien nuevo' }, count: hasCount ? count : null };
+  }
+
   // Un mismo mensaje puede llegar por dos canales: no lo repetimos.
   const seen = new Map();
   function dupe(key) {
@@ -88,7 +112,30 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch, diagFile =
       });
       return;
     }
+    // Nuevo seguidor. Kick lo avisa en el canal del canal (channel.<id>), no
+    // en el del chat, por eso va antes del filtro de canales extra.
+    //   { followersCount, channel_id, username, created_at, followed }
+    // «followed: false» es dejar de seguir. A veces llega sin nombre.
+    if (name.endsWith('FollowersUpdated')) {
+      const f = followOf(parsed);
+      if (f) base.emit({ type: 'follow', user: f.user, extra: { followers: f.count ?? undefined } });
+      return;
+    }
     if (from && extraTopics().includes(from)) return;
+    // Suscripciones y suscripciones regaladas (canal del chat).
+    if (name.endsWith('SubscriptionEvent') && !name.endsWith('GiftedSubscriptionsEvent') && !name.endsWith('LuckyUsersWhoGotGiftSubscriptionsEvent')) {
+      const user = String(parsed?.username || parsed?.user?.username || '').trim();
+      if (!user || dupe(`s|${user}`)) return;
+      base.emit({ type: 'sub', user: { id: parsed?.user_id || user, name: user }, amount: Number(parsed?.months) || 1 });
+      return;
+    }
+    if (name.endsWith('GiftedSubscriptionsEvent')) {
+      const gifter = String(parsed?.gifter_username || parsed?.gifter?.username || '').trim() || 'Anónimo';
+      const list = Array.isArray(parsed?.gifted_usernames) ? parsed.gifted_usernames : [];
+      if (dupe(`gs|${gifter}|${list.join(',')}`)) return;
+      base.emit({ type: 'sub', user: { id: gifter, name: gifter }, amount: list.length || 1, extra: { gifted: true, count: list.length || 1, recipients: list.slice(0, 20) } });
+      return;
+    }
     // Kicks (regalos de Kick). Kick no publica cómo es este evento: lo leemos
     // con cuidado y, si cambia, simplemente no sale.
     if (name.endsWith('KicksGifted')) {
@@ -290,6 +337,8 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch, diagFile =
     const slug = cleanChannel(channelName).toLowerCase();
     if (!slug) throw new Error('Falta el nombre del canal de Kick');
     info = null;
+    followed.clear();
+    lastFollowers = null;
     base.start(slug);
     run();
   }
