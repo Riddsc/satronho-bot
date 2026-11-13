@@ -21,6 +21,7 @@ const { createPiperEngine } = require('./tts/piper');
 const { createMsOnlineEngine } = require('./tts/msonline');
 const { createGiftCatalog } = require('./modules/giftCatalog');
 const { createAlertRules } = require('./modules/alertRules');
+const { createWheels } = require('./modules/wheels');
 const { createSoundLibrary } = require('./modules/soundLibrary');
 const { createSpotify } = require('./connectors/spotify');
 const { whoReason, configureStarvios } = require('./modules/roles');
@@ -248,6 +249,29 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
 
   musicRef = music;
+
+  // ---- Ruletas ----
+  const wheels = createWheels({
+    store,
+    broadcast: (...a) => broadcast(...a),
+    whoReason,
+    actions: {
+      sound: (ref, volume) => broadcast('alert', { id: `wh-${Date.now()}`, type: 'sfx', soundOnly: true, instant: true, title: 'Ruleta', sound: { sound: ref, volume: Number(volume) || 75, maxSeconds: 15 } }),
+      say: (text) => tts.speak(text),
+      chat: (platform, text) => {
+        // Escribe donde llegó la tirada; si fue desde el panel, en todas las conectadas.
+        const targets = writers[platform] ? [platform] : Object.keys(writers);
+        for (const p of targets) {
+          const cb = store.get('chatBot')?.[p];
+          if (cb?.enabled === false) continue;
+          writers[p].say(text, 'ruleta');
+        }
+      },
+      time: (seconds) => live.countdown('add', seconds),
+      counter: (id, delta) => live.counter(id, { delta }),
+      skip: () => music.skip?.(),
+    },
+  });
   bus.on('viewers', (v) => { stats.onViewers(v); live.onViewers(v); });
   bus.on('stream-end', (x) => {
     stats.end('fin del LIVE de TikTok');
@@ -327,6 +351,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       if (decision.read) stats.onTtsRead();
     }
     music.handleEvent(e);
+    try { wheels.handleEvent(e); } catch { /* una ruleta rota no tumba el resto */ }
   });
 
   // Cómo sale cada alerta: duración, sonido y si se lee en voz alta.
@@ -407,6 +432,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           alertOverlays: alertOverlays.size,
           spotify: spotify.status(),
           goals: goals.list(),
+          wheels: wheels.list(),
           accountStats: account.snapshot(),
           status,
           recent: recent.slice(0, 80),
@@ -480,7 +506,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
   app.post('/api/config', (req, res) => {
     // Metas y permisos tienen su propia API; no se pisan desde aquí.
-    const { goals: _g, ttsAllowed: _a, secrets: _s, ...rest } = req.body || {};
+    const { goals: _g, ttsAllowed: _a, secrets: _s, wheels: _w, wheelHistory: _wh, ...rest } = req.body || {};
     const config = publicConfig(store.update(rest));
     if (rest.overlayStyle) broadcast('overlay-style', config.overlayStyle);
     if (rest.widgets) broadcast('widgets', store.get('widgets'));
@@ -750,6 +776,21 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     /* sin historial */
   }
   app.get('/api/changelog', (_req, res) => ok(res, { changelog }));
+
+  // ---------- Ruletas ----------
+  app.get('/api/wheels', (_req, res) => ok(res, { wheels: wheels.list(), history: wheels.history().slice(0, 100), state: wheels.state() }));
+  app.post('/api/wheels', (req, res) => ok(res, { wheels: wheels.save(req.body?.wheels) }));
+  app.get('/api/wheels/new', (_req, res) => ok(res, { wheel: wheels.example() }));
+  app.post('/api/wheels/:id/spin', (req, res) => {
+    const done = wheels.spin(String(req.params.id), { name: String(req.body?.user || 'Prueba').slice(0, 40) });
+    return done ? ok(res, { state: wheels.state() }) : fail(res, 'Esa ruleta no existe o no tiene premios');
+  });
+  app.post('/api/wheels/control', (req, res) => { wheels.control(String(req.body?.action || '')); ok(res, { state: wheels.state() }); });
+  app.post('/api/wheels/history/:id', (req, res) => {
+    const e = wheels.markDone(String(req.params.id), req.body?.done !== false);
+    return e ? ok(res, { entry: e }) : fail(res, 'No se encontró esa tirada');
+  });
+  app.delete('/api/wheels/history', (_req, res) => { wheels.clearHistory(); ok(res); });
 
   // ---- Ayuda: reportar un problema (llega a Discord) ----
   const support = createSupport({ fetch: fetchFn, logbook, appInfo: { version: appInfo.version || require('../package.json').version }, getStatus: () => status, getExtra: () => {

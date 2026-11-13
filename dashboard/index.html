@@ -32,6 +32,7 @@
   </nav>
   <nav class="nav-group" style="--g:#9b8cff"><h6><i></i>Lo que se ve</h6>
     <a class="nav-item" href="#/alertas" data-page="alertas"><span class="ic" data-icon="bell"></span>Alertas</a>
+    <a class="nav-item" href="#/ruletas" data-page="ruletas"><span class="ic" data-icon="wheel"></span>Ruletas<span class="badge" id="nav-wheels" hidden title="Retos pendientes">0</span></a>
     <a class="nav-item" href="#/overlays" data-page="overlays"><span class="ic" data-icon="layers"></span>Overlays para OBS</a>
     <div class="nav-pins" id="nav-pins" hidden></div>
   </nav>
@@ -783,6 +784,32 @@
   </div>
 </section>
 
+<!-- ---------- Ruletas (Troya) ---------- -->
+<section class="page" id="page-ruletas" data-page="ruletas" hidden>
+  <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Ruletas</h1><p>Ruletas que gira tu público con suscripciones, canjes, regalos o un comando. Con sub-ruletas, retos y una mascota mareándose en el centro.</p></div>
+    <div class="host" style="--g:#9b8cff"><p class="bubble" data-bubble="troya" data-static><b>Troya:</b> Cada premio puede abrir otra ruleta, sonar, sumar tiempo o quedar como reto. Toca <b>✏️ Editar</b> y arma la tuya.</p><span class="guide" data-avatar="troya" data-size="mini"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="ruletas"><button data-tab="lista">Mis ruletas</button><button data-tab="historial">Historial y retos</button></div>
+  <div class="tabpanel" data-tabpanel="lista" style="--g:#9b8cff">
+    <div class="wh-top">
+      <div class="wh-queue" id="wh-queue"></div>
+      <span class="row tight">
+        <button type="button" class="btn small ghost" id="wh-skip" title="Termina el giro que está saliendo">⏭ Saltar giro</button>
+        <button type="button" class="btn small ghost danger" id="wh-clear" title="Corta el giro y vacía la fila">■ Vaciar fila</button>
+        <button type="button" class="btn small ghost" id="wh-reset" title="Los premios con «Máx. por directo» vuelven a estar disponibles">↺ Premios agotados</button>
+        <button type="button" class="btn primary" id="wh-new">＋ Nueva ruleta</button>
+      </span>
+    </div>
+    <div class="wh-list" id="wh-list"></div>
+    <div class="card wh-obs"><h3 class="card-title">En tu directo</h3><p class="hint">Pon este overlay como Fuente de navegador (720 × 860). Aparece solo cuando una ruleta gira. Para oír las clavijas y el premio en OBS, marca <b>«Controlar audio mediante OBS»</b> en esa fuente.</p><div id="wh-links"></div></div>
+  </div>
+  <div class="tabpanel" data-tabpanel="historial" hidden style="--g:#9b8cff">
+    <div class="cols wh-hcols">
+      <div class="card"><h3 class="card-title">🎯 Retos pendientes</h3><p class="hint">Los premios marcados como reto quedan aquí hasta que los cumplas.</p><ul class="wh-hlist" id="wh-pending"></ul></div>
+      <div class="card"><div class="row space"><h3 class="card-title">Historial de tiradas</h3><button type="button" class="btn small ghost danger" id="wh-hclear">Borrar historial</button></div><ul class="wh-hlist" id="wh-history"></ul></div>
+    </div>
+  </div>
+</section>
+
 <!-- ---------- Metas (Juana) ---------- -->
 <section class="page" id="page-metas" data-page="metas" hidden>
   <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Metas</h1><p>Barras de progreso para tu directo: diamantes, seguidores, likes…</p></div>
@@ -1061,6 +1088,23 @@
       </aside>
     </div>
     <div class="vp-foot"><span class="hint" id="ar-foot-hint">Lo que no tenga alerta propia suena con la de serie.</span><span class="row tight"><button type="button" class="btn ghost" id="ar-cancel">Cancelar</button><button type="button" class="btn primary" id="ar-save">Guardar alerta</button></span></div>
+  </div>
+</div>
+<div class="vp-modal wh-modal" id="wh-modal" hidden role="dialog" aria-modal="true" aria-labelledby="wh-modal-title">
+  <div class="vp-card wh-mcard" style="--g:#9b8cff">
+    <div class="vp-head"><div class="ar-mtitle"><span class="guide" data-avatar="troya" data-size="40"></span><div><h2 id="wh-modal-title">Nueva ruleta</h2><small>Con Troya</small></div></div><button type="button" class="btn small ghost" id="wh-close" aria-label="Cerrar">✕</button></div>
+    <div class="wh-mbody">
+      <div class="wh-edit">
+        <nav class="seg wh-steps" aria-label="Partes de la ruleta"><button type="button" data-wstep="premios">🎁 Premios</button><button type="button" data-wstep="cuando">⚡ Cuándo gira</button><button type="button" data-wstep="aspecto">🎨 Aspecto y mascota</button><button type="button" data-wstep="anuncio">📣 Anuncio y OBS</button></nav>
+        <div class="wh-step" id="wh-step"></div>
+      </div>
+      <aside class="wh-live">
+        <div class="wh-stage checker"><iframe id="wh-prev" title="Vista previa de la ruleta" tabindex="-1"></iframe></div>
+        <div class="row tight wh-prev-bar"><button type="button" class="btn small primary" id="wh-prev-spin">↻ Girar de prueba</button><label class="chip-check"><input type="checkbox" id="wh-prev-sound"><span>🔊 Con sonido</span></label></div>
+        <div class="wh-odds" id="wh-odds"></div>
+      </aside>
+    </div>
+    <div class="vp-foot"><span class="hint">La prueba de aquí no sale en tu directo. Para probar en OBS usa <b>▶ Girar</b> en la lista.</span><span class="row tight"><button type="button" class="btn ghost" id="wh-cancel">Cancelar</button><button type="button" class="btn primary" id="wh-save">Guardar ruleta</button></span></div>
   </div>
 </div>
 <div class="news-modal" id="news-modal" hidden role="dialog" aria-modal="true" aria-labelledby="news-modal-title">

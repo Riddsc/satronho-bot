@@ -1,5 +1,40 @@
 [
   {
+    "version": "0.27.0",
+    "date": "2026-11-13",
+    "title": "Ruletas con sub-ruletas, retos y una mascota que se marea",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "🎡 Ruletas: crea todas las que quieras en «Ruletas». Cada premio lleva nombre, emoji, color y un peso que decide qué tan probable es (ves el porcentaje al instante), y puede tener un máximo de veces por directo."
+      },
+      {
+        "type": "nuevo",
+        "text": "Cada ruleta gira sola cuando tú quieras: con una suscripción, un canje de la tienda de Kick, un regalo concreto o por valor, un seguidor nuevo, cada tantos likes, un comando del chat como !ruleta (para todos, suscriptores o mods, con espera por persona), un compartido o un superfan. Las tiradas hacen fila y salen de una en una, con el nombre de quien la giró."
+      },
+      {
+        "type": "nuevo",
+        "text": "Sub-ruletas: un premio puede abrir otra ruleta (hasta 6 niveles), y con «＋ Crear la sub-ruleta» la armas sin salir del editor. Un premio también puede sonar un sonido de tu biblioteca, hacer que la voz lea un texto, que el bot escriba en el chat, sumar o restar tiempo a la cuenta regresiva, cambiar un contador, saltar la canción o volver a girar."
+      },
+      {
+        "type": "nuevo",
+        "text": "En el centro de la ruleta aparece Samy, Troya, Ñoño o Juana (al azar o la que elijas): gira con la ruleta, se marea con los ojos en espiral y estrellitas, se tambalea al frenar y luego celebra con confeti o se asusta si te tocó un reto. Con clavijas que suenan, puntero que rebota, luces que corren y 6 paletas de colores."
+      },
+      {
+        "type": "nuevo",
+        "text": "Retos pendientes: marca un premio como reto y queda en «Ruletas → Historial y retos» hasta que tocas «✓ Cumplido». El menú te muestra cuántos tienes pendientes. También está el historial de todas las tiradas."
+      },
+      {
+        "type": "nuevo",
+        "text": "Overlay de ruletas para OBS y TikTok LIVE Studio (720 × 860), también en «Overlays para OBS». Aparece solo cuando una ruleta gira, y cada ruleta tiene su propio enlace si la quieres en una fuente aparte. El resultado lo decide la app, así que en todas las fuentes cae en el mismo premio."
+      },
+      {
+        "type": "arreglo",
+        "text": "Los botones «Llévame ahí» de los guías que no llevaban a ningún lado ya funcionan: el de Mechanizer para Chat en vivo, el de Samy para las plataformas que usas, el de Troya para Espectadores especiales y los de Ñoño para los comandos y límites de la música. Revisamos los 50 que hay."
+      }
+    ]
+  },
+  {
     "version": "0.26.2",
     "date": "2026-11-13",
     "title": "Actualizaciones a prueba de antivirus",

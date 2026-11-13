@@ -79,8 +79,8 @@ const KB = [
   {
     guide: 'samy', q: '¿Cómo escondo las plataformas que no uso?',
     keys: ['esconder', 'ocultar', 'quitar plataforma', 'no uso', 'plataformas que uso', 'twitch', 'starvios'],
-    answer: 'En <b>Conexiones</b>, abre <b>Plataformas que uso</b> y desmarca las que no usas. Se esconden del panel y no se conectan solas. Puedes volver a marcarlas cuando quieras.',
-    go: '#conn-pick',
+    answer: 'En <b>Conexiones</b>, en <b>Plataformas que usas</b> apaga las que no usas. Se esconden del panel y no se conectan solas. Puedes volver a marcarlas cuando quieras.',
+    go: '#plat-order-card',
   },
   {
     guide: 'samy', q: '¿Estoy conectado?',
@@ -120,7 +120,7 @@ const KB = [
     guide: 'mechanizer', q: '¿Dónde veo lo que está pasando en el chat?',
     keys: ['actividad', 'registro', 'mensajes', 'chat', 'eventos', 'log', 'pasando', 'ver'],
     answer: 'En <b>Chat en vivo</b> ves todo lo que llega: chat, regalos, seguidores… Cada mensaje lleva 🔊 si Troya lo leyó o 🔇 con el motivo si no. Ahí mismo puedes <b>simular un mensaje</b> para probar sin estar en directo.',
-    go: '#card-actividad',
+    go: '#lc-layout',
   },
   {
     guide: 'mechanizer', q: '¿Cómo pongo el chat en mi segundo monitor?',
@@ -214,10 +214,28 @@ const KB = [
     go: '#voice-pool',
   },
   {
+    guide: 'troya', q: '¿Cómo hago una ruleta?',
+    keys: ['ruleta', 'ruletas', 'girar', 'premios', 'sorteo', 'rueda', 'castigo'],
+    answer: 'En <b>Ruletas</b> toca <b>＋ Nueva ruleta</b>. Pon tus premios (el <b>peso</b> decide qué tan probable es cada uno), elige en <b>Cuándo gira</b> si va con suscripciones, canjes de Kick, regalos, likes o un comando como <b>!ruleta</b>, y en <b>Aspecto</b> qué mascota se marea en el centro. Luego pon el overlay de ruletas en OBS (720 × 860).',
+    go: '#wh-list',
+  },
+  {
+    guide: 'troya', q: '¿Cómo pongo una ruleta dentro de otra?',
+    keys: ['sub-ruleta', 'subruleta', 'sub ruleta', 'dentro', 'otra ruleta', 'anidada'],
+    answer: 'Edita la ruleta y, en un premio, elige <b>🎡 Abrir otra ruleta</b>. Puedes escoger una que ya tengas o tocar <b>＋ Crear la sub-ruleta</b>. Cuando caiga ese premio, gira la otra con la misma persona, y así hasta 6 niveles.',
+    go: '#wh-list',
+  },
+  {
+    guide: 'troya', q: '¿Dónde veo los retos que me salieron en la ruleta?',
+    keys: ['retos', 'reto', 'pendientes', 'cumplir', 'historial ruleta', 'tiradas'],
+    answer: 'Marca un premio como <b>🎯 Es un reto</b> y, cuando salga, queda en <b>Ruletas → Historial y retos</b> hasta que toques <b>✓ Cumplido</b>. El número junto a «Ruletas» en el menú te dice cuántos tienes pendientes.',
+    go: '#wh-pending',
+  },
+  {
     guide: 'troya', q: '¿Cómo le doy una voz especial a alguien o lo silencio?',
     keys: ['especial', 'silenciar', 'mute', 'callar', 'bloquear', 'apodo', 'vip', 'molesta', 'troll', 'nombre'],
     answer: 'Abre <b>Espectadores especiales</b>: escribe su usuario, elige la plataforma y decide: <b>Siempre leer</b> (con su propia voz y un nombre para decir, como «el jefe») o <b>Silenciar</b>.',
-    go: '#special-form',
+    go: '#sp-card',
   },
   {
     guide: 'troya', q: '¿Por qué en TikTok no leo a todos?',
@@ -267,13 +285,13 @@ const KB = [
     guide: 'nono', q: '¿Cómo pide música el chat?',
     keys: ['play', 'temita', 'pedir', 'piden', 'cancion', 'musica', 'tema', 'pido', 'poner'],
     answer: 'En Kick, Starvios o Twitch escriben <code>!play</code> o <code>!temita</code> y el nombre de la canción o un enlace de YouTube. Yo la busco y la pongo en la cola.',
-    go: '#card-musica .cmds',
+    go: '#mcmds',
   },
   {
     guide: 'nono', q: '¿Cómo funciona !skip y !quitar?',
     keys: ['skip', 'saltar', 'quitar', 'equivocar', 'borrar', 'sacar', 'cancion'],
     answer: '<code>!skip</code> salta la canción que suena, pero <b>solo si la pidió quien escribe</b>. <code>!quitar</code> saca de la cola la última canción que pidió esa persona (si ya está sonando, la salta). Tú, desde el panel, puedes saltar o quitar cualquiera.',
-    go: '#card-musica .cmds',
+    go: '#mcmds',
   },
   {
     guide: 'nono', q: '¿Qué está sonando?',
@@ -295,7 +313,7 @@ const KB = [
     guide: 'nono', q: '¿Cómo limito cuántas canciones pide cada uno?',
     keys: ['limite', 'limitar', 'cuantas', 'persona', 'duracion', 'larga', 'maximo', 'cancion'],
     answer: 'En <b>Ajustes de música</b>: canciones por persona (2) y duración máxima (10 min). También eliges en qué plataformas se puede pedir.',
-    go: '#card-musica details',
+    go: '[data-music="maxPerUser"]',
   },
   {
     guide: 'nono', q: '¿Cómo pauso, vacío la cola o cierro las peticiones?',
@@ -461,7 +479,8 @@ function answer(question) {
 export function goTo(selector) {
   if (selector.startsWith('#/')) { location.hash = selector; if (window.matchMedia('(max-width: 760px)').matches) closeHelp(); return; }
   const el = document.querySelector(selector);
-  if (!el) return;
+  // Si la sección no está (p. ej. una plataforma escondida), al menos llevamos a su pantalla.
+  if (!el) { const page = selector.match(/^#(?:page|card)-(\w+)/)?.[1]; if (page) showPage(page); return; }
   // Primero la pantalla y la pestaña donde vive.
   const page = el.closest('.page')?.dataset.page;
   const tab = el.closest('[data-tabpanel]')?.dataset.tabpanel;
