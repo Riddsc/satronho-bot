@@ -347,10 +347,21 @@ function renderUpdate(u) {
     : u.state === 'downloading'
       ? `<i></i>Actualizando… ${pct}%`
       : '<i></i>Actualizar';
-  pill.title = u.state === 'ready' ? `La versión ${u.version} está lista` : `Versión ${u.version}`;
+  pill.title = u.state === 'ready' ? (u.failed ? `La versión ${u.version} no se pudo instalar: toca para ver por qué` : `La versión ${u.version} está lista`) : `Versión ${u.version}`;
+  if (u.failed) pill.innerHTML = '<i></i>Actualización pendiente';
   el.hidden = updateHidden;
   el.className = `update-banner ${u.state}`;
-  if (u.state === 'ready') {
+  if (u.state === 'ready' && u.failed) {
+    // El intento anterior no se instaló: decimos por qué y cómo arreglarlo.
+    const f = u.failed;
+    el.classList.add('failed');
+    el.innerHTML = `<div class="upd-fail">
+      <span>⚠️ La versión <b>${esc(u.version)}</b> no se pudo instalar${f.count > 1 ? ` (${f.count} intentos)` : ''}. Sigues usando la ${esc(appVersion || 'versión anterior')}, que funciona normal.</span>
+      <span class="hint" style="margin:0">${esc(f.reason)}</span>
+      <span class="hint" style="margin:0">Cierra las ventanas del Explorador que tengas abiertas en la carpeta de la app y reintenta. Si vuelve a pasar, agrega esta carpeta a las <b>exclusiones de tu antivirus</b>: <code>${esc(f.dir || '')}</code> <button class="btn ghost small" id="update-copy-dir">Copiar ruta</button></span>
+    </div><button class="btn primary small" id="update-apply">Reintentar</button><button class="btn ghost small" id="update-later">Luego</button>`;
+    $('#update-copy-dir')?.addEventListener('click', () => navigator.clipboard.writeText(f.dir || '').then(() => toast('Ruta copiada')).catch(() => toast('No se pudo copiar')));
+  } else if (u.state === 'ready') {
     el.innerHTML = `<span>🐾 La versión <b>${esc(u.version)}</b> de Satronho Bot ya está lista.</span><button class="btn primary small" id="update-apply">Reiniciar y actualizar</button><button class="btn ghost small" id="update-later">Luego</button>`;
   } else if (u.state === 'available') {
     el.innerHTML = `<span>🐾 Hay una versión nueva de Satronho Bot: <b>${esc(u.version)}</b>.</span>${u.url ? `<button class="btn primary small" id="update-open">Actualizar</button>` : ''}<button class="btn ghost small" id="update-later">Luego</button>`;

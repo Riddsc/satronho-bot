@@ -228,6 +228,8 @@ const DEFAULTS = {
     // Dirección donde publicas las versiones (Velopack). Vacío = no buscar.
     feedUrl: '',
     auto: true,
+    attempt: null, // última instalación pedida: { version, from, at }
+    failures: 0, // intentos seguidos que no se instalaron
   },
   // Novedades: última versión cuyas novedades ya vio el streamer.
   seenVersion: '',

@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.26.2",
+    "date": "2026-11-13",
+    "title": "Actualizaciones a prueba de antivirus",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Al tocar «Reiniciar y actualizar», Satronho Bot se cierra al instante para dejarle libres sus archivos al instalador. Antes esperaba a cerrar todo con calma y, en algunos equipos, el instalador no podía reemplazar la app y la versión nueva no quedaba puesta."
+      },
+      {
+        "type": "mejora",
+        "text": "Si una versión no se puede instalar, ya no te pide actualizar una y otra vez sin explicar nada: te dice por qué falló (por ejemplo, el antivirus revisando los archivos), qué hacer, la carpeta para agregar a las exclusiones del antivirus con un botón para copiarla, y un botón «Reintentar»."
+      },
+      {
+        "type": "mejora",
+        "text": "Satronho Bot guarda un registro de sus actualizaciones (qué versión encontró, cuándo la descargó y si se instaló). Va incluido en «Reportar un problema» para ver al momento qué pasó."
+      }
+    ]
+  },
+  {
     "version": "0.26.1",
     "date": "2026-11-13",
     "title": "Las alertas de seguidores y suscripciones de Kick ya salen",
