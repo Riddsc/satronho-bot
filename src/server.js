@@ -385,7 +385,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     const x = e.extra || {};
     switch (e.type) {
       case 'follow': return `${n} te sigue`;
-      case 'sub': return `${n} se suscribió`;
+      case 'sub': return x.gifted ? `${n} regaló ${e.amount} ${e.amount > 1 ? 'suscripciones' : 'suscripción'}` : `${n} se suscribió`;
       case 'gift': return `${n} envió ${x.count > 1 ? `${x.count} ` : ''}${x.giftName || 'un regalo'}`;
       case 'like': return `${n} dio ${e.amount} likes`;
       case 'share': return `${n} compartió el directo`;
