@@ -16,6 +16,7 @@ const ICONS = {
   mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
   music: '<path d="M9 18V5.5l11-2V16"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
   bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+  wheel: '<circle cx="12" cy="12.5" r="8.5"/><path d="M12 4v17M3.5 12.5h17M6 6.5l12 12M18 6.5l-12 12"/><circle cx="12" cy="12.5" r="2.2" fill="currentColor"/><path d="M10.2 2.2h3.6L12 4.8z" fill="currentColor"/>',
   target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
   layers: '<path d="m12 4 9 4.5-9 4.5-9-4.5z"/><path d="m3 13 9 4.5 9-4.5"/>',
   chart: '<path d="M4 20h16"/><path d="M7 16v-5M12 16V7M17 16v-8"/>',
@@ -58,6 +59,7 @@ const PAGES = {
   musica: { title: 'Música', guide: 'nono', words: 'música canción cola play temita skip quitar youtube spotify' },
   sonidos: { title: 'Sonidos', guide: 'nono', words: 'sonidos efectos memes biblioteca frases soundboard groseros graciosos sospechoso rosalía packs' },
   alertas: { title: 'Alertas', guide: 'troya', words: 'alertas seguidor regalo suscripción likes compartir' },
+  ruletas: { title: 'Ruletas', guide: 'troya', words: 'ruleta ruletas girar premios sorteo sub-ruleta suscripción canje recompensa retos castigos mascota' },
   overlays: { title: 'Overlays para OBS', guide: 'samy', words: 'obs overlay url fuente navegador estilo streamlabs metas objetivo barra progreso contadores cuenta regresiva' },
   chatbot: { title: 'Chat Bot', guide: 'mecha', words: 'chat bot chatbot mecharidds comandos comando respuesta redes discord alias espera moderadores mensajes automáticos temporizador timer cada minutos anuncio escribir enviar' },
   estadisticas: { title: 'Estadísticas', guide: 'juana', words: 'estadísticas números gané diamantes tops historial gráfica' },
@@ -74,6 +76,7 @@ const TAB_NAMES = {
   ayuda: { preguntas: 'Preguntas', reportar: 'Reportar un problema' },
   chatbot: { inicio: 'Inicio', comandos: 'Comandos', automaticos: 'Mensajes automáticos' },
   voz: { voces: 'Voces', mensaje: 'Mensaje y plataformas', quien: 'Quién se lee', filtros: 'Filtros y límites', especiales: 'Espectadores especiales', probar: 'Probar' },
+  ruletas: { lista: 'Mis ruletas', historial: 'Historial y retos' },
   ajustes: { apariencia: 'Apariencia', app: 'App', atajos: 'Atajos de teclado', acerca: 'Acerca de' },
 };
 

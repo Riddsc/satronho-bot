@@ -20,6 +20,7 @@ import { initSpotify, onSpotify } from './spotifyUI.js';
 import { initOverlays, setOverlayGoals, setOverlayLive, setOverlayWidgets, setAccountStats } from './overlays.js';
 import { initKickbot, renderKickbot } from './kickbot.js';
 import { initAlerts } from './alerts.js';
+import { initWheels, onWheels, onWheelQueue, onWheelHistory, onWheelLanded, onWheelNotice } from './wheels.js';
 import { initStarviosbot, renderStarviosbot } from './starviosbot.js';
 import { initCommands, onCommands, onTimers } from './commands.js';
 import { initHotkeys, onHotkeysStatus, onHotkey } from './hotkeys.js';
@@ -198,7 +199,7 @@ export function kickWriteState(st) {
 
 function updateSamy() {
   if (!config) return;
-  if (!ALL_PLATFORMS.some(isShown)) return setBubble('samy', 'Escondiste todas las plataformas. Abre <b>Plataformas que uso</b> y marca las tuyas.');
+  if (!ALL_PLATFORMS.some(isShown)) return setBubble('samy', 'Escondiste todas las plataformas. En <b>Plataformas que usas</b> enciende las tuyas.');
   const on = Object.values(status).filter((s) => s.state === 'connected').map((s) => PLATFORM_NAMES[s.platform]);
   const trouble = Object.values(status).find((s) => s.state === 'connecting' && s.detail);
   if (trouble) return setBubble('samy', `${PLATFORM_NAMES[trouble.platform]} no me deja entrar todavía (${esc(trouble.detail)}). Sigo intentando yo solo.`);
@@ -438,6 +439,7 @@ async function init() {
   onTtsQueue(() => homeVoice(config, lastEngine));
   initGoalsAndAlerts();
   initOverlays(config);
+  initWheels(config);
   initSounds(config);
   initSpotify(config);
   initLiveChat();
@@ -526,6 +528,11 @@ async function init() {
         case 'alert-control': onAlertControl(p); break;
         case 'overlay-style': setAlertSoundEnabled(p?.sound); break;
         case 'widgets': setOverlayWidgets(p); break;
+        case 'wheels': onWheels(p); break;
+        case 'wheel-queue': onWheelQueue(p); break;
+        case 'wheel-history': onWheelHistory(p); break;
+        case 'wheel-landed': onWheelLanded(p); break;
+        case 'wheel-notice': onWheelNotice(p); break;
         case 'goal-complete': sayFor('juana', `¡Cumpliste la meta «${esc(p.title)}»! 🎉`, 9000, 'ok'); break;
         case 'status': renderStatus(p); onChatbotStatus(p); break;
         case 'tts': onTtsItem(p); break;

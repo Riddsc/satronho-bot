@@ -93,6 +93,13 @@ function card(id) {
   </article>`;
 }
 
+function wheelsCard() {
+  return `<article class="ovg-card" data-go-wheels tabindex="0" style="--g:${GUIDES.troya.color}">
+    <div class="ovg-pv checker" data-w="720" data-h="860"><iframe src="/overlays/wheel.html?preview=1" width="720" height="860" loading="lazy" tabindex="-1" title="Vista previa: Ruletas"></iframe></div>
+    <div class="ovg-info"><span class="ovg-ic">🎡</span><div><b>Ruletas</b><small>Tus ruletas girando, con Samy, Troya, Ñoño o Juana mareándose en el centro. Se arman en Ruletas.</small></div></div>
+    <div class="ovg-tags"><span>Ir a Ruletas →</span></div></article>`;
+}
+
 function alertsCard() {
   return `<article class="ovg-card" data-go-alerts tabindex="0" style="--g:${GUIDES.troya.color}">
     <div class="ovg-pv checker" data-w="800" data-h="300"><iframe src="/overlays/alerts.html?preview=1" width="800" height="300" loading="lazy" tabindex="-1" title="Vista previa: Alertas"></iframe></div>
@@ -116,7 +123,7 @@ function renderGallery() {
     : '';
   $('#ovg-list').innerHTML = CATEGORIES.filter((c) => filter === 'all' || filter === c.id).map((c) => {
     const mine = ids.filter((id) => KINDS[widgetOf(id).kind].cat === c.id);
-    const extra = c.id === 'regalos' && !query ? alertsCard() : '';
+    const extra = c.id === 'regalos' && !query ? alertsCard() + wheelsCard() : '';
     if (!mine.length && !extra) return '';
     const g = GUIDES[c.guide];
     return `<section class="ovg-sec" style="--g:${g.color}"><header class="ovg-head">${avatarHTML(c.guide, 'md')}<div><h3>${esc(c.name)}</h3><p>${esc(c.desc)} <span class="ovg-by">Te guía ${esc(g.name)}</span></p></div></header>
@@ -929,6 +936,7 @@ async function onEditorSubmit(ev) {
 function renderClassic() {
   const list = [
     { name: 'Alertas', path: '/overlays/alerts.html', note: 'Regalos, stickers, seguidores y tus alertas propias', w: 800, h: 300 },
+    { name: 'Ruletas', path: '/overlays/wheel.html', note: 'Tus ruletas, con la mascota mareándose (se arman en Ruletas)', w: 720, h: 860 },
     ...goals.map((g) => ({ name: `Meta: ${g.title}`, path: `/overlays/goal.html?id=${encodeURIComponent(g.id)}`, note: 'Barra de una sola meta', w: 700, h: 140 })),
   ];
   $('#overlay-list').innerHTML = list.map((it) => `<div class="ovg-crow"><b>${esc(it.name)}<small>${it.w} × ${it.h} · ${esc(it.note)}</small></b><code>${esc(origin() + it.path)}</code><button type="button" class="btn small ghost" data-copy="${esc(origin() + it.path)}">Copiar</button><button type="button" class="btn small ghost" data-copy="${esc(tiktokUrl(it.path))}" data-tt title="Enlace https para TikTok LIVE Studio">TikTok</button></div>`).join('');
@@ -1064,6 +1072,7 @@ export function initOverlays(cfg) {
       return;
     }
     if (ev.target.closest('[data-go-alerts]')) return showPage('alertas');
+    if (ev.target.closest('[data-go-wheels]')) return showPage('ruletas');
     const c = ev.target.closest('[data-open-w]');
     if (c) go(c.dataset.openW);
   });
