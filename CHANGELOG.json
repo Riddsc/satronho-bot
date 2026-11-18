@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.27.1",
+    "date": "2026-11-18",
+    "title": "Mechanizer estrena diseño",
+    "items": [
+      {
+        "type": "mejora",
+        "text": "Mechanizer se ve como debe: cara ovalada y fina, melena bob negra con flequillo de lado, ojos grandes con delineado y pestañas, gafas delgadas tipo cat-eye en oro rosa y labios con brillo. Lo androide sigue ahí, con elegancia: ojo biónico rosa, placa perlada con costura de luz, antena con un corazón y aretes de perla. Ya no lleva la diadema gamer."
+      }
+    ]
+  },
+  {
     "version": "0.27.0",
     "date": "2026-11-13",
     "title": "Ruletas con sub-ruletas, retos y una mascota que se marea",
