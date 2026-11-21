@@ -219,7 +219,14 @@ function initPlatforms() {
     const cfg = config.platforms[platform];
     field('channel').value = cfg.channel || '';
     field('autoConnect').checked = Boolean(cfg.autoConnect);
-    if (field('signApiKey')) field('signApiKey').value = cfg.signApiKey || '';
+    // La clave nunca vuelve al panel: solo se sabe si hay una guardada.
+    const keyField = field('signApiKey');
+    const showKey = (has) => {
+      if (!keyField) return;
+      keyField.value = '';
+      keyField.placeholder = has ? 'Clave guardada ✓ · pega otra para cambiarla' : 'Pega aquí tu clave';
+    };
+    showKey(cfg.hasSignApiKey);
 
     const connect = async () => {
       const channel = field('channel').value.trim();
@@ -234,7 +241,12 @@ function initPlatforms() {
     field('channel').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') connect(); });
     box.querySelector('[data-act="disconnect"]').addEventListener('click', () => api('POST', `/api/disconnect/${platform}`).catch((e) => toast(e.message)));
     field('autoConnect').addEventListener('change', (ev) => saveConfig({ platforms: { [platform]: { autoConnect: ev.target.checked } } }));
-    field('signApiKey')?.addEventListener('change', (ev) => saveConfig({ platforms: { [platform]: { signApiKey: ev.target.value.trim() } } }));
+    keyField?.addEventListener('change', (ev) => {
+      const key = ev.target.value.trim();
+      if (!key) return;
+      saveConfig({ platforms: { [platform]: { signApiKey: key } } });
+      showKey(true);
+    });
   }
 }
 

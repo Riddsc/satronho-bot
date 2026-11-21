@@ -13,7 +13,8 @@ const fs = require('fs');
 const path = require('path');
 const { spawn, execFile } = require('child_process');
 const readline = require('readline');
-const { VOICES, ENGINE_RELEASE, ENGINE_ASSETS } = require('./voices');
+const crypto = require('crypto');
+const { VOICES, ENGINE_RELEASE, ENGINE_ASSETS, ENGINE_SHA256 } = require('./voices');
 
 function createPiperEngine({ dataDir, fetch: fetchFn = fetch, onState = () => {} }) {
   const root = path.join(dataDir, 'piper');
@@ -70,7 +71,7 @@ function createPiperEngine({ dataDir, fetch: fetchFn = fetch, onState = () => {}
   }
 
   // ---------- Descargas ----------
-  async function download(url, dest, label) {
+  async function download(url, dest, label, sha256 = '') {
     let res;
     try {
       res = await fetchFn(url, { redirect: 'follow' });
@@ -81,6 +82,7 @@ function createPiperEngine({ dataDir, fetch: fetchFn = fetch, onState = () => {}
     const total = Number(res.headers.get('content-length')) || 0;
     const tmp = `${dest}.part`;
     const out = fs.createWriteStream(tmp);
+    const hash = crypto.createHash('sha256');
     let done = 0;
     let lastPct = -1;
     try {
@@ -89,6 +91,7 @@ function createPiperEngine({ dataDir, fetch: fetchFn = fetch, onState = () => {}
         const { done: end, value } = await reader.read();
         if (end) break;
         done += value.length;
+        hash.update(value);
         if (!out.write(Buffer.from(value))) await new Promise((r) => out.once('drain', r));
         const pct = total ? Math.floor((done / total) * 100) : 0;
         if (pct !== lastPct) {
@@ -101,6 +104,9 @@ function createPiperEngine({ dataDir, fetch: fetchFn = fetch, onState = () => {}
         }
       }
       await new Promise((resolve, reject) => out.end((err) => (err ? reject(err) : resolve())));
+      if (sha256 && hash.digest('hex') !== sha256) {
+        throw new Error(`${label}: el archivo descargado no es el original (no coincide su huella). No se instaló; vuelve a intentarlo más tarde.`);
+      }
       fs.renameSync(tmp, dest);
     } catch (err) {
       out.destroy();
@@ -129,7 +135,7 @@ function createPiperEngine({ dataDir, fetch: fetchFn = fetch, onState = () => {}
     setBusy('engine', 'Motor de voz');
     const file = path.join(root, asset);
     try {
-      await download(`${ENGINE_RELEASE}/${asset}`, file, 'Motor de voz');
+      await download(`${ENGINE_RELEASE}/${asset}`, file, 'Motor de voz', ENGINE_SHA256[asset]);
       setBusy('engine', 'Descomprimiendo…', 100);
       await extract(file);
       if (!fs.existsSync(exe)) throw new Error('El paquete de Piper no trae el ejecutable esperado');
@@ -167,10 +173,19 @@ function createPiperEngine({ dataDir, fetch: fetchFn = fetch, onState = () => {}
   // recargarse en cada mensaje; el más antiguo se cierra si hace falta.
   const MAX_PROCS = 3;
 
-  function killProc(p, reason = 'Piper se reinició') {
-    procs.delete(p.key);
-    for (const req of p.pending) req.reject(new Error(reason));
+  // Cierra un proceso y rechaza lo que tenía pendiente. Los temporizadores
+  // se cancelan aquí: si quedaran vivos, a los 30 s podrían «cerrar» el
+  // proceso nuevo de la misma voz y dejarlo funcionando sin control.
+  function failPending(p, reason) {
+    for (const req of p.pending) {
+      clearTimeout(req.timer);
+      req.reject(new Error(reason));
+    }
     p.pending = [];
+  }
+  function killProc(p, reason = 'Piper se reinició') {
+    if (procs.get(p.key) === p) procs.delete(p.key);
+    failPending(p, reason);
     p.child.kill();
   }
 
@@ -217,17 +232,12 @@ function createPiperEngine({ dataDir, fetch: fetchFn = fetch, onState = () => {}
       // No arrancó (p. ej. un antivirus lo bloqueó): fallamos al instante
       // para que el mensaje se lea con la voz de Windows.
       lastError = `Piper no arrancó: ${err.message}`;
-      for (const req of p.pending) {
-        clearTimeout(req.timer);
-        req.reject(new Error(lastError));
-      }
-      p.pending = [];
+      failPending(p, lastError);
       if (procs.get(key) === p) procs.delete(key);
       emit();
     });
     child.on('exit', (code) => {
-      for (const req of p.pending) req.reject(new Error(`Piper se cerró (código ${code}). ${stderr.trim()}`));
-      p.pending = [];
+      failPending(p, `Piper se cerró (código ${code}). ${stderr.trim()}`);
       if (procs.get(key) === p) procs.delete(key);
     });
     return p;

@@ -15,6 +15,7 @@
 //   - packs (.satronho-sonidos) que exporta otro streamer.
 // Satronho no reparte sonidos ajenos: cada quien trae los suyos.
 
+const { isPrivateAddress, readLimited } = require('../security');
 const fs = require('fs');
 const path = require('path');
 
@@ -86,17 +87,20 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
   async function download(url) {
     const u = new URL(url);
     if (!/^https?:$/.test(u.protocol)) throw new Error('El enlace debe empezar por http o https');
-    if (/^(localhost|127\.|10\.|192\.168\.|0\.)/.test(u.hostname)) throw new Error('Ese enlace no es de internet');
+    if (isPrivateAddress(u.hostname)) throw new Error('Ese enlace no es de internet');
     let res = await (mediaFetch || fetchFn)(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' }).catch(() => null);
     // Si la página protege sus archivos, se prueba con el otro camino.
     if ((!res || !res.ok) && mediaFetch) res = await fetchFn(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' }).catch(() => null);
     if (!res) throw new Error('No hay conexión con esa página. Revisa tu internet.');
     if (!res.ok) throw new Error(`La página respondió ${res.status}`);
     const type = String(res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-    const len = Number(res.headers.get('content-length') || 0);
-    if (len > MAX_BYTES) throw new Error('Ese sonido pesa más de 10 MB');
-    const buf = Buffer.from(await res.arrayBuffer());
-    if (buf.length > MAX_BYTES) throw new Error('Ese sonido pesa más de 10 MB');
+    // Si la página redirigió a una dirección de este PC o de la casa, no se usa.
+    try {
+      if (res.url && isPrivateAddress(new URL(res.url).hostname)) throw new Error('private');
+    } catch {
+      throw new Error('Ese enlace no es de internet');
+    }
+    const buf = await readLimited(res, MAX_BYTES, 'Ese sonido pesa más de 10 MB');
     return { buf, type, finalUrl: res.url || u.href };
   }
   const extFrom = (type, url) => EXT[type] || (String(url).toLowerCase().match(/\.(mp3|wav|ogg|webm|m4a|aac)(?:$|[?#])/) || [])[1] || '';

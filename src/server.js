@@ -38,6 +38,8 @@ const { createKickChat } = require('./connectors/kickChat');
 const { createStarviosChat } = require('./connectors/starviosChat');
 const { createCommands } = require('./modules/commands');
 const { createSupport, createLogbook } = require('./modules/support');
+const { createHttpGuard, verifyWsClient, frameHeaders, isPrivateAddress } = require('./security');
+const { createSecretBox } = require('./secretBox');
 
 const ROOT = path.join(__dirname, '..');
 const PLATFORMS = ['tiktok', 'kick', 'starvios', 'twitch'];
@@ -69,9 +71,16 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   // una página de internet hable con el PC (red local): aquí se lo damos,
   // solo para leer overlays.
   const PAGES_ORIGIN = 'https://riddsc.github.io';
+  // Solo este PC le habla al servidor (ver security.js).
+  app.use(createHttpGuard());
+  app.use(frameHeaders);
   app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Private-Network', 'true');
-    if (req.headers.origin === PAGES_ORIGIN) res.setHeader('Access-Control-Allow-Origin', PAGES_ORIGIN);
+    // Ese dominio lo comparten todas las páginas de GitHub Pages de Riddsc:
+    // solo puede leer los overlays y saber si la app está abierta, nunca la
+    // configuración ni el resto de la API.
+    const forPages = req.path === '/api/ping' || req.path.startsWith('/overlays/');
+    if (forPages && req.headers.origin === PAGES_ORIGIN) res.setHeader('Access-Control-Allow-Origin', PAGES_ORIGIN);
     if (req.method === 'OPTIONS' && req.headers['access-control-request-private-network']) {
       res.setHeader('Access-Control-Allow-Methods', 'GET');
       return res.sendStatus(204);
@@ -109,7 +118,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
 
   const httpServer = http.createServer(app);
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws', verifyClient: verifyWsClient });
 
   function broadcast(kind, payload) {
     // Volumen general de las alertas (Alertas → barra de arriba).
@@ -133,6 +142,16 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     broadcast('status', s);
   }
   const deps = { bus, onStatus, fetch: fetchFn };
+  // La clave de conexión de TikTok (Euler) va cifrada con los demás secretos;
+  // si una versión anterior la dejó en la configuración, se muda aquí.
+  const tiktokKeys = createSecretBox({ store, name: 'tiktok', vault: hooks.vault || null });
+  {
+    const old = String(store.get('platforms')?.tiktok?.signApiKey || '').trim();
+    if (old) {
+      tiktokKeys.save({ signApiKey: old });
+      store.update({ platforms: { tiktok: { signApiKey: '' } } });
+    }
+  }
   const catalog = createGiftCatalog({ dataDir, broadcast: (...a) => broadcast(...a), fetchFn });
   // Starvios: tu canal, tus moderadores y tu lista de personas (roles a mano).
   configureStarvios(() => ({ owner: store.get('platforms')?.starvios?.channel || '', ...(store.get('starviosPeople') || {}) }));
@@ -140,7 +159,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   const podium = createLeaderboard({ broadcast: (...a) => broadcast(...a) });
   const live = createLive({ store, broadcast: (...a) => broadcast(...a) });
   const connectors = {
-    tiktok: createTiktokConnector({ ...deps, getSettings: () => store.get('platforms').tiktok, onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }), onStickers: (s) => catalog.merge('stickers', 'tiktok', s), onFollowers: (n) => accountRef?.set('tiktok', n), diagFile: path.join(dataDir, 'tiktok-diagnostico.json') }),
+    tiktok: createTiktokConnector({ ...deps, getSettings: () => ({ ...store.get('platforms').tiktok, signApiKey: tiktokKeys.get().signApiKey || '' }), onGifts: (g) => catalog.merge('gifts', 'tiktok', g, { replace: true }), onStickers: (s) => catalog.merge('stickers', 'tiktok', s), onFollowers: (n) => accountRef?.set('tiktok', n), diagFile: path.join(dataDir, 'tiktok-diagnostico.json') }),
     kick: createKickConnector({ ...deps, diagFile: path.join(dataDir, 'kick-diagnostico.json') }),
     twitch: createTwitchConnector(deps),
     starvios: createStarviosConnector({ ...deps, logFile: path.join(dataDir, 'starvios-eventos.jsonl') }),
@@ -227,7 +246,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     known: (p, who) => stats.people(who, 20).find((u) => u.platform === p && [u.id, u.name].some((x) => String(x).toLowerCase() === who))?.avatar || '',
   });
   const resolver = customResolver || createYoutubeResolver({ fetch: fetchFn });
-  const spotify = createSpotify({ store, fetchFn, broadcast: (...a) => broadcast(...a) });
+  const spotify = createSpotify({ store, fetchFn, broadcast: (...a) => broadcast(...a), vault: hooks.vault || null });
   const music = createMusic({
     store,
     spotify,
@@ -479,6 +498,10 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   // El panel nunca recibe claves ni tokens.
   const publicConfig = (c) => {
     const { secrets: _s, ...rest } = c;
+    // La clave de TikTok tampoco: el panel solo sabe si hay una guardada.
+    if (rest.platforms?.tiktok) {
+      rest.platforms = { ...rest.platforms, tiktok: { ...rest.platforms.tiktok, signApiKey: '', hasSignApiKey: Boolean(tiktokKeys.get().signApiKey) } };
+    }
     return rest;
   };
   const ok = (res, data = {}) => res.json({ ok: true, ...data });
@@ -507,10 +530,18 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   app.post('/api/config', (req, res) => {
     // Metas y permisos tienen su propia API; no se pisan desde aquí.
     const { goals: _g, ttsAllowed: _a, secrets: _s, wheels: _w, wheelHistory: _wh, ...rest } = req.body || {};
+    // La clave de TikTok llega por aquí desde el panel, pero se guarda cifrada.
+    const tk = rest.platforms?.tiktok;
+    if (tk && 'signApiKey' in tk) {
+      tiktokKeys.save({ signApiKey: String(tk.signApiKey || '').trim() });
+      const { signApiKey: _k, hasSignApiKey: _h, ...tkRest } = tk;
+      rest.platforms = { ...rest.platforms, tiktok: tkRest };
+    }
     const config = publicConfig(store.update(rest));
     if (rest.overlayStyle) broadcast('overlay-style', config.overlayStyle);
     if (rest.widgets) broadcast('widgets', store.get('widgets'));
     if (rest.window) hooks.onWindowConfig?.(config.window);
+    if (rest.updates && 'feedUrl' in rest.updates) hooks.onFeedChange?.();
     if (rest.hotkeys) {
       hotkeysStatus = hooks.onHotkeys?.(store.get('hotkeys')) || hotkeysStatus;
       broadcast('hotkeys-status', hotkeysStatus);
@@ -1086,7 +1117,10 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       res.set('Cache-Control', 'public, max-age=604800');
       res.sendFile(f);
     } catch {
-      if (/^https:\/\//.test(url)) res.redirect(url); else res.status(404).end();
+      // Si no se pudo guardar, el navegador la pide directo (solo de internet).
+      let pub = false;
+      try { pub = /^https:\/\//.test(url) && !isPrivateAddress(new URL(url).hostname); } catch { pub = false; }
+      if (pub) res.redirect(url); else res.status(404).end();
     }
   });
 
