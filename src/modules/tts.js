@@ -234,6 +234,11 @@ function createTts({ store, broadcast, engine, online = null }) {
     if (!dryRun) {
       lastRead.set(key, now);
       lastText.set(key, { text: norm, ts: now });
+      // En directos de muchas horas no se acumulan miles de personas: se
+      // olvidan las que no escriben hace más de una hora.
+      if (lastRead.size > 3000) {
+        for (const [k, t] of lastRead) if (now - t > 60 * 60 * 1000) { lastRead.delete(k); lastText.delete(k); }
+      }
     }
     // Nombres con letras decorativas (𝓒𝓪𝓶𝓲𝓵𝓪 ✨) se dicen como letras normales y
     // sin emojis; si no queda nada legible, se usa su @usuario.
@@ -283,6 +288,8 @@ function createTts({ store, broadcast, engine, online = null }) {
     if (base.startsWith('win:')) {
       item.windowsVoice = base.slice(4); // la lee el panel con esa voz de Windows
     } else if (base.startsWith('ms:')) {
+      if (inFlight >= c.maxQueue) return false;
+      inFlight += 1;
       try {
         const file = await online.synth(text, { voiceId: base.slice(3), rate: synthRate });
         item.audioUrl = `/tts-audio/${file}`;
@@ -291,9 +298,11 @@ function createTts({ store, broadcast, engine, online = null }) {
         // del mismo género e idioma, y avisa.
         item.error = err.message;
         item.wanted = describeVoice(base);
+      } finally {
+        inFlight -= 1;
       }
     } else if (base) {
-      if (inFlight >= c.maxQueue) return;
+      if (inFlight >= c.maxQueue) return false;
       inFlight += 1;
       try {
         const [voiceId, speaker] = base.split('#');
@@ -323,7 +332,11 @@ function createTts({ store, broadcast, engine, online = null }) {
   function handleEvent(e) {
     if (e.platform === 'tiktok' && e.type === 'gift' && isGateGift(e)) allow(e.user);
     if (e.type !== 'chat') return null;
-    const d = decide(e);
+    let d = decide(e);
+    // Fila de voz llena: se dice en el registro en vez de marcarlo «se lee»
+    // y que nunca suene (las voces de Windows no hacen fila aquí).
+    const usesQueue = d.read && !String(d.voice || '').startsWith('win:');
+    if (usesQueue && inFlight >= (Number(cfg().maxQueue) || 15)) d = { ...d, read: false, reason: 'la fila de voz estaba llena' };
     if (d.read) speak(d.text, { user: e.user.name, platform: e.platform, voice: d.voice, rate: d.rate, pitch: d.pitch, volume: d.volume });
     remember(e, d);
     return d;

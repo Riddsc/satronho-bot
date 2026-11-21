@@ -53,7 +53,21 @@ function createMusic({ store, broadcast, resolver, spotify = null, onSong = () =
       playlists: playlists().map((p) => ({ id: p.id, name: p.name, count: p.songs.length, durationSec: p.songs.reduce((a, x) => a + (x.durationSec || 0), 0) })),
     };
   }
-  const publish = () => broadcast('music', snapshot());
+  // La cola se guarda: si la app se cierra o se reinicia en pleno directo,
+  // al volver sigue ahí (lo que sonaba vuelve al principio de la cola).
+  const saveQueue = () => store.set('musicQueue', { queue: [current, ...queue].filter(Boolean).slice(0, 200), at: Date.now() });
+  const publish = () => {
+    saveQueue();
+    broadcast('music', snapshot());
+  };
+  {
+    const saved = store.get('musicQueue');
+    // Solo si es reciente (menos de 12 horas): una cola de hace días ya no sirve.
+    if (saved?.queue?.length && Date.now() - (saved.at || 0) < 12 * 60 * 60 * 1000) {
+      queue = saved.queue.filter((x) => x?.videoId).map((x) => ({ ...x, startedAt: 0, pausedMs: 0, pausedAt: 0 }));
+    }
+  }
+  const totalPending = () => [...pending.values()].reduce((a, n) => a + n, 0);
   const notice = (text, kind = 'info', user = null, platform = '') => broadcast('music-notice', { text, kind, user, platform, ts: Date.now() });
 
   function playNext() {
@@ -80,15 +94,19 @@ function createMusic({ store, broadcast, resolver, spotify = null, onSong = () =
     const mine =
       queue.filter((s) => s.requesterKey === key).length + (current?.requesterKey === key ? 1 : 0) + (pending.get(key) || 0);
     if (key !== 'panel:streamer' && mine >= c.maxPerUser) {
-      return notice(`${user.name} ya tiene ${mine} canción(es) pedidas (máximo ${c.maxPerUser})`, 'warn', user.name, platform);
+      return notice(`${user.name} ya tiene ${mine === 1 ? '1 canción pedida' : `${mine} canciones pedidas`} (máximo ${c.maxPerUser})`, 'warn', user.name, platform);
     }
-    if (queue.length >= c.maxQueue) return notice('La cola está llena', 'warn', user.name, platform);
+    // También cuentan las búsquedas en curso: varios pedidos a la vez no pasan del tope.
+    if (queue.length + totalPending() >= c.maxQueue) return notice('La cola está llena', 'warn', user.name, platform);
     const wait = Number(c.cooldownSec) || 0;
     if (key !== 'panel:streamer' && wait && Date.now() - (lastAsk.get(key) || 0) < wait * 1000) {
       const left = Math.ceil((wait * 1000 - (Date.now() - lastAsk.get(key))) / 1000);
       return notice(`${user.name}: espera ${left} s para pedir otra`, 'warn', user.name, platform);
     }
+    const prevAsk = lastAsk.get(key);
     lastAsk.set(key, Date.now());
+    // Si el pedido falla, la espera no cuenta: puede intentar de nuevo ya.
+    const undoWait = () => (prevAsk ? lastAsk.set(key, prevAsk) : lastAsk.delete(key));
 
     // Con Spotify activo, el pedido va a la cola de Spotify del streamer.
     if (spotify?.active()) {
@@ -96,6 +114,7 @@ function createMusic({ store, broadcast, resolver, spotify = null, onSong = () =
         const t = await spotify.request(query, user.name);
         return notice(`${user.name} pidió «${t.title}» de ${t.author} (en Spotify)`, 'ok', user.name, platform);
       } catch (err) {
+        undoWait();
         return notice(`${user.name}: ${err.message || 'no pude pedirla en Spotify'}`, 'error', user.name, platform);
       }
     }
@@ -104,6 +123,7 @@ function createMusic({ store, broadcast, resolver, spotify = null, onSong = () =
     try {
       const song = await resolver.resolve(query, { maxDurationSec: c.maxDurationMin * 60, copyright: c.copyright || 'avoid' });
       if (current?.videoId === song.videoId || queue.some((s) => s.videoId === song.videoId)) {
+        undoWait();
         return notice(`«${song.title}» ya está en la cola`, 'warn', user.name, platform);
       }
       seq += 1;
@@ -113,6 +133,7 @@ function createMusic({ store, broadcast, resolver, spotify = null, onSong = () =
       if (!current) playNext();
       else publish();
     } catch (err) {
+      undoWait();
       notice(`${user.name}: ${err.message || 'no pude buscar la canción'}`, 'error', user.name, platform);
     } finally {
       const n = (pending.get(key) || 1) - 1;
@@ -263,6 +284,8 @@ function createMusic({ store, broadcast, resolver, spotify = null, onSong = () =
     },
     setPlayer(clientId) {
       playerId = clientId;
+      // Volvió la ventana que reproduce y quedó cola guardada: sigue sonando.
+      if (clientId && !current && queue.length && cfg().enabled) return playNext();
       publish();
     },
     // ---------- Consola ----------

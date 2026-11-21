@@ -67,7 +67,7 @@ La app se actualiza con [Velopack](https://velopack.io), igual que OverInteracti
 |---|---|---|---|---|
 | Alertas y metas | ✓ | — | — | — |
 | Estadísticas | ✓ (regalos, likes, espectadores) | ✓ (chat) | ✓ (chat) | ✓ (chat) |
-| Voz del chat | Solo de quien envió **Quiéreme** | Todo el chat | Todo el chat | Todo el chat |
+| Voz del chat | Todo el chat (o el filtro que elijas) | Todo el chat | Todo el chat | Todo el chat |
 | Música (`!play`) | Opcional (apagada) | ✓ | ✓ | ✓ |
 
 Twitch se lee con su chat oficial como espectador anónimo: no hace falta iniciar sesión.
@@ -158,11 +158,11 @@ El interruptor **Sonido en OBS** apaga todos los sonidos de las alertas. En OBS,
 
 También eliges qué voces entran en el reparto.
 
-**Espectadores especiales.** A una persona le puedes dar su propia voz y un nombre para leer (por ejemplo, «el jefe»), o silenciarla. La opción «Siempre leer» también se salta el filtro del regalo en TikTok.
+**Espectadores especiales.** A una persona le puedes dar su propia voz y un nombre para leer (por ejemplo, «el jefe»), o silenciarla. La opción «Siempre leer» también se salta los filtros de «Quién puede hablar».
 
 **Quién se lee.**
-- **Kick, Starvios y Twitch:** todo el chat.
-- **TikTok:** solo quien envió **Quiéreme** / **Heart Me**. El permiso dura 3 h, 12 h, 24 h, 7 días o para siempre, según elijas.
+- **Por defecto:** todo el chat en todas las plataformas.
+- **Filtros por plataforma** (Voz del chat → Quién puede hablar): seguidores, suscriptores, VIP, moderadores, **Miembros de tu equipo** de TikTok (con nivel mínimo) o **Miembros de tu equipo que ya te enviaron Quiéreme** / **Heart Me**. En Starvios: tu lista de personas o solo moderadores.
 - **Comandos:** los mensajes que empiezan con `!` no se leen.
 
 **Límites.**
@@ -236,16 +236,33 @@ En OBS ve a **Fuentes → + → Navegador** y pega la URL (en el panel hay un bo
 src/
   main.js                  Electron + Velopack (arranque y actualizaciones)
   server.js                Servidor local: panel, overlays, WebSocket y API
-  eventBus.js, store.js    Eventos comunes y configuración
-  connectors/              tiktok.js, kick.js, starvios.js
-  modules/                 tts.js, music.js, goals.js, stats.js
-  tts/                     piper.js (motor), voices.js, textFilter.js
+  security.js              Quién puede hablarle al servidor local (ver «Seguridad»)
+  secretBox.js             Claves y permisos cifrados con la protección de Windows
+  eventBus.js, store.js    Eventos comunes y configuración (con copia de respaldo)
+  i18n/                    Idiomas de la interfaz (es, en, pt, fr, it)
+  connectors/              tiktok, kick, kickChat, starvios, starviosChat, twitch, spotify
+  modules/                 voz, música, alertas, metas, estadísticas, ruletas, comandos…
+  tts/                     piper.js (motor), voices.js, msonline.js, textFilter.js
   music/youtube.js         Búsqueda en YouTube
-dashboard/                 Panel (index.html, styles.css, js/ con mascots.js)
-overlays/                  Páginas para OBS
+dashboard/                 Panel (index.html, styles.css, js/)
+overlays/                  Páginas para OBS y TikTok LIVE Studio
+web/                       Página de GitHub Pages que muestra los overlays en TikTok LIVE Studio
+relay/                     Relé de reportes para Cloudflare (ver relay/LEEME.md)
 assets/                    Ícono de la app (svg, png, ico)
 scripts/release.mjs        Empaquetado y publicación
 ```
+
+## Seguridad
+
+El servidor escucha solo en `127.0.0.1`, pero el navegador del streamer también vive en el PC, así que `src/security.js` filtra cada pedido:
+
+- **Cabecera Host:** solo `localhost`, `127.0.0.1` o `[::1]`. Así ninguna página de internet se hace pasar por «local» con un truco de DNS.
+- **Cambios (POST, PATCH, DELETE):** solo desde páginas de este PC o desde programas sin navegador. Una web ajena recibe un 403.
+- **WebSocket:** solo para páginas de este PC.
+- **GitHub Pages** (`riddsc.github.io`): solo puede leer los overlays y `/api/ping`.
+- **Marcos:** solo los overlays se pueden meter dentro de otra página.
+- **Actualizaciones:** un repositorio distinto al oficial se confirma en una ventana de Windows.
+- **Claves:** Kick, Starvios, Spotify y la clave de TikTok van cifradas y nunca llegan al panel.
 
 ## Licencias
 
