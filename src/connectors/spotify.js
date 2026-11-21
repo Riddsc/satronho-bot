@@ -14,6 +14,7 @@
 
 const crypto = require('crypto');
 const fs = require('fs');
+const { createSecretBox } = require('../secretBox');
 const path = require('path');
 
 const SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing';
@@ -27,11 +28,13 @@ function builtinClientId() {
   }
 }
 
-function createSpotify({ store, fetchFn = fetch, broadcast = () => {}, port = 3800, builtin = builtinClientId() }) {
+function createSpotify({ store, fetchFn = fetch, broadcast = () => {}, port = 3800, builtin = builtinClientId(), vault = null }) {
   const redirectUri = () => `http://127.0.0.1:${store.get('port') || port}/auth/spotify/callback`;
   const cfg = () => store.get('spotify') || {};
-  const sec = () => store.get('secrets')?.spotify || {};
-  const saveSec = (patch) => store.update({ secrets: { spotify: { ...sec(), ...patch } } });
+  // El permiso de Spotify va cifrado, igual que los de Kick y Starvios.
+  const box = createSecretBox({ store, name: 'spotify', vault });
+  const sec = () => box.get();
+  const saveSec = (patch) => box.save(patch);
   const clientId = () => String(cfg().clientId || '').trim() || builtin;
   let pendingAuth = null; // { verifier, state, ts }
   let access = { token: '', exp: 0 };
@@ -116,7 +119,7 @@ function createSpotify({ store, fetchFn = fetch, broadcast = () => {}, port = 38
     try { me = await api('GET', '/me'); } catch (err) { lastError = err.message; }
   }
   function disconnect() {
-    store.update({ secrets: { spotify: { refresh: '', clientId: '' } } });
+    box.clear();
     access = { token: '', exp: 0 };
     me = null;
     now = null;

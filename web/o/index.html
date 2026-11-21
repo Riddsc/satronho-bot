@@ -25,7 +25,8 @@
   (function () {
     var q = new URLSearchParams(location.search);
     var path = q.get('p') || '/overlays/alerts.html';
-    if (path.charAt(0) !== '/' || path.indexOf('//') === 0) path = '/overlays/alerts.html'; // solo rutas de la app
+    // Solo overlays: este enlace nunca debe mostrar el panel de la app.
+    if (path.indexOf('/overlays/') !== 0 || path.indexOf('..') >= 0 || path.indexOf('\\') >= 0) path = '/overlays/alerts.html';
     var port = String(Number(q.get('port')) || 3800);
     var base = 'http://127.0.0.1:' + port;
     var f = document.getElementById('f');
