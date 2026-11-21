@@ -73,8 +73,12 @@ function createAlertRules({ store }) {
       case 'keyword': {
         if (e.type !== 'chat') return 0;
         const words = String(r.keyword || '').split(',').map(norm).filter(Boolean);
-        const msg = norm(e.message);
-        return words.some((w) => msg.includes(w)) ? 1 : 0;
+        // Palabra completa: «hola» no salta con «holanda». Una frase o un
+        // emoji se busca tal cual dentro del mensaje.
+        const msg = ` ${norm(e.message).replace(/[^\p{L}\p{N}\p{Extended_Pictographic}]+/gu, ' ')} `;
+        const asWords = (w) => ` ${w.replace(/[^\p{L}\p{N}\p{Extended_Pictographic}]+/gu, ' ').trim()} `;
+        const raw = norm(e.message);
+        return words.some((w) => (/[\p{L}\p{N}]/u.test(w) ? asWords(w).trim() && msg.includes(asWords(w)) : raw.includes(w))) ? 1 : 0;
       }
       case 'liveStart': return e.type === 'live-start' ? 1 : 0;
       case 'liveEnd': return e.type === 'live-end' ? 1 : 0;

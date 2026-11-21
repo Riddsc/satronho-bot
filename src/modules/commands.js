@@ -16,7 +16,9 @@
 
 const crypto = require('crypto');
 
-// Nombres que ya usa la app (música) y no se pueden pisar.
+// Nombres que ya usa la app y no se pueden pisar. Los de serie siempre;
+// además, los que el streamer puso a la música, a los sonidos, a los
+// contadores y a las ruletas (ver usedByApp más abajo).
 const RESERVED = new Set(['play', 'temita', 'skip', 'quitar']);
 const PLATFORMS = ['kick', 'starvios', 'twitch', 'tiktok'];
 
@@ -29,6 +31,19 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
   let chatSinceStart = 0;
 
   const list = () => store.get('commands') || [];
+
+  // ¿Qué función de la app ya responde a este nombre? (null = ninguna)
+  function usedByApp(name) {
+    if (RESERVED.has(name)) return 'lo usa la música';
+    const music = store.get('music')?.commands || {};
+    if (Object.values(music).some((c) => (c?.names || []).map(cleanName).includes(name))) return 'lo usa la música';
+    if (cleanName(store.get('sounds')?.chat?.command) === name) return 'lo usan los sonidos del chat';
+    if ((store.get('counters') || []).some((c) => cleanName(c.command) === name)) return 'lo usa un contador';
+    for (const w of store.get('wheels')?.list || []) {
+      for (const t of w.triggers || []) if (t.type === 'command' && cleanName(t.command) === name) return `lo usa la ruleta «${w.name || 'sin nombre'}»`;
+    }
+    return null;
+  }
   const timersCfg = () => store.get('timers') || { enabled: true, items: [] };
 
   // ---------- CRUD ----------
@@ -37,8 +52,10 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     if (!name || !/^[\p{L}\p{N}_-]+$/u.test(name)) throw new Error('El comando necesita un nombre, sin espacios (por ejemplo «redes»)');
     const aliases = [...new Set((Array.isArray(input.aliases) ? input.aliases : String(input.aliases || '').split(/[\s,]+/)).map(cleanName).filter(Boolean))].filter((a) => a !== name);
     const all = [name, ...aliases];
-    const clash = all.find((n) => RESERVED.has(n));
-    if (clash) throw new Error(`!${clash} ya lo usa la música`);
+    for (const n of all) {
+      const owner = usedByApp(n);
+      if (owner) throw new Error(`!${n} ya ${owner}`);
+    }
     for (const c of list()) {
       if (c.id === id) continue;
       const theirs = [c.name, ...(c.aliases || [])];
@@ -124,7 +141,7 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     if (e.type !== 'chat' || !String(e.message || '').trim().startsWith('!')) return null;
     const [first, ...args] = String(e.message).trim().slice(1).split(/\s+/);
     const name = cleanName(first);
-    if (!name || RESERVED.has(name)) return null;
+    if (!name || usedByApp(name)) return null;
     const cmd = list().find((c) => c.name === name || (c.aliases || []).includes(name));
     if (!cmd) return null;
     const no = (reason) => ({ ran: false, reason, command: cmd.name });

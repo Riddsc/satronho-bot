@@ -47,8 +47,10 @@ function createLogbook() {
   const origWarn = console.warn.bind(console);
   console.error = (...a) => { add('error', ...a); origError(...a); };
   console.warn = (...a) => { add('aviso', ...a); origWarn(...a); };
-  process.on('uncaughtException', (err) => add('fallo', err));
-  process.on('unhandledRejection', (err) => add('fallo', err));
+  // Un fallo inesperado no cierra la app en pleno directo, pero queda anotado
+  // (y se ve en la consola) para «Reportar un problema».
+  process.on('uncaughtException', (err) => { add('fallo', err); origError('Fallo inesperado:', err); });
+  process.on('unhandledRejection', (err) => { add('fallo', err); origError('Promesa sin atender:', err); });
   return { add, lines: () => lines.slice(), recent: (n = 60) => lines.slice(-n) };
 }
 

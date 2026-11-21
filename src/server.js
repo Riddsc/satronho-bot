@@ -318,59 +318,67 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     broadcast('alert', { ...e, type: 'sfx', soundOnly: true, instant: true, title: hit.name, sound: { sound: hit.ref, volume: Number(c.volume) || 70, maxSeconds: 10 } });
   }
   const recent = [];
+  // Cada módulo recibe el evento por separado: si uno falla, los demás
+  // (voz, música, alertas…) siguen funcionando y el error queda anotado.
+  const step = (name, fn) => {
+    try {
+      return fn();
+    } catch (err) {
+      logbook.add('módulo', `${name}: ${String(err?.message || err).slice(0, 200)}`);
+      return undefined;
+    }
+  };
   bus.on('event', (e) => {
-    if (e.user?.avatar) avatars.remember(e.platform, e.user);
+    step('avatares', () => { if (e.user?.avatar) avatars.remember(e.platform, e.user); });
     if (e.type !== 'join') recent.unshift(e);
     recent.length = Math.min(recent.length, 100);
     broadcast('event', e);
-    stats.handleEvent(e);
-
-    catalog.onEvent(e);
-    podium.handleEvent(e);
-    live.handleEvent(e);
+    step('estadísticas', () => stats.handleEvent(e));
+    step('catálogo de regalos', () => catalog.onEvent(e));
+    step('podio', () => podium.handleEvent(e));
+    step('en vivo', () => live.handleEvent(e));
     // Alertas propias primero: si alguna es «solo la suya», la de serie no sale.
-    const matched = alertRules.match(e);
-    const exclusive = matched.some((m) => m.rule.exclusive !== false);
-    const alerts = store.get('alerts');
-    const bigEnough = e.type !== 'gift' || e.amount >= (alerts.minGift || 0);
-    const hasDefault = Boolean(alerts.types?.[e.type]);
-    // Alertas de serie encendidas o apagadas por plataforma.
-    const platOn = alerts.platforms?.[e.platform] !== false;
-    if (hasDefault && !exclusive && platOn && alerts.enabled[e.type] === true && bigEnough) {
-      const a = alertFor(e);
-      broadcast('alert', a);
-      if (a.speak) tts.speak(alertText(e));
-    }
-    for (const { rule, times } of matched) {
-      for (let i = 0; i < times; i += 1) {
-        const a = ruleAlert(rule, e);
+    step('alertas', () => {
+      const matched = alertRules.match(e);
+      const exclusive = matched.some((m) => m.rule.exclusive !== false);
+      const alerts = store.get('alerts') || {};
+      const bigEnough = e.type !== 'gift' || e.amount >= (alerts.minGift || 0);
+      const hasDefault = Boolean(alerts.types?.[e.type]);
+      // Alertas de serie encendidas o apagadas por plataforma.
+      const platOn = alerts.platforms?.[e.platform] !== false;
+      if (hasDefault && !exclusive && platOn && alerts.enabled?.[e.type] === true && bigEnough) {
+        const a = alertFor(e);
         broadcast('alert', a);
-        if (rule.speak) tts.speak(a.plain);
+        if (a.speak) tts.speak(alertText(e));
       }
-    }
-    account.onEvent(e);
-    if (e.type === 'live-start' && !e.test) bus.emit('stream-start', { platform: e.platform });
-    goals.handleEvent(e);
+      for (const { rule, times } of matched) {
+        // Tope por evento: una regla «cada N likes» no puede soltar 200 alertas de golpe.
+        for (let i = 0; i < Math.min(times, 10); i += 1) {
+          const a = ruleAlert(rule, e);
+          broadcast('alert', a);
+          if (rule.speak) tts.speak(a.plain);
+        }
+      }
+    });
+    step('cuentas', () => account.onEvent(e));
+    if (e.type === 'live-start' && !e.test) step('inicio del directo', () => bus.emit('stream-start', { platform: e.platform }));
+    step('metas', () => goals.handleEvent(e));
     // Lo que escribe la propia app (con la cuenta aparte o con la tuya) no se lee en voz alta.
-    const fromBot = e.type === 'chat' && Boolean(writers[e.platform]?.isOwnMessage(e.user?.name, e.message));
+    const fromBot = e.type === 'chat' && Boolean(step('chat bot', () => writers[e.platform]?.isOwnMessage(e.user?.name, e.message)));
     // Comandos propios (!redes…) y conteo para los mensajes automáticos.
     if (!fromBot && e.type === 'chat') {
-      chatSound(e);
-      commands.onChat(e);
-      try {
-        commands.handle(e);
-      } catch {
-        /* un comando roto no debe tumbar el chat */
-      }
+      step('sonidos del chat', () => chatSound(e));
+      step('mensajes automáticos', () => commands.onChat(e));
+      step('comandos', () => commands.handle(e));
     }
-    const decision = fromBot ? { read: false, reason: 'lo escribió Satronho Bot' } : tts.handleEvent(e);
+    const decision = fromBot ? { read: false, reason: 'lo escribió Satronho Bot' } : step('voz', () => tts.handleEvent(e));
     if (decision) {
       // El panel marca cada mensaje con 🔊 o 🔇 y el motivo.
       broadcast('tts-decision', { eventId: e.id, read: decision.read, reason: decision.reason, voice: decision.voice || '' });
-      if (decision.read) stats.onTtsRead();
+      if (decision.read) step('estadísticas', () => stats.onTtsRead());
     }
-    music.handleEvent(e);
-    try { wheels.handleEvent(e); } catch { /* una ruleta rota no tumba el resto */ }
+    step('música', () => music.handleEvent(e));
+    step('ruletas', () => wheels.handleEvent(e));
   });
 
   // Cómo sale cada alerta: duración, sonido y si se lee en voz alta.
@@ -514,7 +522,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     }
   };
 
-  app.get('/api/state', (_req, res) => ok(res, { config: publicConfig(store.get()), status, app: { name: 'Satronho Bot', author: 'RiddsSatronho', version: appInfo.version || require('../package.json').version, portable: Boolean(appInfo.portable), pagesBase: `${PAGES_ORIGIN}/satronho-bot`, port: store.get('port') } }));
+  app.get('/api/state', (_req, res) => ok(res, { config: publicConfig(store.get()), status, app: { name: 'Satronho Bot', author: 'RiddsSatronho', version: appInfo.version || require('../package.json').version, portable: Boolean(appInfo.portable), pagesBase: `${PAGES_ORIGIN}/satronho-bot`, port: store.get('port'), recovered: store.recovered || null } }));
 
   // Actualizaciones (solo en la versión instalada con Velopack).
   let lastUpdate = null;

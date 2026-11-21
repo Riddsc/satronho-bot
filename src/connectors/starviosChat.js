@@ -120,15 +120,21 @@ function createStarviosChat({ store, fetch: fetchFn = fetch, onChange = () => {}
     return data.access_token;
   }
 
+  const NOT_LIVE = 'No estás en directo en Starvios: el bot escribe solo durante el directo';
   // Directo actual del canal del streamer.
   async function currentStream(channel) {
-    if (streamCache.channel === channel && Date.now() - streamCache.ts < 60 * 1000) return streamCache.id;
+    if (streamCache.channel === channel && Date.now() - streamCache.ts < 60 * 1000) {
+      if (streamCache.status !== 'live') throw new Error(NOT_LIVE);
+      return streamCache.id;
+    }
     const c = await cfg();
     const prof = await getJson(fetchFn, `${c.url}/rest/v1/profiles?username=eq.${encodeURIComponent(channel)}&select=id&limit=1`, { headers: { apikey: c.key } });
     if (!prof[0]) throw new Error(`No existe el canal «${channel}» en Starvios`);
     const streams = await getJson(fetchFn, `${c.url}/rest/v1/live_streams?channel_id=eq.${prof[0].id}&select=id,status&order=started_at.desc.nullslast&limit=1`, { headers: { apikey: c.key } });
     if (!streams[0]) throw new Error('Tu canal de Starvios todavía no tiene directos');
-    streamCache = { channel, id: streams[0].id, ts: Date.now() };
+    streamCache = { channel, id: streams[0].id, status: streams[0].status, ts: Date.now() };
+    // Sin directo en curso no se escribe: el mensaje caería en un directo viejo.
+    if (streams[0].status !== 'live') throw new Error(NOT_LIVE);
     return streams[0].id;
   }
 

@@ -440,6 +440,13 @@ async function init() {
   initHelp();
   initNav(config);
   initGuides(config);
+  // El archivo de configuración estaba dañado: se recuperó del respaldo.
+  const rec = state.app?.recovered;
+  if (rec) {
+    setTimeout(() => sayFor('troya', rec.from === 'respaldo'
+      ? 'Tu configuración se dañó (quizá por un apagón) y la recuperé de la copia de respaldo. Revisa que todo esté como lo dejaste.'
+      : 'Tu configuración se dañó y no había copia de respaldo, así que la app empezó de cero. El archivo dañado quedó guardado aparte por si hace falta.', 15000, 'warn'), 1500);
+  }
   setHelpContext(() => {
     const voice = lastEngine?.voices?.find((x) => x.id === config.tts.piperVoice && x.installed);
     return { status, music: lastMusic, stats: lastStats, version: appVersion, voiceLabel: voice?.label || '' };
