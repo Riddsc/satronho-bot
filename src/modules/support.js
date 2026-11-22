@@ -13,10 +13,15 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
+// Prioridad: el relé (relay/reportes-worker.js), que guarda el webhook de
+// Discord fuera de la app y pone su propio límite de reportes. Si una copia
+// vieja no trae relé, se usa el webhook directo como antes.
 function builtinWebhook() {
+  if (process.env.SATRONHO_SUPPORT_RELAY) return process.env.SATRONHO_SUPPORT_RELAY;
   if (process.env.SATRONHO_DISCORD_WEBHOOK) return process.env.SATRONHO_DISCORD_WEBHOOK;
   try {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'builtin.json'), 'utf8')).discord?.webhook || '';
+    const b = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'builtin.json'), 'utf8'));
+    return b.support?.relay || b.discord?.webhook || '';
   } catch {
     return '';
   }
@@ -42,8 +47,10 @@ function createLogbook() {
   const origWarn = console.warn.bind(console);
   console.error = (...a) => { add('error', ...a); origError(...a); };
   console.warn = (...a) => { add('aviso', ...a); origWarn(...a); };
-  process.on('uncaughtException', (err) => add('fallo', err));
-  process.on('unhandledRejection', (err) => add('fallo', err));
+  // Un fallo inesperado no cierra la app en pleno directo, pero queda anotado
+  // (y se ve en la consola) para «Reportar un problema».
+  process.on('uncaughtException', (err) => { add('fallo', err); origError('Fallo inesperado:', err); });
+  process.on('unhandledRejection', (err) => { add('fallo', err); origError('Promesa sin atender:', err); });
   return { add, lines: () => lines.slice(), recent: (n = 60) => lines.slice(-n) };
 }
 
@@ -111,7 +118,8 @@ function createSupport({ fetch: fetchFn = fetch, logbook, appInfo = {}, getStatu
     } else {
       res = await fetchFn(webhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     }
-    if (!res.ok) throw new Error(`No se pudo enviar (Discord respondió ${res.status}). Inténtalo más tarde.`);
+    if (res.status === 429) throw new Error('Llegaron muchos reportes seguidos. Inténtalo en un rato.');
+    if (!res.ok) throw new Error(`No se pudo enviar (el servidor respondió ${res.status}). Inténtalo más tarde.`);
     lastSent = now;
     sentToday.n++;
     return { ok: true };

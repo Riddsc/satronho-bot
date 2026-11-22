@@ -15,11 +15,17 @@
 //   - packs (.satronho-sonidos) que exporta otro streamer.
 // Satronho no reparte sonidos ajenos: cada quien trae los suyos.
 
+const { isPrivateAddress, readLimited } = require('../security');
 const fs = require('fs');
 const path = require('path');
 
 const BUILTIN = require('../data/kenney-sounds.json');
 const PHRASES = require('../data/sound-phrases.json');
+const i18n = require('../i18n');
+
+// Voz en línea por idioma, para crear frases cuando no hay una voz de ese idioma en tu PC.
+const ONLINE_BY_LANG = { es: 'ms:es-CO-SalomeNeural', en: 'ms:en-US-JennyNeural', pt: 'ms:pt-BR-FranciscaNeural', fr: 'ms:fr-FR-DeniseNeural', it: 'ms:it-IT-ElsaNeural' };
+const langOfVoice = (k) => (String(k || '').match(/^(?:ms:)?([a-z]{2})[_-][A-Z]{2}/) || [])[1] || null;
 
 const EXT = { 'audio/mpeg': 'mp3', 'audio/mp3': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/wave': 'wav', 'audio/ogg': 'ogg', 'audio/webm': 'webm', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/aac': 'aac' };
 const MIME = { mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', webm: 'audio/webm', m4a: 'audio/mp4', aac: 'audio/aac' };
@@ -58,7 +64,7 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
   }
 
   function list() {
-    return { builtin: BUILTIN, mine, phrases: PHRASES };
+    return { builtin: BUILTIN, mine, phrases: PHRASES[i18n.getLang()] || PHRASES.es };
   }
   function fileOf(id) {
     const e = mine.find((x) => x.id === id);
@@ -86,17 +92,20 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
   async function download(url) {
     const u = new URL(url);
     if (!/^https?:$/.test(u.protocol)) throw new Error('El enlace debe empezar por http o https');
-    if (/^(localhost|127\.|10\.|192\.168\.|0\.)/.test(u.hostname)) throw new Error('Ese enlace no es de internet');
+    if (isPrivateAddress(u.hostname)) throw new Error('Ese enlace no es de internet');
     let res = await (mediaFetch || fetchFn)(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' }).catch(() => null);
     // Si la página protege sus archivos, se prueba con el otro camino.
     if ((!res || !res.ok) && mediaFetch) res = await fetchFn(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' }).catch(() => null);
     if (!res) throw new Error('No hay conexión con esa página. Revisa tu internet.');
     if (!res.ok) throw new Error(`La página respondió ${res.status}`);
     const type = String(res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-    const len = Number(res.headers.get('content-length') || 0);
-    if (len > MAX_BYTES) throw new Error('Ese sonido pesa más de 10 MB');
-    const buf = Buffer.from(await res.arrayBuffer());
-    if (buf.length > MAX_BYTES) throw new Error('Ese sonido pesa más de 10 MB');
+    // Si la página redirigió a una dirección de este PC o de la casa, no se usa.
+    try {
+      if (res.url && isPrivateAddress(new URL(res.url).hostname)) throw new Error('private');
+    } catch {
+      throw new Error('Ese enlace no es de internet');
+    }
+    const buf = await readLimited(res, MAX_BYTES, 'Ese sonido pesa más de 10 MB');
     return { buf, type, finalUrl: res.url || u.href };
   }
   const extFrom = (type, url) => EXT[type] || (String(url).toLowerCase().match(/\.(mp3|wav|ogg|webm|m4a|aac)(?:$|[?#])/) || [])[1] || '';
@@ -188,7 +197,7 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
         if (results.length) break;
       } catch (err) { lastErr = err; }
     }
-    if (!results.length && lastErr) throw new Error(`No pude buscar memes: ${lastErr.message}`);
+    if (!results.length && lastErr) throw new Error(/fetch failed|ENOTFOUND|ECONN|ETIMEDOUT/i.test(lastErr.message) ? 'No hay conexión con la página de memes. Revisa tu internet.' : `No pude buscar memes: ${lastErr.message}`);
     return { results, more: results.length >= 20 };
   }
 
@@ -198,10 +207,15 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
     if (!t) throw new Error('Escribe la frase');
     const tts = store.get('tts') || {};
     const piperKeys = engine.installedVoiceKeys();
-    let v = voice || tts.mainVoice || `${tts.piperVoice}#${Number(tts.speaker) || 0}`;
-    // Las voces de Windows solo suenan dentro del panel: para guardar la frase
-    // como archivo usamos una voz de tu PC o, si no hay, una en línea.
-    if (v.startsWith('win:') || (!v.startsWith('ms:') && !piperKeys.includes(v.split('~')[0]))) v = piperKeys[0] || 'ms:es-CO-SalomeNeural';
+    // La frase se dice con una voz de su idioma (el de la app): tu voz principal
+    // si es de ese idioma; si no, una de tu PC en ese idioma o una en línea.
+    // Las voces de Windows solo suenan dentro del panel, así que aquí no sirven.
+    const lang = i18n.getLang();
+    const usable = (k) => k && !k.startsWith('win:') && (k.startsWith('ms:') || piperKeys.includes(k.split('~')[0]));
+    const main = tts.mainVoice || `${tts.piperVoice}#${Number(tts.speaker) || 0}`;
+    let v = voice && usable(voice) ? voice : '';
+    if (!v && usable(main) && langOfVoice(main) === lang) v = main;
+    if (!v) v = piperKeys.find((k) => langOfVoice(k) === lang) || ONLINE_BY_LANG[lang] || ONLINE_BY_LANG.es;
     v = v.split('~')[0];
     let file;
     if (v.startsWith('ms:')) file = await online.synth(t, { voiceId: v.slice(3), rate: 1 });

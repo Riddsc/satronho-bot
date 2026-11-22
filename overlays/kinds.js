@@ -7,10 +7,11 @@
 import { mascotSVG } from '/js/mascots.js';
 import { mechaBust } from '/js/mecharidds.js';
 import { messageHtml } from '/js/emotes.js';
+import { getLocale, t as tr, tn as trn } from './i18n/i18n.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const nf = new Intl.NumberFormat('es-CO');
-const cmp = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat('es-CO', { notation: 'compact', maximumFractionDigits: 1 }).format(n) : nf.format(Math.round(n || 0)));
+const nf = { format: (n) => new Intl.NumberFormat(getLocale()).format(n) };
+const cmp = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(n) : nf.format(Math.round(n || 0)));
 const img = (u) => (/^https:\/\//.test(u || '') ? `/gift-img?u=${encodeURIComponent(u)}` : /^\//.test(u || '') ? u : '');
 const pad = (n) => String(Math.max(0, Math.floor(n))).padStart(2, '0');
 function hms(ms, hours = true, secs = true) {
@@ -794,13 +795,133 @@ const screens = {
       const left = t - Date.now();
       count = left > 0 ? `<div class="sc-count k-num">${hms(left, left >= 3600000)}</div>` : '';
     }
-    const clock = set.showClock ? `<div class="sc-clock k-num">${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</div>` : '';
+    const clock = set.showClock ? `<div class="sc-clock k-num">${new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}</div>` : '';
     const dogs = set.showGuides ? `<div class="sc-dogs" data-own="1">${['samy', 'troya'].map((g) => `<span>${mascotSVG(g)}</span>`).join('')}<span class="sc-mecha">${mechaBust()}</span>${['nono', 'juana'].map((g) => `<span>${mascotSVG(g)}</span>`).join('')}</div>` : '';
     return `<div class="sc-bg"></div>${clock}<div class="sc"><div class="sc-kicker">${esc(kick)}</div><div class="sc-title">${esc(set.title || def)}</div>${set.subtitle ? `<div class="sc-sub">${esc(set.subtitle)}</div>` : ''}${count}</div>${dogs}${set.socials ? `<div class="sc-foot">${esc(set.socials)}</div>` : ''}`;
   },
 };
 
-export const RENDER = { goals, counters, countdown, uptime, viewers, followers, ranking, mvp, lastgifts, giftspot, bestgift, giftrain, chat, spotlight, activity, ticker, nowplaying, queue, screens };
+// ===================== Huellitas: los que más tienen =====================
+const pointstop = {
+  css: BASE_CSS + `
+  .w { width: 380px; }
+  .pt { display: grid; gap: 7px; padding: 14px; }
+  .pt-row { position: relative; display: grid; grid-template-columns: 30px 36px minmax(0, 1fr) auto; gap: 9px; align-items: center; animation: k-in .45s both; }
+  .pt-row .k-av { width: 36px; height: 36px; font-size: 15px; }
+  .pt-pos { width: 30px; height: 30px; display: grid; place-items: center; font-weight: 900; font-size: 14px; border-radius: 50% 50% 46% 46%; background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .pt-row:nth-child(2) .pt-pos { background: #ffd23e; color: #1c1300; } .pt-row:nth-child(3) .pt-pos { background: #d5dcea; color: #161a22; } .pt-row:nth-child(4) .pt-pos { background: #e39a5c; color: #221004; }
+  .pt-name { font-weight: 800; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pt-val { font-weight: 900; font-size: 16px; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pt-row.up .pt-val { animation: pt-bump .7s ease; }
+  @keyframes pt-bump { 40% { transform: scale(1.35); } }
+  body[data-style="huellas"] .pt-pos { border-radius: 50%; position: relative; }
+  body[data-style="huellas"] .pt-pos::after { content: ''; position: absolute; top: -7px; left: 3px; width: 24px; height: 8px; background: radial-gradient(circle at 3px 4px, currentColor 3px, transparent 3.5px), radial-gradient(circle at 12px 2px, currentColor 3px, transparent 3.5px), radial-gradient(circle at 21px 4px, currentColor 3px, transparent 3.5px); opacity: .55; }
+  body[data-style="compacta"] .pt-row { grid-template-columns: 26px minmax(0, 1fr) auto; } body[data-style="compacta"] .pt-row .k-av { display: none; }
+  body[data-shape="wide"] .w { width: 1000px; } body[data-shape="wide"] .pt { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); column-gap: 18px; } body[data-shape="wide"] .pt > .k-title { grid-column: 1 / -1; }
+  `,
+  last: {},
+  render({ S, set }) {
+    const P = S.points;
+    if (!P || !P.enabled) return '';
+    const list = (P.top || []).filter((u) => set.platform === 'all' || u.platform === set.platform).slice(0, set.count);
+    if (!list.length) return '';
+    const rows = list.map((u, i) => {
+      const key = `${u.platform}${u.name}`;
+      const up = pointstop.last[key] != null && pointstop.last[key] < u.pts;
+      pointstop.last[key] = u.pts;
+      return `<div class="pt-row ${up ? 'up' : ''}" data-key="${esc(key)}"><span class="pt-pos">${i + 1}</span>${avatar(u.name, set.avatars ? u.avatar : '')}<span class="pt-name">${set.showPlatform ? plat(u.platform) : ''}${esc(u.name)}</span><span class="pt-val">${cmp(u.pts)} ${esc(P.emoji)}</span></div>`;
+    }).join('');
+    return `<div class="pt surface">${set.showTitle ? `<div class="k-title">${esc(set.title || String(P.plural || '').toUpperCase())}</div>` : ''}${rows}</div>`;
+  },
+};
+
+// ===================== Cofres y canjes (aparecen y se van) =====================
+const chests = {
+  css: BASE_CSS + `
+  #root { padding: 0; }
+  .w { width: 100%; height: 100%; }
+  .ch { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+  body[data-pos="left"] .ch { justify-items: start; padding-left: 40px; } body[data-pos="right"] .ch { justify-items: end; padding-right: 40px; }
+  .ch-card { --cc: var(--accent); display: grid; justify-items: center; gap: 6px; text-align: center; }
+  .ch-card.out { animation: ch-out .5s ease-in both; }
+  .ch-box { position: relative; width: 190px; height: 150px; margin-top: 90px; animation: ch-drop .7s cubic-bezier(.2,1.4,.4,1) both, ch-shake .5s .8s ease-in-out 2; }
+  .ch-body { position: absolute; inset: 52px 0 0; border-radius: 10px 10px 18px 18px; background: linear-gradient(180deg, color-mix(in srgb, var(--cc) 80%, #fff), color-mix(in srgb, var(--cc) 70%, #000)); box-shadow: inset 0 -10px 0 rgba(0,0,0,.2), 0 14px 30px rgba(0,0,0,.45); }
+  .ch-body::before { content: ''; position: absolute; left: 50%; top: -6px; width: 30px; height: 36px; margin-left: -15px; border-radius: 6px; background: #ffe08a; box-shadow: inset 0 -5px 0 rgba(0,0,0,.2); }
+  .ch-lid { position: absolute; left: -6px; right: -6px; top: 14px; height: 46px; border-radius: 40px 40px 8px 8px; transform-origin: 12% 100%; background: linear-gradient(180deg, color-mix(in srgb, var(--cc) 60%, #fff), var(--cc)); box-shadow: inset 0 -6px 0 rgba(0,0,0,.18); animation: ch-open .6s 1.9s cubic-bezier(.3,1.6,.5,1) both; }
+  .ch-light { position: absolute; left: 50%; top: 40px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; box-shadow: 0 0 80px 60px color-mix(in srgb, var(--cc) 70%, #fff); opacity: 0; animation: ch-glow .9s 2s ease-out both; }
+  .ch-prize { position: absolute; left: 0; right: 0; top: 0; font-size: 74px; opacity: 0; animation: ch-rise .9s 2.05s cubic-bezier(.2,1.5,.4,1) both; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45)); }
+  .ch-user { font-size: 40px; font-weight: 900; -webkit-text-stroke: 2px rgba(0,0,0,.6); paint-order: stroke fill; }
+  .ch-what { text-transform: uppercase; font-weight: 900; letter-spacing: .14em; font-size: 15px; opacity: .85; }
+  .ch-label { font-size: 32px; font-weight: 900; color: var(--cc); -webkit-text-stroke: 1.5px rgba(0,0,0,.6); paint-order: stroke fill; opacity: 0; animation: ch-show .5s 2.4s both; }
+  @keyframes ch-show { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .ch-card.rare .ch-label::before { content: '✦ '; } .ch-card.rare .ch-label::after { content: ' ✦'; }
+  .ch-spark { position: absolute; left: 50%; top: 38%; width: 9px; height: 9px; border-radius: 3px; background: var(--cc); animation: ch-spark 1.3s 2s ease-out both; }
+  .ch-toast { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: center; padding: 12px 20px; max-width: 560px; animation: ch-toast .6s cubic-bezier(.2,1.4,.4,1) both; }
+  .ch-toast .ch-ic { grid-row: span 2; font-size: 40px; }
+  .ch-toast b { font-size: 22px; } .ch-toast span { font-size: 17px; opacity: .9; }
+  body[data-style="vitrina"] .ch-card { padding: 20px 40px 24px; background: var(--bg); border-radius: calc(26px * var(--r)); border: 3px solid var(--cc); }
+  @keyframes ch-drop { from { opacity: 0; transform: translateY(-260px) rotate(-12deg); } }
+  @keyframes ch-shake { 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
+  @keyframes ch-open { to { transform: rotate(-38deg) translate(-8px, -16px); } }
+  @keyframes ch-glow { 30% { opacity: .9; } to { opacity: .35; } }
+  @keyframes ch-rise { from { opacity: 0; transform: translateY(70px) scale(.3); } to { opacity: 1; transform: translateY(-62px) scale(1); } }
+  @keyframes ch-spark { from { opacity: 1; } to { transform: translate(var(--dx), var(--dy)) rotate(260deg); opacity: 0; } }
+  @keyframes ch-out { to { opacity: 0; transform: translateY(30px) scale(.9); } }
+  @keyframes ch-toast { from { opacity: 0; transform: translateY(50px) scale(.8); } }
+  `,
+  queue: [],
+  busy: false,
+  render() { return '<div class="ch" data-own="1" id="ch"></div>'; },
+  onPoints(kind, p, ctx) {
+    const { set } = ctx;
+    if (set.platform !== 'all' && p.platform && p.platform !== set.platform) return;
+    if (kind === 'chest-open' && set.showChests) chests.queue.push({ kind, p });
+    else if (kind === 'shop-redemption' && set.showRedeems && p.status !== 'refunded' && p.status !== 'done') chests.queue.push({ kind, p });
+    else if (kind === 'points-feed' && set.showGames && ['duel', 'slots', 'gamble', 'colors', 'heist', 'trivia'].includes(p.kind) && p.big) chests.queue.push({ kind, p });
+    else return;
+    if (chests.queue.length > 8) chests.queue.splice(0, chests.queue.length - 8);
+    if (!chests.busy) chests.next(ctx);
+  },
+  next(ctx) {
+    const it = chests.queue.shift();
+    const box = document.getElementById('ch');
+    if (!it || !box) { chests.busy = false; return; }
+    chests.busy = true;
+    const { kind, p } = it;
+    let ms = 3600;
+    if (kind === 'chest-open') {
+      ms = 5600;
+      const c = /^#[0-9a-f]{6}$/i.test(p.chest?.color || '') ? p.chest.color : '';
+      box.innerHTML = `<div class="ch-card ${p.prize?.rare ? 'rare' : ''}" ${c ? `style="--cc:${c}"` : ''}><div class="ch-user">${esc(p.user?.name || '')}</div><div class="ch-what"><span data-u>${esc(ctx.set.openText || '')}</span> · <span translate="no">${esc(p.chest?.emoji || '')} ${esc(p.chest?.name || '')}</span></div>
+        <div class="ch-box"><div class="ch-light"></div><div class="ch-body"></div><div class="ch-lid"></div><div class="ch-prize">${esc(p.prize?.emoji || '✨')}</div></div><div class="ch-label">${esc(p.prize?.label || '')}</div></div>`;
+      const card = box.firstElementChild;
+      for (let i = 0; i < (p.prize?.rare ? 34 : 18); i += 1) {
+        const s = document.createElement('i');
+        s.className = 'ch-spark';
+        const a = Math.random() * Math.PI * 2;
+        const d = 110 + Math.random() * 230;
+        s.style.cssText = `--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;animation-delay:${2 + Math.random() * .35}s`;
+        card.append(s);
+      }
+    } else if (kind === 'shop-redemption') {
+      box.innerHTML = `<div class="ch-card"><div class="ch-toast surface"><span class="ch-ic">${esc(p.emoji || '🛍️')}</span><b>${esc(p.user?.name || '')}</b><span>${esc(p.item || '')}${p.text ? ` · «${esc(p.text)}»` : ''}</span></div></div>`;
+    } else {
+      box.innerHTML = `<div class="ch-card"><div class="ch-toast surface"><span class="ch-ic">${esc(p.emoji || '🎲')}</span><span>${esc(p.text || '')}</span></div></div>`;
+    }
+    setTimeout(() => {
+      box.querySelector('.ch-card')?.classList.add('out');
+      setTimeout(() => { box.innerHTML = ''; chests.next(ctx); }, 520);
+    }, ctx.preview ? Math.min(ms, 4200) : ms);
+  },
+  demoTick(ctx) {
+    const n = Math.floor(Math.random() * 3);
+    const who = ['Angélica', 'Dacreth', 'Adriana'][n];
+    if (n === 1) chests.onPoints('shop-redemption', { user: { name: who }, item: 'Elegir la próxima canción', emoji: '🎵', text: 'Luces de neón', status: 'pending' }, ctx);
+    else chests.onPoints('chest-open', { user: { name: who }, chest: { name: 'Dorado', emoji: '🧰', color: n ? '#ffb23e' : '#9b8cff' }, prize: { label: n ? '500 huellitas' : 'Saludo en voz alta', emoji: n ? '🐾' : '📢', rare: !n } }, ctx);
+  },
+};
+
+export const RENDER = { pointstop, chests, goals, counters, countdown, uptime, viewers, followers, ranking, mvp, lastgifts, giftspot, bestgift, giftrain, chat, spotlight, activity, ticker, nowplaying, queue, screens };
 
 // ===================== Datos de ejemplo (vista previa) =====================
 const NAMES = ['Angélica', 'Dacreth', 'Aroa Malena', 'fabiosan622', 'Adriana', 'tinvalente', 'Satronho'];
@@ -829,6 +950,7 @@ export function demoState(S) {
     live: { startedAt: t - 3 * 3600000 - 47 * 60000, viewersTotal: 1647, viewers: { tiktok: 1400, kick: 247 }, peak: 1820, follows: 17, likes: 48200, coins: 5300, gifts, best: gifts[5], streak: { ...gifts[2], count: 99 }, counters: [{ id: 'm', name: 'Muertes', icon: '💀', value: 27 }, { id: 'j', name: 'Jefes', icon: '⚔️', value: 3, goal: 5 }], countdown: { running: true, endsAt: t + 4 * 60000 + 54000, left: 0 } },
     music: { current: { id: 'c1', videoId: 'dQw4w9WgXcQ', title: 'Luces de neón', author: 'Nova Ríos', requester: 'Satronho', durationSec: 205, startedAt: t - 43000, pausedMs: 0 }, queue: [['Medianoche en ruta', 'Dacreth'], ['Fuego lento', 'Angélica'], ['Ola dorada', 'Adriana'], ['Estrella fugaz', 'tinvalente']].map(([title, r], i) => ({ id: `q${i}`, videoId: 'dQw4w9WgXcQ', title, requester: r, durationSec: 180 + i * 17 })), paused: false },
     recent,
+    points: { enabled: true, emoji: '🐾', name: 'huellita', plural: 'huellitas', top: people.map((u, i) => ({ ...u, pts: (7 - i) * 1730 + 40 })) },
   };
 }
 demoState.event = () => {

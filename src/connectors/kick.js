@@ -322,7 +322,16 @@ function createKickConnector({ bus, onStatus, fetch: fetchFn = fetch, diagFile =
 
       socket = ws;
       ws.on('error', () => {});
+      // Vigilante: Kick manda algo (aunque sea un ping) cada pocos minutos.
+      // Si pasan 4 minutos en silencio, la conexión quedó muerta sin cerrarse
+      // (pasa con cortes de internet o al despertar el PC): se reconecta.
+      let lastMsg = Date.now();
+      ws.on('message', () => { lastMsg = Date.now(); });
+      const watchdog = setInterval(() => {
+        if (Date.now() - lastMsg > 4 * 60 * 1000) ws.terminate?.() ?? ws.close();
+      }, 30 * 1000);
       ws.on('close', () => {
+        clearInterval(watchdog);
         clearTimeout(refreshTimer);
         if (socket === ws && !base.stopped) base.retry(run, 'Conexión cerrada');
       });

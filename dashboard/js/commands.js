@@ -1,6 +1,6 @@
 // Comandos del chat y Mensajes automáticos (Samy).
 
-import { $, api, esc, toast } from './util.js';
+import { $, api, esc, toast, tr, listOf } from './util.js';
 import { guideToast } from './guides.js';
 
 const PLAT = { kick: 'Kick', starvios: 'Starvios', twitch: 'Twitch', tiktok: 'TikTok' };
@@ -169,12 +169,12 @@ function renderTimers() {
   $('#card-automaticos').classList.toggle('off', timers.enabled === false);
   const rows = (timers.items || []).map((t) => {
     if (editingTimer === t.id) return `<div class="cmd-item open">${timerForm(t)}</div>`;
-    const where = ['kick', 'starvios'].filter((k) => t.platforms?.[k] !== false).map((k) => PLAT[k]).join(' y ');
+    const where = listOf(['kick', 'starvios'].filter((k) => t.platforms?.[k] !== false).map((k) => PLAT[k]));
     return `<div class="cmd-item ${t.enabled ? '' : 'off'}" data-id="${esc(t.id)}">
       <div class="cmd-head timer">
-        <span class="cmd-every">cada <b>${t.everyMin}</b> min</span>
+        <span class="cmd-every">${tr('cada <b>{0}</b> min', t.everyMin)}</span>
         <span class="cmd-resp">${esc(t.text)}</span>
-        <span class="cmd-meta">${t.minChat ? `si hubo ${t.minChat}+ mensajes` : 'aunque el chat esté callado'} · ${esc(where || 'ninguna plataforma')}</span>
+        <span class="cmd-meta"><span data-u>${t.minChat ? tr('si hubo {0}+ mensajes', t.minChat) : tr('aunque el chat esté callado')}</span> · <span data-u>${esc(where || tr('ninguna plataforma'))}</span></span>
         <label class="switch" title="Activar o apagar"><input type="checkbox" data-timer-toggle ${t.enabled ? 'checked' : ''}><span></span></label>
         <span class="row tight"><button type="button" class="btn small ghost" data-timer-send>Enviar ahora</button><button type="button" class="btn small" data-timer-edit>Editar</button></span>
       </div></div>`;

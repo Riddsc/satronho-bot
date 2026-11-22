@@ -3,7 +3,7 @@
 // estado en vivo y, cuando aplica, un atajo (saltar voz, probar alerta,
 // terminar sesión).
 
-import { $, api, esc, toast, PLATFORM_NAMES } from './util.js';
+import { $, api, esc, toast, PLATFORM_NAMES, tr, trn, getLocale } from './util.js';
 import { skipTts, ttsStatus, mainVoiceName } from './voice.js';
 import { sayFor } from './guides.js';
 
@@ -14,7 +14,7 @@ const setState = (key, html, tone = '') => {
   el.innerHTML = html;
   el.className = `hs-state ${tone}`;
 };
-const compact = (n) => (Number(n) || 0).toLocaleString('es-CO', { notation: 'compact', maximumFractionDigits: 1 });
+const compact = (n) => (Number(n) || 0).toLocaleString(getLocale(), { notation: 'compact', maximumFractionDigits: 1 });
 
 // Chat en vivo: lo último que pasó.
 export function homeEvent(e) {
@@ -69,14 +69,14 @@ async function loadExtras() {
   try {
     const { commands } = await api('GET', '/api/commands');
     const on = (commands || []).filter((c) => c.enabled).length;
-    setState('chatbot', `${on ? '<i class="dot on"></i>' : '<i class="dot"></i>'}${on} ${on === 1 ? 'comando activo' : 'comandos activos'}`, on ? 'on' : '');
+    setState('chatbot', `${on ? '<i class="dot on"></i>' : '<i class="dot"></i>'}${trn(on, '{0} comando activo', '{0} comandos activos')}`, on ? 'on' : '');
   } catch {
     setState('chatbot', 'Comandos, mensajes automáticos y respuestas');
   }
   try {
     const lib = await api('GET', '/api/sounds');
     const mine = (lib.mine || []).length;
-    setState('sonidos', mine ? `<i class="dot on"></i>${mine} ${mine === 1 ? 'sonido tuyo' : 'sonidos tuyos'}` : '<i class="dot"></i>Busca memes populares en un clic', mine ? 'on' : '');
+    setState('sonidos', mine ? `<i class="dot on"></i>${trn(mine, '{0} sonido tuyo', '{0} sonidos tuyos')}` : '<i class="dot"></i>Busca memes populares en un clic', mine ? 'on' : '');
   } catch {
     setState('sonidos', 'Memes, frases y tus propios sonidos');
   }
@@ -94,7 +94,7 @@ export function initHome() {
     if (!confirm('¿Terminar el directo actual y guardarlo en Estadísticas?')) return;
     try {
       const { session } = await api('POST', '/api/stats/end');
-      if (session) sayFor('juana', `Guardé tu directo: ${compact(session.diamonds)} diamantes y ${compact(session.counts.chat)} mensajes.`, 8000, 'ok');
+      if (session) sayFor('juana', tr('Guardé tu directo: {0} y {1}.', trn(session.diamonds, '{0} diamante', '{0} diamantes', compact(session.diamonds)), trn(session.counts.chat, '{0} mensaje', '{0} mensajes', compact(session.counts.chat))), 8000, 'ok');
       else toast('No había ningún directo en curso');
     } catch (e) {
       toast(e.message);

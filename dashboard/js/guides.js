@@ -1,5 +1,5 @@
 // Samy, Troya, Ñoño y Juana: los guías de Satronho Bot.
-// Samy y Troya son las guías principales (más grandes, siempre a mano en
+// Samy y Troya son los guías principales (más grandes, siempre a mano en
 // la esquina y responden las preguntas generales); Ñoño lleva la música y
 // Juana las alertas, metas y estadísticas. Tocar a cualquiera abre su
 // ayuda (help.js). Si el streamer sube una foto, se usa en lugar del dibujo.

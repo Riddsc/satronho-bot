@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="i18n-wait">
 <head>
 <meta charset="utf-8">
 <title>Satronho · Alertas</title>
@@ -62,6 +62,7 @@
   import { connectSatronho, param } from './client.js';
   import { applyOverlayStyle, overlayStyle, listenPreview, isPreview } from './style.js';
   import { playAlertSound, stopAlertSound } from './sounds.js';
+  import { t as tr, tn as trn } from './i18n/i18n.js';
 
   const stage = document.getElementById('stage');
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -69,7 +70,7 @@
 
   const TEMPLATES = {
     follow: { icon: '♥', label: 'Nuevo seguidor', title: (e) => `<b>${e.user.name}</b> te sigue` },
-    sub:    { icon: '★', label: 'Suscripción',   title: (e) => e.extra?.gifted ? `<b>${e.user.name}</b> regaló ${e.amount} ${e.amount > 1 ? 'suscripciones' : 'suscripción'}` : `<b>${e.user.name}</b> se suscribió${e.amount > 1 ? ` · ${e.amount} meses` : ''}` },
+    sub:    { icon: '★', label: 'Suscripción',   title: (e) => e.extra?.gifted ? trn(e.amount, '<b>{1}</b> regaló una suscripción', '<b>{1}</b> regaló {0} suscripciones', e.amount, e.user.name) : e.amount > 1 ? tr('<b>{0}</b> se suscribió · {1} meses', e.user.name, e.amount) : tr('<b>{0}</b> se suscribió', e.user.name) },
     gift:   { icon: '🎁', label: 'Regalo',        title: (e) => {
       const x = e.extra || {};
       const what = x.giftName ? `${x.count > 1 ? `${x.count}× ` : ''}${esc(x.giftName)}` : `${e.amount} ${esc(x.currency || '')}`;

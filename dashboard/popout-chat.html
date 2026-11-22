@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="i18n-wait">
 <head>
 <meta charset="utf-8">
 <meta name="author" content="RiddsSatronho">
@@ -134,6 +134,7 @@
 </div>
 <script type="module">
   import { connectSatronho } from '/overlays/client.js';
+  import { getLocale, t as tr, tn as trn } from '/overlays/i18n/i18n.js';
   import { applyAppearance } from '/js/appearance.js';
   import { messageHtml, onlyEmotes } from '/js/emotes.js';
   import { mechanizerHead } from '/js/mechanizer.js';
@@ -237,7 +238,7 @@
   }
   const logo = (p) => (PLATS.includes(p) ? `<img class="pl" src="/img/platforms/${p}.png" alt="">` : '');
   const gimg = (u) => (/^https:\/\//.test(u || '') ? `<img class="gimg" src="/gift-img?u=${encodeURIComponent(u)}" alt="" loading="lazy">` : '');
-  const nf = (n) => Number(n || 0).toLocaleString('es-CO');
+  const nf = (n) => Number(n || 0).toLocaleString(getLocale());
   const msg = (e) => messageHtml(e, { emotes: pp.emotes, transform: censor });
   function evText(e) {
     const x = e.extra || {};
@@ -256,7 +257,7 @@
   function row(e) {
     if (e.type !== 'chat') return `<li class="ev t-${esc(e.type)}" data-id="${esc(e.id)}">${logo(e.platform)} <b>${esc(e.user?.name)}</b> ${evText(e)}</li>`;
     const d = decided.get(e.id);
-    const t = new Date(e.ts || Date.now()).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    const t = new Date(e.ts || Date.now()).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
     const color = /^#[0-9a-f]{3,8}$/i.test(e.extra?.color || '') ? e.extra.color : '';
     const cls = [d && !d.read ? 'muted' : '', highlight(e)].filter(Boolean).join(' ');
     return `<li class="${cls}" data-id="${esc(e.id)}">${av(e.user?.name, e.user?.avatar)}<div><div class="who">${logo(e.platform)}${badges(e)}<span class="nm" ${color ? `style="color:${color}"` : ''}>${esc(e.user?.name)}</span>${d ? (d.read ? ' 🔊' : ' 🔇') : ''}<time>${t}</time></div><p class="${pp.emotes && onlyEmotes(e) ? 'only-emotes' : ''}">${msg(e)}</p></div>${ACT}</li>`;
@@ -268,7 +269,7 @@
   function showNew() {
     const b = $('#po-new');
     b.hidden = unseen === 0;
-    b.textContent = `${unseen} ${unseen === 1 ? 'mensaje nuevo' : 'mensajes nuevos'} ↓`;
+    b.textContent = `${trn(unseen, '{0} mensaje nuevo', '{0} mensajes nuevos')} ↓`;
   }
   function toEnd() { feed.scrollTop = feed.scrollHeight; unseen = 0; showNew(); }
   function drawBar() {
@@ -289,7 +290,7 @@
     po.classList.toggle('no-badges', !pp.badges);
     document.documentElement.dataset.pobg = pp.bg;
     drawBar();
-    feed.innerHTML = items.filter(shows).slice(-250).map(row).join('') || `<li class="ev po-empty"><span class="po-mz">${mechanizerHead()}</span><span><b>Mechanizer:</b> cuando alguien escriba, aparece aquí. Mi ⚙ tiene la letra, el fondo y la transparencia.</span></li>`;
+    feed.innerHTML = items.filter(shows).slice(-250).map(row).join('') || `<li class="ev po-empty"><span class="po-mz">${mechanizerHead()}</span><span><b>Mechanizer:</b> ${tr('cuando alguien escriba, aparece aquí. Mi ⚙ tiene la letra, el fondo y la transparencia.')}</span></li>`;
     toEnd();
   }
   function fillPanel() {

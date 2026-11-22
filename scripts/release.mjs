@@ -73,11 +73,15 @@ const [outDir] = await packager({
       // App de Spotify (solo el Client ID: el inicio de sesión es con PKCE).
       if (process.env.SATRONHO_SPOTIFY_CLIENT_ID) data.spotify = { clientId: process.env.SATRONHO_SPOTIFY_CLIENT_ID };
       // Webhook de Discord para «Reportar un problema».
-      if (process.env.SATRONHO_DISCORD_WEBHOOK) data.discord = { webhook: process.env.SATRONHO_DISCORD_WEBHOOK };
+      // Mejor el relé (relay/LEEME.md): así el webhook no viaja dentro de la app.
+      if (process.env.SATRONHO_SUPPORT_RELAY) {
+        data.support = { relay: process.env.SATRONHO_SUPPORT_RELAY };
+        delete data.discord;
+      } else if (process.env.SATRONHO_DISCORD_WEBHOOK) data.discord = { webhook: process.env.SATRONHO_DISCORD_WEBHOOK };
       fs.writeFileSync(file, JSON.stringify(data, null, 2));
       console.log(data.kick ? '✓ App de Kick incluida' : '⚠ Sin app de Kick incluida: cada streamer tendrá que pegar la suya en «Avanzado»');
       console.log(data.spotify ? '✓ App de Spotify incluida' : '⚠ Sin app de Spotify: cada streamer pega su Client ID en Música → Spotify');
-      console.log(data.discord ? '✓ Reportes a Discord incluidos' : '⚠ Sin webhook de Discord: «Reportar un problema» no podrá enviar');
+      console.log(data.support ? '✓ Reportes por el relé incluidos' : data.discord ? '⚠ Reportes con el webhook directo (mejor configura SUPPORT_RELAY_URL, ver relay/LEEME.md)' : '⚠ Sin reportes: «Reportar un problema» no podrá enviar');
     },
     async ({ buildPath }) => {
       const repo = process.env.SATRONHO_UPDATE_REPO;

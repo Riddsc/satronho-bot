@@ -139,6 +139,7 @@ function createKickChat({ store, fetch: fetchFn = fetch, redirectUri, onChange =
     const verifier = b64url(crypto.randomBytes(48));
     const challenge = b64url(crypto.createHash('sha256').update(verifier).digest());
     const state = b64url(crypto.randomBytes(18));
+    for (const [k, v] of pendingAuth) if (Date.now() - v.ts > 15 * 60 * 1000) pendingAuth.delete(k); // intentos abandonados
     pendingAuth.set(state, { verifier, account: account === 'bot' ? 'bot' : 'me', app: { clientId: app.clientId, clientSecret: app.clientSecret }, ts: Date.now() });
     const q = new URLSearchParams({
       response_type: 'code',
@@ -205,10 +206,21 @@ function createKickChat({ store, fetch: fetchFn = fetch, redirectUri, onChange =
     if (!app) throw new Error('Cambiaste la app de Kick: vuelve a autorizar esta cuenta');
     if (a.expiresAt - Date.now() > 60 * 1000) return a.accessToken;
     if (!a.refreshToken) throw new Error('El permiso de Kick caducó. Vuelve a autorizar.');
-    const t = await tokenRequest(app, { grant_type: 'refresh_token', refresh_token: a.refreshToken });
-    saveSecrets({ [account]: t });
-    return t.accessToken;
+    // Kick cambia el permiso de renovación cada vez que se usa: si dos partes
+    // de la app renuevan a la vez, la segunda usaría uno ya gastado y Kick
+    // pediría autorizar de nuevo. Por eso todas esperan la misma renovación.
+    if (!refreshing.has(account)) {
+      const job = tokenRequest(app, { grant_type: 'refresh_token', refresh_token: a.refreshToken })
+        .then((t) => {
+          saveSecrets({ [account]: t });
+          return t.accessToken;
+        })
+        .finally(() => refreshing.delete(account));
+      refreshing.set(account, job);
+    }
+    return refreshing.get(account);
   }
+  const refreshing = new Map(); // cuenta -> renovación en curso
 
   function logout(account) {
     saveSecrets({ [account]: { accessToken: '', refreshToken: '', expiresAt: 0, appClientId: '', user: null } });

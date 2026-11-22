@@ -9,7 +9,7 @@
 //     «📺 En pantalla» para mostrar un mensaje en el overlay.
 // La ventana aparte (popout-chat.html) lee estos mismos ajustes.
 
-import { $, $$, api, esc, toast, timeOf, PLATFORM_NAMES } from './util.js';
+import { $, $$, api, esc, toast, timeOf, PLATFORM_NAMES, trn, getLocale } from './util.js';
 import { avatarHtml, upsertSpecial, specialFor } from './voice.js';
 import { sayFor } from './guides.js';
 import { messageHtml, onlyEmotes } from './emotes.js';
@@ -95,7 +95,7 @@ function describe(e) {
     case 'sticker': return 'mandó un sticker';
     case 'join': return 'llegó al directo';
     case 'superfan': return 'ahora es superfan ⭐';
-    case 'reward': return `canjeó <b class="lc-reward" ${/^#[0-9a-f]{3,8}$/i.test(x.color || '') ? `style="--rw:${x.color}"` : ''}>${esc(x.rewardTitle || 'una recompensa')}</b>${e.amount ? ` <small class="lc-pts">${Number(e.amount).toLocaleString('es-CO')} pts</small>` : ''}${e.message ? `<span class="lc-rwmsg">«${messageHtml(e, { emotes: prefs.emotes, transform: censor })}»</span>` : ''}`;
+    case 'reward': return `canjeó <b class="lc-reward" ${/^#[0-9a-f]{3,8}$/i.test(x.color || '') ? `style="--rw:${x.color}"` : ''}>${esc(x.rewardTitle || 'una recompensa')}</b>${e.amount ? ` <small class="lc-pts">${Number(e.amount).toLocaleString(getLocale())} pts</small>` : ''}${e.message ? `<span class="lc-rwmsg">«${messageHtml(e, { emotes: prefs.emotes, transform: censor })}»</span>` : ''}`;
     case 'live-start': return '· empezó tu directo';
     case 'live-end': return '· terminó tu directo';
     default: return '';
@@ -162,7 +162,7 @@ function nodeFor(e) {
       </div>`;
   } else {
     const img = (e.type === 'gift' || e.type === 'sticker') && e.extra?.image ? `<img class="lc-giftimg ${e.type === 'sticker' ? 'lc-sticker' : ''}" src="/gift-img?u=${encodeURIComponent(e.extra.image)}" alt="" loading="lazy">` : '';
-    const amount = e.type === 'gift' ? `<span class="lc-amount">${Number(e.amount || 0).toLocaleString('es-CO')} ${esc(e.extra?.currency || '')}</span>` : '';
+    const amount = e.type === 'gift' ? `<span class="lc-amount">${Number(e.amount || 0).toLocaleString(getLocale())} ${esc(e.extra?.currency || '')}</span>` : '';
     li.innerHTML = `<span class="lc-evicon">${{ follow: '♥', sub: '✦', gift: '🎁', like: '👍', share: '↗', sticker: '✨', join: '👋', superfan: '⭐', reward: '🎟', 'live-start': '🔴', 'live-end': '⏹' }[e.type] || '•'}</span>
       <p class="lc-evtext">${LOGO(e.platform)}<b>${name}</b> ${describe(e)} ${img}${amount}</p><time>${timeOf(e.ts)}</time>`;
   }
@@ -236,19 +236,19 @@ function renderTabs() {
 function giftTotals() {
   const by = new Map();
   for (const g of gifts) if (!g.sub) by.set(g.currency, (by.get(g.currency) || 0) + g.amount);
-  return [...by].map(([cur, n]) => `<b>${n.toLocaleString('es-CO')}</b> ${esc(cur || '')}`).join(' · ') || 'Todavía nada';
+  return [...by].map(([cur, n]) => `<b>${n.toLocaleString(getLocale())}</b> ${esc(cur || '')}`).join(' · ') || 'Todavía nada';
 }
 function giftRow(e) {
   const x = e.extra || {};
   if (e.type === 'sub') return `<li>${avatarHtml(e.user?.name, e.user?.avatar)}<div><b>${esc(e.user?.name || 'Anónimo')}</b><small>${LOGO(e.platform)}${e.amount > 1 ? `se suscribió (${e.amount} meses)` : 'se suscribió'}</small></div><span class="lc-amount">✦</span></li>`;
-  return `<li>${avatarHtml(e.user?.name, e.user?.avatar)}<div><b>${esc(e.user?.name || 'Anónimo')}</b><small>${LOGO(e.platform)}${x.count > 1 ? `${x.count}× ` : ''}${esc(x.giftName || 'Regalo')}</small></div>${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}<span class="lc-amount">${Number(e.amount || 0).toLocaleString('es-CO')}<small>${esc(x.currency || '')}</small></span></li>`;
+  return `<li>${avatarHtml(e.user?.name, e.user?.avatar)}<div><b>${esc(e.user?.name || 'Anónimo')}</b><small>${LOGO(e.platform)}${x.count > 1 ? `${x.count}× ` : ''}${esc(x.giftName || 'Regalo')}</small></div>${x.image ? `<img src="${esc(x.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}<span class="lc-amount">${Number(e.amount || 0).toLocaleString(getLocale())}<small>${esc(x.currency || '')}</small></span></li>`;
 }
 function renderGifts() {
   const col = $('#lc-gifts');
   if (!col) return;
   col.hidden = !prefs.giftsColumn;
   $('#lc-gift-total').innerHTML = giftTotals();
-  $('#lc-gift-count').textContent = `${gifts.length} ${gifts.length === 1 ? 'regalo' : 'regalos'}`;
+  $('#lc-gift-count').textContent = trn(gifts.length, '{0} regalo', '{0} regalos');
   const list = gifts.filter((g) => (g.sub ? prefs.countSubs : g.amount >= (Number(prefs.minGift) || 0)));
   $('#lc-gift-list').innerHTML = list.length ? list.slice(0, 120).map((g) => giftRow(g.e)).join('') : '<li class="lc-empty">Los regalos y propinas de todas las plataformas salen aquí.</li>';
 }

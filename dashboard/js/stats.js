@@ -1,7 +1,7 @@
 // Juana también lleva las estadísticas: el directo en curso, el historial
 // de sesiones y los tops de siempre. Todo se guarda en tu PC.
 
-import { $, api, esc, toast, PLATFORM_NAMES } from './util.js';
+import { $, api, esc, toast, PLATFORM_NAMES, tr, trn, getLocale } from './util.js';
 import { sayFor } from './guides.js';
 import { initOverview, refreshOverview } from './statsOverview.js';
 
@@ -18,10 +18,10 @@ const METRICS = {
   viewers: { label: 'Espectadores de TikTok', unit: 'espectadores' },
 };
 
-const nf = new Intl.NumberFormat('es-CO');
-const compact = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat('es-CO', { notation: 'compact', maximumFractionDigits: 1 }).format(n) : nf.format(n));
+const nf = { format: (n) => new Intl.NumberFormat(getLocale()).format(n) };
+const compact = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(n) : nf.format(n));
 const dur = (min) => (min >= 60 ? `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')} min` : `${min} min`);
-const dateOf = (ts) => new Date(ts).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const dateOf = (ts) => new Date(ts).toLocaleString(getLocale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
 // ---------- Selector de sesión ----------
 function renderSelect() {
@@ -62,7 +62,7 @@ function renderTiles(s) {
   const v = (f) => (p ? f(p) : null);
   $('#stats-tiles').innerHTML = [
     tile('Duración', dur(s.durationMin), s.durationMin, v((x) => x.durationMin)),
-    tile('Diamantes', compact(s.diamonds), s.diamonds, v((x) => x.diamonds), { money: `≈ ${s.usd.toLocaleString('es-CO', { style: 'currency', currency: 'USD' })} estimado` }),
+    tile('Diamantes', compact(s.diamonds), s.diamonds, v((x) => x.diamonds), { money: `≈ ${s.usd.toLocaleString(getLocale(), { style: 'currency', currency: 'USD' })} estimado` }),
     tile('Regalos enviados', compact(s.giftsSent), s.giftsSent, v((x) => x.giftsSent)),
     tile('Mensajes de chat', compact(s.counts.chat), s.counts.chat, v((x) => x.counts.chat)),
     tile('Personas en el chat', compact(s.uniqueChatters), s.uniqueChatters, v((x) => x.uniqueChatters)),
@@ -203,7 +203,7 @@ export async function renderAllTops() {
   if (!box) return;
   try {
     const { tops } = await api('GET', '/api/stats/all-time');
-    $('#alltops-note').textContent = `${tops.sessions} ${tops.sessions === 1 ? 'directo guardado' : 'directos guardados'}`;
+    $('#alltops-note').textContent = trn(tops.sessions, '{0} directo guardado', '{0} directos guardados');
     box.innerHTML = [
       topList('Más diamantes', tops.gifters, 'diamantes'),
       topList('Más activos en el chat', tops.chatters, 'mensajes'),
@@ -219,7 +219,7 @@ async function show() {
   $('#stats-session-view').hidden = isAll;
   if (isAll) {
     const { tops } = await api('GET', '/api/stats/all-time');
-    $('#stats-headline').textContent = `Tops de siempre · ${tops.sessions} ${tops.sessions === 1 ? 'directo' : 'directos'} guardados`;
+    $('#stats-headline').textContent = `${tr('Tops de siempre')} · ${trn(tops.sessions, '{0} directo guardado', '{0} directos guardados')}`;
     renderTops(tops);
     return;
   }
@@ -283,7 +283,7 @@ export function initStats({ stats, statsHistory }) {
   $('#stats-end').addEventListener('click', async () => {
     if (!confirm('¿Terminar el directo actual y guardarlo en el historial?')) return;
     const { session } = await api('POST', '/api/stats/end').catch((e) => (toast(e.message), {}));
-    if (session) sayFor('juana', `Guardé tu directo: ${compact(session.diamonds)} diamantes y ${compact(session.counts.chat)} mensajes. ¡Buen trabajo!`, 9000, 'ok');
+    if (session) sayFor('juana', `${tr('Guardé tu directo: {0} y {1}.', trn(session.diamonds, '{0} diamante', '{0} diamantes', compact(session.diamonds)), trn(session.counts.chat, '{0} mensaje', '{0} mensajes', compact(session.counts.chat)))} ${tr('¡Buen trabajo!')}`, 9000, 'ok');
   });
   show().catch(() => {});
   initOverview({ open: openSession });

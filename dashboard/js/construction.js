@@ -3,6 +3,7 @@
 // building(title, text) devuelve el HTML; se pone donde haga falta.
 
 import { mascotSVG } from './mascots.js';
+import { tr } from './util.js';
 import { mechaHead } from './mecharidds.js';
 import { mechanizerHead } from './mechanizer.js';
 
@@ -13,6 +14,6 @@ export function building(title = 'Estamos trabajando en ello', text = 'La crew e
   const crew = CREW.map(([id, k, c], i) => `<span class="cz-dog" style="--k:${k};--c:${c};--d:${(i * 0.35).toFixed(2)}s">${HELMET}<span class="cz-face">${id === 'mecha' ? mechaHead('') : id === 'mechanizer' ? mechanizerHead('') : mascotSVG(id)}</span></span>`).join('');
   return `<div class="cz" role="status">
     <div class="cz-scene"><div class="cz-crew">${crew}</div><div class="cz-tape"></div></div>
-    <div class="cz-sign"><b>🚧 ${title}</b><p>${text}</p></div>
+    <div class="cz-sign"><b>🚧 ${tr(title)}</b><p>${tr(text)}</p></div>
   </div>`;
 }
