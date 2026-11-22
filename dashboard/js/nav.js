@@ -49,6 +49,14 @@ const ICONS = {
   news: '<path d="M5 4.5h11v15H6.5A1.5 1.5 0 0 1 5 18z"/><path d="M16 8.5h3v9.5a1.5 1.5 0 0 1-3 0M8 8h5M8 11.5h5M8 15h3"/>',
   paw: '<ellipse cx="12" cy="16" rx="4.2" ry="3.6"/><circle cx="6" cy="10.5" r="1.9"/><circle cx="9.6" cy="6.3" r="1.9"/><circle cx="14.4" cy="6.3" r="1.9"/><circle cx="18" cy="10.5" r="1.9"/>',
   apps: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><path d="M17 13.5v7M13.5 17h7"/>',
+  appObs: '<rect x="3" y="4" width="18" height="12" rx="2"/><circle cx="12" cy="10" r="3"/><circle cx="17.5" cy="6.8" r=".7" fill="currentColor"/><path d="M8 20h8M12 16v4"/>',
+  appVtube: '<path d="M6.5 9.5 5 3.5l4.5 3M17.5 9.5 19 3.5l-4.5 3"/><circle cx="12" cy="13" r="7"/><circle cx="9.5" cy="12.5" r=".8" fill="currentColor"/><circle cx="14.5" cy="12.5" r=".8" fill="currentColor"/><path d="M10.5 15.8q1.5 1.1 3 0"/>',
+  appVoicemod: '<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 10.5a6.5 6.5 0 0 0 13 0M12 17v4M9 21h6"/><path d="M2.5 8v4M21.5 8v4"/>',
+  appStreamerbot: '<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M13.2 6.5 8.5 13h4l-1.2 4.5L16 11h-4z"/>',
+  appWled: '<path d="M9 17.5h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.4c.8.8 1 1.6 1 2.6h6c0-1 .2-1.8 1-2.6A6 6 0 0 0 12 3z"/><path d="M12 7v3M10.5 8.5h3"/>',
+  appVrchat: '<path d="M2.5 9a2 2 0 0 1 2-2h15a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H15l-2-2.5h-2L9 17H4.5a2 2 0 0 1-2-2z"/><circle cx="8" cy="12" r="1.6"/><circle cx="16" cy="12" r="1.6"/>',
+  appDeck: '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><rect x="5.5" y="8" width="3.5" height="3" rx=".8"/><rect x="10.25" y="8" width="3.5" height="3" rx=".8"/><rect x="15" y="8" width="3.5" height="3" rx=".8"/><rect x="5.5" y="13" width="3.5" height="3" rx=".8"/><rect x="10.25" y="13" width="3.5" height="3" rx=".8"/><rect x="15" y="13" width="3.5" height="3" rx=".8"/>',
+  reactions: '<circle cx="5.5" cy="6" r="2.5"/><circle cx="18.5" cy="18" r="2.5"/><path d="M8 6h7a3.5 3.5 0 0 1 3.5 3.5v6M16 18H9a3.5 3.5 0 0 1-3.5-3.5v-6"/><path d="m16.5 13.5 2 2 2-2M7.5 10.5l-2-2-2 2"/>',
   bellOff: '<path d="M6 16.5V11a6 6 0 0 1 9.5-4.9M18 11v5.5l1.5 1.5h-12"/><path d="M10 20.5a2 2 0 0 0 4 0M4 4l16 16"/>',
 };
 export const iconSVG = (name, size = 18) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -64,7 +72,7 @@ const PAGES = {
   ruletas: { title: 'Ruletas', guide: 'troya', words: 'ruleta ruletas girar premios sorteo sub-ruleta suscripción canje recompensa retos castigos mascota' },
   overlays: { title: 'Overlays para OBS', guide: 'samy', words: 'obs overlay url fuente navegador estilo streamlabs metas objetivo barra progreso contadores cuenta regresiva' },
   chatbot: { title: 'Chat Bot', guide: 'mecha', words: 'chat bot chatbot mecharidds comandos comando respuesta redes discord alias espera moderadores mensajes automáticos temporizador timer cada minutos anuncio escribir enviar' },
-  huellitas: { title: 'Huellitas', guide: 'juana', words: 'huellitas puntos del canal economía monedas tienda cofres llaves canjes canjear juegos duelo tragamonedas apuesta ruleta color atraco trivia top regalar' },
+  huellitas: { title: 'Tienda de Huellitas', guide: 'juana', words: 'tienda de huellitas puntos del canal economía monedas tienda cofres llaves canjes canjear juegos duelo tragamonedas apuesta ruleta color atraco trivia top regalar' },
   apps: { title: 'Apps conectadas', guide: 'samy', words: 'apps integraciones conectar obs escena fuente vtube studio avatar voicemod streamer.bot wled luces vrchat osc stream deck reacciones' },
   estadisticas: { title: 'Estadísticas', guide: 'juana', words: 'estadísticas números gané diamantes tops historial gráfica' },
   ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones atajos teclado teclas' },
@@ -366,6 +374,7 @@ export function applyMenuPrefs(cfg) {
       // Los overlays fijados y su desplegable van pegados a «Overlays para OBS».
       if (a.dataset.page === 'overlays' && $('#nav-pins')) a.after($('#nav-pins'));
       if (a.dataset.page === 'archivos' && $('#nav-files')) a.after($('#nav-files'));
+      if (a.dataset.page === 'apps' && $('#nav-apps')) a.after($('#nav-apps'));
     }
     group.hidden = items.every((a) => a.hidden);
   }

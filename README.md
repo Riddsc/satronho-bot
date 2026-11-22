@@ -220,9 +220,9 @@ Cada directo se guarda como una **sesión**. Una sesión termina cuando pasan 30
 
 Todo se guarda en tu PC, en `%APPDATA%\Satronho Bot\stats`.
 
-## Huellitas, juegos y tienda (Juana)
+## Tienda de Huellitas: puntos, juegos y tienda (Juana)
 
-Los puntos de tu canal. Están en **Tu comunidad → Huellitas**.
+Los puntos de tu canal. Están en **Tu comunidad → Tienda de Huellitas**.
 
 - **Cómo se ganan:** por estar en el directo (cuenta quien escribió hace poco), por escribir, seguir, suscribirse, regalar (por moneda), dar likes, compartir y volverse superfan. Los suscriptores pueden ganar más. Cada plataforma lleva su propia cuenta.
 - **Comandos:** `!huellitas` (saldo), `!top`, `!regalar @persona 100`, y para ti y tus mods `!dar` y `!quitar`. Los nombres se cambian; por defecto salen en el idioma de la app.

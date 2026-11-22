@@ -2750,3 +2750,12 @@ html.i18n-wait body { visibility: hidden; animation: i18n-show 0s 1.5s forwards;
 .ap-mini { display: inline-flex; align-items: center; gap: 6px; font-size: .86em; color: var(--muted); }
 .ap-mini input.num { width: 76px; }
 .ap-sb > select { flex: 0 0 220px; max-width: 100%; }
+/* Apps conectadas: íconos y desplegable del menú */
+.ap-mark svg { width: 26px; height: 26px; stroke-width: 1.9; }
+.ap-card.flash { animation: ap-flash 1.4s ease; }
+@keyframes ap-flash { 0%, 60% { box-shadow: 0 0 0 3px var(--ac), 0 0 26px color-mix(in srgb, var(--ac) 45%, transparent); } }
+#nav-apps .nav-item .ic svg { width: 16px; height: 16px; }
+.ap-dot { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 55%, transparent); flex: none; }
+.ap-dot.connected { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+.ap-dot.connecting { background: #ffb23e; animation: ap-blink 1s infinite; }
+.ap-dot.error { background: var(--bad); }
