@@ -28,10 +28,10 @@ function applyMode() {
 
 function connectCard() {
   if (!st.clientId) {
-    return `<div class="spf-card"><div class="spf-top"><span class="spf-icon">((·))</span><h2>Spotify</h2><p>Esta copia de Satronho Bot no trae la app de Spotify incluida.</p></div>
+    return `<div class="spf-card"><div class="spf-top"><span class="spf-icon"><img src="img/apps/spotify.png" alt=""></span><h2>Spotify</h2><p>Esta copia de Satronho Bot no trae la app de Spotify incluida.</p></div>
       <div class="spf-bottom">${ownApp(true)}</div></div>`;
   }
-  return `<div class="spf-card"><div class="spf-top"><span class="spf-icon">((·))</span><h2>Spotify</h2>
+  return `<div class="spf-card"><div class="spf-top"><span class="spf-icon"><img src="img/apps/spotify.png" alt=""></span><h2>Spotify</h2>
       <p>Conecta tu cuenta de Spotify para que tu público agregue canciones a tu cola con <code>!play</code>.</p>
       <span class="spf-badge">👑 Requiere Spotify Premium</span></div>
     <div class="spf-bottom">
@@ -54,7 +54,7 @@ function connectedPanel() {
   const c = config.spotify || {};
   const n = st.now;
   return `<div class="card spf-panel">
-    <div class="spf-me"><span class="spf-logo">((·))</span><div><b>${esc(st.user?.name || 'Tu cuenta de Spotify')}</b><small>${st.user && !st.user.premium ? '<em class="spf-free">Sin Premium: Spotify no deja poner canciones en la cola</em>' : '<em class="spf-prem">Premium · los pedidos van a tu Spotify</em>'}</small></div><button type="button" class="btn small ghost" data-spf="disconnect">Desconectar</button></div>
+    <div class="spf-me"><span class="spf-logo"><img src="img/apps/spotify.png" alt=""></span><div><b>${esc(st.user?.name || 'Tu cuenta de Spotify')}</b><small>${st.user && !st.user.premium ? '<em class="spf-free">Sin Premium: Spotify no deja poner canciones en la cola</em>' : '<em class="spf-prem">Premium · los pedidos van a tu Spotify</em>'}</small></div><button type="button" class="btn small ghost" data-spf="disconnect">Desconectar</button></div>
     ${n ? `<div class="spf-now">${n.thumbnail ? `<img src="${esc(n.thumbnail)}" alt="">` : '<span class="spf-noart">♪</span>'}<div><small>${n.playing ? 'SONANDO EN SPOTIFY' : 'EN PAUSA'}</small><b>${esc(n.title)}</b><span>${esc(n.author)}${n.requester ? ` · la pidió <b>${esc(n.requester)}</b>` : ''}</span></div>
         <div class="spf-ctl"><button type="button" class="btn small" data-spf="${n.playing ? 'pause' : 'play'}" title="${n.playing ? 'Pausar' : 'Seguir'}">${n.playing ? '⏸' : '▶'}</button><button type="button" class="btn small" data-spf="skip" title="Siguiente">⏭</button></div></div>`
       : `<p class="hint spf-idle">${esc(st.error || 'Abre Spotify en tu PC o celular y pon algo a sonar: así sabemos dónde poner las canciones.')}</p>`}

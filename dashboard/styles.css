@@ -2759,3 +2759,15 @@ html.i18n-wait body { visibility: hidden; animation: i18n-show 0s 1.5s forwards;
 .ap-dot.connected { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
 .ap-dot.connecting { background: #ffb23e; animation: ap-blink 1s infinite; }
 .ap-dot.error { background: var(--bad); }
+/* Logos de las apps y servicios (dashboard/img/apps) */
+.ap-mark { background: color-mix(in srgb, var(--ac) 12%, var(--well)) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ac) 35%, var(--edge)) !important; border-radius: 14px !important; padding: 0 !important; width: 52px; min-width: 52px; height: 52px; }
+.ap-logo { width: 38px; height: 38px; object-fit: contain; display: block; }
+.ap-card:not(.on) .ap-mark { filter: grayscale(.55) brightness(.85); }
+.ap-navlogo { width: 17px; height: 17px; object-fit: contain; display: block; }
+.mu-logo { width: 17px; height: 17px; object-fit: contain; margin-right: 6px; vertical-align: -3px; }
+.spf-icon img { width: 70%; height: 70%; object-fit: contain; }
+.spf-logo img { width: 100%; height: 100%; object-fit: contain; }
+.spf-icon, .spf-logo { background: transparent !important; box-shadow: none !important; }
+.btn-logo { width: 18px; height: 18px; object-fit: contain; margin-right: 7px; vertical-align: -4px; }
+.mu-seg .mu-logo { margin: 0; }
+.ap-card:not(.on) .ap-mark { filter: none !important; opacity: .9; }
