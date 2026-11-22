@@ -65,6 +65,12 @@ const KB = [
     go: '#card-reportar',
   },
   {
+    guide: 'mecha', q: '¿Hay un Discord de Satronho Bot?',
+    keys: ['discord', 'servidor', 'comunidad', 'grupo', 'unirme', 'invitación', 'invitacion', 'novedades', 'beta'],
+    answer: 'Sí: en <b>Ayuda → Reportar un problema</b> pulsa <b>Únete al Discord</b>. Ahí ves si alguien ya reportó lo mismo, sigues cómo va tu reporte, propones ideas y te enteras primero de cada versión.',
+    go: '#card-reportar',
+  },
+  {
     guide: 'nono', q: '¿Cómo busco canciones y guardo listas?',
     keys: ['buscar', 'lista', 'listas', 'playlist', 'historial', 'mezclar', 'importar', 'guardar cola'],
     answer: 'En <b>Música</b>, escribe en <b>Buscar y añadir</b> y pulsa Enter: toca <b>+</b> para poner la canción en cola. En la cola puedes mezclar, guardar como lista o vaciar, y en <b>Historial</b> volver a poner lo que ya sonó. En <b>Listas de reproducción</b> pones tus listas o importas una de YouTube.',
