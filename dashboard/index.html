@@ -37,8 +37,9 @@
     <div class="nav-pins" id="nav-pins" hidden></div>
   </nav>
   <nav class="nav-group" style="--g:#6fdc8c"><h6><i></i>Tu comunidad</h6>
-    <a class="nav-item" href="#/huellitas" data-page="huellitas"><span class="ic" data-icon="paw"></span>Huellitas<span class="badge" id="nav-redeem" hidden title="Canjes por cumplir">0</span></a>
+    <a class="nav-item" href="#/huellitas" data-page="huellitas"><span class="ic" data-icon="paw"></span>Tienda de Huellitas<span class="badge" id="nav-redeem" hidden title="Canjes por cumplir">0</span></a>
     <a class="nav-item" href="#/apps" data-page="apps"><span class="ic" data-icon="apps"></span>Apps conectadas</a>
+    <div class="nav-sub" id="nav-apps" hidden></div>
   </nav>
   <nav class="nav-group" style="--g:#ff8fb5"><h6><i></i>Tus números</h6>
     <a class="nav-item" href="#/estadisticas" data-page="estadisticas"><span class="ic" data-icon="chart"></span>Estadísticas</a>
@@ -593,7 +594,7 @@
 <section class="page" id="page-musica" data-page="musica" hidden>
   <div class="ph"><div class="t"><small>Lo que se escucha</small><h1>Música</h1><p>Tu chat pide canciones con <code>!play</code> o <code>!temita</code>; Ñoño las pone en orden.</p></div>
     <div class="host" style="--g:#4fd1c5"><p class="bubble" data-bubble="nono"></p><span class="guide" data-avatar="nono" data-size="mini"></span></div></div>
-  <div class="mu-mode" id="mu-mode"><div class="mu-seg" role="group" aria-label="De dónde suena la música"><button type="button" data-mumode="youtube"><span class="mu-yt">▶</span>YouTube</button><button type="button" data-mumode="spotify"><span class="mu-sp">((·))</span>Spotify</button></div><span class="mu-sep"></span><button type="button" class="mu-ov" data-ovquick="musica">🖥 Overlay</button></div>
+  <div class="mu-mode" id="mu-mode"><div class="mu-seg" role="group" aria-label="De dónde suena la música"><button type="button" data-mumode="youtube"><img class="mu-logo" src="img/apps/youtube.png" alt="">YouTube</button><button type="button" data-mumode="spotify"><img class="mu-logo" src="img/apps/spotify.png" alt="">Spotify</button></div><span class="mu-sep"></span><button type="button" class="mu-ov" data-ovquick="musica">🖥 Overlay</button></div>
   <div id="spotify-box" class="spf-wrap" hidden style="--g:#1ed760"></div>
   <div class="tabs" role="tablist" data-tabs="musica" id="mu-yt-tabs"><button data-tab="consola">Consola</button><button data-tab="permisos">Permisos y comandos</button></div>
   <div class="tabpanel" data-tabpanel="consola">
@@ -816,7 +817,7 @@
 
 <!-- ---------- Huellitas: puntos del canal, juegos y tienda (Juana) ---------- -->
 <section class="page" id="page-huellitas" data-page="huellitas" hidden>
-  <div class="ph"><div class="t"><small>Tu comunidad</small><h1>Huellitas</h1><p>Los puntos de tu canal: tu público los gana por acompañarte y los gasta en juegos del chat, en tu tienda y abriendo cofres.</p></div>
+  <div class="ph"><div class="t"><small>Tu comunidad</small><h1>Tienda de Huellitas</h1><p>Los puntos de tu canal: tu público los gana por acompañarte y los gasta en juegos del chat, en tu tienda y abriendo cofres.</p></div>
     <div class="host" style="--g:#6fdc8c"><p class="bubble" data-bubble="juana" data-static><b>Juana:</b> Yo llevo la cuenta de cada huellita. Enciéndelas, decide cuánto se gana y arma tu tienda.</p><span class="guide" data-avatar="juana" data-size="mini"></span></div></div>
   <div class="tabs" role="tablist" data-tabs="huellitas"><button data-tab="puntos">Huellitas</button><button data-tab="juegos">Juegos del chat</button><button data-tab="tienda">Tienda y cofres</button><button data-tab="canjes">Canjes<span class="badge" id="tab-redeem" hidden>0</span></button></div>
   <div class="tabpanel" data-tabpanel="puntos" style="--g:#6fdc8c"><div id="hu-points"></div></div>
@@ -1064,7 +1065,7 @@
           <textarea id="rep-msg" rows="6" maxlength="3000" required placeholder="Por ejemplo: conecté Kick, pedí una canción con !play y no sonó nada."></textarea></label>
         <label class="field"><span>¿Cómo te contactamos? (opcional)</span><input id="rep-contact" maxlength="200" placeholder="Tu usuario de Discord o tu correo"></label>
         <label class="switch"><input type="checkbox" id="rep-diag" checked><span></span> Adjuntar diagnóstico (versión, Windows y últimos errores)</label>
-        <div class="row space mt"><button class="btn primary" id="rep-send">Enviar a Ridds</button><button type="button" class="btn ghost" id="rep-copy">Copiar reporte</button></div>
+        <div class="row space mt"><button class="btn primary" id="rep-send"><img class="btn-logo" src="img/apps/discord.png" alt=""><span>Enviar a Ridds</span></button><button type="button" class="btn ghost" id="rep-copy">Copiar reporte</button></div>
         <p class="hint" id="rep-unavailable" hidden>Esta copia de Satronho Bot no puede enviar reportes. Usa <b>Copiar reporte</b> y envíalo por otro medio.</p>
       </form>
       <div class="card"><h3 class="card-title">Lo que se envía</h3>
