@@ -23,6 +23,8 @@ const APP_INFO = {
 };
 // Íconos propios de cada app (dibujan lo que hace, no su logo).
 const APP_ICON = { obs: 'appObs', vtube: 'appVtube', voicemod: 'appVoicemod', streamerbot: 'appStreamerbot', wled: 'appWled', vrchat: 'appVrchat' };
+// Logo de cada app (dashboard/img/apps). Si no carga, queda el ícono dibujado.
+const logo = (id, cls = 'ap-logo') => `<img class="${cls}" src="img/apps/${id}.png" alt="" onerror="this.replaceWith(document.createRange().createContextualFragment(this.dataset.fb))" data-fb="${esc(iconSVG(APP_ICON[id] || 'appDeck'))}">`;
 const SECRET_LABEL = { password: 'Contraseña', clientKey: 'Clave de desarrollador' };
 
 // Qué puede hacer cada app y qué datos pide cada acción.
@@ -88,7 +90,7 @@ function appCard(a) {
     : '';
   return `<article class="card ap-card ${a.enabled ? 'on' : ''}" data-app="${a.id}" style="--ac:${info.color}">
     <header>
-      <span class="ap-mark" aria-hidden="true">${iconSVG(APP_ICON[a.id], 26)}</span>
+      <span class="ap-mark" aria-hidden="true">${logo(a.id)}</span>
       <div class="ap-t"><h3>${esc(info.name)}</h3><span class="ap-st ${st.state}">${tr(STATE[st.state] || st.state)}</span></div>
       <label class="switch"><input type="checkbox" data-cfg="enabled" ${a.enabled ? 'checked' : ''} aria-label="${esc(tr('Conectar {0}', info.name))}"><span></span></label>
     </header>
@@ -106,7 +108,7 @@ function appCard(a) {
 
 function deckCard() {
   return `<article class="card ap-card ap-deck on" data-deck style="--ac:#5ab0ff">
-    <header><span class="ap-mark" aria-hidden="true">${iconSVG('appDeck', 26)}</span><div class="ap-t"><h3>Stream Deck</h3><span class="ap-st connected">${tr('Siempre lista')}</span></div></header>
+    <header><span class="ap-mark" aria-hidden="true">${logo('streamdeck')}</span><div class="ap-t"><h3>Stream Deck</h3><span class="ap-st connected">${tr('Siempre lista')}</span></div></header>
     <p class="hint">${tr('Cada reacción tiene su propia dirección. Ponla en un botón con la acción «Sitio web» (marca «Acceder en segundo plano») o con un plugin de pedidos HTTP.')}</p>
     <p class="hint">${tr('La dirección lleva una clave: si alguien la ve, cámbiala.')}</p>
     <div class="row tight wrap"><button type="button" class="btn small" data-deck-go>${tr('Ver las direcciones')}</button><button type="button" class="btn small ghost" data-deck-renew>${tr('Cambiar la clave')}</button></div>
@@ -127,8 +129,8 @@ function renderNav() {
   box.hidden = !open;
   const here = location.hash.startsWith('#/apps');
   const st = (a) => (a.enabled ? a.status?.state || 'off' : 'off');
-  box.innerHTML = appsList.map((a) => `<a class="nav-item nav-pin" href="#/apps/apps" data-goapp="${a.id}" title="${esc(tr(STATE[st(a)] || ''))}"><span class="ic">${iconSVG(APP_ICON[a.id])}</span>${esc(APP_INFO[a.id].name)}<i class="ap-dot ${st(a)}" aria-hidden="true"></i></a>`).join('')
-    + `<a class="nav-item nav-pin" href="#/apps/apps" data-goapp="deck"><span class="ic">${iconSVG('appDeck')}</span>Stream Deck</a>`
+  box.innerHTML = appsList.map((a) => `<a class="nav-item nav-pin" href="#/apps/apps" data-goapp="${a.id}" title="${esc(tr(STATE[st(a)] || ''))}"><span class="ic">${logo(a.id, 'ap-navlogo')}</span>${esc(APP_INFO[a.id].name)}<i class="ap-dot ${st(a)}" aria-hidden="true"></i></a>`).join('')
+    + `<a class="nav-item nav-pin" href="#/apps/apps" data-goapp="deck"><span class="ic">${logo('streamdeck', 'ap-navlogo')}</span>Stream Deck</a>`
     + `<a class="nav-item nav-pin ${here && location.hash.includes('reacciones') ? 'on' : ''}" href="#/apps/reacciones"><span class="ic">${iconSVG('reactions')}</span>${tr('Reacciones')}<small class="badge">${reactions.length}</small></a>`;
 }
 // Al tocar una app en el menú: se ve su tarjeta y se ilumina un momento.
