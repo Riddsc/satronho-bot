@@ -60,7 +60,7 @@ export function initSupport() {
     ev.preventDefault();
     const btn = $('#rep-send');
     btn.disabled = true;
-    btn.textContent = 'Enviando…';
+    (btn.querySelector('span') || btn).textContent = 'Enviando…';
     try {
       await api('POST', '/api/support/report', { kind, message: $('#rep-msg').value, contact: $('#rep-contact').value, includeDiag: $('#rep-diag').checked });
       $('#rep-msg').value = '';
@@ -69,7 +69,7 @@ export function initSupport() {
       toast(e.message);
     } finally {
       btn.disabled = !available;
-      btn.textContent = 'Enviar a Ridds';
+      (btn.querySelector('span') || btn).textContent = 'Enviar a Ridds';
     }
   });
   loadDiag();
