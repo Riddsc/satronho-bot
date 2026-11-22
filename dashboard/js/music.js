@@ -90,9 +90,11 @@ function tickProgress() {
   const dur = c?.durationSec || 0;
   let t = 0;
   if (c && playerReady && isPlayer()) t = Math.max(0, player.getCurrentTime?.() || 0);
-  $('#mz-time').textContent = c ? fmt(t) || '0:00' : '0:00';
-  $('#mz-dur').textContent = c ? fmt(dur) : '0:00';
-  $('#mz-bar').style.width = dur ? `${Math.min(100, (t / dur) * 100)}%` : '0%';
+  const time = $('#mz-time'), total = $('#mz-dur'), bar = $('#mz-bar');
+  if (!time || !total || !bar) return;
+  time.textContent = c ? fmt(t) || '0:00' : '0:00';
+  total.textContent = c ? fmt(dur) : '0:00';
+  bar.style.width = dur ? `${Math.min(100, (t / dur) * 100)}%` : '0%';
 }
 
 // ---------- Interfaz ----------
