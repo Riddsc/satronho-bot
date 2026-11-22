@@ -241,7 +241,6 @@ En **Tu comunidad → Apps conectadas**. Cada tarjeta explica cómo activar la c
 |---|---|---|
 | OBS Studio | WebSocket 5, puerto 4455 (con contraseña) | Cambiar de escena, mostrar u ocultar fuentes, filtros, silenciar audio |
 | VTube Studio | API, puerto 8001 (se aprueba una vez en VTS) | Lanzar atajos del modelo |
-| T.I.T.S. | API, puerto 42069 | Lanzar objetos y activar disparadores |
 | Voicemod | Control API, puerto 59129 (clave de desarrollador) | Cambiar de voz unos segundos, memes |
 | Streamer.bot | WebSocket Server, puerto 8080 | Ejecutar acciones |
 | Luces WLED | HTTP en tu red | Efectos guardados, color, encender o apagar |
@@ -252,6 +251,8 @@ Una **reacción** es «cuando pase esto → haz estos pasos»: regalo (por nombr
 **Stream Deck:** cada reacción tiene una dirección (`http://127.0.0.1:3800/deck/<clave>/<id>`) para la acción «Sitio web» o un plugin de pedidos HTTP. Sin la clave no hace nada, y se puede cambiar.
 
 Las contraseñas y claves de estas apps se guardan cifradas con la protección de Windows.
+
+**Ideas para más adelante:** T.I.T.S. (lanzar objetos al avatar) y que una IA pueda usar la app (asistente).
 
 ## Overlays para OBS
 
@@ -277,7 +278,7 @@ src/
   i18n.js                  Idioma de lo que dice la app fuera del panel (chat del bot, voz, ventanas)
   connectors/              tiktok, kick, kickChat, starvios, starviosChat, twitch, spotify
   modules/                 voz, música, alertas, metas, estadísticas, ruletas, comandos, huellitas, juegos, tienda…
-  modules/apps/            Apps conectadas (OBS, VTube Studio, T.I.T.S., Voicemod, Streamer.bot, WLED, VRChat) y reacciones
+  modules/apps/            Apps conectadas (OBS, VTube Studio, Voicemod, Streamer.bot, WLED, VRChat) y reacciones
   tts/                     piper.js (motor), voices.js, msonline.js, textFilter.js
   music/youtube.js         Búsqueda en YouTube
 dashboard/                 Panel (index.html, styles.css, js/)

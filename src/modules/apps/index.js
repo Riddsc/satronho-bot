@@ -1,7 +1,7 @@
 // Apps conectadas y reacciones (0.29).
 // Una reacción es «cuando pase esto → haz estos pasos»: por ejemplo, cuando
 // alguien regale una rosa, cambiar a la escena «Baile» de OBS 10 segundos y
-// lanzarle corazones al avatar en T.I.T.S. También se pueden disparar desde
+// lanzar la expresión «corazones» del avatar en VTube Studio. También se pueden disparar desde
 // un botón del Stream Deck con su propia dirección.
 
 const crypto = require('crypto');
@@ -12,7 +12,6 @@ const { t: tr } = require('../../i18n');
 const APPS = {
   obs: { port: 4455, secret: ['password'] },
   vtube: { port: 8001, secret: [] },
-  tits: { port: 42069, secret: [] },
   voicemod: { port: 59129, secret: ['clientKey'] },
   streamerbot: { port: 8080, secret: ['password'], endpoint: '/' },
   wled: { port: 80, secret: [], host: '' },
@@ -73,7 +72,7 @@ function cleanReaction(r = {}) {
       chest: str(w.chest, 40),
       minAmount: clampInt(w.minAmount, 0, 1e7, 0),
     },
-    steps: (Array.isArray(r.steps) ? r.steps : []).slice(0, MAX_STEPS).map(cleanStep),
+    steps: (Array.isArray(r.steps) ? r.steps : []).filter((s) => s && (s.app === 'wait' || APPS[s.app])).slice(0, MAX_STEPS).map(cleanStep),
     cooldownSec: clampInt(r.cooldownSec, 0, 3600, 0),
   };
 }
@@ -130,7 +129,6 @@ function createApps({ store, vault = null, broadcast = () => {}, logbook = { add
   const make = {
     obs: () => C.obs({ cfg: () => cfg().obs, secret: secretOf('obs'), onStatus: onStatus('obs'), WS }),
     vtube: () => C.vtube({ cfg: () => cfg().vtube, secret: secretOf('vtube'), onStatus: onStatus('vtube'), WS, onNeedApproval: () => broadcast('apps-status', { id: 'vtube', state: 'connecting', detail: tr('Acepta el permiso en la ventana de VTube Studio') }) }),
-    tits: () => C.tits({ cfg: () => cfg().tits, onStatus: onStatus('tits'), WS }),
     voicemod: () => C.voicemod({ cfg: () => cfg().voicemod, secret: secretOf('voicemod'), onStatus: onStatus('voicemod'), WS }),
     streamerbot: () => C.streamerbot({ cfg: () => cfg().streamerbot, secret: secretOf('streamerbot'), onStatus: onStatus('streamerbot'), WS }),
     wled: () => C.wled({ cfg: () => cfg().wled, onStatus: onStatus('wled'), fetchFn }),
