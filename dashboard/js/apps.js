@@ -1,4 +1,4 @@
-// Apps conectadas y reacciones (0.29). Conecta OBS, VTube Studio, T.I.T.S.,
+// Apps conectadas y reacciones (0.29). Conecta OBS, VTube Studio,
 // Voicemod, Streamer.bot, luces WLED y VRChat, y arma «reacciones»: cuando
 // pase algo en tu directo, esas apps hacen lo que elijas. Cualquier reacción
 // se puede lanzar también desde un botón del Stream Deck.
@@ -11,8 +11,6 @@ const APP_INFO = {
     how: ['Abre OBS → Herramientas → Ajustes del servidor WebSocket.', 'Activa «Habilitar servidor WebSocket».', 'Toca «Mostrar información de conexión» y copia la contraseña aquí.'] },
   vtube: { name: 'VTube Studio', mark: 'VTS', color: '#ff8fc8', what: 'Lanza los atajos (hotkeys) de tu modelo: expresiones, animaciones, objetos.',
     how: ['En VTube Studio abre Ajustes y baja hasta «VTube Studio API».', 'Enciende «Start API» (puerto 8001).', 'Al conectar, VTube Studio te pide permiso para «Satronho Bot»: acéptalo.'] },
-  tits: { name: 'T.I.T.S.', mark: 'TITS', color: '#ffb23e', what: 'Le lanza objetos a tu avatar y activa tus disparadores.',
-    how: ['Abre T.I.T.S. → Ajustes → API.', 'Activa la API (puerto 42069).', 'Deja T.I.T.S. abierto mientras transmites.'] },
   voicemod: { name: 'Voicemod', mark: 'VM', color: '#41e0c0', what: 'Cambia tu voz por unos segundos o suena uno de tus memes.',
     how: ['Voicemod solo deja conectar programas con una clave de desarrollador.', 'Pídela gratis en el portal de desarrolladores de Voicemod (Control API).', 'Pega aquí la clave que te den.'] },
   streamerbot: { name: 'Streamer.bot', mark: 'SB', color: '#b88bff', what: 'Ejecuta cualquiera de tus acciones de Streamer.bot.',
@@ -33,10 +31,6 @@ const DOES = {
     mute: { label: 'Silenciar un audio', fields: [['source', 'text', 'Audio (como se llama en OBS)'], ['mode', 'mute', ''], ['seconds', 'num', 'Volver después de (s)']] },
   },
   vtube: { hotkey: { label: 'Lanzar un atajo del modelo', fields: [['hotkey', 'opt:hotkeys', 'Atajo']] } },
-  tits: {
-    throw: { label: 'Lanzar objetos', fields: [['items', 'opt:items', 'Objeto'], ['amount', 'num', 'Cuántos']] },
-    trigger: { label: 'Activar un disparador', fields: [['trigger', 'opt:triggers', 'Disparador']] },
-  },
   voicemod: {
     voice: { label: 'Cambiar de voz', fields: [['voice', 'opt:voices', 'Voz'], ['seconds', 'num', 'Volver a tu voz después de (s)']] },
     meme: { label: 'Sonar un meme', fields: [['meme', 'opt:memes', 'Meme']] },

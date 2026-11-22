@@ -2,7 +2,6 @@
 // tiene (escenas, atajos, objetos, voces, acciones…) y hacer una acción.
 //   obs          OBS Studio (obs-websocket 5, puerto 4455)
 //   vtube        VTube Studio (puerto 8001; se aprueba una vez dentro de VTS)
-//   tits         T.I.T.S. (puerto 42069)
 //   voicemod     Voicemod (Control API, puerto 59129, con clave de desarrollador)
 //   streamerbot  Streamer.bot (servidor WebSocket, puerto 8080)
 //   wled         Luces WLED (HTTP en tu red)
@@ -145,39 +144,6 @@ function vtube({ cfg, secret, onStatus, WS, onNeedApproval }) {
     async run(a) {
       if (a.do === 'hotkey') return c.request('HotkeyTriggerRequest', { hotkeyID: a.hotkey });
       throw new Error('Acción de VTube Studio desconocida');
-    },
-  };
-}
-
-// ================= T.I.T.S. =================
-function tits({ cfg, onStatus, WS }) {
-  const c = createWsClient({
-    name: 'tits',
-    WS,
-    url: () => `ws://${local(cfg().host)}:${portOf(cfg().port, 42069)}/websocket`,
-    wrap: (messageType, data, requestID) => ({ apiName: 'TITSPublicApi', apiVersion: '1.0', requestID, messageType, data }),
-    idOf: (m) => m.requestID ?? null,
-    unwrap: (m) => {
-      if (/error/i.test(m.messageType || '')) throw new Error(m.data?.message || 'T.I.T.S. dio un error');
-      return m.data || {};
-    },
-    onStatus,
-  });
-  return {
-    ...c,
-    async options() {
-      const [it, tr] = await Promise.all([c.request('TITSItemListRequest', { sendImage: false }), c.request('TITSTriggerListRequest', {})]);
-      return {
-        items: (it.items || []).map((x) => ({ id: x.ID ?? x.id, name: x.name })),
-        triggers: (tr.triggers || []).map((x) => ({ id: x.ID ?? x.id, name: x.name })),
-      };
-    },
-    async run(a) {
-      if (a.do === 'throw') {
-        return c.request('TITSThrowItemsRequest', { items: (a.items || []).slice(0, 20), delayTime: 0.05, amountOfThrows: Math.max(1, Math.min(50, Number(a.amount) || 1)), errorOnMissingID: false });
-      }
-      if (a.do === 'trigger') return c.request('TITSTriggerActivateRequest', { triggerID: a.trigger });
-      throw new Error('Acción de T.I.T.S. desconocida');
     },
   };
 }
@@ -364,4 +330,4 @@ function vrchat({ cfg, onStatus, createSocket = () => dgram.createSocket('udp4')
   };
 }
 
-module.exports = { obs, vtube, tits, voicemod, streamerbot, wled, vrchat, oscMessage, _test: { hostOk, portOf } };
+module.exports = { obs, vtube, voicemod, streamerbot, wled, vrchat, oscMessage, _test: { hostOk, portOf } };

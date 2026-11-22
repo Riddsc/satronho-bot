@@ -65,7 +65,7 @@ const PAGES = {
   overlays: { title: 'Overlays para OBS', guide: 'samy', words: 'obs overlay url fuente navegador estilo streamlabs metas objetivo barra progreso contadores cuenta regresiva' },
   chatbot: { title: 'Chat Bot', guide: 'mecha', words: 'chat bot chatbot mecharidds comandos comando respuesta redes discord alias espera moderadores mensajes automáticos temporizador timer cada minutos anuncio escribir enviar' },
   huellitas: { title: 'Huellitas', guide: 'juana', words: 'huellitas puntos del canal economía monedas tienda cofres llaves canjes canjear juegos duelo tragamonedas apuesta ruleta color atraco trivia top regalar' },
-  apps: { title: 'Apps conectadas', guide: 'samy', words: 'apps integraciones conectar obs escena fuente vtube studio avatar tits voicemod streamer.bot wled luces vrchat osc stream deck reacciones' },
+  apps: { title: 'Apps conectadas', guide: 'samy', words: 'apps integraciones conectar obs escena fuente vtube studio avatar voicemod streamer.bot wled luces vrchat osc stream deck reacciones' },
   estadisticas: { title: 'Estadísticas', guide: 'juana', words: 'estadísticas números gané diamantes tops historial gráfica' },
   ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones atajos teclado teclas' },
   novedades: { title: 'Novedades', guide: 'mecha', words: 'novedades cambios versión actualización qué hay de nuevo changelog notas' },

@@ -1,5 +1,5 @@
 // Cliente WebSocket con JSON para las apps conectadas (OBS, VTube Studio,
-// T.I.T.S., Voicemod, Streamer.bot). Se reconecta solo con esperas cada vez
+// Voicemod, Streamer.bot). Se reconecta solo con esperas cada vez
 // más largas mientras la app esté encendida, y empareja cada pedido con su
 // respuesta. Cada app pone su saludo (autenticación) y cómo se arman y se
 // reconocen los mensajes.
