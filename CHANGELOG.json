@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.29.1",
+    "date": "2026-11-22",
+    "title": "Tienda de Huellitas y menú de apps conectadas",
+    "items": [
+      {
+        "type": "mejora",
+        "text": "Las huellitas ahora se llaman «Tienda de Huellitas» en el menú, para que se entienda de un vistazo qué es."
+      },
+      {
+        "type": "mejora",
+        "text": "Apps conectadas tiene su desplegable en el menú de la izquierda: cada app con su ícono y un puntito que dice si está conectada, más Stream Deck y Reacciones. Al tocar una app te lleva a su tarjeta."
+      },
+      {
+        "type": "mejora",
+        "text": "Íconos nuevos para cada app conectada."
+      }
+    ]
+  },
+  {
     "version": "0.29.0",
     "date": "2026-11-22",
     "title": "Huellitas, tienda con cofres, juegos del chat y apps conectadas",

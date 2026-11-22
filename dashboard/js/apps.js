@@ -5,6 +5,7 @@
 
 import { $, $$, api, esc, toast, tr, PLATFORM_NAMES } from './util.js';
 import { sayFor } from './guides.js';
+import { iconSVG } from './nav.js';
 
 const APP_INFO = {
   obs: { name: 'OBS Studio', mark: 'OBS', color: '#8fa3ff', what: 'Cambia de escena, muestra u oculta fuentes y filtros, silencia micrófonos.',
@@ -20,6 +21,8 @@ const APP_INFO = {
   vrchat: { name: 'VRChat', mark: 'VRC', color: '#6fdc8c', what: 'Escribe en el cuadro de chat sobre tu cabeza y mueve parámetros de tu avatar.',
     how: ['En VRChat abre el menú rápido → Opciones → OSC.', 'Actívalo. No hay nada más que configurar.', 'Los nombres de parámetros son los de tu avatar (en Unity o en el menú OSC).'] },
 };
+// Íconos propios de cada app (dibujan lo que hace, no su logo).
+const APP_ICON = { obs: 'appObs', vtube: 'appVtube', voicemod: 'appVoicemod', streamerbot: 'appStreamerbot', wled: 'appWled', vrchat: 'appVrchat' };
 const SECRET_LABEL = { password: 'Contraseña', clientKey: 'Clave de desarrollador' };
 
 // Qué puede hacer cada app y qué datos pide cada acción.
@@ -85,7 +88,7 @@ function appCard(a) {
     : '';
   return `<article class="card ap-card ${a.enabled ? 'on' : ''}" data-app="${a.id}" style="--ac:${info.color}">
     <header>
-      <span class="ap-mark" aria-hidden="true">${info.mark}</span>
+      <span class="ap-mark" aria-hidden="true">${iconSVG(APP_ICON[a.id], 26)}</span>
       <div class="ap-t"><h3>${esc(info.name)}</h3><span class="ap-st ${st.state}">${tr(STATE[st.state] || st.state)}</span></div>
       <label class="switch"><input type="checkbox" data-cfg="enabled" ${a.enabled ? 'checked' : ''} aria-label="${esc(tr('Conectar {0}', info.name))}"><span></span></label>
     </header>
@@ -102,18 +105,49 @@ function appCard(a) {
 }
 
 function deckCard() {
-  return `<article class="card ap-card ap-deck on" style="--ac:#5ab0ff">
-    <header><span class="ap-mark" aria-hidden="true">⌨</span><div class="ap-t"><h3>Stream Deck</h3><span class="ap-st connected">${tr('Siempre lista')}</span></div></header>
+  return `<article class="card ap-card ap-deck on" data-deck style="--ac:#5ab0ff">
+    <header><span class="ap-mark" aria-hidden="true">${iconSVG('appDeck', 26)}</span><div class="ap-t"><h3>Stream Deck</h3><span class="ap-st connected">${tr('Siempre lista')}</span></div></header>
     <p class="hint">${tr('Cada reacción tiene su propia dirección. Ponla en un botón con la acción «Sitio web» (marca «Acceder en segundo plano») o con un plugin de pedidos HTTP.')}</p>
     <p class="hint">${tr('La dirección lleva una clave: si alguien la ve, cámbiala.')}</p>
     <div class="row tight wrap"><button type="button" class="btn small" data-deck-go>${tr('Ver las direcciones')}</button><button type="button" class="btn small ghost" data-deck-renew>${tr('Cambiar la clave')}</button></div>
   </article>`;
 }
 
+// ---------- Menú de la izquierda: desplegable con cada app ----------
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
+function renderNav() {
+  const item = $('.nav-item[data-page="apps"]');
+  const box = $('#nav-apps');
+  if (!item || !box) return;
+  if (!item.querySelector('.nav-caret')) item.insertAdjacentHTML('beforeend', `<span class="nav-caret" role="button" tabindex="0" title="${esc(tr('Ver las apps'))}" aria-label="${esc(tr('Ver las apps'))}">▾</span>`);
+  if (item.nextElementSibling !== box) item.after(box);
+  const open = lsGet('satronho.navApps', true);
+  item.classList.toggle('open', open);
+  box.hidden = !open;
+  const here = location.hash.startsWith('#/apps');
+  const st = (a) => (a.enabled ? a.status?.state || 'off' : 'off');
+  box.innerHTML = appsList.map((a) => `<a class="nav-item nav-pin" href="#/apps/apps" data-goapp="${a.id}" title="${esc(tr(STATE[st(a)] || ''))}"><span class="ic">${iconSVG(APP_ICON[a.id])}</span>${esc(APP_INFO[a.id].name)}<i class="ap-dot ${st(a)}" aria-hidden="true"></i></a>`).join('')
+    + `<a class="nav-item nav-pin" href="#/apps/apps" data-goapp="deck"><span class="ic">${iconSVG('appDeck')}</span>Stream Deck</a>`
+    + `<a class="nav-item nav-pin ${here && location.hash.includes('reacciones') ? 'on' : ''}" href="#/apps/reacciones"><span class="ic">${iconSVG('reactions')}</span>${tr('Reacciones')}<small class="badge">${reactions.length}</small></a>`;
+}
+// Al tocar una app en el menú: se ve su tarjeta y se ilumina un momento.
+function goApp(id) {
+  setTimeout(() => {
+    const card = id === 'deck' ? $('#ap-apps [data-deck]') : $(`#ap-apps [data-app="${id}"]`);
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.remove('flash');
+    void card.offsetWidth;
+    card.classList.add('flash');
+  }, 120);
+}
+
 function renderApps() {
   const box = $('#ap-apps');
   if (!box) return;
   box.innerHTML = `<div class="ap-grid">${appsList.map(appCard).join('')}${deckCard()}</div>`;
+  renderNav();
 }
 
 function updateStatus(p) {
@@ -121,6 +155,7 @@ function updateStatus(p) {
   if (!a) return;
   const was = a.status?.state;
   a.status = { state: p.state, detail: p.detail || '' };
+  renderNav();
   const card = $(`#ap-apps [data-app="${p.id}"]`);
   if (card && !card.contains(document.activeElement)) {
     card.outerHTML = appCard(a);
@@ -248,7 +283,7 @@ async function renderReactions() {
 }
 
 const saveReactions = debounce(async () => {
-  try { reactions = (await api('POST', '/api/reactions', { reactions })).reactions; } catch (e) { toast(tr('No se guardó: {0}', e.message)); }
+  try { reactions = (await api('POST', '/api/reactions', { reactions })).reactions; renderNav(); } catch (e) { toast(tr('No se guardó: {0}', e.message)); }
 });
 
 function newStep() {
@@ -395,6 +430,23 @@ export async function initApps() {
   page.addEventListener('change', (ev) => { onInput(ev).catch((e) => toast(e.message)); });
   page.addEventListener('input', (ev) => { if (ev.target.closest('[data-ri]') && ev.target.tagName !== 'SELECT' && ev.target.type !== 'checkbox') onInput(ev).catch(() => {}); });
   page.addEventListener('click', (ev) => { onClick(ev).catch((e) => toast(e.message)); });
+  // Menú: la flechita abre o cierra el desplegable; cada app lleva a su tarjeta.
+  document.addEventListener('click', (ev) => {
+    const caret = ev.target.closest('.nav-item[data-page="apps"] .nav-caret');
+    if (caret) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      lsSet('satronho.navApps', !lsGet('satronho.navApps', true));
+      renderNav();
+      return;
+    }
+    const go = ev.target.closest('#nav-apps [data-goapp]');
+    if (go) goApp(go.dataset.goapp);
+  }, true);
+  document.addEventListener('keydown', (ev) => {
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.closest?.('.nav-item[data-page="apps"] .nav-caret')) { ev.preventDefault(); ev.target.click(); }
+  });
+  window.addEventListener('hashchange', renderNav);
   try { await load(); } catch (e) { toast(tr('No se cargaron las apps: {0}', e.message)); return; }
   renderApps();
   renderReactions();
