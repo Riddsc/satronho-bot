@@ -11,7 +11,8 @@ const path = require('path');
 const WebSocket = require('ws');
 const { secMsGecV2 } = require('./msGec');
 
-// Una femenina y una masculina por país (lo que ofrece Microsoft).
+// Una femenina y una masculina por país (lo que ofrece Microsoft). Las de
+// español son la base; las de otros idiomas sirven a quien usa la app en ese idioma.
 const RAW = [
   ['es-CO', 'Colombia', 'Salome', 'f'], ['es-CO', 'Colombia', 'Gonzalo', 'm'],
   ['es-MX', 'México', 'Dalia', 'f'], ['es-MX', 'México', 'Jorge', 'm'],
@@ -33,6 +34,16 @@ const RAW = [
   ['es-PR', 'Puerto Rico', 'Karina', 'f'], ['es-PR', 'Puerto Rico', 'Victor', 'm'],
   ['es-CU', 'Cuba', 'Belkys', 'f'], ['es-CU', 'Cuba', 'Manuel', 'm'],
   ['es-US', 'Latinos en EE. UU.', 'Paloma', 'f'], ['es-US', 'Latinos en EE. UU.', 'Alonso', 'm'],
+  // Para streamers que usan la app en otro idioma (sus frases y su chat).
+  ['en-US', 'Estados Unidos', 'Jenny', 'f'], ['en-US', 'Estados Unidos', 'Guy', 'm'],
+  ['en-US', 'Estados Unidos', 'Aria', 'f'], ['en-US', 'Estados Unidos', 'Christopher', 'm'],
+  ['en-GB', 'Reino Unido', 'Sonia', 'f'], ['en-GB', 'Reino Unido', 'Ryan', 'm'],
+  ['pt-BR', 'Brasil', 'Francisca', 'f'], ['pt-BR', 'Brasil', 'Antonio', 'm'],
+  ['fr-FR', 'Francia', 'Denise', 'f'], ['fr-FR', 'Francia', 'Henri', 'm'],
+  ['fr-FR', 'Francia', 'Eloise', 'f'],
+  ['fr-BE', 'Bélgica', 'Charline', 'f'], ['fr-BE', 'Bélgica', 'Gerard', 'm'],
+  ['fr-CA', 'Canadá', 'Sylvie', 'f'], ['fr-CA', 'Canadá', 'Jean', 'm'],
+  ['it-IT', 'Italia', 'Elsa', 'f'], ['it-IT', 'Italia', 'Diego', 'm'],
 ];
 const PRETTY = { Salome: 'Salomé', Tomas: 'Tomás', Sebastian: 'Sebastián', Sofia: 'Sofía', Maria: 'María', Andres: 'Andrés', Victor: 'Víctor' };
 
@@ -40,6 +51,7 @@ const MS_VOICES = RAW.map(([locale, country, name, gender]) => ({
   id: `${locale}-${name}Neural`,
   key: `ms:${locale}-${name}Neural`,
   locale,
+  lang: locale.slice(0, 2),
   country,
   name: PRETTY[name] || name,
   gender,

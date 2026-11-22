@@ -1,7 +1,7 @@
 // Troya: la voz. Reproduce los audios de Piper en orden y, si Piper no
 // está listo, usa las voces instaladas en Windows como respaldo.
 
-import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, trn, tr } from './util.js';
+import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, trn, tr, getLocale } from './util.js';
 import { setBubble, sayFor, setMood, guideToast } from './guides.js';
 import { bestWindowsVoice, cleanName, genderOf, windowsVoices } from './winvoices.js';
 
@@ -181,9 +181,12 @@ function renderOnline() {
   const box = $('#ov-voices');
   if (!box || !config) return;
   const byCountry = new Map();
-  for (const v of onlineVoices) {
-    if (!byCountry.has(v.country)) byCountry.set(v.country, []);
-    byCountry.get(v.country).push(v);
+  const appLang = getLocale().slice(0, 2);
+  const sorted = [...onlineVoices].sort((a, b) => ((b.lang || 'es') === appLang) - ((a.lang || 'es') === appLang));
+  for (const v of sorted) {
+    const c = countryName(v.locale.split('-')[1]);
+    if (!byCountry.has(c)) byCountry.set(c, []);
+    byCountry.get(c).push(v);
   }
   const main = config.tts.mainVoice || '';
   box.innerHTML = [...byCountry].map(([country, voices]) => `<div class="ov-country"><b>${esc(country)}</b>
@@ -202,7 +205,7 @@ function initOnline() {
     if (play) {
       const v = onlineVoices.find((x) => x.key === play.dataset.ovPlay);
       try {
-        await api('POST', '/api/tts/say', { text: `Hola, soy ${v?.name || 'una voz'}${v?.country ? `, de ${v.country}` : ''}. Así sonaría tu chat.`, voice: play.dataset.ovPlay });
+        await api('POST', '/api/tts/say', { text: voiceSample(v?.lang || 'es', v?.name, v?.locale?.split('-')[1]), voice: play.dataset.ovPlay });
       } catch (e) {
         toast(e.message);
       }
@@ -777,7 +780,7 @@ export function initVoice(cfg) {
 
   $('#tts-say').addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const text = $('#tts-say-text').value.trim() || 'Hola, soy Troya. Así sueno en el directo.';
+    const text = $('#tts-say-text').value.trim() || tr('Hola, soy Troya. Así sueno en el directo.');
     await api('POST', '/api/tts/say', { text }).catch((e) => toast(e.message));
   });
   $('#tts-skip').addEventListener('click', skipTts);
@@ -866,16 +869,43 @@ export { PLATFORM_NAMES };
 // ---------- Elegir voz (ventana) ----------
 // Categorías: en tu PC (Piper), Latinoamérica (en línea) y Windows.
 // Buscador, filtro de idioma, el país de cada voz y ▶ para escucharla.
-const LANG_NAME = { es: 'Español', en: 'Inglés', fr: 'Francés', pt: 'Portugués', it: 'Italiano', de: 'Alemán' };
+// Nombres de idiomas y países en el idioma de la app.
 let regionNames = null;
+let langNames = null;
 const countryName = (cc) => {
   try {
-    regionNames ??= new Intl.DisplayNames(['es'], { type: 'region' });
+    regionNames ??= new Intl.DisplayNames([getLocale()], { type: 'region' });
     return regionNames.of(cc) || cc;
   } catch {
     return cc;
   }
 };
+const LANG_NAME = new Proxy({}, {
+  get: (_, code) => {
+    try {
+      langNames ??= new Intl.DisplayNames([getLocale()], { type: 'language' });
+      const n = langNames.of(String(code)) || String(code);
+      return n.charAt(0).toUpperCase() + n.slice(1);
+    } catch {
+      return String(code);
+    }
+  },
+});
+
+// Frase para escuchar una voz, dicha en el idioma de esa voz.
+function voiceSample(lang, name, cc) {
+  const who = name || '';
+  let from = '';
+  try { from = cc ? new Intl.DisplayNames([lang], { type: 'region' }).of(String(cc).toUpperCase()) : ''; } catch { from = ''; }
+  const S = {
+    es: `Hola, soy ${who || 'una voz'}${from ? `, de ${from}` : ''}. Así sonaría tu chat.`,
+    en: `Hi, I'm ${who || 'a voice'}${from ? `, from ${from}` : ''}. This is how your chat would sound.`,
+    pt: `Oi, eu sou ${who || 'uma voz'}${from ? `, do ${from}` : ''}. É assim que o seu chat soaria.`,
+    fr: `Bonjour, je suis ${who || 'une voix'}${from ? `, ${String(cc).toUpperCase() === 'CA' ? 'du' : 'de'} ${from}` : ''}. Voilà comment sonnerait ton chat.`,
+    it: `Ciao, sono ${who || 'una voce'}${from ? `, dall'${from}` : ''}. Ecco come suonerebbe la tua chat.`,
+  };
+  return S[lang] || S.es;
+}
 const vp = { cat: 'all', lang: 'all', gender: 'all', q: '' };
 
 // Banderas SVG (flag-icons, MIT): Windows no dibuja las banderas emoji.
@@ -897,7 +927,7 @@ function pickerVoices() {
     }
   }
   for (const v of onlineVoices) {
-    out.push({ key: v.key, cat: 'online', gender: v.gender, lang: 'es', cc: v.locale.split('-')[1], installed: true, name: v.name, detail: `${GENDER_SHORT[v.gender]} · en línea`, src: 'Latinoamérica · necesita internet' });
+    out.push({ key: v.key, cat: 'online', gender: v.gender, lang: v.lang || v.locale.slice(0, 2), cc: v.locale.split('-')[1], installed: true, name: v.name, detail: `${GENDER_SHORT[v.gender]} · en línea`, src: 'En línea · necesita internet' });
   }
   for (const v of windowsVoices()) {
     const [lang, cc = ''] = v.lang.split(/[-_]/);
@@ -931,7 +961,7 @@ function renderCurrentVoice() {
 
 function renderPicker() {
   const all = pickerVoices();
-  const cats = [['all', 'Todas'], ['piper', 'En tu PC'], ['online', 'Latinoamérica'], ['win', 'Windows']];
+  const cats = [['all', 'Todas'], ['piper', 'En tu PC'], ['online', 'En línea'], ['win', 'Windows']];
   $('#vp-cats').innerHTML = cats.map(([id, name]) => `<button type="button" data-vp-cat="${id}" aria-pressed="${vp.cat === id}"><span>${name}</span><small>${all.filter((v) => id === 'all' || v.cat === id).length}</small></button>`).join('');
   const inCat = all.filter((v) => vp.cat === 'all' || v.cat === vp.cat);
   const langs = [...new Set(inCat.map((v) => v.lang))];
@@ -1000,7 +1030,7 @@ function initPicker() {
     if (play) {
       const key = play.dataset.vpPlay;
       const v = pickerVoices().find((x) => x.key === key);
-      const text = v?.lang === 'en' ? `Hi, I am ${v.name}. This is how your chat would sound.` : v?.lang === 'fr' ? `Bonjour, je suis ${v.name}.` : `Hola, soy ${v?.name || 'una voz'}. Así sonaría tu chat.`;
+      const text = voiceSample(v?.lang || 'es', v?.name, v?.cc);
       return api('POST', '/api/tts/say', { text, voice: key }).catch((e) => toast(e.message));
     }
     const dl = ev.target.closest('[data-vp-dl]');

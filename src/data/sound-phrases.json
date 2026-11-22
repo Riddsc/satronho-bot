@@ -1,394 +1,1845 @@
-[
 {
-"text": "¡Gracias por el regalo!",
-"cat": "alertas"
-},
-{
-"text": "¡Muchas gracias por seguirme!",
-"cat": "alertas"
-},
-{
-"text": "¡Bienvenido al directo!",
-"cat": "alertas"
-},
-{
-"text": "¡Gracias por compartir!",
-"cat": "alertas"
-},
-{
-"text": "¡Llegó un regalo!",
-"cat": "alertas"
-},
-{
-"text": "¡Atención, atención!",
-"cat": "alertas"
-},
-{
-"text": "¡Nuevo seguidor!",
-"cat": "alertas"
-},
-{
-"text": "¡Gracias por la rosa!",
-"cat": "alertas"
-},
-{
-"text": "¡Te quiero mucho!",
-"cat": "alertas"
-},
-{
-"text": "¡Gracias por el apoyo, de verdad!",
-"cat": "alertas"
-},
-{
-"text": "¡Uy, qué regalo tan bonito!",
-"cat": "alertas"
-},
-{
-"text": "¡Eres lo máximo!",
-"cat": "alertas"
-},
-{
-"text": "¡Gracias, mi rey!",
-"cat": "alertas"
-},
-{
-"text": "¡Gracias, mi reina!",
-"cat": "alertas"
-},
-{
-"text": "¡Bienvenidos, bienvenidas!",
-"cat": "alertas"
-},
-{
-"text": "¡Saludos a todos!",
-"cat": "alertas"
-},
-{
-"text": "¡La Rosalía!",
-"cat": "graciosos"
-},
-{
-"text": "¿Y eso con qué se come?",
-"cat": "graciosos"
-},
-{
-"text": "¡Ay, no, qué pena!",
-"cat": "graciosos"
-},
-{
-"text": "¡Mamá, mira, salí en el directo!",
-"cat": "graciosos"
-},
-{
-"text": "¡Se cayó el sistema!",
-"cat": "graciosos"
-},
-{
-"text": "¡Esto es un robo!",
-"cat": "graciosos"
-},
-{
-"text": "¡No me lo creo!",
-"cat": "graciosos"
-},
-{
-"text": "¡Qué oso!",
-"cat": "graciosos"
-},
-{
-"text": "¡Uy, juemadre!",
-"cat": "graciosos"
-},
-{
-"text": "¡Quieto todo el mundo!",
-"cat": "graciosos"
-},
-{
-"text": "¡Arrepiéntete!",
-"cat": "graciosos"
-},
-{
-"text": "¿Cómo así?",
-"cat": "graciosos"
-},
-{
-"text": "¡Ay, mi madre!",
-"cat": "graciosos"
-},
-{
-"text": "¡Me muero!",
-"cat": "graciosos"
-},
-{
-"text": "¡Pero qué es esto!",
-"cat": "graciosos"
-},
-{
-"text": "¡Ni modo!",
-"cat": "graciosos"
-},
-{
-"text": "¡Uy, qué miedo!",
-"cat": "graciosos"
-},
-{
-"text": "¡No, pues, de malas!",
-"cat": "graciosos"
-},
-{
-"text": "¡Tranquilo, que todo bien!",
-"cat": "graciosos"
-},
-{
-"text": "¡Se lo merece!",
-"cat": "graciosos"
-},
-{
-"text": "¡Juepucha!",
-"cat": "graciosos"
-},
-{
-"text": "¡Ave María purísima!",
-"cat": "graciosos"
-},
-{
-"text": "¡Llamen a la policía!",
-"cat": "graciosos"
-},
-{
-"text": "¡Ay, qué rico!",
-"cat": "graciosos"
-},
-{
-"text": "¡Y bailó!",
-"cat": "graciosos"
-},
-{
-"text": "¡Eso, eso, eso!",
-"cat": "graciosos"
-},
-{
-"text": "¡Ajá!",
-"cat": "graciosos"
-},
-{
-"text": "¡No te creo!",
-"cat": "graciosos"
-},
-{
-"text": "¡Oiga, pues!",
-"cat": "graciosos"
-},
-{
-"text": "¡Qué nivel!",
-"cat": "graciosos"
-},
-{
-"text": "¡Sospechoso!",
-"cat": "sospechosos"
-},
-{
-"text": "Hmm, qué raro…",
-"cat": "sospechosos"
-},
-{
-"text": "¡Eso huele raro!",
-"cat": "sospechosos"
-},
-{
-"text": "Yo no fui.",
-"cat": "sospechosos"
-},
-{
-"text": "¡Hay un impostor entre nosotros!",
-"cat": "sospechosos"
-},
-{
-"text": "Te estoy vigilando.",
-"cat": "sospechosos"
-},
-{
-"text": "¿Quién fue?",
-"cat": "sospechosos"
-},
-{
-"text": "¡Aquí hay gato encerrado!",
-"cat": "sospechosos"
-},
-{
-"text": "Interesante… muy interesante.",
-"cat": "sospechosos"
-},
-{
-"text": "¡Me huele a trampa!",
-"cat": "sospechosos"
-},
-{
-"text": "¿Seguro?",
-"cat": "sospechosos"
-},
-{
-"text": "No sé, no sé…",
-"cat": "sospechosos"
-},
-{
-"text": "¡Ganamos!",
-"cat": "celebracion"
-},
-{
-"text": "¡Gol!",
-"cat": "celebracion"
-},
-{
-"text": "¡Épico!",
-"cat": "celebracion"
-},
-{
-"text": "¡Victoria!",
-"cat": "celebracion"
-},
-{
-"text": "¡Lo logramos!",
-"cat": "celebracion"
-},
-{
-"text": "¡Meta cumplida!",
-"cat": "celebracion"
-},
-{
-"text": "¡Qué golazo!",
-"cat": "celebracion"
-},
-{
-"text": "¡Eso es todo!",
-"cat": "celebracion"
-},
-{
-"text": "¡Somos los mejores!",
-"cat": "celebracion"
-},
-{
-"text": "¡Bravo, bravo!",
-"cat": "celebracion"
-},
-{
-"text": "¡Nivel completado!",
-"cat": "celebracion"
-},
-{
-"text": "¡Récord!",
-"cat": "celebracion"
-},
-{
-"text": "¡A celebrar!",
-"cat": "celebracion"
-},
-{
-"text": "¡Qué crack!",
-"cat": "celebracion"
-},
-{
-"text": "¡Perdimos!",
-"cat": "fallos"
-},
-{
-"text": "¡Ay, no!",
-"cat": "fallos"
-},
-{
-"text": "¡Fallé!",
-"cat": "fallos"
-},
-{
-"text": "¡Me mataron!",
-"cat": "fallos"
-},
-{
-"text": "¡Qué desastre!",
-"cat": "fallos"
-},
-{
-"text": "¡Otra vez no!",
-"cat": "fallos"
-},
-{
-"text": "¡Game over!",
-"cat": "fallos"
-},
-{
-"text": "¡Se nos fue!",
-"cat": "fallos"
-},
-{
-"text": "¡Qué mala suerte!",
-"cat": "fallos"
-},
-{
-"text": "¡Casi!",
-"cat": "fallos"
-},
-{
-"text": "¡No joda!",
-"cat": "groseros"
-},
-{
-"text": "¡Qué chimba!",
-"cat": "groseros"
-},
-{
-"text": "¡Malparido!",
-"cat": "groseros"
-},
-{
-"text": "¡Gonorrea!",
-"cat": "groseros"
-},
-{
-"text": "¡Mierda!",
-"cat": "groseros"
-},
-{
-"text": "¡Carajo!",
-"cat": "groseros"
-},
-{
-"text": "¡Hijueputa!",
-"cat": "groseros"
-},
-{
-"text": "¡Qué marica!",
-"cat": "groseros"
-},
-{
-"text": "¡Me cago en todo!",
-"cat": "groseros"
-},
-{
-"text": "¡Jueputa vida!",
-"cat": "groseros"
-},
-{
-"text": "¡Qué guevonada!",
-"cat": "groseros"
-},
-{
-"text": "¡Deje de joder!",
-"cat": "groseros"
-},
-{
-"text": "¡Cállese, pues!",
-"cat": "groseros"
-},
-{
-"text": "¡Uy, qué gonorrea!",
-"cat": "groseros"
-},
-{
-"text": "¡A la mierda!",
-"cat": "groseros"
-},
-{
-"text": "¡Qué hijueputa nivel!",
-"cat": "groseros"
+ "@": "Frases listas para crear con la voz, en el idioma de la app. Cada idioma tiene las suyas (no son traducciones palabra por palabra).",
+ "es": [
+  {
+   "text": "¡Gracias por el regalo!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Muchas gracias por seguirme!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Bienvenido al directo!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Gracias por compartir!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Llegó un regalo!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Atención, atención!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Nuevo seguidor!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Gracias por la rosa!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Te quiero mucho!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Gracias por el apoyo, de verdad!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Uy, qué regalo tan bonito!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Eres lo máximo!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Gracias, mi rey!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Gracias, mi reina!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Bienvenidos, bienvenidas!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡Saludos a todos!",
+   "cat": "alertas"
+  },
+  {
+   "text": "¡La Rosalía!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¿Y eso con qué se come?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Ay, no, qué pena!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Mamá, mira, salí en el directo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Se cayó el sistema!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Esto es un robo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡No me lo creo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Qué oso!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Uy, juemadre!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Quieto todo el mundo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Arrepiéntete!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¿Cómo así?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Ay, mi madre!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Me muero!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Pero qué es esto!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Ni modo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Uy, qué miedo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡No, pues, de malas!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Tranquilo, que todo bien!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Se lo merece!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Juepucha!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Ave María purísima!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Llamen a la policía!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Ay, qué rico!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Y bailó!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Eso, eso, eso!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Ajá!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡No te creo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Oiga, pues!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Qué nivel!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "¡Sospechoso!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Hmm, qué raro…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "¡Eso huele raro!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Yo no fui.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "¡Hay un impostor entre nosotros!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Te estoy vigilando.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "¿Quién fue?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "¡Aquí hay gato encerrado!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Interesante… muy interesante.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "¡Me huele a trampa!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "¿Seguro?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "No sé, no sé…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "¡Ganamos!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Gol!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Épico!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Victoria!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Lo logramos!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Meta cumplida!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Qué golazo!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Eso es todo!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Somos los mejores!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Bravo, bravo!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Nivel completado!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Récord!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡A celebrar!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Qué crack!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "¡Perdimos!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Ay, no!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Fallé!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Me mataron!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Qué desastre!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Otra vez no!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Game over!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Se nos fue!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Qué mala suerte!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡Casi!",
+   "cat": "fallos"
+  },
+  {
+   "text": "¡No joda!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Qué chimba!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Malparido!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Gonorrea!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Mierda!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Carajo!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Hijueputa!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Qué marica!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Me cago en todo!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Jueputa vida!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Qué guevonada!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Deje de joder!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Cállese, pues!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Uy, qué gonorrea!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡A la mierda!",
+   "cat": "groseros"
+  },
+  {
+   "text": "¡Qué hijueputa nivel!",
+   "cat": "groseros"
+  }
+ ],
+ "en": [
+  {
+   "text": "Thanks for the gift!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Thank you so much for the follow!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Welcome to the stream!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Thanks for sharing!",
+   "cat": "alertas"
+  },
+  {
+   "text": "A gift just dropped!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Attention, attention!",
+   "cat": "alertas"
+  },
+  {
+   "text": "New follower!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Thanks for the rose!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Love you!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Seriously, thanks for the support!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Ooh, what a beautiful gift!",
+   "cat": "alertas"
+  },
+  {
+   "text": "You're the best!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Thank you, king!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Thank you, queen!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Welcome, everyone!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Hi, chat!",
+   "cat": "alertas"
+  },
+  {
+   "text": "And who asked?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oh no, how embarrassing!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Mom, look, I'm on stream!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "The system crashed!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "This is a robbery!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "I can't believe it!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Awkward!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Everybody freeze!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Repent!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Wait, what?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oh my goodness!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "I'm dead!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "What is this?!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oh well!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "That's scary!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Unlucky!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Relax, it's all good!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "They deserve it!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Call the police!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "And he danced!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Yes, yes, yes!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Aha!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "No way!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "That's next level!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Bruh.",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Sus!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Hmm, that's weird…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Something smells fishy!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "It wasn't me.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "There is an impostor among us!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "I'm watching you.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Who did it?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Something's not right here!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Interesting… very interesting.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Smells like a trap!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Are you sure?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "I don't know, man…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "We won!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Goal!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Epic!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Victory!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "We did it!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Goal reached!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "What a shot!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "That's it!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "We're the best!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Bravo, bravo!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Level complete!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "New record!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Let's celebrate!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "What a legend!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "GG!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "We lost!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Oh no!",
+   "cat": "fallos"
+  },
+  {
+   "text": "I missed!",
+   "cat": "fallos"
+  },
+  {
+   "text": "They got me!",
+   "cat": "fallos"
+  },
+  {
+   "text": "What a disaster!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Not again!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Game over!",
+   "cat": "fallos"
+  },
+  {
+   "text": "It got away!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Such bad luck!",
+   "cat": "fallos"
+  },
+  {
+   "text": "So close!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Damn it!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Holy crap!",
+   "cat": "groseros"
+  },
+  {
+   "text": "What the hell?!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Oh, come on!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Son of a…!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Hell yeah!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Shut up!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Crap!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Screw this!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Are you kidding me?!",
+   "cat": "groseros"
+  },
+  {
+   "text": "That's so freaking good!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Get out of here!",
+   "cat": "groseros"
+  }
+ ],
+ "pt": [
+  {
+   "text": "Obrigado pelo presente!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Muito obrigado por me seguir!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Bem-vindo à live!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Valeu por compartilhar!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Chegou presente!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Atenção, atenção!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Novo seguidor!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Obrigado pela rosa!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Te amo muito!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Valeu demais pelo apoio, de verdade!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Nossa, que presente lindo!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Você é demais!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Valeu, meu rei!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Valeu, minha rainha!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Sejam bem-vindos, sejam bem-vindas!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Salve, galera!",
+   "cat": "alertas"
+  },
+  {
+   "text": "E isso aí serve pra quê?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Ai, que vergonha!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Mãe, olha, eu tô na live!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Caiu o sistema!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Isso é um assalto!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Não acredito!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Que mico!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Ninguém se mexe!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Arrependa-se!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Como assim?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Ai, minha nossa!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Tô morto!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Que isso?!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Fazer o quê!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Ai, que medo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Que azar, hein!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Calma, tá tudo bem!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Merecido!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Chama a polícia!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "E dançou!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Isso, isso, isso!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Hum, sei…",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Não brinca!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Que nível!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Rapaz…",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Suspeito!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Hmm, que estranho…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Isso tá cheirando mal!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Não fui eu.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Tem um impostor entre nós!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Tô de olho em você.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Quem foi?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Aí tem coisa!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Interessante… muito interessante.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Isso tem cara de armadilha!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Certeza?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Sei não, sei não…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Ganhamos!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Gol!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Épico!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Vitória!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Conseguimos!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Meta batida!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Que golaço!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "É isso aí!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Somos os melhores!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Bravo, bravo!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Fase concluída!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Recorde!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Bora comemorar!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Que craque!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "GG!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Perdemos!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Ah, não!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Errei!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Me mataram!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Que desastre!",
+   "cat": "fallos"
+  },
+  {
+   "text": "De novo não!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Game over!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Escapou!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Que azar!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Quase!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Caramba!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Puta merda!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Que porra é essa?!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Caralho!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Vai se ferrar!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Droga!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Cala a boca!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Que merda!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Puta que pariu!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Tá de sacanagem?!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Que foda!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Sai daqui!",
+   "cat": "groseros"
+  }
+ ],
+ "fr": [
+  {
+   "text": "Merci pour le cadeau !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Merci beaucoup pour le follow !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Bienvenue dans le live !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Merci pour le partage !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Un cadeau vient d'arriver !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Attention, attention !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Nouveau follower !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Merci pour la rose !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Je t'adore !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Merci pour le soutien, vraiment !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Oh, quel beau cadeau !",
+   "cat": "alertas"
+  },
+  {
+   "text": "T'es le meilleur !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Merci, mon roi !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Merci, ma reine !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Bienvenue à tous !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Salut le chat !",
+   "cat": "alertas"
+  },
+  {
+   "text": "Et ça se mange comment ?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oh non, la honte !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Maman, regarde, je passe en live !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Le système a planté !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "C'est du vol !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "J'y crois pas !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Malaise !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Que personne ne bouge !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Repens-toi !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Pardon ?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oh mon Dieu !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Je suis mort !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Mais c'est quoi, ça ?!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Tant pis !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oh, ça fait peur !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Pas de bol !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Tranquille, tout va bien !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Bien fait !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Appelez la police !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Et il a dansé !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oui, oui, oui !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Ah ha !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Sérieux ?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Quel niveau !",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oh là là…",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Suspect !",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Hmm, bizarre…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Ça sent pas bon, ça !",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "C'est pas moi.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Il y a un imposteur parmi nous !",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Je te surveille.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "C'est qui ?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Il y a anguille sous roche !",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Intéressant… très intéressant.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Ça sent le piège !",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "T'es sûr ?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Je sais pas, je sais pas…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "On a gagné !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "But !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Épique !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Victoire !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "On l'a fait !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Objectif atteint !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Quel but !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Et voilà !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "On est les meilleurs !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Bravo, bravo !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Niveau terminé !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Record !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "On fête ça !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Quel crack !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "GG !",
+   "cat": "celebracion"
+  },
+  {
+   "text": "On a perdu !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Oh non !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Raté !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Je suis mort !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Quelle catastrophe !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Pas encore !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Game over !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Il nous a échappé !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Pas de chance !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Presque !",
+   "cat": "fallos"
+  },
+  {
+   "text": "Putain !",
+   "cat": "groseros"
+  },
+  {
+   "text": "Merde !",
+   "cat": "groseros"
+  },
+  {
+   "text": "Bordel !",
+   "cat": "groseros"
+  },
+  {
+   "text": "Fais chier !",
+   "cat": "groseros"
+  },
+  {
+   "text": "Oh la vache !",
+   "cat": "groseros"
+  },
+  {
+   "text": "Ta gueule !",
+   "cat": "groseros"
+  },
+  {
+   "text": "Nom de Dieu !",
+   "cat": "groseros"
+  },
+  {
+   "text": "C'est quoi ce bordel ?!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Tu te fous de moi ?!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Va te faire voir !",
+   "cat": "groseros"
+  },
+  {
+   "text": "Trop de la balle !",
+   "cat": "groseros"
+  },
+  {
+   "text": "Dégage !",
+   "cat": "groseros"
+  }
+ ],
+ "it": [
+  {
+   "text": "Grazie per il regalo!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Grazie mille per il follow!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Benvenuto in diretta!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Grazie per la condivisione!",
+   "cat": "alertas"
+  },
+  {
+   "text": "È arrivato un regalo!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Attenzione, attenzione!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Nuovo follower!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Grazie per la rosa!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Ti voglio bene!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Grazie davvero per il supporto!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Ma che bel regalo!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Sei il migliore!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Grazie, re!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Grazie, regina!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Benvenuti a tutti!",
+   "cat": "alertas"
+  },
+  {
+   "text": "Ciao, chat!",
+   "cat": "alertas"
+  },
+  {
+   "text": "E questo come si mangia?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Oddio, che figuraccia!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Mamma, guarda, sono in diretta!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "È crollato il sistema!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Questa è una rapina!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Non ci credo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Che imbarazzo!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Fermi tutti!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Pentiti!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Come scusa?",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Mamma mia!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Sono morto!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Ma che roba è?!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Pazienza!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Che paura!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Che sfiga!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Tranquillo, tutto a posto!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Se lo merita!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Chiamate la polizia!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "E ha ballato!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Sì, sì, sì!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Ah ecco!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Ma dai!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Che livello!",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Vabbè…",
+   "cat": "graciosos"
+  },
+  {
+   "text": "Sospetto!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Mmm, strano…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Qui c'è puzza di bruciato!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Non sono stato io.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "C'è un impostore tra noi!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Ti tengo d'occhio.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Chi è stato?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Qui gatta ci cova!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Interessante… molto interessante.",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Sa di trappola!",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Sicuro?",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Non so, non so…",
+   "cat": "sospechosos"
+  },
+  {
+   "text": "Abbiamo vinto!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Gol!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Epico!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Vittoria!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Ce l'abbiamo fatta!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Obiettivo raggiunto!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Che golazo!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Ecco fatto!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Siamo i migliori!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Bravo, bravo!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Livello completato!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Record!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Festeggiamo!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Che fenomeno!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "GG!",
+   "cat": "celebracion"
+  },
+  {
+   "text": "Abbiamo perso!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Oh no!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Ho sbagliato!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Mi hanno ucciso!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Che disastro!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Di nuovo no!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Game over!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Ci è scappato!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Che sfortuna!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Quasi!",
+   "cat": "fallos"
+  },
+  {
+   "text": "Cavolo!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Porca miseria!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Che palle!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Cazzo!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Ma vaffanculo!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Merda!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Stai zitto!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Porca vacca!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Ma che cazzo è?!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Mi prendi in giro?!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Che figata!",
+   "cat": "groseros"
+  },
+  {
+   "text": "Sparisci!",
+   "cat": "groseros"
+  }
+ ]
 }
-]

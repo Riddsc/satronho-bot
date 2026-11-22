@@ -21,6 +21,11 @@ const path = require('path');
 
 const BUILTIN = require('../data/kenney-sounds.json');
 const PHRASES = require('../data/sound-phrases.json');
+const i18n = require('../i18n');
+
+// Voz en línea por idioma, para crear frases cuando no hay una voz de ese idioma en tu PC.
+const ONLINE_BY_LANG = { es: 'ms:es-CO-SalomeNeural', en: 'ms:en-US-JennyNeural', pt: 'ms:pt-BR-FranciscaNeural', fr: 'ms:fr-FR-DeniseNeural', it: 'ms:it-IT-ElsaNeural' };
+const langOfVoice = (k) => (String(k || '').match(/^(?:ms:)?([a-z]{2})[_-][A-Z]{2}/) || [])[1] || null;
 
 const EXT = { 'audio/mpeg': 'mp3', 'audio/mp3': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/wave': 'wav', 'audio/ogg': 'ogg', 'audio/webm': 'webm', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/aac': 'aac' };
 const MIME = { mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', webm: 'audio/webm', m4a: 'audio/mp4', aac: 'audio/aac' };
@@ -59,7 +64,7 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
   }
 
   function list() {
-    return { builtin: BUILTIN, mine, phrases: PHRASES };
+    return { builtin: BUILTIN, mine, phrases: PHRASES[i18n.getLang()] || PHRASES.es };
   }
   function fileOf(id) {
     const e = mine.find((x) => x.id === id);
@@ -202,10 +207,15 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
     if (!t) throw new Error('Escribe la frase');
     const tts = store.get('tts') || {};
     const piperKeys = engine.installedVoiceKeys();
-    let v = voice || tts.mainVoice || `${tts.piperVoice}#${Number(tts.speaker) || 0}`;
-    // Las voces de Windows solo suenan dentro del panel: para guardar la frase
-    // como archivo usamos una voz de tu PC o, si no hay, una en línea.
-    if (v.startsWith('win:') || (!v.startsWith('ms:') && !piperKeys.includes(v.split('~')[0]))) v = piperKeys[0] || 'ms:es-CO-SalomeNeural';
+    // La frase se dice con una voz de su idioma (el de la app): tu voz principal
+    // si es de ese idioma; si no, una de tu PC en ese idioma o una en línea.
+    // Las voces de Windows solo suenan dentro del panel, así que aquí no sirven.
+    const lang = i18n.getLang();
+    const usable = (k) => k && !k.startsWith('win:') && (k.startsWith('ms:') || piperKeys.includes(k.split('~')[0]));
+    const main = tts.mainVoice || `${tts.piperVoice}#${Number(tts.speaker) || 0}`;
+    let v = voice && usable(voice) ? voice : '';
+    if (!v && usable(main) && langOfVoice(main) === lang) v = main;
+    if (!v) v = piperKeys.find((k) => langOfVoice(k) === lang) || ONLINE_BY_LANG[lang] || ONLINE_BY_LANG.es;
     v = v.split('~')[0];
     let file;
     if (v.startsWith('ms:')) file = await online.synth(t, { voiceId: v.slice(3), rate: 1 });

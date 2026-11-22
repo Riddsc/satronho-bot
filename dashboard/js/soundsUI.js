@@ -158,11 +158,11 @@ function renderPhrases() {
   const groups = {};
   for (const p of lib.phrases) if (!(sounds().hideRude && p.cat === 'groseros')) (groups[p.cat] ??= []).push(p);
   box.innerHTML = `<form class="snd-own" id="snd-own-phrase"><input name="text" maxlength="200" placeholder="Escribe tu propia frase: «¡Qué chimba de regalo!»" required><select name="cat">${['frases', 'graciosos', 'alertas', 'sospechosos', 'celebracion', 'fallos', 'groseros'].map((c) => `<option value="${c}">${esc(catName(c))}</option>`).join('')}</select><button class="btn primary small">Crear con mi voz</button></form>
-    <p class="hint">Se crean con tu voz principal de <b>Voz del chat</b>; si es de Windows, uso una de tu PC o una en línea. Marca las que quieras y créalas de una.</p>
+    <p class="hint">Se crean con una voz de tu idioma: tu voz principal de <b>Voz del chat</b> si es de ese idioma; si no, una de tu PC o una en línea. Marca las que quieras y créalas de una.</p>
     <div class="row wrap snd-phr-act"><button type="button" class="btn small" data-phr-all>Marcar todas</button><button type="button" class="btn small ghost" data-phr-none>Ninguna</button><button type="button" class="btn small primary" id="snd-phr-make">Crear las marcadas</button><span class="hint" id="snd-phr-state"></span></div>
     ${Object.entries(groups).map(([cat, list]) => `<section class="snd-phr-group"><h6>${esc(catName(cat))}</h6><div class="snd-phr-grid">${list.map((p) => {
       const done = made.has(norm(`«${p.text}»`));
-      return `<label class="snd-phr ${done ? 'done' : ''}"><input type="checkbox" data-phr="${esc(p.text)}" data-phr-cat="${esc(p.cat)}" ${done ? 'disabled' : ''}><span>${esc(p.text)}</span>${done ? '<i>✓</i>' : ''}</label>`;
+      return `<label class="snd-phr ${done ? 'done' : ''}"><input type="checkbox" data-phr="${esc(p.text)}" data-phr-cat="${esc(p.cat)}" ${done ? 'disabled' : ''}><span translate="no">${esc(p.text)}</span>${done ? '<i>✓</i>' : ''}</label>`;
     }).join('')}</div></section>`).join('')}`;
 }
 

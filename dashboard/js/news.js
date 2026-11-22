@@ -21,7 +21,7 @@ const fmtDate = (d) => {
 };
 
 function items(list) {
-  return list.map((it) => `<li class="t-${esc(it.type)}"><span class="tag">${esc(TYPE[it.type] || it.type)}</span><span>${esc(it.text)}</span></li>`).join('');
+  return list.map((it) => `<li class="t-${esc(it.type)}"><span class="tag">${esc(TYPE[it.type] || it.type)}</span><span translate="no">${esc(it.text)}</span></li>`).join('');
 }
 
 function renderList() {
@@ -29,7 +29,7 @@ function renderList() {
   if (!box) return;
   box.innerHTML = changelog.map((v, i) => `<article class="card news-ver ${v.version === version ? 'current' : ''}">
     <div class="news-head"><span class="ver">v${esc(v.version)}</span>${v.version === version ? '<span class="now">Tu versión</span>' : i === 0 ? '<span class="now soon">La más reciente</span>' : ''}<time>${esc(fmtDate(v.date))}</time></div>
-    <h3>${esc(v.title)}</h3>
+    <h3 translate="no">${esc(v.title)}</h3>
     <ul class="news-items">${items(v.items || [])}</ul>
   </article>`).join('') || '<p class="hint">No hay novedades para mostrar.</p>';
 }
@@ -53,7 +53,7 @@ function showModal(entry) {
   const show = list.length ? list : [entry];
   $('#news-bust').innerHTML = mechaHead('');
   $('#news-modal-ver').textContent = from ? `Esto cambió desde tu versión anterior (${from})` : `Versión ${entry.version}`;
-  $('#news-modal-items').innerHTML = show.map((v) => `<section class="nw-ver"><h3><span class="nw-v">v${esc(v.version)}</span>${esc(v.title)}</h3><ul class="news-items nw-items">${items(v.items || [])}</ul></section>`).join('');
+  $('#news-modal-items').innerHTML = show.map((v) => `<section class="nw-ver"><h3><span class="nw-v">v${esc(v.version)}</span><span translate="no">${esc(v.title)}</span></h3><ul class="news-items nw-items">${items(v.items || [])}</ul></section>`).join('');
   $('#news-modal').hidden = false;
   $('#news-modal-ok').focus();
 }

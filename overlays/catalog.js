@@ -115,6 +115,20 @@ export const KINDS = {
       f('showValues', 'Números', 'toggle'), f('avatars', 'Fotos de perfil', 'toggle'), f('crown', 'Corona al primero', 'toggle'),
     ],
   },
+  pointstop: {
+    cat: 'chat', icon: '🐾', name: 'Top de huellitas', size: [420, 460],
+    desc: 'Quienes más huellitas tienen. Se actualiza solo cuando ganan o gastan.',
+    styles: [['lista', 'Lista'], ['huellas', 'Huellas'], ['compacta', 'Compacta']],
+    defaults: { count: 5, title: '', showTitle: true, avatars: true, showPlatform: true, platform: 'all' },
+    fields: [f('count', 'Cuántos', 'range', { min: 3, max: 10, step: 1 }), f('showTitle', 'Título', 'toggle'), f('title', 'Texto del título (vacío = el nombre de tus puntos)', 'text', { when: { showTitle: true } }), f('avatars', 'Foto de perfil', 'toggle'), f('showPlatform', 'Logo de la plataforma', 'toggle'), f('platform', 'De dónde', 'seg', PLATS)],
+  },
+  chests: {
+    cat: 'chat', icon: '🧰', name: 'Cofres y canjes', size: [800, 600], noFit: true,
+    desc: 'Cuando alguien abre un cofre sale animado con su premio. También puede avisar lo que canjean en tu tienda y los premios grandes de los juegos.',
+    styles: [['libre', 'Libre'], ['vitrina', 'Vitrina']],
+    defaults: { showChests: true, showRedeems: true, showGames: false, openText: 'abrió el cofre', platform: 'all', pos: 'center' },
+    fields: [f('showChests', 'Cofres que se abren', 'toggle'), f('openText', 'Texto', 'text', { when: { showChests: true } }), f('showRedeems', 'Lo que canjean en la tienda', 'toggle'), f('showGames', 'Premios grandes de los juegos', 'toggle'), POS, f('platform', 'De dónde', 'seg', PLATS)],
+  },
   mvp: {
     cat: 'regalos', icon: '👑', name: 'El más generoso', size: [520, 300],
     desc: 'La persona que más te ha regalado en el directo. Cuando otra la supera, cambia con estilo.',

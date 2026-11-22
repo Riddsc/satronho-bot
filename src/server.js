@@ -37,6 +37,10 @@ const { createTwitchConnector } = require('./connectors/twitch');
 const { createKickChat } = require('./connectors/kickChat');
 const { createStarviosChat } = require('./connectors/starviosChat');
 const { createCommands } = require('./modules/commands');
+const { createPoints } = require('./modules/points');
+const { createChatGames } = require('./modules/chatGames');
+const { createShop } = require('./modules/shop');
+const { createApps } = require('./modules/apps');
 const { createSupport, createLogbook } = require('./modules/support');
 const { createHttpGuard, verifyWsClient, frameHeaders, isPrivateAddress } = require('./security');
 const { createSecretBox } = require('./secretBox');
@@ -64,6 +68,19 @@ const SAMPLE = {
   chat: { platform: 'kick', user: { id: 'espectador', name: 'Espectador' }, amount: 0, message: 'Hola, saludos desde Colombia' },
   reward: { platform: 'kick', user: { id: 'canjeador', name: 'Canjeador' }, amount: 500, message: 'Pon la de la bicicleta', extra: { rewardTitle: 'Elegir canción', color: '#53fc18' } },
 };
+
+// Los ejemplos de prueba salen en el idioma de la app.
+function sampleOf(type) {
+  const base = SAMPLE[type];
+  if (!base) return {};
+  const tx = (v) => (typeof v === 'string' ? i18n.tExact(v) : v);
+  return {
+    ...base,
+    user: { ...base.user, name: tx(base.user?.name) },
+    ...(base.message ? { message: tx(base.message) } : {}),
+    ...(base.extra ? { extra: { ...base.extra, giftName: tx(base.extra.giftName), rewardTitle: tx(base.extra.rewardTitle), currency: tx(base.extra.currency) } } : {}),
+  };
+}
 
 function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, resolver: customResolver, appInfo = {}, hooks = {} }) {
   i18n.setLanguage(store.get('ui')?.language || 'auto', appInfo.locale);
@@ -240,8 +257,55 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     getMusic: () => musicRef?.snapshot(),
     speak: (text) => tts.speak(text),
     broadcast,
+    appCommands: () => [...(points?.commandNames() || []), ...(games?.commandNames() || []), ...(shop?.commandNames() || [])],
   });
   const stats = createStats({ store, dataDir, broadcast });
+
+  // ---------- Huellitas, juegos del chat y tienda ----------
+  // Respuesta a quien escribió: en Kick y Starvios la escribe el bot; en
+  // TikTok y Twitch (donde no puede escribir) la lee la voz si lo pides.
+  const isModOf = (e) => e.platform === 'panel' || !whoReason(e, 'mods');
+  const tryReplies = [];
+  function pointsReply(e, text) {
+    if (tryReplies.length) { tryReplies.at(-1).push(text); return; }
+    const w = writers[e.platform];
+    if (w && store.get('chatBot')?.[e.platform]?.enabled !== false && w.say(text, 'huellitas')) return;
+    if (points.cfg().speakReplies) tts.speak(text);
+  }
+  // Lo que ve el overlay: nombre de la moneda y los que más tienen (sin las personas de prueba del panel).
+  const pointsPublic = () => {
+    const c = points.cfg();
+    return { enabled: c.enabled, emoji: c.emoji || '🐾', name: points.unit(1), plural: points.unit(2), top: points.top(30).filter((u) => !String(u.key).includes(':prueba-')).slice(0, 10).map((u) => ({ name: u.name, platform: u.platform, pts: u.pts, avatar: u.avatar || '' })) };
+  };
+  const points = createPoints({
+    store,
+    dataDir,
+    broadcast: (kind, p) => { broadcast(kind, p); if (kind === 'points-changed') broadcast('points-top', pointsPublic()); },
+    reply: pointsReply,
+    isMod: isModOf,
+  });
+  const games = createChatGames({ store, points, reply: pointsReply, isMod: isModOf, broadcast: (...a) => broadcast(...a) });
+  const apps = createApps({ store, vault: hooks.vault || null, broadcast: (...a) => broadcast(...a), logbook: { add: (...a) => logbook.add(...a) }, fetchFn });
+  const shop = createShop({
+    store,
+    dataDir,
+    points,
+    reply: pointsReply,
+    isMod: isModOf,
+    broadcast: (kind, p) => {
+      broadcast(kind, p);
+      if (kind === 'chest-open') apps.onEvent({ type: 'chest', platform: p.platform, user: p.user, message: p.prize?.label || '' }, { kind: 'chest', chest: p.chest?.id });
+    },
+    actions: {
+      chat: (platform, text) => { if (tryReplies.length) return void tryReplies.at(-1).push(text); for (const p of writers[platform] ? [platform] : Object.keys(writers)) if (store.get('chatBot')?.[p]?.enabled !== false) writers[p].say(text, 'tienda'); },
+      say: (text) => tts.speak(text),
+      sound: (ref, volume) => broadcast('alert', { id: `sh-${Date.now()}`, type: 'sfx', soundOnly: true, instant: true, title: 'Tienda', sound: { sound: ref, volume: Number(volume) || 75, maxSeconds: 15 } }),
+      wheel: (id, user, platform) => wheels.spin(id, user, platform),
+      counter: (id, delta) => live.counter(id, { delta }),
+      time: (seconds) => live.countdown('add', seconds),
+      skip: () => music.skip?.(),
+    },
+  });
   // Fotos de perfil (Espectadores especiales y el buscador de gente).
   const avatars = createAvatars({
     dataDir,
@@ -272,6 +336,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   });
 
   musicRef = music;
+
+  shop.onRedeem((r, e) => apps.onEvent(e, { kind: 'redeem', item: r.itemId }));
 
   // ---- Ruletas ----
   const wheels = createWheels({
@@ -370,7 +436,13 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     // Lo que escribe la propia app (con la cuenta aparte o con la tuya) no se lee en voz alta.
     const fromBot = e.type === 'chat' && Boolean(step('chat bot', () => writers[e.platform]?.isOwnMessage(e.user?.name, e.message)));
     // Comandos propios (!redes…) y conteo para los mensajes automáticos.
-    if (!fromBot && e.type === 'chat') {
+    step('huellitas', () => { if (!fromBot) points.earnFrom(e); });
+    step('apps', () => { if (!fromBot) apps.onEvent(e); });
+    if (e.type === 'live-start' && !e.test) step('tienda', () => shop.newStream());
+    // Huellitas, juegos y tienda responden primero: si era uno de sus
+    // comandos, no se busca entre los comandos propios.
+    const pointsCmd = !fromBot && e.type === 'chat' && Boolean(step('huellitas', () => points.handleCommand(e) || games.handle(e) || shop.handle(e)));
+    if (!fromBot && e.type === 'chat' && !pointsCmd) {
       step('sonidos del chat', () => chatSound(e));
       step('mensajes automáticos', () => commands.onChat(e));
       step('comandos', () => commands.handle(e));
@@ -473,6 +545,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
           podium: podium.snapshot(),
           live: live.snapshot(),
           widgets: store.get('widgets'),
+          points: pointsPublic(),
           music: music.snapshot(),
           engine: engine.state(),
           allowed: tts.allowedList(),
@@ -537,6 +610,15 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     hooks.checkForUpdates();
     ok(res);
   });
+  // Aviso al cerrar: el panel decide y la ventana obedece (cerrar o esconder).
+  app.post('/api/window/action', (req, res) => {
+    const action = req.body?.action;
+    if (!['close', 'tray'].includes(action)) return fail(res, 'Acción desconocida');
+    if (!hooks.windowAction) return fail(res, 'Solo funciona en la app de escritorio');
+    ok(res, {});
+    setTimeout(() => hooks.windowAction(action), 50);
+  });
+
   app.post('/api/update/apply', (_req, res) => {
     if (!hooks.applyUpdate || !hooks.applyUpdate()) return fail(res, 'No hay ninguna actualización lista');
     ok(res);
@@ -570,7 +652,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   app.post('/api/test/:type', (req, res) => {
     const { type } = req.params;
     if (!EVENT_TYPES.includes(type)) return fail(res, `Tipo desconocido: ${type}`);
-    const event = makeEvent({ ...SAMPLE[type], ...(req.body || {}), type, test: true });
+    const event = makeEvent({ ...sampleOf(type), ...(req.body || {}), type, test: true });
     bus.emit('event', event);
     ok(res, { event });
   });
@@ -824,7 +906,28 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   } catch {
     /* sin historial */
   }
-  app.get('/api/changelog', (_req, res) => ok(res, { changelog }));
+  // Las notas salen en el idioma de la app (overlays/i18n/notas/<idioma>.json).
+  // Una nota sin traducir se ve en español.
+  const notesCache = new Map();
+  function notesDict(lang) {
+    if (lang === 'es') return null;
+    if (!notesCache.has(lang)) {
+      let d = {};
+      try {
+        d = JSON.parse(fs.readFileSync(path.join(ROOT, 'overlays', 'i18n', 'notas', `${lang}.json`), 'utf8'));
+      } catch {
+        /* sin notas en ese idioma */
+      }
+      notesCache.set(lang, d);
+    }
+    return notesCache.get(lang);
+  }
+  app.get('/api/changelog', (_req, res) => {
+    const d = notesDict(i18n.getLang());
+    if (!d) return ok(res, { changelog });
+    const tr = (x) => d[x] || x;
+    ok(res, { changelog: changelog.map((v) => ({ ...v, title: tr(v.title), items: (v.items || []).map((it) => ({ ...it, text: tr(it.text) })) })) });
+  });
 
   // ---------- Ruletas ----------
   app.get('/api/wheels', (_req, res) => ok(res, { wheels: wheels.list(), history: wheels.history().slice(0, 100), state: wheels.state() }));
@@ -924,6 +1027,80 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
       fail(res, err);
     }
   };
+  // ---------- Huellitas (puntos del canal), juegos y tienda ----------
+  const tr = i18n.t;
+  const pointsSettings = require('./modules/points').settingsOf;
+  const gamesSettings = require('./modules/chatGames').settingsOf;
+  const shopSettings = require('./modules/shop').settingsOf;
+  const pointsView = () => ({ settings: points.cfg(), summary: points.summary(), top: points.top(10), log: points.log() });
+  app.get('/api/points', (_req, res) => ok(res, pointsView()));
+  app.post('/api/points/settings', wrap((req) => (store.set('points', pointsSettings({ ...points.cfg(), ...(req.body || {}) })), pointsView())));
+  app.get('/api/points/users', (req, res) => ok(res, { users: points.list({ q: String(req.query.q || ''), platform: String(req.query.platform || '') }) }));
+  app.post('/api/points/users/:key', wrap((req) => {
+    points.setBalance(String(req.params.key), req.body?.points);
+    return pointsView();
+  }));
+  app.delete('/api/points/users/:key', wrap((req) => (points.removeUser(String(req.params.key)), pointsView())));
+  app.post('/api/points/reset', wrap((req) => {
+    if (req.body?.confirm !== true) throw new Error(tr('Falta confirmar'));
+    points.resetAll();
+    return pointsView();
+  }));
+  app.get('/api/games', (_req, res) => ok(res, { settings: gamesSettings(store.get('games')), state: games.state() }));
+  app.post('/api/games/settings', wrap((req) => (store.set('games', gamesSettings({ ...gamesSettings(store.get('games')), ...(req.body || {}) })), { settings: gamesSettings(store.get('games')) })));
+  app.post('/api/games/trivia', wrap(() => {
+    const q = games.startTrivia('panel');
+    if (!q) throw new Error(tr('Ya hay una pregunta en curso o la trivia está apagada'));
+    return { state: games.state() };
+  }));
+  const shopView = () => ({ settings: shop.cfg(), redemptions: shop.redemptions(), sold: shop.sold() });
+  app.get('/api/shop', (_req, res) => ok(res, shopView()));
+  app.post('/api/shop/settings', wrap((req) => (store.set('shop', shopSettings({ ...shop.cfg(), ...(req.body || {}) })), shopView())));
+  app.post('/api/shop/redemptions/:id', wrap((req) => {
+    const status = req.body?.status === 'refunded' ? 'refunded' : 'done';
+    shop.resolve(String(req.params.id), status);
+    return shopView();
+  }));
+  app.post('/api/shop/restock/:id', wrap((req) => (shop.restock(String(req.params.id)), shopView())));
+  // Probar desde el panel: escribe como si fueras alguien del chat (no publica nada).
+  app.post('/api/points/try', wrap((req) => {
+    const b = req.body || {};
+    const said = [];
+    const platform = ['kick', 'tiktok', 'twitch', 'starvios'].includes(b.platform) ? b.platform : 'kick';
+    const e = { type: 'chat', platform, test: true, user: { id: 'prueba-' + String(b.user || 'prueba').toLowerCase().replace(/\s+/g, '').slice(0, 30), name: String(b.user || 'Prueba').slice(0, 40) }, message: String(b.message || '').slice(0, 300), extra: { badges: b.mod ? ['moderator'] : [] } };
+    tryReplies.push(said);
+    try {
+      const hit = points.handleCommand(e) || games.handle(e) || shop.handle(e);
+      return { hit: Boolean(hit), replies: said.slice() };
+    } finally { tryReplies.pop(); }
+  }));
+
+  // ---------- Apps conectadas y reacciones ----------
+  const appsView = () => ({ apps: apps.list(), reactions: apps.reactions(), deck: { token: apps.deckToken(), base: `http://127.0.0.1:${store.get('port') || 3800}/deck` } });
+  app.get('/api/apps', (_req, res) => ok(res, appsView()));
+  app.post('/api/apps/:id', wrap((req) => ({ app: apps.configure(String(req.params.id), req.body || {}) })));
+  app.get('/api/apps/:id/options', async (req, res) => {
+    try { ok(res, { options: await apps.options(String(req.params.id)) }); } catch (err) { fail(res, err); }
+  });
+  app.post('/api/apps-test/step', async (req, res) => {
+    try { await apps.testStep(req.body || {}); ok(res); } catch (err) { fail(res, err); }
+  });
+  app.post('/api/reactions', wrap((req) => ({ reactions: apps.saveReactions(req.body?.reactions) })));
+  app.post('/api/reactions/:id/test', async (req, res) => {
+    try { ok(res, { result: await apps.testReaction(String(req.params.id)) }); } catch (err) { fail(res, err); }
+  });
+  app.post('/api/deck/renew', wrap(() => (apps.deckToken({ renew: true }), appsView())));
+  // Botones del Stream Deck (acción «Sitio web» o un plugin de pedidos HTTP).
+  // Sin la clave de la dirección no hace nada, y se niega a las páginas web.
+  const deckHit = (req, res) => {
+    const site = req.headers['sec-fetch-site'];
+    if (site && site !== 'none' && site !== 'same-origin') return res.status(403).type('text/plain').send('No.');
+    const r = apps.deck(String(req.params.token || ''), String(req.params.id || ''));
+    return res.status(r.ok ? 200 : r.code).type('text/plain').send(r.ok ? 'OK' : 'No');
+  };
+  app.get('/deck/:token/:id', deckHit);
+  app.post('/deck/:token/:id', deckHit);
+
   app.get('/api/commands', (_req, res) => ok(res, { commands: commands.list() }));
   app.post('/api/commands', wrap((req) => ({ command: commands.create(req.body || {}) })));
   app.patch('/api/commands/:id', wrap((req) => ({ command: commands.update(req.params.id, req.body || {}) })));
@@ -1217,6 +1394,9 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     await Promise.all(Object.values(connectors).map((c) => c.disconnect().catch(() => {})));
     engine.stop();
     stats.stop();
+    games.stop();
+    points.stop();
+    apps.stop();
     store.saveNow();
     for (const ws of wss.clients) ws.terminate();
     // OBS y TikTok LIVE Studio dejan conexiones abiertas (keep-alive): si no
@@ -1234,7 +1414,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     switch (action) {
       case 'musicSkip': music.skip(); break;
       case 'musicPause': music.setPaused(!music.snapshot().paused); break;
-      case 'testAlert': bus.emit('event', makeEvent({ ...SAMPLE.follow, type: 'follow', test: true })); break;
+      case 'testAlert': bus.emit('event', makeEvent({ ...sampleOf('follow'), type: 'follow', test: true })); break;
       // La voz suena en el panel: él salta el mensaje o apaga/enciende la voz.
       case 'skipVoice':
       case 'toggleVoice': broadcast('hotkey', { action }); break;

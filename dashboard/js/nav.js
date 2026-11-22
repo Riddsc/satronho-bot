@@ -47,6 +47,8 @@ const ICONS = {
   trophy: '<path d="M8 4.5h8v5a4 4 0 0 1-8 0z"/><path d="M8 6.5H5a3 3 0 0 0 3 3.5M16 6.5h3a3 3 0 0 1-3 3.5"/><path d="M12 13.5v3M8.5 20h7M9.5 16.5h5V20h-5z"/>',
   skipSong: '<path d="M9 18V7l7-1.5"/><circle cx="6.5" cy="18" r="2.5"/><path d="m16 11 4 3-4 3z" fill="currentColor"/>',
   news: '<path d="M5 4.5h11v15H6.5A1.5 1.5 0 0 1 5 18z"/><path d="M16 8.5h3v9.5a1.5 1.5 0 0 1-3 0M8 8h5M8 11.5h5M8 15h3"/>',
+  paw: '<ellipse cx="12" cy="16" rx="4.2" ry="3.6"/><circle cx="6" cy="10.5" r="1.9"/><circle cx="9.6" cy="6.3" r="1.9"/><circle cx="14.4" cy="6.3" r="1.9"/><circle cx="18" cy="10.5" r="1.9"/>',
+  apps: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><path d="M17 13.5v7M13.5 17h7"/>',
   bellOff: '<path d="M6 16.5V11a6 6 0 0 1 9.5-4.9M18 11v5.5l1.5 1.5h-12"/><path d="M10 20.5a2 2 0 0 0 4 0M4 4l16 16"/>',
 };
 export const iconSVG = (name, size = 18) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -62,6 +64,8 @@ const PAGES = {
   ruletas: { title: 'Ruletas', guide: 'troya', words: 'ruleta ruletas girar premios sorteo sub-ruleta suscripción canje recompensa retos castigos mascota' },
   overlays: { title: 'Overlays para OBS', guide: 'samy', words: 'obs overlay url fuente navegador estilo streamlabs metas objetivo barra progreso contadores cuenta regresiva' },
   chatbot: { title: 'Chat Bot', guide: 'mecha', words: 'chat bot chatbot mecharidds comandos comando respuesta redes discord alias espera moderadores mensajes automáticos temporizador timer cada minutos anuncio escribir enviar' },
+  huellitas: { title: 'Huellitas', guide: 'juana', words: 'huellitas puntos del canal economía monedas tienda cofres llaves canjes canjear juegos duelo tragamonedas apuesta ruleta color atraco trivia top regalar' },
+  apps: { title: 'Apps conectadas', guide: 'samy', words: 'apps integraciones conectar obs escena fuente vtube studio avatar tits voicemod streamer.bot wled luces vrchat osc stream deck reacciones' },
   estadisticas: { title: 'Estadísticas', guide: 'juana', words: 'estadísticas números gané diamantes tops historial gráfica' },
   ajustes: { title: 'Ajustes', guide: 'samy', words: 'ajustes tema color letra fuente tipografía tamaño apariencia ventana reloj actualizaciones atajos teclado teclas' },
   novedades: { title: 'Novedades', guide: 'mecha', words: 'novedades cambios versión actualización qué hay de nuevo changelog notas' },
@@ -77,6 +81,8 @@ const TAB_NAMES = {
   chatbot: { inicio: 'Inicio', comandos: 'Comandos', automaticos: 'Mensajes automáticos' },
   voz: { voces: 'Voces', mensaje: 'Mensaje y plataformas', quien: 'Quién se lee', filtros: 'Filtros y límites', especiales: 'Espectadores especiales', probar: 'Probar' },
   ruletas: { lista: 'Mis ruletas', historial: 'Historial y retos' },
+  huellitas: { puntos: 'Huellitas', juegos: 'Juegos del chat', tienda: 'Tienda y cofres', canjes: 'Canjes' },
+  apps: { apps: 'Apps', reacciones: 'Reacciones' },
   ajustes: { apariencia: 'Apariencia', app: 'App', atajos: 'Atajos de teclado', acerca: 'Acerca de' },
 };
 

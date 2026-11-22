@@ -1,0 +1,1010 @@
+{
+ "@": "Preguntas de la trivia por idioma. a = respuestas que valen (la primera es la que se muestra).",
+ "es": [
+  {
+   "q": "¿Cuál es el planeta más grande del sistema solar?",
+   "a": [
+    "Júpiter",
+    "Jupiter"
+   ]
+  },
+  {
+   "q": "¿Cuántas patas tiene una araña?",
+   "a": [
+    "8",
+    "ocho"
+   ]
+  },
+  {
+   "q": "¿De qué color es la esmeralda?",
+   "a": [
+    "verde"
+   ]
+  },
+  {
+   "q": "¿Cómo se llama el fontanero más famoso de Nintendo?",
+   "a": [
+    "Mario",
+    "Super Mario"
+   ]
+  },
+  {
+   "q": "¿En qué juego se construye con bloques y se pelea contra creepers?",
+   "a": [
+    "Minecraft"
+   ]
+  },
+  {
+   "q": "¿Cuál es el océano más grande del mundo?",
+   "a": [
+    "Pacífico",
+    "Pacifico",
+    "océano Pacífico"
+   ]
+  },
+  {
+   "q": "¿Cuántos días tiene un año bisiesto?",
+   "a": [
+    "366"
+   ]
+  },
+  {
+   "q": "¿Qué animal es conocido como el rey de la selva?",
+   "a": [
+    "león",
+    "leon"
+   ]
+  },
+  {
+   "q": "¿Cuál es el país más grande del mundo?",
+   "a": [
+    "Rusia"
+   ]
+  },
+  {
+   "q": "¿Cuántos jugadores tiene un equipo de fútbol en la cancha?",
+   "a": [
+    "11",
+    "once"
+   ]
+  },
+  {
+   "q": "¿Qué gas respiramos para vivir?",
+   "a": [
+    "oxígeno",
+    "oxigeno"
+   ]
+  },
+  {
+   "q": "¿Cómo se llama el erizo azul de SEGA?",
+   "a": [
+    "Sonic"
+   ]
+  },
+  {
+   "q": "¿Cuál es la capital de Japón?",
+   "a": [
+    "Tokio",
+    "Tokyo"
+   ]
+  },
+  {
+   "q": "¿Cuántos lados tiene un hexágono?",
+   "a": [
+    "6",
+    "seis"
+   ]
+  },
+  {
+   "q": "¿Qué instrumento tiene teclas blancas y negras?",
+   "a": [
+    "piano"
+   ]
+  },
+  {
+   "q": "¿En qué juego un impostor intenta engañar a la tripulación?",
+   "a": [
+    "Among Us"
+   ]
+  },
+  {
+   "q": "¿Cuál es el metal más valioso de los Juegos Olímpicos?",
+   "a": [
+    "oro"
+   ]
+  },
+  {
+   "q": "¿Cuántos minutos tiene una hora?",
+   "a": [
+    "60",
+    "sesenta"
+   ]
+  },
+  {
+   "q": "¿Qué planeta es conocido como el planeta rojo?",
+   "a": [
+    "Marte"
+   ]
+  },
+  {
+   "q": "¿Cuál es el animal más grande del mundo?",
+   "a": [
+    "ballena azul",
+    "ballena"
+   ]
+  },
+  {
+   "q": "¿Qué pokémon eléctrico es la mascota de Pokémon?",
+   "a": [
+    "Pikachu"
+   ]
+  },
+  {
+   "q": "¿Cuántos colores tiene el arcoíris?",
+   "a": [
+    "7",
+    "siete"
+   ]
+  },
+  {
+   "q": "¿Qué se mide con un termómetro?",
+   "a": [
+    "temperatura",
+    "la temperatura"
+   ]
+  },
+  {
+   "q": "¿Cuál es el río más largo de América?",
+   "a": [
+    "Amazonas",
+    "el Amazonas"
+   ]
+  },
+  {
+   "q": "¿Cuántas cartas tiene una baraja de póker sin comodines?",
+   "a": [
+    "52",
+    "cincuenta y dos"
+   ]
+  },
+  {
+   "q": "¿En qué juego se recorre Hyrule con Link?",
+   "a": [
+    "Zelda",
+    "The Legend of Zelda"
+   ]
+  },
+  {
+   "q": "¿Qué animal pone huevos y dice cuac?",
+   "a": [
+    "pato"
+   ]
+  },
+  {
+   "q": "¿Cuántos huesos tiene el cuerpo humano adulto?",
+   "a": [
+    "206"
+   ]
+  },
+  {
+   "q": "¿Cuál es el idioma más hablado de Brasil?",
+   "a": [
+    "portugués",
+    "portugues"
+   ]
+  },
+  {
+   "q": "¿De qué color es el cielo en un día despejado?",
+   "a": [
+    "azul"
+   ]
+  }
+ ],
+ "en": [
+  {
+   "q": "What is the largest planet in the solar system?",
+   "a": [
+    "Jupiter"
+   ]
+  },
+  {
+   "q": "How many legs does a spider have?",
+   "a": [
+    "8",
+    "eight"
+   ]
+  },
+  {
+   "q": "What color is an emerald?",
+   "a": [
+    "green"
+   ]
+  },
+  {
+   "q": "What's the name of Nintendo's most famous plumber?",
+   "a": [
+    "Mario",
+    "Super Mario"
+   ]
+  },
+  {
+   "q": "In which game do you build with blocks and fight creepers?",
+   "a": [
+    "Minecraft"
+   ]
+  },
+  {
+   "q": "What is the largest ocean on Earth?",
+   "a": [
+    "Pacific",
+    "Pacific Ocean"
+   ]
+  },
+  {
+   "q": "How many days are there in a leap year?",
+   "a": [
+    "366"
+   ]
+  },
+  {
+   "q": "Which animal is known as the king of the jungle?",
+   "a": [
+    "lion"
+   ]
+  },
+  {
+   "q": "What is the largest country in the world?",
+   "a": [
+    "Russia"
+   ]
+  },
+  {
+   "q": "How many players does a soccer team have on the field?",
+   "a": [
+    "11",
+    "eleven"
+   ]
+  },
+  {
+   "q": "Which gas do we breathe to stay alive?",
+   "a": [
+    "oxygen"
+   ]
+  },
+  {
+   "q": "What's the name of SEGA's blue hedgehog?",
+   "a": [
+    "Sonic"
+   ]
+  },
+  {
+   "q": "What is the capital of Japan?",
+   "a": [
+    "Tokyo"
+   ]
+  },
+  {
+   "q": "How many sides does a hexagon have?",
+   "a": [
+    "6",
+    "six"
+   ]
+  },
+  {
+   "q": "Which instrument has black and white keys?",
+   "a": [
+    "piano"
+   ]
+  },
+  {
+   "q": "In which game does an impostor try to fool the crew?",
+   "a": [
+    "Among Us"
+   ]
+  },
+  {
+   "q": "Which Olympic medal is the most valuable?",
+   "a": [
+    "gold"
+   ]
+  },
+  {
+   "q": "How many minutes are in an hour?",
+   "a": [
+    "60",
+    "sixty"
+   ]
+  },
+  {
+   "q": "Which planet is known as the red planet?",
+   "a": [
+    "Mars"
+   ]
+  },
+  {
+   "q": "What is the largest animal in the world?",
+   "a": [
+    "blue whale",
+    "whale"
+   ]
+  },
+  {
+   "q": "Which electric Pokémon is the series' mascot?",
+   "a": [
+    "Pikachu"
+   ]
+  },
+  {
+   "q": "How many colors does a rainbow have?",
+   "a": [
+    "7",
+    "seven"
+   ]
+  },
+  {
+   "q": "What does a thermometer measure?",
+   "a": [
+    "temperature"
+   ]
+  },
+  {
+   "q": "What is the longest river in South America?",
+   "a": [
+    "Amazon",
+    "the Amazon"
+   ]
+  },
+  {
+   "q": "How many cards are in a poker deck without jokers?",
+   "a": [
+    "52",
+    "fifty two",
+    "fifty-two"
+   ]
+  },
+  {
+   "q": "In which game do you explore Hyrule as Link?",
+   "a": [
+    "Zelda",
+    "The Legend of Zelda"
+   ]
+  },
+  {
+   "q": "Which bird says quack?",
+   "a": [
+    "duck"
+   ]
+  },
+  {
+   "q": "How many bones does an adult human body have?",
+   "a": [
+    "206"
+   ]
+  },
+  {
+   "q": "What language is mostly spoken in Brazil?",
+   "a": [
+    "Portuguese"
+   ]
+  },
+  {
+   "q": "What color is the sky on a clear day?",
+   "a": [
+    "blue"
+   ]
+  }
+ ],
+ "pt": [
+  {
+   "q": "Qual é o maior planeta do sistema solar?",
+   "a": [
+    "Júpiter",
+    "Jupiter"
+   ]
+  },
+  {
+   "q": "Quantas patas tem uma aranha?",
+   "a": [
+    "8",
+    "oito"
+   ]
+  },
+  {
+   "q": "Qual é a cor da esmeralda?",
+   "a": [
+    "verde"
+   ]
+  },
+  {
+   "q": "Como se chama o encanador mais famoso da Nintendo?",
+   "a": [
+    "Mario",
+    "Super Mario"
+   ]
+  },
+  {
+   "q": "Em qual jogo você constrói com blocos e enfrenta creepers?",
+   "a": [
+    "Minecraft"
+   ]
+  },
+  {
+   "q": "Qual é o maior oceano do mundo?",
+   "a": [
+    "Pacífico",
+    "Pacifico",
+    "oceano Pacífico"
+   ]
+  },
+  {
+   "q": "Quantos dias tem um ano bissexto?",
+   "a": [
+    "366"
+   ]
+  },
+  {
+   "q": "Qual animal é conhecido como o rei da selva?",
+   "a": [
+    "leão",
+    "leao"
+   ]
+  },
+  {
+   "q": "Qual é o maior país do mundo?",
+   "a": [
+    "Rússia",
+    "Russia"
+   ]
+  },
+  {
+   "q": "Quantos jogadores um time de futebol tem em campo?",
+   "a": [
+    "11",
+    "onze"
+   ]
+  },
+  {
+   "q": "Que gás respiramos para viver?",
+   "a": [
+    "oxigênio",
+    "oxigenio"
+   ]
+  },
+  {
+   "q": "Como se chama o ouriço azul da SEGA?",
+   "a": [
+    "Sonic"
+   ]
+  },
+  {
+   "q": "Qual é a capital do Japão?",
+   "a": [
+    "Tóquio",
+    "Toquio",
+    "Tokyo"
+   ]
+  },
+  {
+   "q": "Quantos lados tem um hexágono?",
+   "a": [
+    "6",
+    "seis"
+   ]
+  },
+  {
+   "q": "Qual instrumento tem teclas brancas e pretas?",
+   "a": [
+    "piano"
+   ]
+  },
+  {
+   "q": "Em qual jogo um impostor tenta enganar a tripulação?",
+   "a": [
+    "Among Us"
+   ]
+  },
+  {
+   "q": "Qual é a medalha olímpica mais valiosa?",
+   "a": [
+    "ouro"
+   ]
+  },
+  {
+   "q": "Quantos minutos tem uma hora?",
+   "a": [
+    "60",
+    "sessenta"
+   ]
+  },
+  {
+   "q": "Qual planeta é conhecido como planeta vermelho?",
+   "a": [
+    "Marte"
+   ]
+  },
+  {
+   "q": "Qual é o maior animal do mundo?",
+   "a": [
+    "baleia azul",
+    "baleia"
+   ]
+  },
+  {
+   "q": "Qual Pokémon elétrico é o mascote da série?",
+   "a": [
+    "Pikachu"
+   ]
+  },
+  {
+   "q": "Quantas cores tem o arco-íris?",
+   "a": [
+    "7",
+    "sete"
+   ]
+  },
+  {
+   "q": "O que se mede com um termômetro?",
+   "a": [
+    "temperatura",
+    "a temperatura"
+   ]
+  },
+  {
+   "q": "Qual é o rio mais longo da América do Sul?",
+   "a": [
+    "Amazonas",
+    "o Amazonas"
+   ]
+  },
+  {
+   "q": "Quantas cartas tem um baralho de pôquer sem coringas?",
+   "a": [
+    "52",
+    "cinquenta e dois"
+   ]
+  },
+  {
+   "q": "Em qual jogo você explora Hyrule com o Link?",
+   "a": [
+    "Zelda",
+    "The Legend of Zelda"
+   ]
+  },
+  {
+   "q": "Qual ave faz quá-quá?",
+   "a": [
+    "pato"
+   ]
+  },
+  {
+   "q": "Quantos ossos tem o corpo humano adulto?",
+   "a": [
+    "206"
+   ]
+  },
+  {
+   "q": "Qual idioma é mais falado no Brasil?",
+   "a": [
+    "português",
+    "portugues"
+   ]
+  },
+  {
+   "q": "De que cor é o céu num dia sem nuvens?",
+   "a": [
+    "azul"
+   ]
+  }
+ ],
+ "fr": [
+  {
+   "q": "Quelle est la plus grande planète du système solaire ?",
+   "a": [
+    "Jupiter"
+   ]
+  },
+  {
+   "q": "Combien de pattes a une araignée ?",
+   "a": [
+    "8",
+    "huit"
+   ]
+  },
+  {
+   "q": "De quelle couleur est l'émeraude ?",
+   "a": [
+    "vert",
+    "verte"
+   ]
+  },
+  {
+   "q": "Comment s'appelle le plombier le plus célèbre de Nintendo ?",
+   "a": [
+    "Mario",
+    "Super Mario"
+   ]
+  },
+  {
+   "q": "Dans quel jeu construit-on avec des blocs et affronte-t-on des creepers ?",
+   "a": [
+    "Minecraft"
+   ]
+  },
+  {
+   "q": "Quel est le plus grand océan du monde ?",
+   "a": [
+    "Pacifique",
+    "océan Pacifique"
+   ]
+  },
+  {
+   "q": "Combien de jours compte une année bissextile ?",
+   "a": [
+    "366"
+   ]
+  },
+  {
+   "q": "Quel animal est surnommé le roi de la jungle ?",
+   "a": [
+    "lion",
+    "le lion"
+   ]
+  },
+  {
+   "q": "Quel est le plus grand pays du monde ?",
+   "a": [
+    "Russie",
+    "la Russie"
+   ]
+  },
+  {
+   "q": "Combien de joueurs une équipe de football a-t-elle sur le terrain ?",
+   "a": [
+    "11",
+    "onze"
+   ]
+  },
+  {
+   "q": "Quel gaz respirons-nous pour vivre ?",
+   "a": [
+    "oxygène",
+    "oxygene",
+    "l'oxygène"
+   ]
+  },
+  {
+   "q": "Comment s'appelle le hérisson bleu de SEGA ?",
+   "a": [
+    "Sonic"
+   ]
+  },
+  {
+   "q": "Quelle est la capitale du Japon ?",
+   "a": [
+    "Tokyo"
+   ]
+  },
+  {
+   "q": "Combien de côtés a un hexagone ?",
+   "a": [
+    "6",
+    "six"
+   ]
+  },
+  {
+   "q": "Quel instrument a des touches blanches et noires ?",
+   "a": [
+    "piano",
+    "le piano"
+   ]
+  },
+  {
+   "q": "Dans quel jeu un imposteur essaie-t-il de tromper l'équipage ?",
+   "a": [
+    "Among Us"
+   ]
+  },
+  {
+   "q": "Quelle est la médaille olympique la plus précieuse ?",
+   "a": [
+    "or",
+    "l'or"
+   ]
+  },
+  {
+   "q": "Combien de minutes y a-t-il dans une heure ?",
+   "a": [
+    "60",
+    "soixante"
+   ]
+  },
+  {
+   "q": "Quelle planète est surnommée la planète rouge ?",
+   "a": [
+    "Mars"
+   ]
+  },
+  {
+   "q": "Quel est le plus grand animal du monde ?",
+   "a": [
+    "baleine bleue",
+    "baleine",
+    "la baleine bleue"
+   ]
+  },
+  {
+   "q": "Quel Pokémon électrique est la mascotte de la série ?",
+   "a": [
+    "Pikachu"
+   ]
+  },
+  {
+   "q": "Combien de couleurs a l'arc-en-ciel ?",
+   "a": [
+    "7",
+    "sept"
+   ]
+  },
+  {
+   "q": "Que mesure un thermomètre ?",
+   "a": [
+    "température",
+    "temperature",
+    "la température"
+   ]
+  },
+  {
+   "q": "Quel est le plus long fleuve d'Amérique du Sud ?",
+   "a": [
+    "Amazone",
+    "l'Amazone"
+   ]
+  },
+  {
+   "q": "Combien de cartes compte un jeu de poker sans jokers ?",
+   "a": [
+    "52",
+    "cinquante-deux",
+    "cinquante deux"
+   ]
+  },
+  {
+   "q": "Dans quel jeu explore-t-on Hyrule avec Link ?",
+   "a": [
+    "Zelda",
+    "The Legend of Zelda"
+   ]
+  },
+  {
+   "q": "Quel oiseau fait coin-coin ?",
+   "a": [
+    "canard",
+    "le canard"
+   ]
+  },
+  {
+   "q": "Combien d'os compte le corps humain adulte ?",
+   "a": [
+    "206"
+   ]
+  },
+  {
+   "q": "Quelle langue parle-t-on surtout au Brésil ?",
+   "a": [
+    "portugais",
+    "le portugais"
+   ]
+  },
+  {
+   "q": "De quelle couleur est le ciel par temps clair ?",
+   "a": [
+    "bleu"
+   ]
+  }
+ ],
+ "it": [
+  {
+   "q": "Qual è il pianeta più grande del sistema solare?",
+   "a": [
+    "Giove"
+   ]
+  },
+  {
+   "q": "Quante zampe ha un ragno?",
+   "a": [
+    "8",
+    "otto"
+   ]
+  },
+  {
+   "q": "Di che colore è lo smeraldo?",
+   "a": [
+    "verde"
+   ]
+  },
+  {
+   "q": "Come si chiama l'idraulico più famoso di Nintendo?",
+   "a": [
+    "Mario",
+    "Super Mario"
+   ]
+  },
+  {
+   "q": "In quale gioco si costruisce con i blocchi e si combattono i creeper?",
+   "a": [
+    "Minecraft"
+   ]
+  },
+  {
+   "q": "Qual è l'oceano più grande del mondo?",
+   "a": [
+    "Pacifico",
+    "oceano Pacifico"
+   ]
+  },
+  {
+   "q": "Quanti giorni ha un anno bisestile?",
+   "a": [
+    "366"
+   ]
+  },
+  {
+   "q": "Quale animale è chiamato il re della giungla?",
+   "a": [
+    "leone",
+    "il leone"
+   ]
+  },
+  {
+   "q": "Qual è il paese più grande del mondo?",
+   "a": [
+    "Russia",
+    "la Russia"
+   ]
+  },
+  {
+   "q": "Quanti giocatori ha una squadra di calcio in campo?",
+   "a": [
+    "11",
+    "undici"
+   ]
+  },
+  {
+   "q": "Quale gas respiriamo per vivere?",
+   "a": [
+    "ossigeno",
+    "l'ossigeno"
+   ]
+  },
+  {
+   "q": "Come si chiama il riccio blu di SEGA?",
+   "a": [
+    "Sonic"
+   ]
+  },
+  {
+   "q": "Qual è la capitale del Giappone?",
+   "a": [
+    "Tokyo",
+    "Tokio"
+   ]
+  },
+  {
+   "q": "Quanti lati ha un esagono?",
+   "a": [
+    "6",
+    "sei"
+   ]
+  },
+  {
+   "q": "Quale strumento ha tasti bianchi e neri?",
+   "a": [
+    "pianoforte",
+    "piano"
+   ]
+  },
+  {
+   "q": "In quale gioco un impostore cerca di ingannare l'equipaggio?",
+   "a": [
+    "Among Us"
+   ]
+  },
+  {
+   "q": "Qual è la medaglia olimpica più preziosa?",
+   "a": [
+    "oro",
+    "l'oro"
+   ]
+  },
+  {
+   "q": "Quanti minuti ci sono in un'ora?",
+   "a": [
+    "60",
+    "sessanta"
+   ]
+  },
+  {
+   "q": "Quale pianeta è chiamato il pianeta rosso?",
+   "a": [
+    "Marte"
+   ]
+  },
+  {
+   "q": "Qual è l'animale più grande del mondo?",
+   "a": [
+    "balenottera azzurra",
+    "balena",
+    "balena blu"
+   ]
+  },
+  {
+   "q": "Quale Pokémon elettrico è la mascotte della serie?",
+   "a": [
+    "Pikachu"
+   ]
+  },
+  {
+   "q": "Quanti colori ha l'arcobaleno?",
+   "a": [
+    "7",
+    "sette"
+   ]
+  },
+  {
+   "q": "Cosa misura un termometro?",
+   "a": [
+    "temperatura",
+    "la temperatura"
+   ]
+  },
+  {
+   "q": "Qual è il fiume più lungo del Sud America?",
+   "a": [
+    "Rio delle Amazzoni",
+    "Amazzoni"
+   ]
+  },
+  {
+   "q": "Quante carte ha un mazzo da poker senza jolly?",
+   "a": [
+    "52",
+    "cinquantadue"
+   ]
+  },
+  {
+   "q": "In quale gioco si esplora Hyrule con Link?",
+   "a": [
+    "Zelda",
+    "The Legend of Zelda"
+   ]
+  },
+  {
+   "q": "Quale uccello fa qua qua?",
+   "a": [
+    "papera",
+    "anatra",
+    "la papera"
+   ]
+  },
+  {
+   "q": "Quante ossa ha il corpo umano adulto?",
+   "a": [
+    "206"
+   ]
+  },
+  {
+   "q": "Quale lingua si parla di più in Brasile?",
+   "a": [
+    "portoghese",
+    "il portoghese"
+   ]
+  },
+  {
+   "q": "Di che colore è il cielo in una giornata serena?",
+   "a": [
+    "azzurro",
+    "blu"
+   ]
+  }
+ ]
+}

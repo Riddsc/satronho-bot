@@ -3,17 +3,17 @@
 // Cada voz tiene su propia licencia (ver su MODEL_CARD en Hugging Face);
 // revísala antes de usar la app con fines comerciales.
 //
-// lang: 'es' entra al reparto automático por espectador; 'en' y 'fr' se
-// usan solo a mano (Voz del chat → Espectadores especiales).
+// lang: el reparto automático por espectador usa las voces del mismo idioma
+// que tu voz principal; las demás se usan a mano (Espectadores especiales).
 // gender: 'f' | 'm' | '' (desconocido o varias).
 
 const BASE = 'https://huggingface.co/rhasspy/piper-voices/resolve/main';
 
 const COUNTRY = {
   es_MX: 'México', es_AR: 'Argentina', es_ES: 'España',
-  en_US: 'Estados Unidos', en_GB: 'Reino Unido', fr_FR: 'Francia',
+  en_US: 'Estados Unidos', en_GB: 'Reino Unido', fr_FR: 'Francia', pt_BR: 'Brasil', it_IT: 'Italia',
 };
-const LANG_NAME = { es: 'Español', en: 'Inglés', fr: 'Francés' };
+const LANG_NAME = { es: 'Español', en: 'Inglés', fr: 'Francés', pt: 'Portugués', it: 'Italiano' };
 
 function voice(locale, name, quality, label, extra = {}) {
   const id = `${locale}-${name}-${quality}`;
@@ -57,6 +57,13 @@ const VOICES = [
   voice('fr_FR', 'upmc', 'medium', 'UPMC · Francia (Jessica y Pierre)', { speakers: 2, speakerGenders: ['f', 'm'] }),
   voice('fr_FR', 'tom', 'medium', 'Tom · Francia', { gender: 'm' }),
   voice('fr_FR', 'gilles', 'low', 'Gilles · Francia', { gender: 'm' }),
+  // ----- Portugués de Brasil (Piper solo tiene voces masculinas) -----
+  voice('pt_BR', 'faber', 'medium', 'Faber · Brasil', { gender: 'm' }),
+  voice('pt_BR', 'cadu', 'medium', 'Cadu · Brasil', { gender: 'm' }),
+  voice('pt_BR', 'jeff', 'medium', 'Jeff · Brasil', { gender: 'm' }),
+  // ----- Italiano -----
+  voice('it_IT', 'paola', 'medium', 'Paola · Italia', { gender: 'f' }),
+  voice('it_IT', 'riccardo', 'x_low', 'Riccardo · Italia', { gender: 'm' }),
 ];
 
 // Motor Piper (versión 2023.11.14-2, licencia MIT) desde GitHub.
