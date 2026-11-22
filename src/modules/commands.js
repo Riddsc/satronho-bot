@@ -15,6 +15,7 @@
 // ese tiempo hubo al menos N mensajes en el chat (para no hablar solo).
 
 const crypto = require('crypto');
+const { t: tr, tExact } = require('../i18n');
 
 // Nombres que ya usa la app y no se pueden pisar. Los de serie siempre;
 // además, los que el streamer puso a la música, a los sonidos, a los
@@ -32,15 +33,15 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
 
   const list = () => store.get('commands') || [];
 
-  // ¿Qué función de la app ya responde a este nombre? (null = ninguna)
+  // ¿Qué función de la app ya responde a este nombre? Devuelve la frase
+  // completa para el aviso («!x ya lo usa la música»), o null si ninguna.
   function usedByApp(name) {
-    if (RESERVED.has(name)) return 'lo usa la música';
     const music = store.get('music')?.commands || {};
-    if (Object.values(music).some((c) => (c?.names || []).map(cleanName).includes(name))) return 'lo usa la música';
-    if (cleanName(store.get('sounds')?.chat?.command) === name) return 'lo usan los sonidos del chat';
-    if ((store.get('counters') || []).some((c) => cleanName(c.command) === name)) return 'lo usa un contador';
+    if (RESERVED.has(name) || Object.values(music).some((c) => (c?.names || []).map(cleanName).includes(name))) return tr('!{0} ya lo usa la música', name);
+    if (cleanName(store.get('sounds')?.chat?.command) === name) return tr('!{0} ya lo usan los sonidos del chat', name);
+    if ((store.get('counters') || []).some((c) => cleanName(c.command) === name)) return tr('!{0} ya lo usa un contador', name);
     for (const w of store.get('wheels')?.list || []) {
-      for (const t of w.triggers || []) if (t.type === 'command' && cleanName(t.command) === name) return `lo usa la ruleta «${w.name || 'sin nombre'}»`;
+      for (const t of w.triggers || []) if (t.type === 'command' && cleanName(t.command) === name) return w.name ? tr('!{0} ya lo usa la ruleta «{1}»', name, w.name) : tr('!{0} ya lo usa una ruleta', name);
     }
     return null;
   }
@@ -54,7 +55,7 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     const all = [name, ...aliases];
     for (const n of all) {
       const owner = usedByApp(n);
-      if (owner) throw new Error(`!${n} ya ${owner}`);
+      if (owner) throw new Error(owner);
     }
     for (const c of list()) {
       if (c.id === id) continue;
@@ -105,11 +106,11 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     const music = getMusic?.() || {};
     const channel = store.get('platforms')?.[e.platform]?.channel || '';
     const now = new Date();
-    return text
+    return tExact(text)
       .replace(/\{usuario\}/gi, e.user?.name || '')
       .replace(/\{canal\}/gi, String(channel).replace(/^@/, ''))
       .replace(/\{plataforma\}/gi, { kick: 'Kick', starvios: 'Starvios', twitch: 'Twitch', tiktok: 'TikTok' }[e.platform] || e.platform)
-      .replace(/\{cancion\}/gi, music.current?.title || 'nada por ahora')
+      .replace(/\{cancion\}/gi, music.current?.title || tr('nada por ahora'))
       .replace(/\{cola\}/gi, String(music.queue?.length || 0))
       .replace(/\{usos\}/gi, String(cmd.uses || 0))
       .replace(/\{comandos\}/gi, list().filter((c) => c.enabled && c.permission === 'all' && c.platforms?.[e.platform] !== false).map((c) => `!${c.name}`).join(' '))
@@ -223,9 +224,9 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     for (const p of ['kick', 'starvios']) {
       if (item.platforms?.[p] === false) continue;
       if (status[p]?.state !== 'connected') continue;
-      if (writers[p]?.say(item.text, 'automatico')) sent.push(p);
+      if (writers[p]?.say(tExact(item.text), 'automatico')) sent.push(p);
     }
-    if (sent.length && store.get('tts').readBot?.timers) speak?.(item.text);
+    if (sent.length && store.get('tts').readBot?.timers) speak?.(tExact(item.text));
     return sent;
   }
 

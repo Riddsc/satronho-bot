@@ -1,3 +1,8 @@
+// tr() traduce un texto armado en el código y trn() elige singular o plural.
+import { getLocale } from '/overlays/i18n/i18n.js';
+
+export { t as tr, tn as trn, listOf, getLocale } from '/overlays/i18n/i18n.js';
+
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
@@ -53,7 +58,7 @@ export function toast(text, guideHtml = '') {
   toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
 }
 
-export const timeOf = (ts) => new Date(ts).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+export const timeOf = (ts) => new Date(ts).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
 // Pide un texto en una ventanita propia (la app de escritorio no muestra
 // prompt()). Devuelve el texto, o null si se cancela.

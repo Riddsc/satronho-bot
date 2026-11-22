@@ -2,8 +2,9 @@
 // Une todas las piezas: navegación, conexiones, voz, música, alertas, metas,
 // overlays, estadísticas, apariencia y los guías.
 
-import { connectSatronho } from '/overlays/client.js';
-import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSaved } from './util.js';
+import { connectSatronho, i18nReady } from '/overlays/client.js';
+import { LANGS } from '/overlays/i18n/i18n.js';
+import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSaved, tr, trn, listOf } from './util.js';
 import { initGuides, setBubble, sayFor, guideToast, GUIDES } from './guides.js';
 import { initAlertRules, onCatalogChange } from './alertRulesUI.js';
 import { initQuick, onQuickStatus, onQuickMusic, refreshRail } from './quick.js';
@@ -205,11 +206,11 @@ function updateSamy() {
   if (trouble) return setBubble('samy', `${PLATFORM_NAMES[trouble.platform]} no me deja entrar todavía (${esc(trouble.detail)}). Sigo intentando yo solo.`);
   if (on.length) return setBubble('samy', `¡Estoy escuchando ${on.join(', ')}! Marca «Conectar al abrir la app» y la próxima vez me conecto solo.`);
   const chatOnly = ['kick', 'starvios', 'twitch'].filter(isShown).map((p) => PLATFORM_NAMES[p]);
-  const list = (a) => (a.length > 1 ? `${a.slice(0, -1).join(', ')} y ${a.at(-1)}` : a[0]);
+  const list = (a) => listOf(a);
   const parts = [];
-  if (isShown('tiktok')) parts.push('TikTok trae alertas, metas y voz');
-  if (chatOnly.length) parts.push(`${list(chatOnly)} ${chatOnly.length > 1 ? 'traen' : 'trae'} chat para la voz y la música`);
-  setBubble('samy', `Escribe tu usuario y pulsa <b>Conectar</b>. ${parts.join('; ')}.`);
+  if (isShown('tiktok')) parts.push(tr('TikTok trae alertas, metas y voz'));
+  if (chatOnly.length) parts.push(trn(chatOnly.length, '{0} trae chat para la voz y la música', '{0} traen chat para la voz y la música', list(chatOnly)));
+  setBubble('samy', `${tr('Escribe tu usuario y pulsa <b>Conectar</b>.')} ${parts.map((x) => `${x}.`).join(' ')}`);
 }
 
 function initPlatforms() {
@@ -324,6 +325,17 @@ const markDecision = (d) => markChatDecision(d);
 
 // ---------- Ajustes → App ----------
 function initAppSettings() {
+  // Idioma: los nombres van en su propio idioma, para encontrar el tuyo aunque no entiendas el actual.
+  const langSeg = $('#lang-seg');
+  const langNow = config.ui?.language || 'auto';
+  const langOpts = [['auto', tr('Automático (el de Windows)')], ...Object.entries(LANGS).map(([code, l]) => [code, l.name])];
+  langSeg.innerHTML = langOpts.map(([code, name]) => `<button type="button" data-lang-opt="${code}" aria-pressed="${code === langNow}"${code === 'auto' ? '' : ' translate="no"'}>${esc(name)}</button>`).join('');
+  langSeg.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-lang-opt]');
+    if (!b) return;
+    for (const x of langSeg.children) x.setAttribute('aria-pressed', String(x === b));
+    saveConfig({ ui: { language: b.dataset.langOpt } });
+  });
   const tray = $('#tray-toggle');
   tray.checked = Boolean(config.window?.minimizeToTray);
   tray.addEventListener('change', () => saveConfig({ window: { minimizeToTray: tray.checked } }));
@@ -369,7 +381,7 @@ function renderUpdate(u) {
     const f = u.failed;
     el.classList.add('failed');
     el.innerHTML = `<div class="upd-fail">
-      <span>⚠️ La versión <b>${esc(u.version)}</b> no se pudo instalar${f.count > 1 ? ` (${f.count} intentos)` : ''}. Sigues usando la ${esc(appVersion || 'versión anterior')}, que funciona normal.</span>
+      <span>⚠️ ${f.count > 1 ? tr('La versión <b>{0}</b> no se pudo instalar ({1} intentos).', esc(u.version), f.count) : tr('La versión <b>{0}</b> no se pudo instalar.', esc(u.version))} ${appVersion ? tr('Sigues usando la {0}, que funciona normal.', esc(appVersion)) : tr('Sigues usando la versión anterior, que funciona normal.')}</span>
       <span class="hint" style="margin:0">${esc(f.reason)}</span>
       <span class="hint" style="margin:0">Cierra las ventanas del Explorador que tengas abiertas en la carpeta de la app y reintenta. Si vuelve a pasar, agrega esta carpeta a las <b>exclusiones de tu antivirus</b>: <code>${esc(f.dir || '')}</code> <button class="btn ghost small" id="update-copy-dir">Copiar ruta</button></span>
     </div><button class="btn primary small" id="update-apply">Reintentar</button><button class="btn ghost small" id="update-later">Luego</button>`;
@@ -411,7 +423,7 @@ function renderHelpPage() {
     .map((id) => {
       const qs = helpKb.KB.filter((e) => e.guide === id);
       return `<div class="card help-guide" style="--g:${GUIDES[id].color}">
-        <div class="who"><span class="guide" data-avatar="${id}" data-size="70"></span><div><b>${esc(GUIDES[id].name)}</b><small>${esc(GUIDES[id].role)}</small></div></div>
+        <div class="who"><span class="guide" data-avatar="${id}" data-size="70"></span><div><b>${esc(GUIDES[id].name)}</b><small>${esc(tr(GUIDES[id].role))}</small></div></div>
         ${qs.map((e) => `<button type="button" class="faq-q" data-faq="${id}">${esc(e.q)}</button>`).join('')}
         <button type="button" class="btn small mt" data-open-help="${id}">Preguntarle a ${esc(GUIDES[id].name)}</button></div>`;
     })
@@ -424,7 +436,8 @@ function renderHelpPage() {
 
 // ---------- Arranque ----------
 async function init() {
-  const state = await api('GET', '/api/state');
+  // Primero el diccionario: así los textos que arma el código salen ya en tu idioma.
+  const [state] = await Promise.all([api('GET', '/api/state'), i18nReady]);
   config = state.config;
   applyAppearance(config);
   const v = `v${state.app?.version || ''}`;

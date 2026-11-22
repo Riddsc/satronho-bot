@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-theme="noche">
+<html lang="es" class="i18n-wait" data-theme="noche">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -943,6 +943,9 @@
   </div>
   <div class="tabpanel" data-tabpanel="app" hidden>
     <div class="cols c2">
+      <div class="card span2"><h3 class="card-title">Idioma</h3>
+        <p class="hint">El idioma del panel, de la ventana del chat, de los overlays y de lo que el bot escribe en tu chat. Las voces se eligen aparte, en Voz.</p>
+        <div class="seg lang-seg" id="lang-seg" aria-label="Idioma"></div></div>
       <div class="card"><h3 class="card-title">Guías</h3>
         <label class="switch"><input type="checkbox" id="guides-toggle"><span></span> Mostrar a Samy, Troya, Ñoño y Juana</label>
         <button class="btn small mt" id="welcome-again">Ver otra vez la bienvenida</button>
@@ -981,13 +984,13 @@
 
 <!-- ---------- Tu perfil (Samy) ---------- -->
 <section class="page" id="page-perfil" data-page="perfil" hidden>
-  <div class="ph"><div class="t"><small>Sistema</small><h1>Tu perfil</h1><p>Cómo te llaman las guías, tus cuentas, el orden del menú y tu barra de botones rápidos.</p></div>
+  <div class="ph"><div class="t"><small>Sistema</small><h1>Tu perfil</h1><p>Cómo te llaman los guías, tus cuentas, el orden del menú y tu barra de botones rápidos.</p></div>
     <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Todo lo de aquí es solo tuyo y se guarda en tu PC. Lo que muevas se ve al instante.</p><span class="guide" data-avatar="samy" data-size="mini"></span></div></div>
   <div class="cols c2" style="--g:#ffb23e">
     <div class="card pf-me"><h3 class="card-title">Tú</h3>
       <div class="pf-photo"><span class="pf-av" id="pf-av"></span>
         <div class="row"><button type="button" class="btn small" id="pf-photo-btn">Cambiar foto</button><button type="button" class="btn small ghost" id="pf-photo-del">Quitar</button><input type="file" id="pf-photo-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div></div>
-      <label class="field"><span>Tu nombre (así te llaman las guías)</span><input id="pf-name" placeholder="Ridds" maxlength="40"></label>
+      <label class="field"><span>Tu nombre (así te llaman los guías)</span><input id="pf-name" placeholder="Ridds" maxlength="40"></label>
       <label class="switch"><input type="checkbox" id="pf-greet"><span></span> Saludarme por mi nombre en Inicio</label>
       <h4 class="pf-h">Tus cuentas</h4>
       <div class="pf-accounts" id="pf-accounts"></div>
@@ -1080,7 +1083,7 @@
       </div>
       <aside class="ar-live">
         <div class="ar-stage"><iframe id="ar-prev" title="Vista previa de la alerta" tabindex="-1"></iframe><button type="button" class="btn small ar-replay" id="ar-test-prev">↻ Repetir</button></div>
-        <p class="ar-sentence" id="ar-sentence"></p>
+        <p class="ar-sentence" id="ar-sentence" translate="no"></p>
         <div class="ar-qs" id="ar-qs"></div>
         <span class="field-label">Si ese evento también tiene alerta de serie</span>
         <div class="seg ar-excl-big"><button type="button" data-excl="1">Solo esta</button><button type="button" data-excl="0">Las dos</button></div>

@@ -6,7 +6,7 @@
 //    Cuenta regresiva según el overlay). Todo cambia al instante.
 //  - Estilo general: tema, letra y colores para todos los overlays.
 
-import { $, $$, api, esc, toast, saveConfig } from './util.js';
+import { $, $$, api, esc, toast, saveConfig, trn, getLocale, tr } from './util.js';
 import { FONTS, ACCENTS } from './appearance.js';
 import { guideToast, avatarHTML, GUIDES } from './guides.js';
 import { markStep, onPageChange, showPage, currentPage } from './nav.js';
@@ -41,7 +41,7 @@ const GUIDE_TIP = {
   samy: 'Las pantallas de empezamos, vuelvo y se acabó. Ponles tu título y tus redes.',
 };
 
-const nf = new Intl.NumberFormat('es-CO');
+const nf = { format: (n) => new Intl.NumberFormat(getLocale()).format(n) };
 let config;
 let style;
 let widgets = {};
@@ -86,10 +86,10 @@ function card(id) {
   const [W, H] = k.size;
   const pinned = pins.includes(id);
   return `<article class="ovg-card" data-open-w="${esc(id)}" tabindex="0" style="--g:${GUIDES[catOf(w.kind).guide].color}">
-    <div class="ovg-pv checker" data-w="${W}" data-h="${H}"><iframe src="/overlays/w.html?id=${encodeURIComponent(id)}&preview=1" width="${W}" height="${H}" loading="lazy" tabindex="-1" title="Vista previa: ${esc(nameOf(id, w))}"></iframe></div>
-    <div class="ovg-info"><span class="ovg-ic">${k.icon}</span><div><b>${esc(nameOf(id, w))}</b><small>${esc(k.desc)}</small></div>
+    <div class="ovg-pv checker" data-w="${W}" data-h="${H}"><iframe src="/overlays/w.html?id=${encodeURIComponent(id)}&preview=1" width="${W}" height="${H}" loading="lazy" tabindex="-1" title="${esc(tr('Vista previa: {0}', tr(nameOf(id, w))))}"></iframe></div>
+    <div class="ovg-info"><span class="ovg-ic">${k.icon}</span><div><b>${esc(nameOf(id, w))}</b><small>${esc(tr(k.desc))}</small></div>
       <button type="button" class="ovg-star" data-pin="${esc(id)}" aria-pressed="${pinned}" title="${pinned ? 'Quitar del menú' : 'Fijar en el menú'}">${pinned ? '★' : '☆'}</button></div>
-    <div class="ovg-tags"><span>${k.styles.length} estilos</span>${widgets[id] ? '<span class="on">Personalizado</span>' : ''}${KINDS[id] ? '' : '<span>Copia</span>'}</div>
+    <div class="ovg-tags"><span>${trn(k.styles.length, '{0} estilo', '{0} estilos')}</span>${widgets[id] ? '<span class="on">Personalizado</span>' : ''}${KINDS[id] ? '' : '<span>Copia</span>'}</div>
   </article>`;
 }
 
@@ -126,7 +126,7 @@ function renderGallery() {
     const extra = c.id === 'regalos' && !query ? alertsCard() + wheelsCard() : '';
     if (!mine.length && !extra) return '';
     const g = GUIDES[c.guide];
-    return `<section class="ovg-sec" style="--g:${g.color}"><header class="ovg-head">${avatarHTML(c.guide, 'md')}<div><h3>${esc(c.name)}</h3><p>${esc(c.desc)} <span class="ovg-by">Te guía ${esc(g.name)}</span></p></div></header>
+    return `<section class="ovg-sec" style="--g:${g.color}"><header class="ovg-head">${avatarHTML(c.guide, 'md')}<div><h3>${esc(c.name)}</h3><p>${esc(c.desc)} <span class="ovg-by" data-u>${esc(tr('Te guía {0}', g.name))}</span></p></div></header>
       <div class="ovg-grid">${mine.map(card).join('')}${extra}</div></section>`;
   }).join('') || '<p class="hint">No hay overlays con ese nombre.</p>';
   fitAll($('#ovg'));
@@ -567,7 +567,7 @@ function accountLines(g) {
   if (g.type !== 'follow' || g.source === 'events') return '';
   const lines = platsOfGoal(g).filter((p) => READABLE.includes(p)).map((p) => {
     const a = accountStats[p] || {};
-    const val = Number.isFinite(a.followers) ? `<b>${new Intl.NumberFormat('es-CO').format(a.followers)}</b> seguidores <small>${ago(a.ts)}</small>`
+    const val = Number.isFinite(a.followers) ? `<b>${new Intl.NumberFormat(getLocale()).format(a.followers)}</b> seguidores <small>${ago(a.ts)}</small>`
       : !a.channel ? '<span class="ove-acc-warn">Pon tu canal en Conexiones</span>'
       : `<span class="ove-acc-warn">${esc(a.error || (p === 'tiktok' ? 'Se lee al conectarte a tu LIVE' : 'Leyendo…'))}</span>`;
     return `<li>${platLogo(p)}<span>${val}</span></li>`;
@@ -937,9 +937,9 @@ function renderClassic() {
   const list = [
     { name: 'Alertas', path: '/overlays/alerts.html', note: 'Regalos, stickers, seguidores y tus alertas propias', w: 800, h: 300 },
     { name: 'Ruletas', path: '/overlays/wheel.html', note: 'Tus ruletas, con la mascota mareándose (se arman en Ruletas)', w: 720, h: 860 },
-    ...goals.map((g) => ({ name: `Meta: ${g.title}`, path: `/overlays/goal.html?id=${encodeURIComponent(g.id)}`, note: 'Barra de una sola meta', w: 700, h: 140 })),
+    ...goals.map((g) => ({ name: tr('Meta: {0}', g.title), path: `/overlays/goal.html?id=${encodeURIComponent(g.id)}`, note: 'Barra de una sola meta', w: 700, h: 140 })),
   ];
-  $('#overlay-list').innerHTML = list.map((it) => `<div class="ovg-crow"><b>${esc(it.name)}<small>${it.w} × ${it.h} · ${esc(it.note)}</small></b><code>${esc(origin() + it.path)}</code><button type="button" class="btn small ghost" data-copy="${esc(origin() + it.path)}">Copiar</button><button type="button" class="btn small ghost" data-copy="${esc(tiktokUrl(it.path))}" data-tt title="Enlace https para TikTok LIVE Studio">TikTok</button></div>`).join('');
+  $('#overlay-list').innerHTML = list.map((it) => `<div class="ovg-crow"><b>${esc(it.name)}<small>${it.w} × ${it.h} · <span data-u>${esc(it.note)}</span></small></b><code>${esc(origin() + it.path)}</code><button type="button" class="btn small ghost" data-copy="${esc(origin() + it.path)}">Copiar</button><button type="button" class="btn small ghost" data-copy="${esc(tiktokUrl(it.path))}" data-tt title="Enlace https para TikTok LIVE Studio">TikTok</button></div>`).join('');
 }
 
 // ---------- Estilo general ----------

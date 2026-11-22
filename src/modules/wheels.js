@@ -17,6 +17,7 @@
 // y quedar como «reto pendiente» para que lo tachen cuando lo cumplas.
 
 const crypto = require('crypto');
+const { t: tr, tExact } = require('../i18n');
 
 const TRIGGERS = ['sub', 'reward', 'gift', 'coins', 'follow', 'likesTotal', 'command', 'share', 'superfan'];
 const MASCOTS = ['samy', 'troya', 'nono', 'juana'];
@@ -34,19 +35,19 @@ const clamp = (n, min, max, def) => {
 function exampleWheel() {
   return {
     id: 'premios',
-    name: 'Ruleta de premios',
+    name: tr('Ruleta de premios'),
     enabled: true,
     prizes: [
-      { id: 'p1', label: 'Saludo especial', emoji: '👋', color: '#ff5d8f', weight: 3 },
-      { id: 'p2', label: 'Elige la próxima canción', emoji: '🎵', color: '#5ab0ff', weight: 2 },
-      { id: 'p3', label: '+5 minutos de directo', emoji: '⏱️', color: '#ffb23e', weight: 2, action: { type: 'time', seconds: 300 } },
-      { id: 'p4', label: 'Reto: 10 sentadillas', emoji: '🏋️', color: '#74d14c', weight: 2, reto: true },
-      { id: 'p5', label: 'Gira otra vez', emoji: '🔁', color: '#c084fc', weight: 1, action: { type: 'respin' } },
-      { id: 'p6', label: 'Abrazo virtual', emoji: '🤗', color: '#4fd1c5', weight: 3 },
+      { id: 'p1', label: tr('Saludo especial'), emoji: '👋', color: '#ff5d8f', weight: 3 },
+      { id: 'p2', label: tr('Elige la próxima canción'), emoji: '🎵', color: '#5ab0ff', weight: 2 },
+      { id: 'p3', label: tr('+5 minutos de directo'), emoji: '⏱️', color: '#ffb23e', weight: 2, action: { type: 'time', seconds: 300 } },
+      { id: 'p4', label: tr('Reto: 10 sentadillas'), emoji: '🏋️', color: '#74d14c', weight: 2, reto: true },
+      { id: 'p5', label: tr('Gira otra vez'), emoji: '🔁', color: '#c084fc', weight: 1, action: { type: 'respin' } },
+      { id: 'p6', label: tr('Abrazo virtual'), emoji: '🤗', color: '#4fd1c5', weight: 3 },
     ],
     triggers: [{ id: 't1', type: 'sub', platform: 'any' }],
     look: { mascot: 'random', mascots: [...MASCOTS], palette: 'premio', spinSeconds: 7, showSeconds: 5, ticks: true, winSound: 'fanfarria', volume: 70, title: true },
-    announce: { chat: true, speak: false, text: '🎡 {usuario} giró «{ruleta}» y ganó: {premio}' },
+    announce: { chat: true, speak: false, text: tr('🎡 {usuario} giró «{ruleta}» y ganó: {premio}') },
   };
 }
 
@@ -78,7 +79,7 @@ function cleanWheel(w, i = 0) {
   const base = exampleWheel();
   const prizes = (Array.isArray(w?.prizes) ? w.prizes : []).slice(0, 40).map((p, j) => ({
     id: String(p?.id || uid('p')).slice(0, 40),
-    label: String(p?.label ?? `Premio ${j + 1}`).slice(0, 60),
+    label: String(p?.label ?? tr('Premio {0}', j + 1)).slice(0, 60),
     emoji: String(p?.emoji || '').slice(0, 16),
     image: /^(\/media\/|\/gift-img\?|https:\/\/)/.test(p?.image || '') ? String(p.image).slice(0, 500) : '',
     color: /^#[0-9a-f]{3,8}$/i.test(p?.color || '') ? p.color : '',
@@ -90,7 +91,7 @@ function cleanWheel(w, i = 0) {
   const look = { ...base.look, ...(w?.look || {}) };
   return {
     id: String(w?.id || uid('w')).slice(0, 40),
-    name: String(w?.name || `Ruleta ${i + 1}`).slice(0, 60),
+    name: String(w?.name || tr('Ruleta {0}', i + 1)).slice(0, 60),
     enabled: w?.enabled !== false,
     prizes,
     triggers: (Array.isArray(w?.triggers) ? w.triggers : []).slice(0, 20).map(cleanTrigger),
@@ -238,14 +239,14 @@ function createWheels({ store, broadcast, actions = {}, whoReason = null, now = 
       else if (a.type === 'skip') actions.skip?.();
     } catch { /* un premio roto no frena la ruleta */ }
 
-    if (w?.announce?.chat && w.announce.text) actions.chat?.(spin.platform, vars(w.announce.text, spin, prize));
-    if (w?.announce?.speak) actions.say?.(vars(w.announce.text || '{usuario} ganó {premio}', spin, prize).replace(/[🎡]/gu, ''));
+    if (w?.announce?.chat && w.announce.text) actions.chat?.(spin.platform, vars(tExact(w.announce.text), spin, prize));
+    if (w?.announce?.speak) actions.say?.(vars(tExact(w.announce.text || '{usuario} ganó {premio}'), spin, prize).replace(/[🎡]/gu, ''));
 
     // Sub-ruleta o volver a girar: va primero en la fila, con la misma persona.
     if ((a.type === 'wheel' || a.type === 'respin') && spin.depth < MAX_DEPTH) {
       const target = a.type === 'respin' ? spin.wheelId : a.wheel;
       if (byId(target)) {
-        const item = { id: uid('s'), wheelId: target, user: spin.user, platform: spin.platform, reason: a.type === 'respin' ? 'Gira otra vez' : `Desde «${spin.wheelName}»`, depth: spin.depth + 1, parent: spin.wheelName };
+        const item = { id: uid('s'), wheelId: target, user: spin.user, platform: spin.platform, reason: a.type === 'respin' ? tr('Gira otra vez') : `Desde «${spin.wheelName}»`, depth: spin.depth + 1, parent: spin.wheelName };
         queue.unshift(item);
       }
     }
@@ -353,7 +354,7 @@ function createWheels({ store, broadcast, actions = {}, whoReason = null, now = 
     clearHistory,
     history,
     state: () => ({ busy: Boolean(current), queue: queue.length }),
-    example: () => cleanWheel({ ...exampleWheel(), id: uid('w'), name: 'Ruleta nueva' }),
+    example: () => cleanWheel({ ...exampleWheel(), id: uid('w'), name: tr('Ruleta nueva') }),
   };
 }
 

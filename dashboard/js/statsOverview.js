@@ -6,15 +6,15 @@
 //   - Regalos más enviados y quienes más regalan en el periodo.
 //   - Lista de directos: clic para ver el detalle, casillas para comparar dos.
 
-import { $, $$, api, esc, toast, PLATFORM_NAMES } from './util.js';
+import { $, $$, api, esc, toast, PLATFORM_NAMES, trn, getLocale } from './util.js';
 import { building } from './construction.js';
 const setBubble = (_id, html) => { const el = $('#ov-juana'); if (el) el.innerHTML = `<b>Juana:</b> ${html}`; };
 
 const DAY = 86400000;
-const nf = new Intl.NumberFormat('es-CO');
-const compact = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat('es-CO', { notation: 'compact', maximumFractionDigits: 1 }).format(n) : nf.format(Math.round(n)));
-const money = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n || 0);
-const dateShort = (ts) => new Date(ts).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const nf = { format: (n) => new Intl.NumberFormat(getLocale()).format(n) };
+const compact = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(n) : nf.format(Math.round(n)));
+const money = (n) => new Intl.NumberFormat(getLocale(), { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n || 0);
+const dateShort = (ts) => new Date(ts).toLocaleString(getLocale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 const dur = (min) => (min >= 60 ? `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')} min` : `${min} min`);
 const LOGO = (p) => (p === 'twitch' ? '<span class="pl plogo" data-logo="twitch" aria-hidden="true"></span>' : `<span class="pl plogo" data-logo="${esc(p)}" aria-hidden="true"></span>`);
 
@@ -101,7 +101,7 @@ function chart(list) {
   const line = pts.map((s, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(vals[i]).toFixed(1)}`).join(' ');
   const area = `${line} L${x(pts.length - 1).toFixed(1)} ${y(0)} L${x(0).toFixed(1)} ${y(0)} Z`;
   const every = Math.max(1, Math.ceil(pts.length / 7));
-  const xs = pts.map((s, i) => (i % every === 0 || i === pts.length - 1 ? `<text x="${x(i)}" y="${H - 10}" class="xl">${esc(new Date(s.startedAt).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }))}</text>` : '')).join('');
+  const xs = pts.map((s, i) => (i % every === 0 || i === pts.length - 1 ? `<text x="${x(i)}" y="${H - 10}" class="xl">${esc(new Date(s.startedAt).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' }))}</text>` : '')).join('');
   const dots = pts.map((s, i) => `<circle cx="${x(i)}" cy="${y(vals[i])}" r="4" class="dot" data-i="${i}"/>`).join('');
   box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(m.label)} por directo"><defs><linearGradient id="ovg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--g)" stop-opacity=".35"/><stop offset="1" stop-color="var(--g)" stop-opacity="0"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#ovg)"/><path d="${line}" class="ln"/>${dots}${xs}</svg><div class="chart-tip" hidden></div>`;
   const tip = box.querySelector('.chart-tip');
@@ -167,14 +167,14 @@ function giftsAndFans(list) {
       const k = `${x.platform}:${x.name}`; const a = f.get(k) || { name: x.name, platform: x.platform, value: 0, n: 0 }; a.value += x.value; a.n += 1; f.set(k, a);
     }
   }
-  $('#ov-gifts').innerHTML = bars([...g.values()].sort((a, b) => b.value - a.value).slice(0, 8).map((x) => ({ ...x, sub: `${compact(x.diamonds)} diamantes` })), 'veces');
-  $('#ov-fans').innerHTML = bars([...f.values()].sort((a, b) => b.value - a.value).slice(0, 8).map((x) => ({ ...x, logo: LOGO(x.platform), sub: `en ${x.n} ${x.n === 1 ? 'directo' : 'directos'}` })), 'diamantes');
+  $('#ov-gifts').innerHTML = bars([...g.values()].sort((a, b) => b.value - a.value).slice(0, 8).map((x) => ({ ...x, sub: trn(x.diamonds, '{0} diamante', '{0} diamantes', compact(x.diamonds)) })), 'veces');
+  $('#ov-fans').innerHTML = bars([...f.values()].sort((a, b) => b.value - a.value).slice(0, 8).map((x) => ({ ...x, logo: LOGO(x.platform), sub: trn(x.n, 'en {0} directo', 'en {0} directos') })), 'diamantes');
 }
 
 // ---------- Lista de directos y comparar ----------
 function table(list) {
   const rows = [...list].sort((a, b) => b.startedAt - a.startedAt);
-  $('#ov-count').textContent = `${rows.length} ${rows.length === 1 ? 'directo' : 'directos'}`;
+  $('#ov-count').textContent = trn(rows.length, '{0} directo', '{0} directos');
   $('#ov-table').innerHTML = rows.length ? `<table class="ov-table"><thead><tr><th></th><th>Directo</th><th>Plataformas</th><th>Diamantes</th><th>Mensajes</th><th>Interacciones</th><th>Pico</th><th></th></tr></thead><tbody>${rows.map((s) => `<tr data-ov="${esc(s.id)}">
       <td><input type="checkbox" data-cmp="${esc(s.id)}" ${st.compare.has(s.id) ? 'checked' : ''} aria-label="Comparar"></td>
       <td><b>${s.live ? '<i class="live-dot"></i> ' : ''}${esc(dateShort(s.startedAt))}</b><small>${esc(dur(s.durationMin))}</small></td>
@@ -200,7 +200,7 @@ function renderCompare() {
 // ---------- Juana ----------
 function juana(t, p, prof) {
   if (!t.n) return setBubble('juana', 'No hay directos en este periodo. Prueba con «Todo» o con otras fechas.');
-  const parts = [`En este periodo hiciste <b>${t.n}</b> ${t.n === 1 ? 'directo' : 'directos'} (${dur(t.minutes)} en vivo)`];
+  const parts = [trn(t.n, 'En este periodo hiciste <b>{0}</b> directo ({1} en vivo)', 'En este periodo hiciste <b>{0}</b> directos ({1} en vivo)', t.n, dur(t.minutes))];
   if (p && p.diamonds) {
     const pct = Math.round(((t.diamonds - p.diamonds) / p.diamonds) * 100);
     parts.push(pct >= 0 ? `y los diamantes subieron un <b>${pct}%</b> frente al periodo anterior` : `y los diamantes bajaron un <b>${Math.abs(pct)}%</b> frente al periodo anterior`);
@@ -275,8 +275,8 @@ export function initOverview({ open }) {
       table(pick(range().from, range().to));
       return;
     }
-    const tr = ev.target.closest('[data-ov]');
-    if (tr) onOpen(tr.dataset.ov);
+    const row = ev.target.closest('[data-ov]');
+    if (row) onOpen(row.dataset.ov);
   });
   refreshOverview();
 }

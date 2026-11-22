@@ -1,5 +1,44 @@
 [
   {
+    "version": "0.28.0",
+    "date": "2026-11-21",
+    "title": "Satronho Bot habla tu idioma y cuida mejor tu PC",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "🌎 Idiomas: elige en Ajustes → App → Idioma entre español, English, Português (Brasil), Français e Italiano, o «Automático» para usar el de Windows. Cambia el panel, la ventana del chat, los overlays de OBS, lo que el bot escribe en tu chat y los avisos que lee la voz. Las voces siguen eligiéndose aparte, en Voz."
+      },
+      {
+        "type": "mejora",
+        "text": "Singulares y plurales bien dichos en todos los idiomas: «1 canción», «1 regalo», «1 voz»… ya no sale «1 canciones»."
+      },
+      {
+        "type": "mejora",
+        "text": "Seguridad: solo los programas de tu PC pueden hablarle a Satronho Bot. Una página web cualquiera ya no puede cambiar tu configuración ni mandar cosas a tu chat."
+      },
+      {
+        "type": "mejora",
+        "text": "Tu clave de TikTok y el permiso de Spotify se guardan cifrados con la protección de Windows."
+      },
+      {
+        "type": "mejora",
+        "text": "El motor de voz se comprueba al descargarlo: si el archivo no es el original, no se instala."
+      },
+      {
+        "type": "arreglo",
+        "text": "Si la configuración se daña, Satronho Bot la recupera de una copia de respaldo y Troya te avisa."
+      },
+      {
+        "type": "arreglo",
+        "text": "La cola de música sobrevive a un reinicio de la app, y la palabra clave de una alerta ya no salta dentro de otra palabra."
+      },
+      {
+        "type": "arreglo",
+        "text": "Kick y Starvios se reconectan mejor, y la voz ya no se atasca cuando llegan muchos mensajes."
+      }
+    ]
+  },
+  {
     "version": "0.27.1",
     "date": "2026-11-18",
     "title": "Mechanizer estrena diseño",

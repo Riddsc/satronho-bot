@@ -5,7 +5,7 @@
 //   3. Cómo sale: nombre, sonido, segundos, texto, imagen, voz y si
 //      reemplaza a la alerta de serie («Solo la suya») o suena con ella.
 
-import { $, $$, api, esc, toast, saveConfig } from './util.js';
+import { $, $$, api, esc, toast, saveConfig, tr, trn, listOf, getLocale } from './util.js';
 import { sayFor } from './guides.js';
 import { SOUNDS, playAlertSound } from '/overlays/sounds.js';
 import { openSoundPicker, soundLabel, loadSounds } from './soundsUI.js';
@@ -30,7 +30,7 @@ const TRIG = {
 };
 const ONLY_TIKTOK = ['likesPerson', 'likesTotal', 'join', 'superfan', 'liveStart', 'liveEnd'];
 const VARS = ['{usuario}', '{regalo}', '{cantidad}', '{valor}', '{plataforma}', '{mensaje}'];
-const nf = new Intl.NumberFormat('es-CO');
+const nf = { format: (n) => new Intl.NumberFormat(getLocale()).format(n) };
 
 let config;
 const ui = { plat: 'tiktok', q: '' };
@@ -95,7 +95,7 @@ async function importStickers(btn) {
     const n = (r.stickers || []).length;
     const nuevos = Math.max(0, n - before);
     sayFor('troya', n
-      ? `Tienes <b>${nf.format(n)}</b> sticker${n === 1 ? '' : 's'} guardado${n === 1 ? '' : 's'}${nuevos ? `, <b>${nf.format(nuevos)}</b> nuevo${nuevos === 1 ? '' : 's'}` : ''}. Toca los que quieras para esta alerta.`
+      ? `${trn(n, 'Tienes <b>{0}</b> sticker guardado.', 'Tienes <b>{0}</b> stickers guardados.', nf.format(n))}${nuevos ? ` ${trn(nuevos, '<b>{0}</b> es nuevo.', '<b>{0}</b> son nuevos.', nf.format(nuevos))}` : ''} ${tr('Toca los que quieras para esta alerta.')}`
       : r.live ? 'Todavía no ha llegado ningún sticker a este directo. Apenas alguien mande uno, aparece aquí solo.' : 'Aún no hay stickers guardados. Conéctate a tu LIVE: cada sticker que te manden se guarda aquí solo, y este botón vuelve a buscarlos.', 8000, n ? 'ok' : 'warn');
   } catch (e) {
     sayFor('troya', esc(e.message), 8000, 'warn');
@@ -234,24 +234,27 @@ async function renderPicker() {
 // ---------- Frase resumen y vista previa ----------
 const PLAT_NAME = Object.fromEntries(PLATS);
 function sentence() {
+  // Cada pedazo es una frase completa con comodines, para que cada idioma
+  // la pueda ordenar a su manera.
   const d = draft;
-  const where = d.platform === 'any' ? 'en cualquier plataforma' : `en ${PLAT_NAME[d.platform]}`;
+  const where = d.platform === 'any' ? tr('en cualquier plataforma') : tr('en {0}', PLAT_NAME[d.platform]);
   const cat = catalogs[d.platform === 'any' ? 'tiktok' : d.platform] || {};
   const names = (ids, list) => ids.map((id) => list.find((g) => String(g.id) === String(id))?.name || id);
-  const list = (arr) => (arr.length <= 2 ? arr.join(' o ') : `${arr.slice(0, 2).join(', ')} o ${arr.length - 2} más`);
+  const list = (arr) => (arr.length <= 2 ? listOf(arr, 'disjunction') : listOf([...arr.slice(0, 2), tr('{0} más', arr.length - 2)], 'disjunction'));
   const what = {
-    gift: d.gifts.length ? `mande <b>${esc(list(names(d.gifts, cat.gifts || [])))}</b>` : 'mande <i>(elige un regalo)</i>',
-    coins: `mande un regalo de <b>${nf.format(Number(d.min) || 0)}</b> a <b>${d.max ? nf.format(d.max) : 'más'}</b> monedas`,
-    sticker: d.stickers.length === 1 ? 'mande <b>el sticker elegido</b>' : d.stickers.length ? `mande <b>uno de los ${d.stickers.length} stickers elegidos</b>` : 'mande <b>el sticker que elijas abajo</b>',
-    likesPerson: `llegue a <b>${nf.format(Number(d.every) || 100)}</b> likes (cada vez)`,
-    likesTotal: `entre todos sumen <b>${nf.format(Number(d.every) || 1000)}</b> likes más`,
-    follow: 'te siga', sub: 'se suscriba', share: 'comparta tu directo', join: 'llegue al directo', superfan: 'se vuelva superfan',
-    keyword: `escriba <b>«${esc(String(d.keyword || '…').split(',')[0].trim())}»</b>`,
-    liveStart: '', liveEnd: '',
-  }[d.trigger];
-  const sound = d.sound === 'none' ? 'sin sonido' : d.sound === 'file' ? `con <b>${esc(d.fileName || 'tu sonido')}</b>` : `con <b>${esc(soundLabel(d.sound))}</b>`;
-  const lead = d.trigger === 'liveStart' ? `Cuando empiece tu directo ${where}` : d.trigger === 'liveEnd' ? `Cuando termine tu directo ${where}` : `Cuando alguien ${where} ${what}`;
-  return `${lead}, sale <b>${esc(d.name || TRIG[d.trigger]?.name || 'la alerta')}</b> ${sound}${d.instant ?? d.trigger === 'sticker' ? ', al instante' : ` durante <b>${d.fitSound ? 'lo que dure el sonido' : `${d.seconds || 5} s`}</b>`}${d.speak ? ' y Troya la lee' : ''}.`;
+    gift: () => (d.gifts.length ? tr('mande <b>{0}</b>', esc(list(names(d.gifts, cat.gifts || [])))) : tr('mande <i>(elige un regalo)</i>')),
+    coins: () => (d.max ? tr('mande un regalo de <b>{0}</b> a <b>{1}</b> monedas', nf.format(Number(d.min) || 0), nf.format(d.max)) : tr('mande un regalo de <b>{0}</b> monedas o más', nf.format(Number(d.min) || 0))),
+    sticker: () => (d.stickers.length === 1 ? tr('mande <b>el sticker elegido</b>') : d.stickers.length ? tr('mande <b>uno de los {0} stickers elegidos</b>', d.stickers.length) : tr('mande <b>el sticker que elijas abajo</b>')),
+    likesPerson: () => tr('llegue a <b>{0}</b> likes (cada vez)', nf.format(Number(d.every) || 100)),
+    likesTotal: () => tr('entre todos sumen <b>{0}</b> likes más', nf.format(Number(d.every) || 1000)),
+    follow: () => tr('te siga'), sub: () => tr('se suscriba'), share: () => tr('comparta tu directo'), join: () => tr('llegue al directo'), superfan: () => tr('se vuelva superfan'),
+    keyword: () => tr('escriba <b>«{0}»</b>', esc(String(d.keyword || '…').split(',')[0].trim())),
+  }[d.trigger]?.() || '';
+  const lead = d.trigger === 'liveStart' ? tr('Cuando empiece tu directo {0}', where) : d.trigger === 'liveEnd' ? tr('Cuando termine tu directo {0}', where) : tr('Cuando alguien {0} {1}', where, what);
+  const name = esc(d.name || TRIG[d.trigger]?.name || tr('la alerta'));
+  const sound = d.sound === 'none' ? tr('sin sonido') : tr('con <b>{0}</b>', esc(d.sound === 'file' ? d.fileName || tr('tu sonido') : soundLabel(d.sound)));
+  const time = d.instant ?? d.trigger === 'sticker' ? tr('al instante') : d.fitSound ? tr('durante <b>lo que dure el sonido</b>') : tr('durante <b>{0} s</b>', d.seconds || 5);
+  return d.speak ? tr('{0}, sale <b>{1}</b> {2}, {3}, y Troya la lee.', lead, name, sound, time) : tr('{0}, sale <b>{1}</b> {2}, {3}.', lead, name, sound, time);
 }
 function previewEvent() {
   const d = draft;
@@ -453,8 +456,8 @@ export function initAlertRules(cfg) {
       draft.stickers = [];
       return renderEditor();
     }
-    const tr = ev.target.closest('[data-trig]');
-    if (tr && !tr.disabled) { draft.trigger = tr.dataset.trig; return renderEditor(); }
+    const trig = ev.target.closest('[data-trig]');
+    if (trig && !trig.disabled) { draft.trigger = trig.dataset.trig; return renderEditor(); }
     const tier = ev.target.closest('[data-tier]');
     if (tier) { pick.price = tier.dataset.tier; return renderPicker(); }
     const jump = ev.target.closest('[data-arjump]');

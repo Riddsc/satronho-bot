@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="i18n-wait">
 <head>
 <script>
   // Desde 0.22 este enlace muestra el overlay nuevo (se acomoda a cualquier tamaño).
@@ -48,12 +48,13 @@
 <script type="module">
   import { connectSatronho, param } from './client.js';
   import { applyOverlayStyle, overlayStyle, listenPreview, isPreview } from './style.js';
+  import { getLocale, t as tr, tn as trn } from './i18n/i18n.js';
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const METRIC = { likes: 'likes', regalos: 'gifts', gifts: 'gifts', mensajes: 'chat', chat: 'chat' };
   const UNIT = { likes: 'likes', gifts: 'monedas', chat: 'mensajes' };
   const TITLE = { likes: 'Top likes', gifts: 'Top regalos', chat: 'Más activos' };
-  const nf = new Intl.NumberFormat('es-CO', { notation: 'compact', maximumFractionDigits: 1 });
+  const nf = { format: (n) => new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(n) };
   let data = {};
   const prev = new Map();
 
