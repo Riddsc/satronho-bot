@@ -2,7 +2,7 @@
 // oficial de YouTube incrustado), buscar y añadir, cola e historial,
 // listas de reproducción y actividad. Solo una ventana reproduce a la vez.
 
-import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, askText } from './util.js';
+import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, askText, trn, tr, listOf } from './util.js';
 import { setBubble, sayFor, setMood, guideToast } from './guides.js';
 
 let config;
@@ -148,7 +148,7 @@ function renderResults(msg) {
 function renderPlaylists() {
   const pls = state.playlists || [];
   $('#mz-pls').innerHTML = pls.length
-    ? pls.map((p) => `<li data-pl="${esc(p.id)}"><span class="t"><b>${esc(p.name)}</b><small>${p.count} canciones${p.durationSec ? ` · ${fmt(p.durationSec)}` : ''}</small></span><span class="row tight"><button class="btn small" data-pl-load title="Añadir a la cola">Poner</button><button class="btn small ghost" data-pl-shuffle title="Añadir mezclada" aria-label="Añadir mezclada"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3.5c4 0 5 10 9 10H20M4 17h3.5c1.6 0 2.7-1.6 3.6-3.6M14 9.6c.9-1.4 1.9-2.6 3.5-2.6H20"/><path d="m18 5 2 2-2 2M18 15l2 2-2 2"/></svg></button><button class="btn small ghost" data-pl-rename title="Cambiar nombre" aria-label="Cambiar nombre">✎</button><button class="btn small ghost" data-pl-delete title="Eliminar">✕</button></span></li>`).join('')
+    ? pls.map((p) => `<li data-pl="${esc(p.id)}"><span class="t"><b>${esc(p.name)}</b><small>${trn(p.count, '{0} canción', '{0} canciones')}${p.durationSec ? ` · ${fmt(p.durationSec)}` : ''}</small></span><span class="row tight"><button class="btn small" data-pl-load title="Añadir a la cola">Poner</button><button class="btn small ghost" data-pl-shuffle title="Añadir mezclada" aria-label="Añadir mezclada"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3.5c4 0 5 10 9 10H20M4 17h3.5c1.6 0 2.7-1.6 3.6-3.6M14 9.6c.9-1.4 1.9-2.6 3.5-2.6H20"/><path d="m18 5 2 2-2 2M18 15l2 2-2 2"/></svg></button><button class="btn small ghost" data-pl-rename title="Cambiar nombre" aria-label="Cambiar nombre">✎</button><button class="btn small ghost" data-pl-delete title="Eliminar">✕</button></span></li>`).join('')
     : '<li class="empty">Todavía no hay listas. Guarda la cola con el botón de guardar o importa una de YouTube.</li>';
 }
 
@@ -170,8 +170,8 @@ function updateNono() {
   const on = Object.entries(config.music.platforms).filter(([, v]) => v).map(([k]) => PLATFORM_NAMES[k]);
   if (!state.enabled) return setBubble('nono', 'Las peticiones están cerradas. Actívalas cuando quieras que el chat ponga música.');
   if (!on.length) return setBubble('nono', 'No escucho ninguna plataforma. Elige en <b>Permisos y comandos</b> dónde pueden pedir música.');
-  if (state.current) return setBubble('nono', `Suena «${esc(state.current.title)}». ${state.queue.length ? `Quedan ${state.queue.length} en cola.` : 'La cola está vacía.'}`);
-  setBubble('nono', `En ${new Intl.ListFormat('es', { type: 'conjunction' }).format(on)} escriben <code>!play</code> o <code>!temita</code> y la canción. También puedes buscar aquí y poner tus listas.`);
+  if (state.current) return setBubble('nono', `${tr('Suena «{0}».', esc(state.current.title))} ${state.queue.length ? trn(state.queue.length, 'Queda {0} en cola.', 'Quedan {0} en cola.') : tr('La cola está vacía.')}`);
+  setBubble('nono', tr('En {0} escriben <code>!play</code> o <code>!temita</code> y la canción. También puedes buscar aquí y poner tus listas.', listOf(on)));
 }
 
 export function onMusic(s) {
@@ -232,7 +232,7 @@ export function initMusic(cfg, { clientId, sendWs }) {
     const name = await askText('Nombre de la lista', `Mi lista ${(state.playlists?.length || 0) + 1}`);
     if (name === null) return;
     const r = await act('save-playlist', { name }).catch(() => null);
-    if (r) guideToast('nono', `Guardé «${esc(r.playlist.name)}» con ${r.playlist.songs.length} canciones.`);
+    if (r) guideToast('nono', trn(r.playlist.songs.length, 'Guardé «{1}» con {0} canción.', 'Guardé «{1}» con {0} canciones.', r.playlist.songs.length, esc(r.playlist.name)));
   });
   $('#music-volume').addEventListener('input', (ev) => {
     if (playerReady && isPlayer()) player.setVolume(Number(ev.target.value));
@@ -348,7 +348,7 @@ export function initMusic(cfg, { clientId, sendWs }) {
     if (r) {
       $('#mz-import-url').value = '';
       $('#mz-import-form').hidden = true;
-      guideToast('nono', `Importé «${esc(r.playlist.name)}» con ${r.playlist.songs.length} canciones.`);
+      guideToast('nono', trn(r.playlist.songs.length, 'Importé «{1}» con {0} canción.', 'Importé «{1}» con {0} canciones.', r.playlist.songs.length, esc(r.playlist.name)));
     }
   });
   $('#mz-pls').addEventListener('click', async (ev) => {

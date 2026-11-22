@@ -2,7 +2,7 @@
 // moderadores y su lista de personas. La misma lista sirve para «Quién pide
 // música» y «Quién se lee» (hay una copia del editor en cada sitio).
 
-import { $$, saveConfig } from './util.js';
+import { $$, saveConfig, tr, trn } from './util.js';
 
 const parse = (v) => [...new Set(String(v || '').split(/[\n,]+/).map((x) => x.trim().replace(/^@/, '')).filter(Boolean))];
 
@@ -13,7 +13,7 @@ export function initStarviosPeople(config) {
     for (const el of $$('[data-svp]')) if (el !== skip) el.value = (p[el.dataset.svp] || []).join('\n');
     for (const el of $$('[data-svp-count]')) {
       const n = p.mods.length + p.allowed.length;
-      el.textContent = n ? `· ${p.mods.length} mod${p.mods.length === 1 ? '' : 's'}, ${p.allowed.length} en tu lista` : '· vacía';
+      el.textContent = n ? `· ${trn(p.mods.length, '{0} moderador', '{0} moderadores')}, ${trn(p.allowed.length, '{0} en tu lista', '{0} en tu lista')}` : `· ${tr('vacía')}`;
     }
   };
   for (const el of $$('[data-svp]')) {

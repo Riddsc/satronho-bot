@@ -2,7 +2,7 @@
 // superior y aviso «¿Qué hay de nuevo?» la primera vez que se abre una
 // versión nueva. El historial viene de CHANGELOG.json (incluido en la app).
 
-import { $, api, esc, saveConfig } from './util.js';
+import { $, api, esc, saveConfig, getLocale } from './util.js';
 import { mechaHead } from './mecharidds.js';
 
 const TYPE = { nuevo: 'Nuevo', mejora: 'Mejora', arreglo: 'Arreglo', cambio: 'Cambio' };
@@ -14,7 +14,7 @@ let version = '';
 
 const fmtDate = (d) => {
   try {
-    return new Date(`${d}T12:00:00`).toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(`${d}T12:00:00`).toLocaleDateString(getLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
   } catch {
     return d;
   }

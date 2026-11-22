@@ -9,7 +9,7 @@
 // También exporta openSoundPicker(): la misma biblioteca para elegir el
 // sonido de una alerta.
 
-import { $, $$, api, esc, toast, saveConfig } from './util.js';
+import { $, $$, api, esc, toast, saveConfig, tr, trn } from './util.js';
 import { SOUNDS, SYNTH_LIB, playAlertSound, stopAlertSound } from '/overlays/sounds.js';
 import { guideToast } from './guides.js';
 import { onPageChange } from './nav.js';
@@ -19,7 +19,7 @@ const CATS = [
   ['sospechosos', 'Sospechosos', '🕵️'], ['dramaticos', 'Dramáticos', '🎭'], ['celebracion', 'Celebración', '🎉'], ['fallos', 'Fallos', '💀'],
   ['golpes', 'Golpes', '👊'], ['voces', 'Voces', '🗣️'], ['frases', 'Frases', '💬'], ['groseros', 'Groseros', '🤬'], ['objetos', 'Objetos', '📦'], ['mis', 'Mis archivos', '📁'],
 ];
-const CAT_NAME = Object.fromEntries(CATS.map(([id, n, ic]) => [id, `${ic} ${n}`]));
+const catName = (id) => { const c = CATS.find((x) => x[0] === id); return c ? `${c[2]} ${tr(c[1])}` : id; };
 
 let config;
 let lib = { builtin: [], mine: [], phrases: [] };
@@ -76,7 +76,7 @@ function filtered() {
   const q = norm(ui.q);
   if (q) {
     const words = q.split(/\s+/);
-    list = list.filter((x) => { const hay = norm(`${x.name} ${x.tags} ${CAT_NAME[x.cat] || ''}`); return words.every((w) => hay.includes(w)); });
+    list = list.filter((x) => { const hay = norm(`${x.name} ${x.tags} ${catName(x.cat)} ${CATS.find((c) => c[0] === x.cat)?.[1] || ''}`); return words.every((w) => hay.includes(w)); });
   }
   return list;
 }
@@ -84,8 +84,8 @@ function catsBar(prefix) {
   const list = all();
   const count = (id) => list.filter((x) => x.cat === id).length;
   const s = sounds();
-  const chips = [['all', `Todos <small>${list.length}</small>`], ['fav', `★ Favoritos <small>${(s.favorites || []).length}</small>`], ['recent', '🕘 Recientes'],
-    ...CATS.filter(([id]) => count(id)).map(([id, n, ic]) => [id, `${ic} ${n} <small>${count(id)}</small>`])];
+  const chips = [['all', `${tr('Todos')} <small>${list.length}</small>`], ['fav', `★ ${tr('Favoritos')} <small>${(s.favorites || []).length}</small>`], ['recent', `🕘 ${tr('Recientes')}`],
+    ...CATS.filter(([id]) => count(id)).map(([id, n, ic]) => [id, `${ic} ${tr(n)} <small>${count(id)}</small>`])];
   return `<div class="snd-cats" data-${prefix}-cats>${chips.map(([id, html]) => `<button type="button" data-scat="${id}" aria-pressed="${ui.cat === id}">${html}</button>`).join('')}</div>`;
 }
 function rows(list, pickMode, current) {
@@ -93,7 +93,7 @@ function rows(list, pickMode, current) {
   if (!list.length) return `<p class="hint snd-empty">${ui.cat === 'fav' ? 'Marca con ★ los que más uses y quedan aquí.' : ui.cat === 'recent' ? 'Los que pruebes o elijas aparecen aquí.' : 'Nada con esa búsqueda. Prueba en la pestaña «Memes».'}</p>`;
   return list.slice(0, 600).map((x) => `<div class="snd-row ${current === x.ref ? 'on' : ''}" data-ref="${esc(x.ref)}">
     <button type="button" class="snd-play" data-splay="${esc(x.ref)}" title="Escuchar" aria-label="Escuchar ${esc(x.name)}">▶</button>
-    <div class="snd-main"><b>${esc(x.name)}</b><small>${esc(CAT_NAME[x.cat] || x.cat)}${x.dur ? ` · ${fmt(x.dur)}` : ''} · ${esc(x.by)}</small></div>
+    <div class="snd-main"><b>${esc(x.name)}</b><small><span data-u>${esc(catName(x.cat))}</span>${x.dur ? ` · ${fmt(x.dur)}` : ''} · ${esc(x.by)}</small></div>
     <button type="button" class="snd-fav" data-sfav="${esc(x.ref)}" aria-pressed="${fav.has(x.ref)}" title="${fav.has(x.ref) ? 'Quitar de favoritos' : 'Favorito'}">${fav.has(x.ref) ? '★' : '☆'}</button>
     ${pickMode ? `<button type="button" class="snd-pick ${current === x.ref ? 'on' : ''}" data-spick="${esc(x.ref)}">${current === x.ref ? '✓ Elegido' : 'Elegir'}</button>` : ''}
   </div>`).join('') + (list.length > 600 ? `<p class="hint">Y ${list.length - 600} más: afina la búsqueda.</p>` : '');
@@ -124,7 +124,7 @@ async function searchMemes(more = false) {
     ui.memeMore = r.more;
     ui.memePage += 1;
   } catch (e) {
-    toast(`No pude buscar memes: ${e.message}`);
+    toast(/memes/i.test(e.message) ? e.message : `No pude buscar memes: ${e.message}`);
   } finally {
     ui.memeBusy = false;
     renderMemes();
@@ -157,10 +157,10 @@ function renderPhrases() {
   const made = new Set(lib.mine.filter((x) => x.cat && /voz:/.test(x.source || '')).map((x) => norm(x.name)));
   const groups = {};
   for (const p of lib.phrases) if (!(sounds().hideRude && p.cat === 'groseros')) (groups[p.cat] ??= []).push(p);
-  box.innerHTML = `<form class="snd-own" id="snd-own-phrase"><input name="text" maxlength="200" placeholder="Escribe tu propia frase: «¡Qué chimba de regalo!»" required><select name="cat">${['frases', 'graciosos', 'alertas', 'sospechosos', 'celebracion', 'fallos', 'groseros'].map((c) => `<option value="${c}">${esc(CAT_NAME[c])}</option>`).join('')}</select><button class="btn primary small">Crear con mi voz</button></form>
+  box.innerHTML = `<form class="snd-own" id="snd-own-phrase"><input name="text" maxlength="200" placeholder="Escribe tu propia frase: «¡Qué chimba de regalo!»" required><select name="cat">${['frases', 'graciosos', 'alertas', 'sospechosos', 'celebracion', 'fallos', 'groseros'].map((c) => `<option value="${c}">${esc(catName(c))}</option>`).join('')}</select><button class="btn primary small">Crear con mi voz</button></form>
     <p class="hint">Se crean con tu voz principal de <b>Voz del chat</b>; si es de Windows, uso una de tu PC o una en línea. Marca las que quieras y créalas de una.</p>
     <div class="row wrap snd-phr-act"><button type="button" class="btn small" data-phr-all>Marcar todas</button><button type="button" class="btn small ghost" data-phr-none>Ninguna</button><button type="button" class="btn small primary" id="snd-phr-make">Crear las marcadas</button><span class="hint" id="snd-phr-state"></span></div>
-    ${Object.entries(groups).map(([cat, list]) => `<section class="snd-phr-group"><h6>${esc(CAT_NAME[cat] || cat)}</h6><div class="snd-phr-grid">${list.map((p) => {
+    ${Object.entries(groups).map(([cat, list]) => `<section class="snd-phr-group"><h6>${esc(catName(cat))}</h6><div class="snd-phr-grid">${list.map((p) => {
       const done = made.has(norm(`«${p.text}»`));
       return `<label class="snd-phr ${done ? 'done' : ''}"><input type="checkbox" data-phr="${esc(p.text)}" data-phr-cat="${esc(p.cat)}" ${done ? 'disabled' : ''}><span>${esc(p.text)}</span>${done ? '<i>✓</i>' : ''}</label>`;
     }).join('')}</div></section>`).join('')}`;
@@ -188,7 +188,7 @@ async function uploadFiles(files) {
       n += 1;
     } catch (e) { toast(`${f.name}: ${e.message}`); }
   }
-  if (n) guideToast('nono', `${n} ${n === 1 ? 'sonido agregado' : 'sonidos agregados'} a tu biblioteca.`);
+  if (n) guideToast('nono', trn(n, '{0} sonido agregado a tu biblioteca.', '{0} sonidos agregados a tu biblioteca.'));
 }
 
 // ---------- Comando del chat ----------
@@ -367,7 +367,7 @@ export function initSounds(cfg) {
         const res = await fetch('/api/sounds/pack', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: await f.text() });
         const j = await res.json();
         if (!j.ok) throw new Error(j.error);
-        guideToast('nono', j.added ? `Importé ${j.added} sonidos del pack.` : 'Ese pack ya lo tenías completo.');
+        guideToast('nono', j.added ? trn(j.added, 'Importé {0} sonido del pack.', 'Importé {0} sonidos del pack.') : tr('Ese pack ya lo tenías completo.'));
       } catch (e) { toast(e.message); }
       return;
     }
@@ -420,7 +420,7 @@ export function initSounds(cfg) {
       try {
         const cats = Object.fromEntries(list.map((c) => [c.dataset.phr, c.dataset.phrCat]));
         const r = await api('POST', '/api/sounds/phrase', { texts: list.map((c) => c.dataset.phr), cats });
-        guideToast('nono', `Listo: ${r.added.length} frases en tu biblioteca.${r.errors.length ? ` ${r.errors.length} fallaron.` : ''}`);
+        guideToast('nono', `${trn(r.added.length, 'Listo: {0} frase en tu biblioteca.', 'Listo: {0} frases en tu biblioteca.')}${r.errors.length ? ` ${trn(r.errors.length, '{0} falló.', '{0} fallaron.')}` : ''}`);
       } catch (e) { toast(e.message); }
       btn.disabled = false;
       $('#snd-phr-state').textContent = '';
@@ -437,7 +437,7 @@ export function initSounds(cfg) {
       btn.disabled = true;
       try {
         const r = await api('POST', '/api/sounds/add-url', { urls, cat: f.cat || 'memes' });
-        guideToast('nono', `${r.added.length} ${r.added.length === 1 ? 'sonido agregado' : 'sonidos agregados'}.${r.errors.length ? ` ${r.errors.length} no se pudieron.` : ''}`);
+        guideToast('nono', `${trn(r.added.length, '{0} sonido agregado.', '{0} sonidos agregados.')}${r.errors.length ? ` ${trn(r.errors.length, '{0} no se pudo.', '{0} no se pudieron.')}` : ''}`);
         if (r.errors.length) toast(r.errors.map((x) => x.error).slice(0, 2).join(' · '));
         ev.target.reset();
       } catch (e) { toast(e.message); }

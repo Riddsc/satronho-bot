@@ -2547,3 +2547,8 @@ body.rail .side:not(:hover):not(:focus-within):not(.peek) .nav-sub { display: no
 .wh-tr-top select { flex: 1 1 170px; max-width: 260px; }
 .wh-p-more > select { flex: 0 1 330px; }
 .wh-tr-f select { flex: 0 1 240px; }
+
+/* Idioma: la página espera un instante a su diccionario para no parpadear en
+   español. Si algo falla, se muestra igual al segundo y medio. */
+html.i18n-wait body { visibility: hidden; animation: i18n-show 0s 1.5s forwards; }
+@keyframes i18n-show { to { visibility: visible; } }

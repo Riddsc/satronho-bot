@@ -1,7 +1,7 @@
 // Troya: la voz. Reproduce los audios de Piper en orden y, si Piper no
 // está listo, usa las voces instaladas en Windows como respaldo.
 
-import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES } from './util.js';
+import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, trn, tr } from './util.js';
 import { setBubble, sayFor, setMood, guideToast } from './guides.js';
 import { bestWindowsVoice, cleanName, genderOf, windowsVoices } from './winvoices.js';
 
@@ -133,7 +133,7 @@ export function renderEngine(state) {
     else if (spanish) action = `<button class="btn small" data-voice-use="${v.id}">Hacer principal</button>`;
     else action = `<span class="pill">Lista ✓</span>`;
     const who = v.speakers > 1 ? (v.speakerNames?.filter(Boolean).join(' y ') || `${v.speakers} voces`) : GENDER[v.gender] || '';
-    return `<li class="${inUse ? 'sel' : ''}"><span><b>${esc(v.label.split(' · ')[0])}</b><small>${esc(v.country)}${who ? ` · ${esc(who)}` : ''} · calidad ${esc(v.quality)}${v.installed ? ' · ✓ descargada' : ''}</small></span>${action}</li>`;
+    return `<li class="${inUse ? 'sel' : ''}"><span><b>${esc(v.label.split(' · ')[0])}</b><small><span data-u>${esc(v.country)}</span>${who ? ` · <span data-u>${esc(who)}</span>` : ''} · <span data-u>${esc(tr('calidad {0}', tr(v.quality)))}</span>${v.installed ? ` · <span data-u>${tr('✓ descargada')}</span>` : ''}</small></span>${action}</li>`;
   };
   const langs = [...new Set(state.voices.map((v) => v.lang || 'es'))];
   const voices = langs
@@ -142,11 +142,11 @@ export function renderEngine(state) {
       const name = list[0].langName || lang;
       const got = list.filter((v) => v.installed).length;
       const note = lang === 'es' ? 'entran al reparto por espectador' : 'solo para espectadores especiales';
-      return `<details class="voice-lang" ${lang === 'es' ? 'open' : ''}><summary>${esc(name)} <small>· ${list.length} voces · ${got} descargadas · ${note}</small></summary><ul class="voices">${list.map(row).join('')}</ul></details>`;
+      return `<details class="voice-lang" ${lang === 'es' ? 'open' : ''}><summary>${esc(name)} <small>· <span data-u>${trn(list.length, '{0} voz', '{0} voces')}</span> · <span data-u>${trn(got, '{0} descargada', '{0} descargadas')}</span> · <span data-u>${note}</span></small></summary><ul class="voices">${list.map(row).join('')}</ul></details>`;
     })
     .join('');
   const missing = state.voices.filter((v) => !v.installed && (v.lang || 'es') === 'es').length;
-  const all = state.installed && missing ? `<div class="row space mt"><span class="hint" style="margin:0">Te faltan ${missing} ${missing === 1 ? 'voz' : 'voces'} en español.</span><button class="btn small primary" data-engine="all" ${busy ? 'disabled' : ''}>Descargar todas en español</button></div>` : '';
+  const all = state.installed && missing ? `<div class="row space mt"><span class="hint" style="margin:0">${trn(missing, 'Te falta {0} voz en español.', 'Te faltan {0} voces en español.')}</span><button class="btn small primary" data-engine="all" ${busy ? 'disabled' : ''}>Descargar todas en español</button></div>` : '';
 
   const current = state.voices.find((v) => v.id === selected);
   const speakers =
@@ -925,7 +925,7 @@ function renderCurrentVoice() {
   const key = currentMain();
   const v = pickerVoices().find((x) => x.key === key);
   $('#vp-cur-name').textContent = v ? v.name : 'Sin voz elegida';
-  $('#vp-cur-src').textContent = v ? `${v.cc ? `${countryName(v.cc)} · ` : ''}${v.src}` : 'Descarga una voz o elige una de Latinoamérica o de Windows';
+  $('#vp-cur-src').innerHTML = v ? [v.cc ? countryName(v.cc) : '', ...String(v.src || '').split(' · ')].filter(Boolean).map((x) => `<span data-u>${esc(x)}</span>`).join(' · ') : esc(tr('Descarga una voz o elige una de Latinoamérica o de Windows'));
   $('#vp-cur-flag').innerHTML = v?.cc ? flagHtml(v.cc) : '♪';
 }
 
@@ -952,10 +952,10 @@ function renderPicker() {
   $('#vp-list').innerHTML = [...groups].map(([g, vs]) => `<h4>${flagHtml(vs[0].cc)}${esc(g)} <small>${vs.length}</small></h4>
     ${vs.map((v) => `<div class="vp-item ${v.key === main ? 'on' : ''} ${v.installed ? '' : 'off'} ${fail(v.key) ? 'bad' : ''}" data-vp="${esc(v.key)}">
       <span class="vp-g ${v.gender || 'x'}" aria-hidden="true">${v.gender === 'f' ? '♀' : v.gender === 'm' ? '♂' : '·'}</span>
-      <button type="button" class="vp-pick" ${v.installed ? '' : 'disabled'}><b>${esc(v.name)}${v.key === main ? ' <em class="vp-tag">En uso</em>' : ''}</b><small>${esc(v.detail)}${fail(v.key) ? ` · <span class="vp-warn" title="${esc(fail(v.key).reason)}">⚠ no respondió hace poco</span>` : ''}</small></button>
+      <button type="button" class="vp-pick" ${v.installed ? '' : 'disabled'}><b>${esc(v.name)}${v.key === main ? ' <em class="vp-tag">En uso</em>' : ''}</b><small>${String(v.detail || '').split(' · ').map((x) => `<span data-u>${esc(x)}</span>`).join(' · ')}${fail(v.key) ? ` · <span class="vp-warn" title="${esc(fail(v.key).reason)}">⚠ no respondió hace poco</span>` : ''}</small></button>
       ${v.installed ? `<button type="button" class="vp-play" data-vp-play="${esc(v.key)}" aria-label="Escuchar ${esc(v.name)}">▶</button>` : `<button type="button" class="btn small" data-vp-dl="${esc(v.id)}">Descargar</button>`}
     </div>`).join('')}`).join('') || '<p class="hint">No hay voces con ese filtro.</p>';
-  $('#vp-count').textContent = `${list.length} voces`;
+  $('#vp-count').textContent = trn(list.length, '{0} voz', '{0} voces');
   const cur = all.find((v) => v.key === main);
   if (vpTarget) { $('#vp-sel').innerHTML = cur ? `Para esta persona: <b>${esc(cur.name)}</b>` : 'Usa su voz de siempre'; return; }
   $('#vp-sel').innerHTML = cur ? `Elegida: <b>${esc(cur.name)}</b>${cur.cc ? ` · ${esc(countryName(cur.cc))}` : ''}` : '';

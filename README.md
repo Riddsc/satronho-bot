@@ -239,18 +239,31 @@ src/
   security.js              Quién puede hablarle al servidor local (ver «Seguridad»)
   secretBox.js             Claves y permisos cifrados con la protección de Windows
   eventBus.js, store.js    Eventos comunes y configuración (con copia de respaldo)
-  i18n/                    Idiomas de la interfaz (es, en, pt, fr, it)
+  i18n.js                  Idioma de lo que dice la app fuera del panel (chat del bot, voz, ventanas)
   connectors/              tiktok, kick, kickChat, starvios, starviosChat, twitch, spotify
   modules/                 voz, música, alertas, metas, estadísticas, ruletas, comandos…
   tts/                     piper.js (motor), voices.js, msonline.js, textFilter.js
   music/youtube.js         Búsqueda en YouTube
 dashboard/                 Panel (index.html, styles.css, js/)
 overlays/                  Páginas para OBS y TikTok LIVE Studio
+  i18n/                    Idiomas: i18n.js y los diccionarios en.json, pt.json, fr.json, it.json
 web/                       Página de GitHub Pages que muestra los overlays en TikTok LIVE Studio
 relay/                     Relé de reportes para Cloudflare (ver relay/LEEME.md)
 assets/                    Ícono de la app (svg, png, ico)
 scripts/release.mjs        Empaquetado y publicación
 ```
+
+## Idiomas
+
+La app habla el idioma del streamer: español, inglés, portugués (Brasil), francés o italiano. Se elige en **Ajustes → App → Idioma** («Automático» usa el de Windows). Cambia el panel, la ventana del chat, los overlays, lo que el bot escribe en tu chat y los avisos que lee la voz. Las voces se eligen aparte, en **Voz**.
+
+Cómo funciona, para quien toque el código:
+
+- Los textos se escriben en español, como siempre. El español es la clave.
+- `overlays/i18n/i18n.js` traduce la pantalla sola (también lo que se dibuja después). Lo que tenga `translate="no"` no se toca: chat, nombres y lo que escribe el streamer.
+- Para frases que arma el código: `tr('{0} te sigue', nombre)` y, con singular y plural, `trn(n, '{0} canción', '{0} canciones')`. En el servidor: `require('./i18n')`.
+- `<span data-u>` dentro de un párrafo lo vuelve una frase aparte.
+- Los diccionarios son `overlays/i18n/<idioma>.json`. Si falta una frase, se ve en español. Conserva `{0}`, `{usuario}`, `<0>…</0>` y los `!comandos`. `{#0}` solo acepta números.
 
 ## Seguridad
 

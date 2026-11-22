@@ -99,13 +99,13 @@ function createTts({ store, broadcast, engine, online = null }) {
       const minLevel = Math.max(1, Number(rule.teamMinLevel) || 1);
       const inTeam = (r.team || 0) >= minLevel;
       const sentGiftEver = Boolean(store.get('ttsAllowed')[e.user.id]);
-      const teamText = minLevel > 1 ? `Miembro de tu equipo nivel ${minLevel}+` : 'Miembro de tu equipo';
+      const notTeam = minLevel > 1 ? `no es miembro de tu equipo nivel ${minLevel}+` : 'no es miembro de tu equipo';
       switch (mode) {
         case 'followers': return r.follower || r.sub || r.team ? '' : 'no te sigue';
         case 'subs': return r.sub ? '' : 'no es suscriptor';
-        case 'team': return inTeam ? '' : `no es ${teamText}`;
+        case 'team': return inTeam ? '' : notTeam;
         case 'team-gift':
-          if (!inTeam) return `no es ${teamText}`;
+          if (!inTeam) return notTeam;
           return sentGiftEver ? '' : `no te ha enviado ${gift}`;
         case 'mods': return 'solo leo a moderadores';
         default: return '';

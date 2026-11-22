@@ -2,7 +2,7 @@
 // pasa al ganar y cómo se ven (con Samy, Troya, Ñoño o Juana mareándose en
 // el centro). También el historial de tiradas y los retos pendientes.
 
-import { $, $$, api, esc, toast, askText } from './util.js';
+import { $, $$, api, esc, toast, askText, trn, getLocale, tr } from './util.js';
 import { sayFor } from './guides.js';
 import { mascotSVG } from './mascots.js';
 import { playAlertSound } from '/overlays/sounds.js';
@@ -41,7 +41,7 @@ const ACTIONS = {
   respin: '🔁 Girar otra vez',
 };
 const VARS = '{usuario} {premio} {ruleta} {plataforma}';
-const nf = new Intl.NumberFormat('es-CO');
+const nf = { format: (n) => new Intl.NumberFormat(getLocale()).format(n) };
 
 let config;
 let wheels = [];
@@ -101,12 +101,12 @@ function triggerText(t) {
   const T = TRIG[t.type] || { icon: '✦', name: t.type };
   const where = t.platform && t.platform !== 'any' ? ` · ${PLATS.find((p) => p[0] === t.platform)?.[1]}` : '';
   let extra = '';
-  if (t.type === 'reward') extra = t.reward ? ` «${esc(t.reward)}»` : ' (cualquiera)';
-  if (t.type === 'gift') extra = t.giftNames?.length ? ` ${esc(t.giftNames.slice(0, 2).join(', '))}${t.giftNames.length > 2 ? '…' : ''}` : ' (cualquiera)';
+  if (t.type === 'reward') extra = t.reward ? ` «${esc(t.reward)}»` : ` ${tr('(cualquiera)')}`;
+  if (t.type === 'gift') extra = t.giftNames?.length ? ` ${esc(t.giftNames.slice(0, 2).join(', '))}${t.giftNames.length > 2 ? '…' : ''}` : ` ${tr('(cualquiera)')}`;
   if (t.type === 'coins') extra = ` 🪙 ${nf.format(t.min || 0)}–${t.max ? nf.format(t.max) : '∞'}`;
-  if (t.type === 'likesTotal') extra = ` cada ${nf.format(t.every || 1000)}`;
+  if (t.type === 'likesTotal') extra = ` ${tr('cada {0}', nf.format(t.every || 1000))}`;
   if (t.type === 'command') extra = ` !${esc(t.command || 'ruleta')}`;
-  return `<span class="wh-trig">${T.icon} ${esc(T.name)}${extra}${where}</span>`;
+  return `<span class="wh-trig" translate="no">${T.icon} ${esc(tr(T.name))}${extra}${where}</span>`;
 }
 
 function renderList() {
@@ -116,7 +116,7 @@ function renderList() {
       ${miniWheel(w)}
       <div class="wh-info">
         <b>${esc(w.name)}</b>
-        <small>${w.prizes.length} premio${w.prizes.length === 1 ? '' : 's'}${w.prizes.some((p) => p.action?.type === 'wheel') ? ' · con sub-ruletas' : ''}${w.prizes.some((p) => p.reto) ? ' · con retos' : ''}</small>
+        <small><span data-u>${trn(w.prizes.length, '{0} premio', '{0} premios')}</span>${w.prizes.some((p) => p.action?.type === 'wheel') ? ' · <span data-u>con sub-ruletas</span>' : ''}${w.prizes.some((p) => p.reto) ? ' · <span data-u>con retos</span>' : ''}</small>
         <div class="wh-trigs">${w.triggers.length ? w.triggers.map(triggerText).join('') : '<span class="wh-trig none">Solo desde el panel</span>'}</div>
       </div>
       <div class="wh-actions">
@@ -144,10 +144,10 @@ const PLAT_NAME = { tiktok: 'TikTok', kick: 'Kick', starvios: 'Starvios', twitch
 function renderHistory() {
   const pend = history.filter((h) => h.reto && !h.done);
   $('#wh-pending').innerHTML = pend.length
-    ? pend.map((h) => `<li><span class="wh-h-emo">${esc(h.emoji || '🎯')}</span><div><b>${esc(h.prize)}</b><small>${esc(h.user)} · ${esc(h.wheel)} · ${new Date(h.ts).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}</small></div><button type="button" class="btn small primary" data-hdone="${esc(h.id)}">✓ Cumplido</button></li>`).join('')
+    ? pend.map((h) => `<li><span class="wh-h-emo">${esc(h.emoji || '🎯')}</span><div><b>${esc(h.prize)}</b><small>${esc(h.user)} · ${esc(h.wheel)} · ${new Date(h.ts).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}</small></div><button type="button" class="btn small primary" data-hdone="${esc(h.id)}">✓ Cumplido</button></li>`).join('')
     : '<li class="empty">No tienes retos pendientes. 🎉</li>';
   $('#wh-history').innerHTML = history.length
-    ? history.slice(0, 100).map((h) => `<li class="${h.reto ? (h.done ? 'done' : 'reto') : ''}"><time>${new Date(h.ts).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}</time><span class="wh-h-emo">${esc(h.emoji || '🎡')}</span><div><b>${esc(h.prize)}</b><small>${h.depth ? '↳ ' : ''}${esc(h.wheel)} · ${esc(h.user)}${h.platform ? ` · ${esc(PLAT_NAME[h.platform] || h.platform)}` : ''}${h.reason ? ` · ${esc(h.reason)}` : ''}</small></div>${h.reto ? `<button type="button" class="btn small ghost" data-hdone="${esc(h.id)}" data-undo="${h.done ? '1' : ''}">${h.done ? '↺ Pendiente' : '✓ Cumplido'}</button>` : ''}</li>`).join('')
+    ? history.slice(0, 100).map((h) => `<li class="${h.reto ? (h.done ? 'done' : 'reto') : ''}"><time>${new Date(h.ts).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}</time><span class="wh-h-emo">${esc(h.emoji || '🎡')}</span><div><b>${esc(h.prize)}</b><small>${h.depth ? '↳ ' : ''}${esc(h.wheel)} · ${esc(h.user)}${h.platform ? ` · ${esc(PLAT_NAME[h.platform] || h.platform)}` : ''}${h.reason ? ` · ${esc(h.reason)}` : ''}</small></div>${h.reto ? `<button type="button" class="btn small ghost" data-hdone="${esc(h.id)}" data-undo="${h.done ? '1' : ''}">${h.done ? '↺ Pendiente' : '✓ Cumplido'}</button>` : ''}</li>`).join('')
     : '<li class="empty">Aún no ha girado ninguna ruleta.</li>';
   const n = pend.length;
   const badge = $('#nav-wheels');

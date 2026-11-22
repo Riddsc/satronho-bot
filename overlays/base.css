@@ -67,3 +67,8 @@ body[data-card="glass"] { --bg: rgba(18, 14, 30, 0.45); }
 body[data-card="glass"] .surface { background: color-mix(in srgb, var(--bg) 100%, transparent) !important; background-image: none !important; backdrop-filter: blur(10px) saturate(130%); }
 body[data-card="glass"][data-theme="papel"] .surface, body[data-card="glass"][data-theme="samy"] .surface, body[data-card="glass"][data-theme="dulce"] .surface, body[data-card="glass"][data-theme="colonizadora"] .surface { background: rgba(255, 248, 235, .55) !important; }
 body[data-card="none"] .surface { background: transparent !important; background-image: none !important; border-color: transparent !important; box-shadow: none !important; outline: 0 !important; backdrop-filter: none !important; clip-path: none !important; }
+
+/* Idioma: la página espera un instante a su diccionario para no parpadear en
+   español. Si algo falla, se muestra igual al segundo y medio. */
+html.i18n-wait body { visibility: hidden; animation: i18n-show 0s 1.5s forwards; }
+@keyframes i18n-show { to { visibility: visible; } }

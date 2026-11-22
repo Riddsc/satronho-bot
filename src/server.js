@@ -40,6 +40,7 @@ const { createCommands } = require('./modules/commands');
 const { createSupport, createLogbook } = require('./modules/support');
 const { createHttpGuard, verifyWsClient, frameHeaders, isPrivateAddress } = require('./security');
 const { createSecretBox } = require('./secretBox');
+const i18n = require('./i18n');
 
 const ROOT = path.join(__dirname, '..');
 const PLATFORMS = ['tiktok', 'kick', 'starvios', 'twitch'];
@@ -65,6 +66,7 @@ const SAMPLE = {
 };
 
 function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, resolver: customResolver, appInfo = {}, hooks = {} }) {
+  i18n.setLanguage(store.get('ui')?.language || 'auto', appInfo.locale);
   const app = express();
   // Enlace https para TikTok LIVE Studio: esa página (en GitHub Pages) muestra
   // el overlay de este PC dentro de un marco. Chrome pide permiso para que
@@ -88,6 +90,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     next();
   });
   app.get('/api/ping', (_req, res) => res.json({ ok: true }));
+  // Idioma de la interfaz (panel, ventana del chat y overlays).
+  app.get('/api/lang', (_req, res) => res.json({ lang: i18n.getLang(), setting: store.get('ui')?.language || 'auto' }));
   const jsonBody = express.json();
   // Los packs de sonidos son grandes: los lee su propia ruta con más margen.
   app.use((req, res, next) => (req.path === '/api/sounds/pack' && req.method === 'POST' ? next() : jsonBody(req, res, next)));
@@ -433,20 +437,22 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
   }
 
   function alertText(e) {
-    const n = e.user?.name || 'Alguien';
+    const n = e.user?.name || i18n.t('Alguien');
     const x = e.extra || {};
+    const tr = i18n.t;
     switch (e.type) {
-      case 'follow': return `${n} te sigue`;
-      case 'sub': return x.gifted ? `${n} regaló ${e.amount} ${e.amount > 1 ? 'suscripciones' : 'suscripción'}` : `${n} se suscribió`;
-      case 'gift': return `${n} envió ${x.count > 1 ? `${x.count} ` : ''}${x.giftName || 'un regalo'}`;
-      case 'like': return `${n} dio ${e.amount} likes`;
-      case 'share': return `${n} compartió el directo`;
-      case 'sticker': return `${n} mandó un sticker`;
-      case 'join': return `${n} llegó`;
-      case 'superfan': return `${n} ahora es superfan`;
+      case 'follow': return tr('{0} te sigue', n);
+      case 'sub': return x.gifted ? i18n.tn(e.amount, '{1} regaló una suscripción', '{1} regaló {0} suscripciones', e.amount, n) : tr('{0} se suscribió', n);
+      case 'gift': return x.count > 1 ? tr('{0} envió {1} {2}', n, x.count, x.giftName || tr('regalos')) : tr('{0} envió {1}', n, x.giftName || tr('un regalo'));
+      case 'like': return i18n.tn(e.amount, '{1} dio {0} like', '{1} dio {0} likes', e.amount, n);
+      case 'share': return tr('{0} compartió el directo', n);
+      case 'sticker': return tr('{0} mandó un sticker', n);
+      case 'join': return tr('{0} llegó', n);
+      case 'superfan': return tr('{0} ahora es superfan', n);
       default: return '';
     }
   }
+
 
   // ---- WebSocket: cada cliente recibe un id y el estado inicial ----
   wss.on('connection', (ws) => {
@@ -549,6 +555,10 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     if (rest.overlayStyle) broadcast('overlay-style', config.overlayStyle);
     if (rest.widgets) broadcast('widgets', store.get('widgets'));
     if (rest.window) hooks.onWindowConfig?.(config.window);
+    if (rest.ui && 'language' in rest.ui) {
+      const before = i18n.getLang();
+      if (i18n.setLanguage(store.get('ui').language, appInfo.locale) !== before) broadcast('ui-lang', { lang: i18n.getLang() });
+    }
     if (rest.updates && 'feedUrl' in rest.updates) hooks.onFeedChange?.();
     if (rest.hotkeys) {
       hotkeysStatus = hooks.onHotkeys?.(store.get('hotkeys')) || hotkeysStatus;
@@ -763,7 +773,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     ok(res, { kickbot: kickChat.status() });
   });
   app.post('/api/kickbot/test', (_req, res) => {
-    const sent = writers.kick.say('🐾 Satronho Bot está listo. Pide música con !play o !temita.', 'prueba');
+    const sent = writers.kick.say(i18n.t('🐾 Satronho Bot está listo. Pide música con !play o !temita.'), 'prueba');
     if (!sent) return fail(res, 'Falta autorizar una cuenta o escribir tu canal de Kick en Conexiones');
     ok(res);
   });
@@ -951,7 +961,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     ok(res, { starviosbot: starviosChat.status() });
   });
   app.post('/api/starviosbot/test', (_req, res) => {
-    const sent = writers.starvios.say('🐾 Satronho Bot está listo. Pide música con !play o !temita.', 'prueba');
+    const sent = writers.starvios.say(i18n.t('🐾 Satronho Bot está listo. Pide música con !play o !temita.'), 'prueba');
     if (!sent) return fail(res, 'Inicia sesión y escribe tu canal de Starvios en Conexiones → Escuchar');
     ok(res);
   });

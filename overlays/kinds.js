@@ -7,10 +7,11 @@
 import { mascotSVG } from '/js/mascots.js';
 import { mechaBust } from '/js/mecharidds.js';
 import { messageHtml } from '/js/emotes.js';
+import { getLocale, t as tr, tn as trn } from './i18n/i18n.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const nf = new Intl.NumberFormat('es-CO');
-const cmp = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat('es-CO', { notation: 'compact', maximumFractionDigits: 1 }).format(n) : nf.format(Math.round(n || 0)));
+const nf = { format: (n) => new Intl.NumberFormat(getLocale()).format(n) };
+const cmp = (n) => (Math.abs(n) >= 10000 ? new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(n) : nf.format(Math.round(n || 0)));
 const img = (u) => (/^https:\/\//.test(u || '') ? `/gift-img?u=${encodeURIComponent(u)}` : /^\//.test(u || '') ? u : '');
 const pad = (n) => String(Math.max(0, Math.floor(n))).padStart(2, '0');
 function hms(ms, hours = true, secs = true) {
@@ -794,7 +795,7 @@ const screens = {
       const left = t - Date.now();
       count = left > 0 ? `<div class="sc-count k-num">${hms(left, left >= 3600000)}</div>` : '';
     }
-    const clock = set.showClock ? `<div class="sc-clock k-num">${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</div>` : '';
+    const clock = set.showClock ? `<div class="sc-clock k-num">${new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}</div>` : '';
     const dogs = set.showGuides ? `<div class="sc-dogs" data-own="1">${['samy', 'troya'].map((g) => `<span>${mascotSVG(g)}</span>`).join('')}<span class="sc-mecha">${mechaBust()}</span>${['nono', 'juana'].map((g) => `<span>${mascotSVG(g)}</span>`).join('')}</div>` : '';
     return `<div class="sc-bg"></div>${clock}<div class="sc"><div class="sc-kicker">${esc(kick)}</div><div class="sc-title">${esc(set.title || def)}</div>${set.subtitle ? `<div class="sc-sub">${esc(set.subtitle)}</div>` : ''}${count}</div>${dogs}${set.socials ? `<div class="sc-foot">${esc(set.socials)}</div>` : ''}`;
   },

@@ -192,7 +192,7 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
         if (results.length) break;
       } catch (err) { lastErr = err; }
     }
-    if (!results.length && lastErr) throw new Error(`No pude buscar memes: ${lastErr.message}`);
+    if (!results.length && lastErr) throw new Error(/fetch failed|ENOTFOUND|ECONN|ETIMEDOUT/i.test(lastErr.message) ? 'No hay conexión con la página de memes. Revisa tu internet.' : `No pude buscar memes: ${lastErr.message}`);
     return { results, more: results.length >= 20 };
   }
 

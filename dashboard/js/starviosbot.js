@@ -35,7 +35,7 @@ export function renderStarviosbot(status) {
       ${accountRow('bot', 'Cuenta aparte para el bot')}
       <label class="field"><span>Escribe como</span><span class="seg" data-sv-as><button type="button" data-as="me" aria-pressed="${sendAs === 'me'}">Mi cuenta</button><button type="button" data-as="bot" aria-pressed="${sendAs === 'bot'}">Cuenta aparte</button></span></label>
     </details>
-    <p class="hint">${st.encrypted ? '🔒 La sesión se guarda cifrada en este PC.' : 'La sesión se guarda solo en este PC.'} Satronho Bot nunca ve tu contraseña.</p>`;
+    <p class="hint"><span data-u>${st.encrypted ? '🔒 La sesión se guarda cifrada en este PC.' : 'La sesión se guarda solo en este PC.'}</span> <span data-u>Satronho Bot nunca ve tu contraseña.</span></p>`;
   writeState();
 }
 

@@ -23,6 +23,7 @@ const { app, BrowserWindow, shell, dialog, net, Tray, Menu, nativeImage, safeSto
 const { Store } = require('./store');
 const { createServer } = require('./server');
 const { isSafeExternalUrl } = require('./security');
+const { t: tr } = require('./i18n');
 
 const APP_ID = 'com.riddssatronho.satronhobot';
 let server = null;
@@ -68,10 +69,10 @@ async function ensureFeedAllowed(store) {
   confirmingFeed = (async () => {
     const { response } = await dialog.showMessageBox(win && !win.isDestroyed() ? win : undefined, {
       type: 'warning',
-      title: 'Repositorio de actualizaciones',
-      message: '¿Buscar actualizaciones en otro repositorio?',
-      detail: `Satronho Bot instalará las versiones que se publiquen en:\n${feed}\n\nAcepta solo si ese repositorio es tuyo o confías en quien lo maneja.`,
-      buttons: ['Usar este repositorio', 'Seguir con el oficial'],
+      title: tr('Repositorio de actualizaciones'),
+      message: tr('¿Buscar actualizaciones en otro repositorio?'),
+      detail: `${tr('Satronho Bot instalará las versiones que se publiquen en:')}\n${feed}\n\n${tr('Acepta solo si ese repositorio es tuyo o confías en quien lo maneja.')}`,
+      buttons: [tr('Usar este repositorio'), tr('Seguir con el oficial')],
       defaultId: 1,
       cancelId: 1,
       noLink: true,
@@ -273,9 +274,9 @@ function ensureTray() {
   tray.setToolTip('Satronho Bot');
   tray.setContextMenu(
     Menu.buildFromTemplate([
-      { label: 'Abrir Satronho Bot', click: showWindow },
+      { label: tr('Abrir Satronho Bot'), click: showWindow },
       { type: 'separator' },
-      { label: 'Salir', click: () => { quitting = true; app.quit(); } },
+      { label: tr('Salir'), click: () => { quitting = true; app.quit(); } },
     ])
   );
   tray.on('click', showWindow);
@@ -380,7 +381,7 @@ function openAuthWindow(url, account) {
     parent: win || undefined,
     width: 520,
     height: 780,
-    title: account === 'bot' ? 'Autorizar la cuenta aparte en Kick' : 'Autorizar tu cuenta de Kick',
+    title: account === 'bot' ? tr('Autorizar la cuenta aparte en Kick') : tr('Autorizar tu cuenta de Kick'),
     autoHideMenuBar: true,
     backgroundColor: '#0f0d17',
     webPreferences: { partition: `persist:kick-${account}`, contextIsolation: true, nodeIntegration: false },
@@ -436,7 +437,7 @@ function openLoginWindow(platform, account) {
       parent: win || undefined,
       width: 520,
       height: 800,
-      title: site.title[account] || site.title.me,
+      title: tr(site.title[account] || site.title.me),
       autoHideMenuBar: true,
       backgroundColor: '#0f0d17',
       webPreferences: { partition: `persist:${platform}-${account}`, contextIsolation: true, nodeIntegration: false },
@@ -516,7 +517,7 @@ if (!app.requestSingleInstanceLock()) {
     server = createServer({
       store,
       fetch: (url, opts) => net.fetch(url, opts),
-      appInfo: { version: app.getVersion(), portable: Boolean(velopack) },
+      appInfo: { version: app.getVersion(), portable: Boolean(velopack), locale: app.getLocale() },
       hooks: { applyUpdate, checkForUpdates: () => checkForUpdates(store), onFeedChange: () => checkForUpdates(store), onWindowConfig: applyWindowConfig,
         updateLog: () => updLogTail(25),
         openAuthWindow,
@@ -579,7 +580,7 @@ if (!app.requestSingleInstanceLock()) {
         }
         const cfg = store.get('window')?.popout || {};
         const bounds = savedPopoutBounds(cfg.bounds) || { width: 440, height: 720 };
-        return { action: 'allow', overrideBrowserWindowOptions: { ...bounds, minWidth: 300, minHeight: 300, autoHideMenuBar: true, alwaysOnTop: Boolean(cfg.onTop), title: 'Chat · Satronho Bot', backgroundColor: '#0f0d17', icon: path.join(__dirname, '..', 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png') } };
+        return { action: 'allow', overrideBrowserWindowOptions: { ...bounds, minWidth: 300, minHeight: 300, autoHideMenuBar: true, alwaysOnTop: Boolean(cfg.onTop), title: tr('Chat · Satronho Bot'), backgroundColor: '#0f0d17', icon: path.join(__dirname, '..', 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png') } };
       }
       if (isSafeExternalUrl(target)) shell.openExternal(target);
       return { action: 'deny' };
