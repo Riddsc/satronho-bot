@@ -67,7 +67,7 @@ La app se actualiza con [Velopack](https://velopack.io), igual que OverInteracti
 |---|---|---|---|---|
 | Alertas y metas | ✓ | — | — | — |
 | Estadísticas | ✓ (regalos, likes, espectadores) | ✓ (chat) | ✓ (chat) | ✓ (chat) |
-| Voz del chat | Solo de quien envió **Quiéreme** | Todo el chat | Todo el chat | Todo el chat |
+| Voz del chat | Todo el chat (o el filtro que elijas) | Todo el chat | Todo el chat | Todo el chat |
 | Música (`!play`) | Opcional (apagada) | ✓ | ✓ | ✓ |
 
 Twitch se lee con su chat oficial como espectador anónimo: no hace falta iniciar sesión.
@@ -158,11 +158,11 @@ El interruptor **Sonido en OBS** apaga todos los sonidos de las alertas. En OBS,
 
 También eliges qué voces entran en el reparto.
 
-**Espectadores especiales.** A una persona le puedes dar su propia voz y un nombre para leer (por ejemplo, «el jefe»), o silenciarla. La opción «Siempre leer» también se salta el filtro del regalo en TikTok.
+**Espectadores especiales.** A una persona le puedes dar su propia voz y un nombre para leer (por ejemplo, «el jefe»), o silenciarla. La opción «Siempre leer» también se salta los filtros de «Quién puede hablar».
 
 **Quién se lee.**
-- **Kick, Starvios y Twitch:** todo el chat.
-- **TikTok:** solo quien envió **Quiéreme** / **Heart Me**. El permiso dura 3 h, 12 h, 24 h, 7 días o para siempre, según elijas.
+- **Por defecto:** todo el chat en todas las plataformas.
+- **Filtros por plataforma** (Voz del chat → Quién puede hablar): seguidores, suscriptores, VIP, moderadores, **Miembros de tu equipo** de TikTok (con nivel mínimo) o **Miembros de tu equipo que ya te enviaron Quiéreme** / **Heart Me**. En Starvios: tu lista de personas o solo moderadores.
 - **Comandos:** los mensajes que empiezan con `!` no se leen.
 
 **Límites.**
@@ -220,6 +220,40 @@ Cada directo se guarda como una **sesión**. Una sesión termina cuando pasan 30
 
 Todo se guarda en tu PC, en `%APPDATA%\Satronho Bot\stats`.
 
+## Huellitas, juegos y tienda (Juana)
+
+Los puntos de tu canal. Están en **Tu comunidad → Huellitas**.
+
+- **Cómo se ganan:** por estar en el directo (cuenta quien escribió hace poco), por escribir, seguir, suscribirse, regalar (por moneda), dar likes, compartir y volverse superfan. Los suscriptores pueden ganar más. Cada plataforma lleva su propia cuenta.
+- **Comandos:** `!huellitas` (saldo), `!top`, `!regalar @persona 100`, y para ti y tus mods `!dar` y `!quitar`. Los nombres se cambian; por defecto salen en el idioma de la app.
+- **Juegos del chat:** `!duelo @persona 100` (y `!acepto`), `!tragamonedas 50`, `!apuesta 100` o `!apuesta todo`, `!color rojo 100`, `!atraco 200` (en grupo) y `!trivia` (tus propias preguntas o las de la app). Cada juego tiene mínimo, máximo y espera.
+- **Tienda:** `!tienda` y `!canjear 2` (o por nombre). Cada artículo puede leer un texto con la voz, escribir en el chat, sonar un sonido, girar una ruleta, sumar a un contador o a la cuenta regresiva, saltar canción o dar una llave. Con «Lo reviso yo» queda en **Canjes** para marcarlo hecho o devolver las huellitas. Existencias y límites por persona se reponen en cada directo.
+- **Cofres:** se abren con una llave (`!abrir dorado`) y dan un premio al azar según su peso. `!cofre dorado` dice qué trae.
+- **Probar:** en la pestaña Huellitas puedes escribir como si fueras alguien del chat; las respuestas salen ahí, no en tu chat.
+- En TikTok y Twitch el bot no puede escribir: activa «Leer las respuestas en voz alta» para que la voz las diga.
+- Se guarda en tu PC, en `huellitas.json` y `tienda.json`.
+
+## Apps conectadas y reacciones (Samy)
+
+En **Tu comunidad → Apps conectadas**. Cada tarjeta explica cómo activar la conexión en la otra app.
+
+| App | Conexión | Qué puede hacer |
+|---|---|---|
+| OBS Studio | WebSocket 5, puerto 4455 (con contraseña) | Cambiar de escena, mostrar u ocultar fuentes, filtros, silenciar audio |
+| VTube Studio | API, puerto 8001 (se aprueba una vez en VTS) | Lanzar atajos del modelo |
+| Voicemod | Control API, puerto 59129 (clave de desarrollador) | Cambiar de voz unos segundos, memes |
+| Streamer.bot | WebSocket Server, puerto 8080 | Ejecutar acciones |
+| Luces WLED | HTTP en tu red | Efectos guardados, color, encender o apagar |
+| VRChat | OSC, puerto 9000 | Cuadro de chat y parámetros del avatar |
+
+Una **reacción** es «cuando pase esto → haz estos pasos»: regalo (por nombre o valor), seguidor, suscripción, likes, compartir, superfan, un comando, una recompensa de Kick, un canje de la tienda, un cofre, empezar el directo o solo con botón. Los pasos van en orden y pueden esperar entre ellos; muchos vuelven solos a como estaban tras unos segundos.
+
+**Stream Deck:** cada reacción tiene una dirección (`http://127.0.0.1:3800/deck/<clave>/<id>`) para la acción «Sitio web» o un plugin de pedidos HTTP. Sin la clave no hace nada, y se puede cambiar.
+
+Las contraseñas y claves de estas apps se guardan cifradas con la protección de Windows.
+
+**Ideas para más adelante:** T.I.T.S. (lanzar objetos al avatar) y que una IA pueda usar la app (asistente).
+
 ## Overlays para OBS
 
 En OBS ve a **Fuentes → + → Navegador** y pega la URL (en el panel hay un botón para copiarla).
@@ -229,6 +263,8 @@ En OBS ve a **Fuentes → + → Navegador** y pega la URL (en el panel hay un bo
 | Alertas de TikTok | `http://localhost:3800/overlays/alerts.html` | 800 × 300 |
 | Sonando ahora | `http://localhost:3800/overlays/now-playing.html` | 700 × 140 |
 | Meta | `http://localhost:3800/overlays/goal.html?id=seguidores` | 700 × 140 |
+| Top de huellitas | `http://localhost:3800/overlays/w.html?id=pointstop` | 420 × 460 |
+| Cofres y canjes | `http://localhost:3800/overlays/w.html?id=chests` | 800 × 600 |
 
 ## Estructura
 
@@ -236,16 +272,47 @@ En OBS ve a **Fuentes → + → Navegador** y pega la URL (en el panel hay un bo
 src/
   main.js                  Electron + Velopack (arranque y actualizaciones)
   server.js                Servidor local: panel, overlays, WebSocket y API
-  eventBus.js, store.js    Eventos comunes y configuración
-  connectors/              tiktok.js, kick.js, starvios.js
-  modules/                 tts.js, music.js, goals.js, stats.js
-  tts/                     piper.js (motor), voices.js, textFilter.js
+  security.js              Quién puede hablarle al servidor local (ver «Seguridad»)
+  secretBox.js             Claves y permisos cifrados con la protección de Windows
+  eventBus.js, store.js    Eventos comunes y configuración (con copia de respaldo)
+  i18n.js                  Idioma de lo que dice la app fuera del panel (chat del bot, voz, ventanas)
+  connectors/              tiktok, kick, kickChat, starvios, starviosChat, twitch, spotify
+  modules/                 voz, música, alertas, metas, estadísticas, ruletas, comandos, huellitas, juegos, tienda…
+  modules/apps/            Apps conectadas (OBS, VTube Studio, Voicemod, Streamer.bot, WLED, VRChat) y reacciones
+  tts/                     piper.js (motor), voices.js, msonline.js, textFilter.js
   music/youtube.js         Búsqueda en YouTube
-dashboard/                 Panel (index.html, styles.css, js/ con mascots.js)
-overlays/                  Páginas para OBS
+dashboard/                 Panel (index.html, styles.css, js/)
+overlays/                  Páginas para OBS y TikTok LIVE Studio
+  i18n/                    Idiomas: i18n.js y los diccionarios en.json, pt.json, fr.json, it.json
+web/                       Página de GitHub Pages que muestra los overlays en TikTok LIVE Studio
+relay/                     Relé de reportes para Cloudflare (ver relay/LEEME.md)
 assets/                    Ícono de la app (svg, png, ico)
 scripts/release.mjs        Empaquetado y publicación
 ```
+
+## Idiomas
+
+La app habla el idioma del streamer: español, inglés, portugués (Brasil), francés o italiano. Se elige en **Ajustes → App → Idioma** («Automático» usa el de Windows). Cambia el panel, la ventana del chat, los overlays, lo que el bot escribe en tu chat, los avisos que lee la voz y las novedades. La primera vez que abres la app te pregunta el idioma. Las voces se eligen aparte, en **Voz**; la voz automática del chat usa voces del mismo idioma que tu voz principal.
+
+Cómo funciona, para quien toque el código:
+
+- Los textos se escriben en español, como siempre. El español es la clave.
+- `overlays/i18n/i18n.js` traduce la pantalla sola (también lo que se dibuja después). Lo que tenga `translate="no"` no se toca: chat, nombres y lo que escribe el streamer.
+- Para frases que arma el código: `tr('{0} te sigue', nombre)` y, con singular y plural, `trn(n, '{0} canción', '{0} canciones')`. En el servidor: `require('./i18n')`.
+- `<span data-u>` dentro de un párrafo lo vuelve una frase aparte.
+- Los diccionarios son `overlays/i18n/<idioma>.json`. Si falta una frase, se ve en español. Conserva `{0}`, `{usuario}`, `<0>…</0>` y los `!comandos`. `{#0}` solo acepta números.
+
+## Seguridad
+
+El servidor escucha solo en `127.0.0.1`, pero el navegador del streamer también vive en el PC, así que `src/security.js` filtra cada pedido:
+
+- **Cabecera Host:** solo `localhost`, `127.0.0.1` o `[::1]`. Así ninguna página de internet se hace pasar por «local» con un truco de DNS.
+- **Cambios (POST, PATCH, DELETE):** solo desde páginas de este PC o desde programas sin navegador. Una web ajena recibe un 403.
+- **WebSocket:** solo para páginas de este PC.
+- **GitHub Pages** (`riddsc.github.io`): solo puede leer los overlays y `/api/ping`.
+- **Marcos:** solo los overlays se pueden meter dentro de otra página.
+- **Actualizaciones:** un repositorio distinto al oficial se confirma en una ventana de Windows.
+- **Claves:** Kick, Starvios, Spotify y la clave de TikTok van cifradas y nunca llegan al panel.
 
 ## Licencias
 

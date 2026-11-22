@@ -22,6 +22,8 @@ const path = require('path');
 const { app, BrowserWindow, shell, dialog, net, Tray, Menu, nativeImage, safeStorage, session, globalShortcut, screen } = require('electron');
 const { Store } = require('./store');
 const { createServer } = require('./server');
+const { isSafeExternalUrl } = require('./security');
+const { t: tr } = require('./i18n');
 
 const APP_ID = 'com.riddssatronho.satronhobot';
 let server = null;
@@ -43,7 +45,53 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 //  - Instalada con Velopack: descarga sola y muestra «Reiniciar y actualizar».
 //  - Portable simple (.zip): solo avisa y lleva a la página de descarga.
 const pkg = require('../package.json');
-const feedOf = (store) => (store.get('updates').feedUrl || pkg.satronho?.updateRepo || '').trim();
+const OFFICIAL_FEED = (pkg.satronho?.updateRepo || '').trim();
+const customFeed = (store) => String(store.get('updates').feedUrl || '').trim();
+const feedOf = (store) => customFeed(store) || OFFICIAL_FEED;
+
+// Cambiar el repositorio de actualizaciones es delicado: la app instalaría lo
+// que se publique ahí. Por eso un repositorio distinto al oficial se confirma
+// en una ventana de Windows (ninguna página web puede pulsar ese botón) y la
+// confirmación se guarda aparte de la configuración.
+const feedOkFile = () => path.join(app.getPath('userData'), 'repositorio-confirmado.txt');
+const feedConfirmed = (feed) => {
+  try {
+    return fs.readFileSync(feedOkFile(), 'utf8').trim() === feed;
+  } catch {
+    return false;
+  }
+};
+let confirmingFeed = null;
+async function ensureFeedAllowed(store) {
+  const feed = customFeed(store);
+  if (!feed || feed === OFFICIAL_FEED || feedConfirmed(feed)) return true;
+  if (confirmingFeed) return confirmingFeed;
+  confirmingFeed = (async () => {
+    const { response } = await dialog.showMessageBox(win && !win.isDestroyed() ? win : undefined, {
+      type: 'warning',
+      title: tr('Repositorio de actualizaciones'),
+      message: tr('¿Buscar actualizaciones en otro repositorio?'),
+      detail: `${tr('Satronho Bot instalará las versiones que se publiquen en:')}\n${feed}\n\n${tr('Acepta solo si ese repositorio es tuyo o confías en quien lo maneja.')}`,
+      buttons: [tr('Usar este repositorio'), tr('Seguir con el oficial')],
+      defaultId: 1,
+      cancelId: 1,
+      noLink: true,
+    });
+    if (response === 0) {
+      try { fs.writeFileSync(feedOkFile(), feed); } catch { /* se volverá a preguntar */ }
+      updLog(`Repositorio de actualizaciones cambiado a ${feed}`);
+      return true;
+    }
+    store.update({ updates: { feedUrl: '' } });
+    updLog(`Se rechazó el repositorio ${feed}; se sigue con el oficial`);
+    return false;
+  })();
+  try {
+    return await confirmingFeed;
+  } finally {
+    confirmingFeed = null;
+  }
+}
 
 const newer = (a, b) => {
   const pa = String(a).replace(/^v/, '').split('.').map(Number);
@@ -140,6 +188,7 @@ async function checkNotice(feed) {
 
 let checking = false;
 async function checkForUpdates(store) {
+  await ensureFeedAllowed(store);
   const feed = feedOf(store);
   const { auto } = store.get('updates');
   if (!feed || checking || pendingUpdate) return;
@@ -225,13 +274,25 @@ function ensureTray() {
   tray.setToolTip('Satronho Bot');
   tray.setContextMenu(
     Menu.buildFromTemplate([
-      { label: 'Abrir Satronho Bot', click: showWindow },
+      { label: tr('Abrir Satronho Bot'), click: showWindow },
       { type: 'separator' },
-      { label: 'Salir', click: () => { quitting = true; app.quit(); } },
+      { label: tr('Salir'), click: () => { quitting = true; app.quit(); } },
     ])
   );
   tray.on('click', showWindow);
   return tray;
+}
+
+// Lo que el streamer eligió en el aviso al cerrar.
+function windowAction(action) {
+  if (!win || win.isDestroyed()) return;
+  if (action === 'tray') {
+    ensureTray();
+    win.hide();
+    return;
+  }
+  quitting = true;
+  win.close();
 }
 
 function applyWindowConfig(cfg) {
@@ -332,7 +393,7 @@ function openAuthWindow(url, account) {
     parent: win || undefined,
     width: 520,
     height: 780,
-    title: account === 'bot' ? 'Autorizar la cuenta aparte en Kick' : 'Autorizar tu cuenta de Kick',
+    title: account === 'bot' ? tr('Autorizar la cuenta aparte en Kick') : tr('Autorizar tu cuenta de Kick'),
     autoHideMenuBar: true,
     backgroundColor: '#0f0d17',
     webPreferences: { partition: `persist:kick-${account}`, contextIsolation: true, nodeIntegration: false },
@@ -388,7 +449,7 @@ function openLoginWindow(platform, account) {
       parent: win || undefined,
       width: 520,
       height: 800,
-      title: site.title[account] || site.title.me,
+      title: tr(site.title[account] || site.title.me),
       autoHideMenuBar: true,
       backgroundColor: '#0f0d17',
       webPreferences: { partition: `persist:${platform}-${account}`, contextIsolation: true, nodeIntegration: false },
@@ -468,8 +529,8 @@ if (!app.requestSingleInstanceLock()) {
     server = createServer({
       store,
       fetch: (url, opts) => net.fetch(url, opts),
-      appInfo: { version: app.getVersion(), portable: Boolean(velopack) },
-      hooks: { applyUpdate, checkForUpdates: () => checkForUpdates(store), onWindowConfig: applyWindowConfig,
+      appInfo: { version: app.getVersion(), portable: Boolean(velopack), locale: app.getLocale() },
+      hooks: { applyUpdate, checkForUpdates: () => checkForUpdates(store), onFeedChange: () => checkForUpdates(store), onWindowConfig: applyWindowConfig,
         updateLog: () => updLogTail(25),
         openAuthWindow,
         renderPage,
@@ -478,6 +539,7 @@ if (!app.requestSingleInstanceLock()) {
         onHotkeys: applyHotkeys,
         popoutHover,
         clearLogin,
+        windowAction,
         // Cifrado de Windows (DPAPI) para el Client Secret y los permisos de Kick.
         vault: safeStorage.isEncryptionAvailable()
           ? {
@@ -531,15 +593,37 @@ if (!app.requestSingleInstanceLock()) {
         }
         const cfg = store.get('window')?.popout || {};
         const bounds = savedPopoutBounds(cfg.bounds) || { width: 440, height: 720 };
-        return { action: 'allow', overrideBrowserWindowOptions: { ...bounds, minWidth: 300, minHeight: 300, autoHideMenuBar: true, alwaysOnTop: Boolean(cfg.onTop), title: 'Chat · Satronho Bot', backgroundColor: '#0f0d17', icon: path.join(__dirname, '..', 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png') } };
+        return { action: 'allow', overrideBrowserWindowOptions: { ...bounds, minWidth: 300, minHeight: 300, autoHideMenuBar: true, alwaysOnTop: Boolean(cfg.onTop), title: tr('Chat · Satronho Bot'), backgroundColor: '#0f0d17', icon: path.join(__dirname, '..', 'assets', process.platform === 'win32' ? 'icon.ico' : 'icon.png') } };
       }
-      shell.openExternal(target);
+      if (isSafeExternalUrl(target)) shell.openExternal(target);
       return { action: 'deny' };
+    });
+
+    // El panel nunca se cambia por otra página: un enlace externo se abre en
+    // el navegador y la ventana sigue mostrando Satronho Bot.
+    win.webContents.on('will-navigate', (ev, target) => {
+      if (String(target).startsWith(url.replace(/\/$/, ''))) return;
+      ev.preventDefault();
+      if (isSafeExternalUrl(target)) shell.openExternal(target);
     });
 
     win.webContents.on('did-create-window', (child, { url: target }) => {
       if (String(target).includes('/popout-chat.html')) trackPopout(child, store);
     });
+
+    // Al tocar ✕: el panel muestra el aviso «¿Cerramos Satronho Bot?».
+    // Si la página no responde (o el aviso está apagado), se cierra normal.
+    win.on('close', (ev) => {
+      // Escondida junto al reloj o apagando Windows: se cierra sin preguntar.
+      if (quitting || applying || !win.isVisible() || store.get('window')?.askOnClose === false) return;
+      ev.preventDefault();
+      win.webContents
+        .executeJavaScript('typeof window.__satronhoAskClose === "function" ? window.__satronhoAskClose() : false', true)
+        .then((shown) => { if (!shown) windowAction('close'); })
+        .catch(() => windowAction('close'));
+    });
+
+    win.on('session-end', () => { quitting = true; });
 
     win.on('minimize', (ev) => {
       if (!store.get('window')?.minimizeToTray) return;
@@ -553,6 +637,9 @@ if (!app.requestSingleInstanceLock()) {
     win.webContents.once('did-finish-load', () => setTimeout(() => checkForUpdates(store), 5000));
     setInterval(() => checkForUpdates(store), 6 * 60 * 60 * 1000);
   });
+
+  // Salir desde el menú del reloj, apagar Windows o cerrar sesión: sin aviso.
+  app.on('before-quit', () => { quitting = true; });
 
   app.on('window-all-closed', async () => {
     if (applying) return; // applyUpdate ya se encarga de salir

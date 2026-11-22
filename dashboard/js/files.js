@@ -2,7 +2,7 @@
 // Las mismas opciones están en el menú de la izquierda (desplegable) y en
 // las pestañas de la pantalla: Todos, Audios, Imágenes, Videos y Sin usar.
 
-import { $, $$, api, esc, toast, askText } from './util.js';
+import { $, $$, api, esc, toast, askText, tr, trn, getLocale } from './util.js';
 import { sayFor } from './guides.js';
 
 const FILTERS = [['todos', 'Todos los archivos', '▤'], ['audios', 'Audios', '♪'], ['imagenes', 'Imágenes', '▣'], ['videos', 'Videos', '▶'], ['sinuso', 'Sin usar', '○']];
@@ -19,7 +19,7 @@ let playing = null;
 
 const filter = () => document.querySelector('[data-tabs="archivos"] [aria-selected="true"]')?.dataset.tab || 'todos';
 const kb = (n) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
-const when = (t) => new Date(t).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' });
+const when = (t) => new Date(t).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short', year: 'numeric' });
 const count = (f) => files.filter((x) => (f === 'todos' ? true : f === 'sinuso' ? !x.uses : x.kind === KIND_OF[f])).length;
 
 // Forma de onda de adorno, fija para cada archivo (no hace falta decodificar el audio).
@@ -56,7 +56,7 @@ function renderGrid() {
   }
   box.innerHTML = list.length ? list.map((f) => `<button type="button" class="fl-card ${selected === f.id ? 'on' : ''}" data-fl="${esc(f.id)}">
       <span class="fl-thumb k-${f.kind}">${thumb(f)}${f.kind !== 'image' ? `<span class="fl-pl" data-flplay="${esc(f.id)}" title="Reproducir">${playing?.id === f.id ? '■' : '▶'}</span>` : ''}</span>
-      <span class="fl-info"><b>${esc(f.name)}</b><small><span class="fl-ext">${esc(f.ext.toUpperCase())}</span>${kb(f.size)}<span class="fl-uses ${f.uses ? '' : 'none'}">${f.uses ? `${f.uses} ${f.uses === 1 ? 'uso' : 'usos'}` : 'Sin usar'}</span></small></span>
+      <span class="fl-info"><b>${esc(f.name)}</b><small><span class="fl-ext">${esc(f.ext.toUpperCase())}</span>${kb(f.size)}<span class="fl-uses ${f.uses ? '' : 'none'}">${f.uses ? trn(f.uses, '{0} uso', '{0} usos') : 'Sin usar'}</span></small></span>
     </button>`).join('') : `<div class="fl-empty"><b>${files.length ? 'Nada con este filtro.' : 'Todavía no tienes archivos.'}</b><p>Sube sonidos, imágenes o videos con el botón de arriba o arrastrándolos aquí. Los sonidos que agregues en Sonidos también aparecen.</p></div>`;
   renderSide();
 }
@@ -111,7 +111,7 @@ async function rename(id) {
 async function remove(id) {
   const f = files.find((x) => x.id === id);
   if (!f) return;
-  const msg = f.uses ? `«${f.name}» se usa en ${f.uses} ${f.uses === 1 ? 'sitio' : 'sitios'}. ¿Borrarlo igual?` : `¿Borrar «${f.name}»?`;
+  const msg = f.uses ? trn(f.uses, '«{1}» se usa en {0} sitio. ¿Borrarlo igual?', '«{1}» se usa en {0} sitios. ¿Borrarlo igual?', f.uses, f.name) : tr('¿Borrar «{0}»?', f.name);
   if (!confirm(msg)) return;
   await api('DELETE', `/api/files/${encodeURIComponent(id)}`).catch((e) => toast(e.message));
   selected = '';
@@ -129,7 +129,7 @@ async function uploadAll(list) {
       okN += 1;
     } catch (e) { toast(`${file.name}: ${e.message}`); }
   }
-  if (okN) sayFor('nono', `Subí ${okN} ${okN === 1 ? 'archivo' : 'archivos'}.`, 4000, 'ok');
+  if (okN) sayFor('nono', trn(okN, 'Subí {0} archivo.', 'Subí {0} archivos.'), 4000, 'ok');
   load();
 }
 

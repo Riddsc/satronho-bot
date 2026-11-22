@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-theme="noche">
+<html lang="es" class="i18n-wait" data-theme="noche">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,6 +35,10 @@
     <a class="nav-item" href="#/ruletas" data-page="ruletas"><span class="ic" data-icon="wheel"></span>Ruletas<span class="badge" id="nav-wheels" hidden title="Retos pendientes">0</span></a>
     <a class="nav-item" href="#/overlays" data-page="overlays"><span class="ic" data-icon="layers"></span>Overlays para OBS</a>
     <div class="nav-pins" id="nav-pins" hidden></div>
+  </nav>
+  <nav class="nav-group" style="--g:#6fdc8c"><h6><i></i>Tu comunidad</h6>
+    <a class="nav-item" href="#/huellitas" data-page="huellitas"><span class="ic" data-icon="paw"></span>Huellitas<span class="badge" id="nav-redeem" hidden title="Canjes por cumplir">0</span></a>
+    <a class="nav-item" href="#/apps" data-page="apps"><span class="ic" data-icon="apps"></span>Apps conectadas</a>
   </nav>
   <nav class="nav-group" style="--g:#ff8fb5"><h6><i></i>Tus números</h6>
     <a class="nav-item" href="#/estadisticas" data-page="estadisticas"><span class="ic" data-icon="chart"></span>Estadísticas</a>
@@ -371,7 +375,7 @@
               <select data-tts="voiceMode"><option value="perViewer">Una voz fija para cada espectador</option><option value="random">Una voz al azar en cada mensaje</option><option value="single">Todos con la voz principal</option></select></label>
             <label class="switch"><input type="checkbox" data-tts="toneVariants"><span></span> Variar el tono (grave, normal y aguda) para tener el triple de voces</label>
             <label class="switch"><input type="checkbox" data-tts="useWindowsVoices"><span></span> Sumar las voces de Windows en español</label>
-            <p class="hint">Las voces de Latinoamérica (Colombia y más) están abajo, en su propia tarjeta.</p>
+            <p class="hint">Las voces en línea (Latinoamérica y otros idiomas) están abajo, en su propia tarjeta.</p>
             <div id="voice-pool" class="pool"></div></div>
           <div class="card"><h3 class="card-title">Voz principal</h3>
             <div class="vp-current"><span class="vp-flag" id="vp-cur-flag"></span><span><b id="vp-cur-name">—</b><small id="vp-cur-src"></small></span><button type="button" class="btn small primary" id="vp-open">Cambiar voz</button></div>
@@ -386,9 +390,9 @@
         </div>
       </div>
       <div class="card mt" id="online-voices" style="--g:#9b8cff">
-        <div class="row space"><h3 class="card-title">Voces de Latinoamérica</h3>
-          <label class="switch" style="margin:0"><input type="checkbox" data-tts="useOnlineVoices"><span></span> Sumarlas todas al reparto</label></div>
-        <p class="hint">Una voz femenina y una masculina por país, con su acento. Pulsa ▶ para oírla y ★ para que sea tu <b>voz principal</b>. Necesitan internet y son de Microsoft (no es un servicio oficial para apps): si fallan, uso la voz de Windows.</p>
+        <div class="row space"><h3 class="card-title">Voces en línea</h3>
+          <label class="switch" style="margin:0"><input type="checkbox" data-tts="useOnlineVoices"><span></span> Sumar al reparto las de mi idioma</label></div>
+        <p class="hint">Toda Latinoamérica, más inglés, portugués, francés e italiano: voces femeninas y masculinas por país, con su acento. Pulsa ▶ para oírla y ★ para que sea tu <b>voz principal</b>. Necesitan internet y son de Microsoft (no es un servicio oficial para apps): si fallan, uso la voz de Windows.</p>
         <div class="ov-voices" id="ov-voices"></div>
       </div>
     </div>
@@ -810,6 +814,26 @@
   </div>
 </section>
 
+<!-- ---------- Huellitas: puntos del canal, juegos y tienda (Juana) ---------- -->
+<section class="page" id="page-huellitas" data-page="huellitas" hidden>
+  <div class="ph"><div class="t"><small>Tu comunidad</small><h1>Huellitas</h1><p>Los puntos de tu canal: tu público los gana por acompañarte y los gasta en juegos del chat, en tu tienda y abriendo cofres.</p></div>
+    <div class="host" style="--g:#6fdc8c"><p class="bubble" data-bubble="juana" data-static><b>Juana:</b> Yo llevo la cuenta de cada huellita. Enciéndelas, decide cuánto se gana y arma tu tienda.</p><span class="guide" data-avatar="juana" data-size="mini"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="huellitas"><button data-tab="puntos">Huellitas</button><button data-tab="juegos">Juegos del chat</button><button data-tab="tienda">Tienda y cofres</button><button data-tab="canjes">Canjes<span class="badge" id="tab-redeem" hidden>0</span></button></div>
+  <div class="tabpanel" data-tabpanel="puntos" style="--g:#6fdc8c"><div id="hu-points"></div></div>
+  <div class="tabpanel" data-tabpanel="juegos" hidden style="--g:#6fdc8c"><div id="hu-games"></div></div>
+  <div class="tabpanel" data-tabpanel="tienda" hidden style="--g:#6fdc8c"><div id="hu-shop"></div></div>
+  <div class="tabpanel" data-tabpanel="canjes" hidden style="--g:#6fdc8c"><div id="hu-redeem"></div></div>
+</section>
+
+<!-- ---------- Apps conectadas (Samy) ---------- -->
+<section class="page" id="page-apps" data-page="apps" hidden>
+  <div class="ph"><div class="t"><small>Tu comunidad</small><h1>Apps conectadas</h1><p>Haz que lo que pasa en tu directo mueva tus otros programas: escenas de OBS, tu avatar, luces, cambiador de voz y más.</p></div>
+    <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Primero conecta una app; luego crea una <b>reacción</b>: «cuando pase esto → haz aquello».</p><span class="guide" data-avatar="samy" data-size="mini"></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="apps"><button data-tab="apps">Apps</button><button data-tab="reacciones">Reacciones</button></div>
+  <div class="tabpanel" data-tabpanel="apps" style="--g:#ffb23e"><div id="ap-apps"></div></div>
+  <div class="tabpanel" data-tabpanel="reacciones" hidden style="--g:#ffb23e"><div id="ap-reactions"></div></div>
+</section>
+
 <!-- ---------- Metas (Juana) ---------- -->
 <section class="page" id="page-metas" data-page="metas" hidden>
   <div class="ph"><div class="t"><small>Lo que se ve</small><h1>Metas</h1><p>Barras de progreso para tu directo: diamantes, seguidores, likes…</p></div>
@@ -943,12 +967,16 @@
   </div>
   <div class="tabpanel" data-tabpanel="app" hidden>
     <div class="cols c2">
+      <div class="card span2"><h3 class="card-title">Idioma</h3>
+        <p class="hint">El idioma del panel, de la ventana del chat, de los overlays y de lo que el bot escribe en tu chat. Las voces se eligen aparte, en Voz.</p>
+        <div class="seg lang-seg" id="lang-seg" aria-label="Idioma"></div></div>
       <div class="card"><h3 class="card-title">Guías</h3>
         <label class="switch"><input type="checkbox" id="guides-toggle"><span></span> Mostrar a Samy, Troya, Ñoño y Juana</label>
         <button class="btn small mt" id="welcome-again">Ver otra vez la bienvenida</button>
         <button class="btn small mt" id="steps-again">Mostrar «Primeros pasos»</button></div>
       <div class="card"><h3 class="card-title">Ventana</h3>
         <label class="switch"><input type="checkbox" id="tray-toggle"><span></span> Al minimizar, esconder la app junto al reloj de Windows</label>
+        <label class="switch"><input type="checkbox" id="askclose-toggle"><span></span> Preguntar antes de cerrar la app</label>
         <p class="hint">Satronho Bot nunca se abre sola: solo cuando tú la abres.</p></div>
       <div class="card span2"><h3 class="card-title">Actualizaciones</h3>
         <p class="hint">Al abrir y cada 6 horas reviso si hay una versión nueva. Si instalaste con el instalador, la descargo sola y te muestro «Reiniciar y actualizar»; con el .zip portable te aviso y te llevo a descargarla.</p>
@@ -981,13 +1009,13 @@
 
 <!-- ---------- Tu perfil (Samy) ---------- -->
 <section class="page" id="page-perfil" data-page="perfil" hidden>
-  <div class="ph"><div class="t"><small>Sistema</small><h1>Tu perfil</h1><p>Cómo te llaman las guías, tus cuentas, el orden del menú y tu barra de botones rápidos.</p></div>
+  <div class="ph"><div class="t"><small>Sistema</small><h1>Tu perfil</h1><p>Cómo te llaman los guías, tus cuentas, el orden del menú y tu barra de botones rápidos.</p></div>
     <div class="host" style="--g:#ffb23e"><p class="bubble" data-bubble="samy" data-static><b>Samy:</b> Todo lo de aquí es solo tuyo y se guarda en tu PC. Lo que muevas se ve al instante.</p><span class="guide" data-avatar="samy" data-size="mini"></span></div></div>
   <div class="cols c2" style="--g:#ffb23e">
     <div class="card pf-me"><h3 class="card-title">Tú</h3>
       <div class="pf-photo"><span class="pf-av" id="pf-av"></span>
         <div class="row"><button type="button" class="btn small" id="pf-photo-btn">Cambiar foto</button><button type="button" class="btn small ghost" id="pf-photo-del">Quitar</button><input type="file" id="pf-photo-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></div></div>
-      <label class="field"><span>Tu nombre (así te llaman las guías)</span><input id="pf-name" placeholder="Ridds" maxlength="40"></label>
+      <label class="field"><span>Tu nombre (así te llaman los guías)</span><input id="pf-name" placeholder="Ridds" maxlength="40"></label>
       <label class="switch"><input type="checkbox" id="pf-greet"><span></span> Saludarme por mi nombre en Inicio</label>
       <h4 class="pf-h">Tus cuentas</h4>
       <div class="pf-accounts" id="pf-accounts"></div>
@@ -1050,6 +1078,16 @@
 </div>
 
 <div id="toast" class="toast" role="status"></div>
+<div class="close-ask" id="close-ask" hidden role="dialog" aria-modal="true" aria-labelledby="ca-title"></div>
+<div class="lang-first" id="lang-first" hidden role="dialog" aria-modal="true" aria-labelledby="lang-first-title" translate="no">
+  <div class="lang-first-card">
+    <div class="lang-first-paws" aria-hidden="true">🐾</div>
+    <h2 id="lang-first-title">¿En qué idioma usas Satronho Bot?</h2>
+    <p class="lang-first-sub" id="lang-first-sub"></p>
+    <div class="lang-first-list" id="lang-first-list"></div>
+    <p class="lang-first-note" id="lang-first-note"></p>
+  </div>
+</div>
 <div class="vp-modal" id="vp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="vp-title">
   <div class="vp-card">
     <div class="vp-head"><h2 id="vp-title">Elegir voz</h2><button type="button" class="btn small ghost" id="vp-close" aria-label="Cerrar">✕</button></div>
@@ -1080,7 +1118,7 @@
       </div>
       <aside class="ar-live">
         <div class="ar-stage"><iframe id="ar-prev" title="Vista previa de la alerta" tabindex="-1"></iframe><button type="button" class="btn small ar-replay" id="ar-test-prev">↻ Repetir</button></div>
-        <p class="ar-sentence" id="ar-sentence"></p>
+        <p class="ar-sentence" id="ar-sentence" translate="no"></p>
         <div class="ar-qs" id="ar-qs"></div>
         <span class="field-label">Si ese evento también tiene alerta de serie</span>
         <div class="seg ar-excl-big"><button type="button" data-excl="1">Solo esta</button><button type="button" data-excl="0">Las dos</button></div>

@@ -2,8 +2,10 @@
 // Une todas las piezas: navegación, conexiones, voz, música, alertas, metas,
 // overlays, estadísticas, apariencia y los guías.
 
-import { connectSatronho } from '/overlays/client.js';
-import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSaved } from './util.js';
+import { connectSatronho, i18nReady } from '/overlays/client.js';
+import { initCloseAsk } from './closeAsk.js';
+import { LANGS, systemLang } from '/overlays/i18n/i18n.js';
+import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSaved, tr, trn, listOf } from './util.js';
 import { initGuides, setBubble, sayFor, guideToast, GUIDES } from './guides.js';
 import { initAlertRules, onCatalogChange } from './alertRulesUI.js';
 import { initQuick, onQuickStatus, onQuickMusic, refreshRail } from './quick.js';
@@ -30,6 +32,8 @@ import { initNews, onNewsPage } from './news.js';
 import { initStarviosPeople } from './starviosPeople.js';
 import { initFiles, onFilesChanged } from './files.js';
 import { building } from './construction.js';
+import { initHuellitas, onHuellitasPage, onPointsChanged, onPointsFeed, onRedemption } from './huellitas.js';
+import { initApps, onAppsPage, onAppsStatus, onReactionFired } from './apps.js';
 import { initHome, homeEvent, homeVoice, homeMusic, homeStats, homeConnections, homeRefreshExtras } from './home.js';
 
 let config = null;
@@ -205,11 +209,11 @@ function updateSamy() {
   if (trouble) return setBubble('samy', `${PLATFORM_NAMES[trouble.platform]} no me deja entrar todavía (${esc(trouble.detail)}). Sigo intentando yo solo.`);
   if (on.length) return setBubble('samy', `¡Estoy escuchando ${on.join(', ')}! Marca «Conectar al abrir la app» y la próxima vez me conecto solo.`);
   const chatOnly = ['kick', 'starvios', 'twitch'].filter(isShown).map((p) => PLATFORM_NAMES[p]);
-  const list = (a) => (a.length > 1 ? `${a.slice(0, -1).join(', ')} y ${a.at(-1)}` : a[0]);
+  const list = (a) => listOf(a);
   const parts = [];
-  if (isShown('tiktok')) parts.push('TikTok trae alertas, metas y voz');
-  if (chatOnly.length) parts.push(`${list(chatOnly)} ${chatOnly.length > 1 ? 'traen' : 'trae'} chat para la voz y la música`);
-  setBubble('samy', `Escribe tu usuario y pulsa <b>Conectar</b>. ${parts.join('; ')}.`);
+  if (isShown('tiktok')) parts.push(tr('TikTok trae alertas, metas y voz'));
+  if (chatOnly.length) parts.push(trn(chatOnly.length, '{0} trae chat para la voz y la música', '{0} traen chat para la voz y la música', list(chatOnly)));
+  setBubble('samy', `${tr('Escribe tu usuario y pulsa <b>Conectar</b>.')} ${parts.map((x) => `${x}.`).join(' ')}`);
 }
 
 function initPlatforms() {
@@ -219,7 +223,14 @@ function initPlatforms() {
     const cfg = config.platforms[platform];
     field('channel').value = cfg.channel || '';
     field('autoConnect').checked = Boolean(cfg.autoConnect);
-    if (field('signApiKey')) field('signApiKey').value = cfg.signApiKey || '';
+    // La clave nunca vuelve al panel: solo se sabe si hay una guardada.
+    const keyField = field('signApiKey');
+    const showKey = (has) => {
+      if (!keyField) return;
+      keyField.value = '';
+      keyField.placeholder = has ? 'Clave guardada ✓ · pega otra para cambiarla' : 'Pega aquí tu clave';
+    };
+    showKey(cfg.hasSignApiKey);
 
     const connect = async () => {
       const channel = field('channel').value.trim();
@@ -234,7 +245,12 @@ function initPlatforms() {
     field('channel').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') connect(); });
     box.querySelector('[data-act="disconnect"]').addEventListener('click', () => api('POST', `/api/disconnect/${platform}`).catch((e) => toast(e.message)));
     field('autoConnect').addEventListener('change', (ev) => saveConfig({ platforms: { [platform]: { autoConnect: ev.target.checked } } }));
-    field('signApiKey')?.addEventListener('change', (ev) => saveConfig({ platforms: { [platform]: { signApiKey: ev.target.value.trim() } } }));
+    keyField?.addEventListener('change', (ev) => {
+      const key = ev.target.value.trim();
+      if (!key) return;
+      saveConfig({ platforms: { [platform]: { signApiKey: key } } });
+      showKey(true);
+    });
   }
 }
 
@@ -311,10 +327,55 @@ const addLog = (e) => addChatEvent(e);
 const markDecision = (d) => markChatDecision(d);
 
 // ---------- Ajustes → App ----------
+// Primera vez que se abre: preguntar el idioma, cada opción escrita en su propio idioma.
+const FIRST = {
+  es: { title: '¿En qué idioma usas Satronho Bot?', sub: 'El panel, los overlays y lo que el bot escribe en tu chat saldrán en este idioma.', note: 'Lo cambias cuando quieras en Ajustes → App → Idioma.', sys: 'el de tu PC' },
+  en: { title: 'Which language do you use Satronho Bot in?', sub: 'The panel, the overlays and what the bot writes in your chat will be in this language.', note: 'You can change it anytime in Settings → App → Language.', sys: 'your PC\'s language' },
+  pt: { title: 'Em que idioma você usa o Satronho Bot?', sub: 'O painel, os overlays e o que o bot escreve no seu chat vão aparecer neste idioma.', note: 'Você muda quando quiser em Ajustes → App → Idioma.', sys: 'o do seu PC' },
+  fr: { title: 'Dans quelle langue utilises-tu Satronho Bot ?', sub: 'Le panneau, les overlays et ce que le bot écrit dans ton chat seront dans cette langue.', note: 'Tu peux la changer quand tu veux dans Réglages → App → Langue.', sys: 'celle de ton PC' },
+  it: { title: 'In che lingua usi Satronho Bot?', sub: 'Il pannello, gli overlay e quello che il bot scrive nella tua chat saranno in questa lingua.', note: 'Puoi cambiarla quando vuoi in Impostazioni → App → Lingua.', sys: 'quella del tuo PC' },
+};
+function askLanguageFirstTime() {
+  if (config.ui?.chosen) return;
+  const box = $('#lang-first');
+  const sys = systemLang();
+  const txt = FIRST[sys] || FIRST.es;
+  $('#lang-first-title').textContent = txt.title;
+  $('#lang-first-sub').textContent = txt.sub;
+  $('#lang-first-note').textContent = txt.note;
+  const order = [sys, ...Object.keys(LANGS).filter((c) => c !== sys)];
+  $('#lang-first-list').innerHTML = order.map((code) => `<button type="button" data-first-lang="${code}" class="${code === sys ? 'sys' : ''}" lang="${code}">${esc(LANGS[code].name)}${code === sys ? `<small>${esc(txt.sys)}</small>` : ''}</button>`).join('');
+  box.hidden = false;
+  box.querySelector('button')?.focus();
+  box.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-first-lang]');
+    if (!b) return;
+    const code = b.dataset.firstLang;
+    box.hidden = true;
+    // Si es el idioma que ya se ve, no hace falta recargar.
+    saveConfig({ ui: { language: code, chosen: true } });
+    config.ui = { ...config.ui, language: code, chosen: true };
+  });
+}
+
 function initAppSettings() {
+  // Idioma: los nombres van en su propio idioma, para encontrar el tuyo aunque no entiendas el actual.
+  const langSeg = $('#lang-seg');
+  const langNow = config.ui?.language || 'auto';
+  const langOpts = [['auto', tr('Automático (el de Windows)')], ...Object.entries(LANGS).map(([code, l]) => [code, l.name])];
+  langSeg.innerHTML = langOpts.map(([code, name]) => `<button type="button" data-lang-opt="${code}" aria-pressed="${code === langNow}"${code === 'auto' ? '' : ' translate="no"'}>${esc(name)}</button>`).join('');
+  langSeg.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-lang-opt]');
+    if (!b) return;
+    for (const x of langSeg.children) x.setAttribute('aria-pressed', String(x === b));
+    saveConfig({ ui: { language: b.dataset.langOpt, chosen: true } });
+  });
   const tray = $('#tray-toggle');
   tray.checked = Boolean(config.window?.minimizeToTray);
   tray.addEventListener('change', () => saveConfig({ window: { minimizeToTray: tray.checked } }));
+  const ask = $('#askclose-toggle');
+  ask.checked = config.window?.askOnClose !== false;
+  ask.addEventListener('change', () => saveConfig({ window: { askOnClose: ask.checked } }));
   const auto = $('#update-auto');
   auto.checked = config.updates?.auto !== false;
   auto.addEventListener('change', () => saveConfig({ updates: { auto: auto.checked } }));
@@ -357,7 +418,7 @@ function renderUpdate(u) {
     const f = u.failed;
     el.classList.add('failed');
     el.innerHTML = `<div class="upd-fail">
-      <span>⚠️ La versión <b>${esc(u.version)}</b> no se pudo instalar${f.count > 1 ? ` (${f.count} intentos)` : ''}. Sigues usando la ${esc(appVersion || 'versión anterior')}, que funciona normal.</span>
+      <span>⚠️ ${f.count > 1 ? tr('La versión <b>{0}</b> no se pudo instalar ({1} intentos).', esc(u.version), f.count) : tr('La versión <b>{0}</b> no se pudo instalar.', esc(u.version))} ${appVersion ? tr('Sigues usando la {0}, que funciona normal.', esc(appVersion)) : tr('Sigues usando la versión anterior, que funciona normal.')}</span>
       <span class="hint" style="margin:0">${esc(f.reason)}</span>
       <span class="hint" style="margin:0">Cierra las ventanas del Explorador que tengas abiertas en la carpeta de la app y reintenta. Si vuelve a pasar, agrega esta carpeta a las <b>exclusiones de tu antivirus</b>: <code>${esc(f.dir || '')}</code> <button class="btn ghost small" id="update-copy-dir">Copiar ruta</button></span>
     </div><button class="btn primary small" id="update-apply">Reintentar</button><button class="btn ghost small" id="update-later">Luego</button>`;
@@ -399,7 +460,7 @@ function renderHelpPage() {
     .map((id) => {
       const qs = helpKb.KB.filter((e) => e.guide === id);
       return `<div class="card help-guide" style="--g:${GUIDES[id].color}">
-        <div class="who"><span class="guide" data-avatar="${id}" data-size="70"></span><div><b>${esc(GUIDES[id].name)}</b><small>${esc(GUIDES[id].role)}</small></div></div>
+        <div class="who"><span class="guide" data-avatar="${id}" data-size="70"></span><div><b>${esc(GUIDES[id].name)}</b><small>${esc(tr(GUIDES[id].role))}</small></div></div>
         ${qs.map((e) => `<button type="button" class="faq-q" data-faq="${id}">${esc(e.q)}</button>`).join('')}
         <button type="button" class="btn small mt" data-open-help="${id}">Preguntarle a ${esc(GUIDES[id].name)}</button></div>`;
     })
@@ -412,7 +473,8 @@ function renderHelpPage() {
 
 // ---------- Arranque ----------
 async function init() {
-  const state = await api('GET', '/api/state');
+  // Primero el diccionario: así los textos que arma el código salen ya en tu idioma.
+  const [state] = await Promise.all([api('GET', '/api/state'), i18nReady]);
   config = state.config;
   applyAppearance(config);
   const v = `v${state.app?.version || ''}`;
@@ -428,6 +490,13 @@ async function init() {
   initHelp();
   initNav(config);
   initGuides(config);
+  // El archivo de configuración estaba dañado: se recuperó del respaldo.
+  const rec = state.app?.recovered;
+  if (rec) {
+    setTimeout(() => sayFor('troya', rec.from === 'respaldo'
+      ? 'Tu configuración se dañó (quizá por un apagón) y la recuperé de la copia de respaldo. Revisa que todo esté como lo dejaste.'
+      : 'Tu configuración se dañó y no había copia de respaldo, así que la app empezó de cero. El archivo dañado quedó guardado aparte por si hace falta.', 15000, 'warn'), 1500);
+  }
   setHelpContext(() => {
     const voice = lastEngine?.voices?.find((x) => x.id === config.tts.piperVoice && x.installed);
     return { status, music: lastMusic, stats: lastStats, version: appVersion, voiceLabel: voice?.label || '' };
@@ -440,12 +509,16 @@ async function init() {
   initGoalsAndAlerts();
   initOverlays(config);
   initWheels(config);
+  initHuellitas();
+  initApps();
   initSounds(config);
   initSpotify(config);
   initLiveChat();
   initQuick(config);
   initHome();
   initAppSettings();
+  askLanguageFirstTime();
+  initCloseAsk({ live: () => Object.values(status).some((s) => s?.state === 'connected') });
   initHotkeys(config);
   initSupport();
   initNews(config, state.app?.version);
@@ -455,6 +528,7 @@ async function init() {
   for (const el of $$('[data-building]')) { const [t, x] = el.dataset.building.split('|'); el.innerHTML = building(t, x); }
   initUpdatePill();
   onPageChange(onNewsPage);
+  onPageChange((page) => { if (page === 'huellitas') onHuellitasPage(); if (page === 'apps') onAppsPage(); });
   for (const p of ['tiktok', 'kick', 'starvios', 'twitch']) renderStatus({ platform: p, state: 'disconnected' });
 
   let started = false;
@@ -528,6 +602,11 @@ async function init() {
         case 'alert-control': onAlertControl(p); break;
         case 'overlay-style': setAlertSoundEnabled(p?.sound); break;
         case 'widgets': setOverlayWidgets(p); break;
+        case 'points-changed': onPointsChanged(p); break;
+        case 'points-feed': onPointsFeed(p); break;
+        case 'shop-redemption': onRedemption(p); break;
+        case 'apps-status': onAppsStatus(p); break;
+        case 'reaction-fired': onReactionFired(p); break;
         case 'wheels': onWheels(p); break;
         case 'wheel-queue': onWheelQueue(p); break;
         case 'wheel-history': onWheelHistory(p); break;

@@ -3,10 +3,10 @@
 // conocimiento (funciona sin internet). Si la pregunta es de otro tema,
 // el guía te pasa con quien sabe. "Llévame ahí" te lleva a la sección.
 //
-// Reparto: Samy y Troya son las guías principales (≈60 % de los temas y
+// Reparto: Samy y Troya son los guías principales (≈60 % de los temas y
 // las preguntas generales); Ñoño y Juana llevan música y números (≈40 %).
 
-import { $, $$, esc } from './util.js';
+import { $, $$, esc, tr } from './util.js';
 import { showPage } from './nav.js';
 import { GUIDES, avatarHTML, setMood, pickPhoto, removePhoto, hasPhoto } from './guides.js';
 
@@ -382,11 +382,11 @@ const GREET = {
 
 const HANDOFF = {
   samy: (to) => `¡Eso lo sabe ${GUIDES[to].name}! Te lo cuenta:`,
-  troya: (to) => `De eso sabe más ${GUIDES[to].name}. Escúchale:`,
+  troya: (to) => `De eso sabe más ${GUIDES[to].name}. Te lo cuenta:`,
   nono: (to) => `Uy, eso es cosa de ${GUIDES[to].name}:`,
   juana: (to) => `Eso lo lleva ${GUIDES[to].name}:`,
   mecha: (to) => `Redirigiendo a ${GUIDES[to].name}…`,
-  mechanizer: (to) => `Eso lo sabe ${GUIDES[to].name}, te paso con ella o él:`,
+  mechanizer: (to) => `Eso lo sabe ${GUIDES[to].name}. Te lo cuenta:`,
 };
 
 const DONT_KNOW = {
@@ -503,7 +503,7 @@ export function goTo(selector) {
 
 function renderHeader() {
   const g = GUIDES[current];
-  $('#help-who').innerHTML = `${avatarHTML(current, 'md')}<div><b>${esc(g.name)}</b><small>${esc(g.role)}</small></div>`;
+  $('#help-who').innerHTML = `${avatarHTML(current, 'md')}<div><b>${esc(g.name)}</b><small>${esc(tr(g.role))}</small></div>`;
   $('#help-input').placeholder = `Pregúntale a ${g.name}…`;
   $('#help-photo-remove').hidden = !hasPhoto(current);
   for (const b of $$('#help-switch [data-switch]')) b.setAttribute('aria-pressed', String(b.dataset.switch === current));
@@ -541,7 +541,7 @@ export function initHelp() {
   panel.innerHTML = `
     <header class="h-head"><div id="help-who" class="h-who"></div><button type="button" class="btn small ghost" id="help-close" aria-label="Cerrar">✕</button></header>
     <div id="help-switch" class="h-switch">
-      ${['samy', 'troya', 'nono', 'juana', 'mecha', 'mechanizer'].map((id) => `<button type="button" data-switch="${id}" class="${GUIDES[id].lead ? 'lead' : ''}" title="${esc(GUIDES[id].name)} · ${esc(GUIDES[id].role)}">${avatarHTML(id, 'xs')}<span>${esc(GUIDES[id].name)}</span></button>`).join('')}
+      ${['samy', 'troya', 'nono', 'juana', 'mecha', 'mechanizer'].map((id) => `<button type="button" data-switch="${id}" class="${GUIDES[id].lead ? 'lead' : ''}" title="${esc(GUIDES[id].name)} · ${esc(tr(GUIDES[id].role))}">${avatarHTML(id, 'xs')}<span>${esc(GUIDES[id].name)}</span></button>`).join('')}
     </div>
     <div id="help-log" class="h-log" aria-live="polite"></div>
     <form id="help-form" class="h-form"><input id="help-input" autocomplete="off"><button class="btn primary">Preguntar</button></form>

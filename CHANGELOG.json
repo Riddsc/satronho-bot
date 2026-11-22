@@ -1,5 +1,95 @@
 [
   {
+    "version": "0.29.0",
+    "date": "2026-11-22",
+    "title": "Huellitas, tienda con cofres, juegos del chat y apps conectadas",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "🐾 Huellitas: los puntos de tu canal. Tu público las gana por estar en el directo, escribir, seguirte, suscribirse, regalar, dar likes o compartir, y las ve con !huellitas. Tú decides cuánto se gana, el nombre y el emoji. Están en Tu comunidad → Huellitas."
+      },
+      {
+        "type": "nuevo",
+        "text": "🎲 Juegos del chat con huellitas: duelo, tragamonedas, apuesta, rojo-negro-verde, atraco en grupo y trivia (con tus propias preguntas). Cada uno con su comando, límites y espera."
+      },
+      {
+        "type": "nuevo",
+        "text": "🛍️ Tienda y cofres: arma lo que se puede canjear (que la voz lea un saludo, sonar un sonido, girar una ruleta, sumar a un contador o tiempo, saltar canción, o algo que cumples tú). Los cofres dan un premio al azar a quien los abre con una llave. Lo que revisas tú queda en Canjes, para marcarlo hecho o devolverlo."
+      },
+      {
+        "type": "nuevo",
+        "text": "🔌 Apps conectadas: OBS Studio, VTube Studio, Voicemod, Streamer.bot, luces WLED y VRChat. Crea reacciones del tipo «cuando llegue una rosa → cambia a la escena Baile 10 segundos y ponle corazones a tu avatar»."
+      },
+      {
+        "type": "nuevo",
+        "text": "⌨ Stream Deck: cada reacción tiene su propia dirección para ponerla en un botón."
+      },
+      {
+        "type": "nuevo",
+        "text": "Overlays nuevos: «Top de huellitas» y «Cofres y canjes», con el cofre que se abre animado y su premio."
+      },
+      {
+        "type": "nuevo",
+        "text": "Al abrir la app por primera vez te pregunta en qué idioma la quieres. Las novedades también salen en tu idioma."
+      },
+      {
+        "type": "mejora",
+        "text": "Voces en línea en inglés, portugués, francés e italiano, y voces de tu PC nuevas para Brasil e Italia. La voz automática del chat usa voces del mismo idioma que tu voz principal."
+      },
+      {
+        "type": "mejora",
+        "text": "Las frases de Sonidos y memes y las de prueba de voz salen en tu idioma, con una voz de ese idioma."
+      },
+      {
+        "type": "mejora",
+        "text": "Al cerrar la ventana te pregunta si quieres cerrar o esconderla junto al reloj, y te avisa si estás en directo."
+      },
+      {
+        "type": "arreglo",
+        "text": "La voz ya lee los mensajes que son solo números, como «37»."
+      }
+    ]
+  },
+  {
+    "version": "0.28.0",
+    "date": "2026-11-21",
+    "title": "Satronho Bot habla tu idioma y cuida mejor tu PC",
+    "items": [
+      {
+        "type": "nuevo",
+        "text": "🌎 Idiomas: elige en Ajustes → App → Idioma entre español, English, Português (Brasil), Français e Italiano, o «Automático» para usar el de Windows. Cambia el panel, la ventana del chat, los overlays de OBS, lo que el bot escribe en tu chat y los avisos que lee la voz. Las voces siguen eligiéndose aparte, en Voz."
+      },
+      {
+        "type": "mejora",
+        "text": "Singulares y plurales bien dichos en todos los idiomas: «1 canción», «1 regalo», «1 voz»… ya no sale «1 canciones»."
+      },
+      {
+        "type": "mejora",
+        "text": "Seguridad: solo los programas de tu PC pueden hablarle a Satronho Bot. Una página web cualquiera ya no puede cambiar tu configuración ni mandar cosas a tu chat."
+      },
+      {
+        "type": "mejora",
+        "text": "Tu clave de TikTok y el permiso de Spotify se guardan cifrados con la protección de Windows."
+      },
+      {
+        "type": "mejora",
+        "text": "El motor de voz se comprueba al descargarlo: si el archivo no es el original, no se instala."
+      },
+      {
+        "type": "arreglo",
+        "text": "Si la configuración se daña, Satronho Bot la recupera de una copia de respaldo y Troya te avisa."
+      },
+      {
+        "type": "arreglo",
+        "text": "La cola de música sobrevive a un reinicio de la app, y la palabra clave de una alerta ya no salta dentro de otra palabra."
+      },
+      {
+        "type": "arreglo",
+        "text": "Kick y Starvios se reconectan mejor, y la voz ya no se atasca cuando llegan muchos mensajes."
+      }
+    ]
+  },
+  {
     "version": "0.27.1",
     "date": "2026-11-18",
     "title": "Mechanizer estrena diseño",

@@ -158,8 +158,9 @@ const DEFAULTS = {
   // Ventana: nunca se abre sola. Opcionalmente se esconde junto al reloj al minimizar.
   // popout: la ventana aparte del chat (Chat en vivo → Ventana). bounds
   // guarda dónde la dejaste (monitor, posición y tamaño); la pone la app.
-  window: { minimizeToTray: false, popout: { onTop: false, opacity: 100, idleOpacity: 100, bounds: null } },
-  // Tu perfil: cómo te llaman las guías, tu foto, el menú y la barra derecha.
+  ui: { language: 'auto', chosen: false }, // idioma de la app: auto (el de Windows), es, en, pt, fr, it
+  window: { minimizeToTray: false, askOnClose: true, popout: { onTop: false, opacity: 100, idleOpacity: 100, bounds: null } },
+  // Tu perfil: cómo te llaman los guías, tu foto, el menú y la barra derecha.
   profile: {
     name: '',
     photo: '',
@@ -218,6 +219,7 @@ const DEFAULTS = {
     // Derechos de autor: off · avoid (evita videos oficiales de sellos) · free (solo música libre)
     copyright: 'avoid',
   },
+  musicQueue: null, // la cola de pedidos guardada (se recupera al reabrir la app)
   musicPlaylists: [], // listas guardadas: { id, name, songs: [{ videoId, title, author, durationSec, thumbnail }] }
   stats: {
     idleMinutes: 30, // sin actividad este tiempo = el directo terminó
@@ -267,6 +269,7 @@ function isObject(v) {
 function deepMerge(base, extra) {
   const out = { ...base };
   for (const [k, v] of Object.entries(extra || {})) {
+    if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
     out[k] = isObject(v) && isObject(base[k]) ? deepMerge(base[k], v) : v;
   }
   return out;
@@ -277,6 +280,9 @@ class Store {
     fs.mkdirSync(dataDir, { recursive: true });
     this.dir = dataDir;
     this.file = path.join(dataDir, 'satronho-config.json');
+    this.backup = path.join(dataDir, 'satronho-config.respaldo.json');
+    this.lastBackup = 0;
+    this.recovered = null; // { from: 'respaldo' | 'cero', damaged: nombre del archivo apartado }
     const saved = this.load();
     this.data = deepMerge(DEFAULTS, saved);
     // 0.12: el filtro «solo quien envió Quiéreme» pasa a ser una regla de
@@ -293,11 +299,29 @@ class Store {
     this.saveTimer = null;
   }
 
+  // Si el archivo está dañado no se pisa: se aparta con otro nombre y se
+  // carga la copia de respaldo. Así nunca se pierde toda la configuración.
   load() {
+    let text;
     try {
-      return JSON.parse(fs.readFileSync(this.file, 'utf8'));
+      text = fs.readFileSync(this.file, 'utf8');
     } catch {
-      return {};
+      return {}; // primera vez: aún no hay configuración
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const damaged = `satronho-config.dañado-${stamp}.json`;
+      try { fs.renameSync(this.file, path.join(this.dir, damaged)); } catch { /* se queda donde está */ }
+      try {
+        const data = JSON.parse(fs.readFileSync(this.backup, 'utf8'));
+        this.recovered = { from: 'respaldo', damaged };
+        return data;
+      } catch {
+        this.recovered = { from: 'cero', damaged };
+        return {};
+      }
     }
   }
 
@@ -328,6 +352,14 @@ class Store {
     // Escritura atómica: si se corta la luz no queda un JSON a medias.
     const tmp = `${this.file}.tmp`;
     fs.writeFileSync(tmp, JSON.stringify(this.data, null, 2));
+    // Copia de respaldo de la versión anterior (como mucho cada 10 minutos).
+    if (Date.now() - this.lastBackup > 10 * 60 * 1000 && fs.existsSync(this.file)) {
+      try {
+        JSON.parse(fs.readFileSync(this.file, 'utf8')); // solo si está sana
+        fs.copyFileSync(this.file, this.backup);
+        this.lastBackup = Date.now();
+      } catch { /* la copia anterior no servía: se conserva el respaldo que había */ }
+    }
     fs.renameSync(tmp, this.file);
   }
 }
