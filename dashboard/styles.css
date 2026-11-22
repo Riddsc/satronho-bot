@@ -2771,3 +2771,13 @@ html.i18n-wait body { visibility: hidden; animation: i18n-show 0s 1.5s forwards;
 .btn-logo { width: 18px; height: 18px; object-fit: contain; margin-right: 7px; vertical-align: -4px; }
 .mu-seg .mu-logo { margin: 0; }
 .ap-card:not(.on) .ap-mark { filter: none !important; opacity: .9; }
+
+/* Ayuda → Reportar: invitación al Discord de la comunidad */
+.rep-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.dc-card { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center; background: linear-gradient(135deg, color-mix(in srgb, #5865f2 22%, var(--panel)), var(--panel) 70%); border-color: color-mix(in srgb, #5865f2 45%, var(--edge)); }
+.dc-logo { width: 46px; height: 46px; object-fit: contain; grid-row: span 1; }
+.dc-text .card-title { margin: 0 0 2px; }
+.dc-text .hint { margin: 0; }
+.btn.primary.dc-join { color: #fff; background-image: none; grid-column: 1 / -1; justify-self: start; background: #5865f2; border-color: #5865f2; text-decoration: none; box-shadow: 0 6px 18px -8px #5865f2; }
+.btn.primary.dc-join:hover { background: #4752c4; border-color: #4752c4; }
+.me-menu .me-logo { width: 17px; height: 17px; object-fit: contain; }
