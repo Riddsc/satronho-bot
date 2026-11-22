@@ -24,7 +24,7 @@ const { VOICES: PIPER_VOICES } = require('../tts/voices');
 function describeVoice(base) {
   if (base.startsWith('ms:')) {
     const v = MS_VOICES.find((x) => x.id === base.slice(3));
-    return v ? { name: v.name, gender: v.gender, lang: 'es', locale: v.locale } : null;
+    return v ? { name: v.name, gender: v.gender, lang: v.lang || 'es', locale: v.locale } : null;
   }
   const [id, speaker] = base.split('#');
   const v = PIPER_VOICES.find((x) => x.id === id);
@@ -161,13 +161,25 @@ function createTts({ store, broadcast, engine, online = null }) {
   //   "es_MX-claude-high#0"  voz de Piper (#variante)
   //   "win:Microsoft Sabina" voz de Windows
   //   …"~g" / "~a"           la misma voz en tono grave / agudo
-  // auto=true: solo las que entran al reparto automático (español).
-  // auto=false: todas (también inglés y francés, para espectadores especiales).
+  // auto=true: solo las que entran al reparto automático (el idioma de tu voz principal).
+  // auto=false: todas (también otros idiomas, para espectadores especiales).
+  // Idioma de una voz por su clave («es_MX-…», «ms:pt-BR-…»); las de Windows no lo dicen.
+  const voiceLang = (k) => {
+    const m = String(k || '').match(/^(?:ms:)?([a-z]{2})[_-][A-Z]{2}/);
+    return m ? m[1] : null;
+  };
+  // El reparto automático usa voces del mismo idioma que tu voz principal
+  // (español si no se sabe), para no mezclar acentos de otro idioma.
+  function poolLang() {
+    const c = cfg();
+    return voiceLang(c.mainVoice) || voiceLang(c.piperVoice) || 'es';
+  }
   function baseKeys(auto = true) {
     const c = cfg();
-    const keys = engine.installedVoiceKeys().filter((k) => !auto || k.startsWith('es_'));
+    const lang = poolLang();
+    const keys = engine.installedVoiceKeys().filter((k) => !auto || voiceLang(k) === lang);
     if (c.useWindowsVoices) keys.push(...(store.get('windowsVoices') || []).map((n) => `win:${n}`));
-    if (c.useOnlineVoices && online) keys.push(...online.voices().map((v) => v.key));
+    if (c.useOnlineVoices && online) keys.push(...online.voices().filter((v) => !auto || (v.lang || 'es') === lang).map((v) => v.key));
     return keys;
   }
   const withTones = (base) => (cfg().toneVariants ? base.flatMap((k) => [k, `${k}~g`, `${k}~a`]) : base);
@@ -225,7 +237,10 @@ function createTts({ store, broadcast, engine, online = null }) {
     if (screened.skip) return no(screened.skip);
     let clean = sanitize(screened.text, c);
     if (c.stripNumbers) clean = clean.replace(/\p{N}+/gu, ' ').replace(/\s+/g, ' ').trim();
-    if (!clean || !/\p{L}/u.test(clean)) return no('no queda texto que leer tras los filtros');
+    // Un número solo («37», «100!») también se lee: en juegos y sorteos la gente
+    // responde con cifras. Las tiras largas de números son spam y no se leen.
+    if (!clean || (!/\p{L}/u.test(clean) && !/\p{N}/u.test(clean))) return no('no queda texto que leer tras los filtros');
+    if (!/\p{L}/u.test(clean) && clean.replace(/\D/g, '').length > 12) return no('es una tira larga de números');
 
     const norm = clean.toLowerCase();
     const prev = lastText.get(key);
@@ -245,8 +260,9 @@ function createTts({ store, broadcast, engine, online = null }) {
     const plainName = (n) => String(n || '').normalize('NFKC').replace(/[^\p{L}\p{N}\s._-]/gu, ' ').replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim();
     const spoken = special?.spokenName || plainName(e.user.name) || plainName(e.user.id) || 'Alguien';
     const voice = pickVoice(e.platform, e.user, special);
-    // «dice» en el idioma de la voz (inglés y francés se dan a mano).
-    const says = /^en_/.test(voice || '') ? 'says' : /^fr_/.test(voice || '') ? 'dit' : 'dice';
+    // «dice» en el idioma de la voz que lo lee.
+    const SAYS = { es: 'dice', en: 'says', pt: 'diz', fr: 'dit', it: 'dice' };
+    const says = SAYS[voiceLang(voice)] || 'dice';
     const PNAME = { tiktok: 'TikTok', kick: 'Kick', twitch: 'Twitch', starvios: 'Starvios' };
     const tpl = String(c.template || '').trim();
     const text = !c.sayName ? clean

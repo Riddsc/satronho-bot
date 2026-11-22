@@ -3,7 +3,8 @@
 // overlays, estadísticas, apariencia y los guías.
 
 import { connectSatronho, i18nReady } from '/overlays/client.js';
-import { LANGS } from '/overlays/i18n/i18n.js';
+import { initCloseAsk } from './closeAsk.js';
+import { LANGS, systemLang } from '/overlays/i18n/i18n.js';
 import { $, $$, api, esc, saveConfig, toast, timeOf, PLATFORM_NAMES, onConfigSaved, tr, trn, listOf } from './util.js';
 import { initGuides, setBubble, sayFor, guideToast, GUIDES } from './guides.js';
 import { initAlertRules, onCatalogChange } from './alertRulesUI.js';
@@ -31,6 +32,8 @@ import { initNews, onNewsPage } from './news.js';
 import { initStarviosPeople } from './starviosPeople.js';
 import { initFiles, onFilesChanged } from './files.js';
 import { building } from './construction.js';
+import { initHuellitas, onHuellitasPage, onPointsChanged, onPointsFeed, onRedemption } from './huellitas.js';
+import { initApps, onAppsPage, onAppsStatus, onReactionFired } from './apps.js';
 import { initHome, homeEvent, homeVoice, homeMusic, homeStats, homeConnections, homeRefreshExtras } from './home.js';
 
 let config = null;
@@ -324,6 +327,37 @@ const addLog = (e) => addChatEvent(e);
 const markDecision = (d) => markChatDecision(d);
 
 // ---------- Ajustes → App ----------
+// Primera vez que se abre: preguntar el idioma, cada opción escrita en su propio idioma.
+const FIRST = {
+  es: { title: '¿En qué idioma usas Satronho Bot?', sub: 'El panel, los overlays y lo que el bot escribe en tu chat saldrán en este idioma.', note: 'Lo cambias cuando quieras en Ajustes → App → Idioma.', sys: 'el de tu PC' },
+  en: { title: 'Which language do you use Satronho Bot in?', sub: 'The panel, the overlays and what the bot writes in your chat will be in this language.', note: 'You can change it anytime in Settings → App → Language.', sys: 'your PC\'s language' },
+  pt: { title: 'Em que idioma você usa o Satronho Bot?', sub: 'O painel, os overlays e o que o bot escreve no seu chat vão aparecer neste idioma.', note: 'Você muda quando quiser em Ajustes → App → Idioma.', sys: 'o do seu PC' },
+  fr: { title: 'Dans quelle langue utilises-tu Satronho Bot ?', sub: 'Le panneau, les overlays et ce que le bot écrit dans ton chat seront dans cette langue.', note: 'Tu peux la changer quand tu veux dans Réglages → App → Langue.', sys: 'celle de ton PC' },
+  it: { title: 'In che lingua usi Satronho Bot?', sub: 'Il pannello, gli overlay e quello che il bot scrive nella tua chat saranno in questa lingua.', note: 'Puoi cambiarla quando vuoi in Impostazioni → App → Lingua.', sys: 'quella del tuo PC' },
+};
+function askLanguageFirstTime() {
+  if (config.ui?.chosen) return;
+  const box = $('#lang-first');
+  const sys = systemLang();
+  const txt = FIRST[sys] || FIRST.es;
+  $('#lang-first-title').textContent = txt.title;
+  $('#lang-first-sub').textContent = txt.sub;
+  $('#lang-first-note').textContent = txt.note;
+  const order = [sys, ...Object.keys(LANGS).filter((c) => c !== sys)];
+  $('#lang-first-list').innerHTML = order.map((code) => `<button type="button" data-first-lang="${code}" class="${code === sys ? 'sys' : ''}" lang="${code}">${esc(LANGS[code].name)}${code === sys ? `<small>${esc(txt.sys)}</small>` : ''}</button>`).join('');
+  box.hidden = false;
+  box.querySelector('button')?.focus();
+  box.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-first-lang]');
+    if (!b) return;
+    const code = b.dataset.firstLang;
+    box.hidden = true;
+    // Si es el idioma que ya se ve, no hace falta recargar.
+    saveConfig({ ui: { language: code, chosen: true } });
+    config.ui = { ...config.ui, language: code, chosen: true };
+  });
+}
+
 function initAppSettings() {
   // Idioma: los nombres van en su propio idioma, para encontrar el tuyo aunque no entiendas el actual.
   const langSeg = $('#lang-seg');
@@ -334,11 +368,14 @@ function initAppSettings() {
     const b = ev.target.closest('[data-lang-opt]');
     if (!b) return;
     for (const x of langSeg.children) x.setAttribute('aria-pressed', String(x === b));
-    saveConfig({ ui: { language: b.dataset.langOpt } });
+    saveConfig({ ui: { language: b.dataset.langOpt, chosen: true } });
   });
   const tray = $('#tray-toggle');
   tray.checked = Boolean(config.window?.minimizeToTray);
   tray.addEventListener('change', () => saveConfig({ window: { minimizeToTray: tray.checked } }));
+  const ask = $('#askclose-toggle');
+  ask.checked = config.window?.askOnClose !== false;
+  ask.addEventListener('change', () => saveConfig({ window: { askOnClose: ask.checked } }));
   const auto = $('#update-auto');
   auto.checked = config.updates?.auto !== false;
   auto.addEventListener('change', () => saveConfig({ updates: { auto: auto.checked } }));
@@ -472,12 +509,16 @@ async function init() {
   initGoalsAndAlerts();
   initOverlays(config);
   initWheels(config);
+  initHuellitas();
+  initApps();
   initSounds(config);
   initSpotify(config);
   initLiveChat();
   initQuick(config);
   initHome();
   initAppSettings();
+  askLanguageFirstTime();
+  initCloseAsk({ live: () => Object.values(status).some((s) => s?.state === 'connected') });
   initHotkeys(config);
   initSupport();
   initNews(config, state.app?.version);
@@ -487,6 +528,7 @@ async function init() {
   for (const el of $$('[data-building]')) { const [t, x] = el.dataset.building.split('|'); el.innerHTML = building(t, x); }
   initUpdatePill();
   onPageChange(onNewsPage);
+  onPageChange((page) => { if (page === 'huellitas') onHuellitasPage(); if (page === 'apps') onAppsPage(); });
   for (const p of ['tiktok', 'kick', 'starvios', 'twitch']) renderStatus({ platform: p, state: 'disconnected' });
 
   let started = false;
@@ -560,6 +602,11 @@ async function init() {
         case 'alert-control': onAlertControl(p); break;
         case 'overlay-style': setAlertSoundEnabled(p?.sound); break;
         case 'widgets': setOverlayWidgets(p); break;
+        case 'points-changed': onPointsChanged(p); break;
+        case 'points-feed': onPointsFeed(p); break;
+        case 'shop-redemption': onRedemption(p); break;
+        case 'apps-status': onAppsStatus(p); break;
+        case 'reaction-fired': onReactionFired(p); break;
         case 'wheels': onWheels(p); break;
         case 'wheel-queue': onWheelQueue(p); break;
         case 'wheel-history': onWheelHistory(p); break;

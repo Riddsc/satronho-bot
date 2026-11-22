@@ -158,8 +158,8 @@ const DEFAULTS = {
   // Ventana: nunca se abre sola. Opcionalmente se esconde junto al reloj al minimizar.
   // popout: la ventana aparte del chat (Chat en vivo → Ventana). bounds
   // guarda dónde la dejaste (monitor, posición y tamaño); la pone la app.
-  ui: { language: 'auto' }, // idioma de la app: auto (el de Windows), es, en, pt, fr, it
-  window: { minimizeToTray: false, popout: { onTop: false, opacity: 100, idleOpacity: 100, bounds: null } },
+  ui: { language: 'auto', chosen: false }, // idioma de la app: auto (el de Windows), es, en, pt, fr, it
+  window: { minimizeToTray: false, askOnClose: true, popout: { onTop: false, opacity: 100, idleOpacity: 100, bounds: null } },
   // Tu perfil: cómo te llaman los guías, tu foto, el menú y la barra derecha.
   profile: {
     name: '',

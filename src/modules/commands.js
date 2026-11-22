@@ -15,7 +15,7 @@
 // ese tiempo hubo al menos N mensajes en el chat (para no hablar solo).
 
 const crypto = require('crypto');
-const { t: tr, tExact } = require('../i18n');
+const { t: tr, tExact, getLocale } = require('../i18n');
 
 // Nombres que ya usa la app y no se pueden pisar. Los de serie siempre;
 // además, los que el streamer puso a la música, a los sonidos, a los
@@ -25,7 +25,7 @@ const PLATFORMS = ['kick', 'starvios', 'twitch', 'tiktok'];
 
 const cleanName = (s) => String(s || '').trim().replace(/^!+/, '').toLowerCase().replace(/\s+/g, '').slice(0, 30);
 
-function createCommands({ store, writers, getStatus, getMusic, speak, broadcast = () => {} }) {
+function createCommands({ store, writers, getStatus, getMusic, speak, broadcast = () => {}, appCommands = () => [] }) {
   const lastUse = new Map(); // id -> ts (espera general)
   const lastUserUse = new Map(); // id:usuario -> ts
   const timerState = new Map(); // id -> { last, chat }
@@ -39,6 +39,7 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
     const music = store.get('music')?.commands || {};
     if (RESERVED.has(name) || Object.values(music).some((c) => (c?.names || []).map(cleanName).includes(name))) return tr('!{0} ya lo usa la música', name);
     if (cleanName(store.get('sounds')?.chat?.command) === name) return tr('!{0} ya lo usan los sonidos del chat', name);
+    if (appCommands().includes(name)) return tr('!{0} ya lo usan las huellitas, los juegos o la tienda', name);
     if ((store.get('counters') || []).some((c) => cleanName(c.command) === name)) return tr('!{0} ya lo usa un contador', name);
     for (const w of store.get('wheels')?.list || []) {
       for (const t of w.triggers || []) if (t.type === 'command' && cleanName(t.command) === name) return w.name ? tr('!{0} ya lo usa la ruleta «{1}»', name, w.name) : tr('!{0} ya lo usa una ruleta', name);
@@ -121,7 +122,7 @@ function createCommands({ store, writers, getStatus, getMusic, speak, broadcast 
         const hi = Math.max(Number(a), Number(b));
         return String(lo + Math.floor(Math.random() * (hi - lo + 1)));
       })
-      .replace(/\{hora\}/gi, now.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' }))
+      .replace(/\{hora\}/gi, now.toLocaleTimeString(getLocale(), { hour: 'numeric', minute: '2-digit' }))
       .replace(/\s+/g, ' ')
       .trim();
   }

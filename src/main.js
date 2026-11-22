@@ -283,6 +283,18 @@ function ensureTray() {
   return tray;
 }
 
+// Lo que el streamer eligió en el aviso al cerrar.
+function windowAction(action) {
+  if (!win || win.isDestroyed()) return;
+  if (action === 'tray') {
+    ensureTray();
+    win.hide();
+    return;
+  }
+  quitting = true;
+  win.close();
+}
+
 function applyWindowConfig(cfg) {
   if (!cfg?.minimizeToTray && tray) {
     tray.destroy();
@@ -527,6 +539,7 @@ if (!app.requestSingleInstanceLock()) {
         onHotkeys: applyHotkeys,
         popoutHover,
         clearLogin,
+        windowAction,
         // Cifrado de Windows (DPAPI) para el Client Secret y los permisos de Kick.
         vault: safeStorage.isEncryptionAvailable()
           ? {
@@ -598,6 +611,20 @@ if (!app.requestSingleInstanceLock()) {
       if (String(target).includes('/popout-chat.html')) trackPopout(child, store);
     });
 
+    // Al tocar ✕: el panel muestra el aviso «¿Cerramos Satronho Bot?».
+    // Si la página no responde (o el aviso está apagado), se cierra normal.
+    win.on('close', (ev) => {
+      // Escondida junto al reloj o apagando Windows: se cierra sin preguntar.
+      if (quitting || applying || !win.isVisible() || store.get('window')?.askOnClose === false) return;
+      ev.preventDefault();
+      win.webContents
+        .executeJavaScript('typeof window.__satronhoAskClose === "function" ? window.__satronhoAskClose() : false', true)
+        .then((shown) => { if (!shown) windowAction('close'); })
+        .catch(() => windowAction('close'));
+    });
+
+    win.on('session-end', () => { quitting = true; });
+
     win.on('minimize', (ev) => {
       if (!store.get('window')?.minimizeToTray) return;
       ev.preventDefault();
@@ -610,6 +637,9 @@ if (!app.requestSingleInstanceLock()) {
     win.webContents.once('did-finish-load', () => setTimeout(() => checkForUpdates(store), 5000));
     setInterval(() => checkForUpdates(store), 6 * 60 * 60 * 1000);
   });
+
+  // Salir desde el menú del reloj, apagar Windows o cerrar sesión: sin aviso.
+  app.on('before-quit', () => { quitting = true; });
 
   app.on('window-all-closed', async () => {
     if (applying) return; // applyUpdate ya se encarga de salir
