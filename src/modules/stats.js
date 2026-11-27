@@ -12,6 +12,7 @@
 // en el historial (hasta 500 sesiones) y se suman los tops históricos.
 
 const fs = require('fs');
+const { renameWithRetry } = require('../store');
 const path = require('path');
 
 const MAX_HISTORY = 500;
@@ -65,7 +66,7 @@ function createStats({ store, dataDir, broadcast }) {
   };
   const write = (f, data) => {
     fs.writeFileSync(`${f}.tmp`, JSON.stringify(data));
-    fs.renameSync(`${f}.tmp`, f);
+    renameWithRetry(`${f}.tmp`, f);
   };
 
   const cfg = () => store.get('stats');
@@ -125,8 +126,14 @@ function createStats({ store, dataDir, broadcast }) {
     pushTimer = setTimeout(() => broadcast('stats', summary(current)), 1500);
   }
   saveTimer = setInterval(() => {
-    if (dirty && current) write(files.current, current);
-    dirty = false;
+    if (dirty && current) {
+      try {
+        write(files.current, current);
+        dirty = false;
+      } catch (err) {
+        console.error(`No se pudieron guardar las estadísticas: ${err?.code || err?.message || err}`); // se reintenta en 30 s
+      }
+    } else dirty = false;
     if (current && Date.now() - current.lastEventAt > cfg().idleMinutes * 60000) end('inactividad');
   }, 30000);
 

@@ -546,7 +546,6 @@ async function init() {
           setAlertSoundEnabled(p.overlayStyle?.sound);
           Object.values(p.status || {}).forEach(renderStatus);
           resetChat();
-          if ($('#home-feed')) $('#home-feed').innerHTML = '<li class="empty">Aún no llega nada. Prueba con ▶ Simular.</li>';
           [...(p.recent || [])].reverse().forEach((e) => { addLog(e); homeEvent(e); });
           setTtsLog(p.ttsLog);
           [...(p.ttsLog || [])].reverse().forEach((x) => x.eventId && markChatDecision({ eventId: x.eventId, read: x.read, reason: x.reason }));

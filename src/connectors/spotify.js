@@ -186,7 +186,7 @@ function createSpotify({ store, fetchFn = fetch, broadcast = () => {}, port = 38
 
   if (sec().refresh) loadMe().then(() => { start(); push(); });
 
-  return { status, authUrl, finish, disconnect, request, skip, pause, play, queueList, active, poll, nowPlaying: () => now };
+  return { status, authUrl, finish, disconnect, request, skip, pause, play, queueList, active, poll, stop, nowPlaying: () => now };
 }
 
 module.exports = { createSpotify };

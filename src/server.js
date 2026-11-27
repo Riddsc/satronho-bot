@@ -601,7 +601,7 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     }
   };
 
-  app.get('/api/state', (_req, res) => ok(res, { config: publicConfig(store.get()), status, app: { name: 'Satronho Bot', author: 'RiddsSatronho', version: appInfo.version || require('../package.json').version, portable: Boolean(appInfo.portable), pagesBase: `${PAGES_ORIGIN}/satronho-bot`, port: store.get('port'), recovered: store.recovered || null } }));
+  app.get('/api/state', (_req, res) => ok(res, { config: publicConfig(store.get()), status, app: { name: 'Satronho Bot', author: 'RiddsSatronho', version: appInfo.version || require('../package.json').version, installed: Boolean(appInfo.installed), pagesBase: `${PAGES_ORIGIN}/satronho-bot`, port: store.get('port'), recovered: store.recovered || null } }));
 
   // Actualizaciones (solo en la versión instalada con Velopack).
   let lastUpdate = null;
@@ -1305,6 +1305,10 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     ok(res, { stickers: catalog.list('stickers', p), found, live: status[p]?.state === 'connected', diag: p === 'tiktok' ? connectors.tiktok.diagnostics?.() : null });
   });
   app.get('/gift-img', async (req, res) => {
+    // Solo para el panel y los overlays de este PC: una página de internet
+    // no puede ponernos a descargar imágenes (llenaría el disco).
+    const site = req.headers['sec-fetch-site'];
+    if (site && site !== 'same-origin' && site !== 'none') return res.status(403).end();
     const url = String(req.query.u || '');
     try {
       const f = await catalog.imagePath(url);
@@ -1397,6 +1401,8 @@ function createServer({ store, dataDir = store.dir, fetch: fetchFn = fetch, reso
     games.stop();
     points.stop();
     apps.stop();
+    // Relojes que quedaban prendidos (importa en «npm run server» y en pruebas).
+    for (const m of [account, goals, commands, spotify]) { try { m.stop?.(); } catch { /* ya parado */ } }
     store.saveNow();
     for (const ws of wss.clients) ws.terminate();
     // OBS y TikTok LIVE Studio dejan conexiones abiertas (keep-alive): si no
