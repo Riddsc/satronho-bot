@@ -15,7 +15,7 @@
 //   - packs (.satronho-sonidos) que exporta otro streamer.
 // Satronho no reparte sonidos ajenos: cada quien trae los suyos.
 
-const { isPrivateAddress, readLimited } = require('../security');
+const { assertPublicUrl, fetchPublic, readLimited } = require('../security');
 const fs = require('fs');
 const path = require('path');
 
@@ -90,21 +90,15 @@ function createSoundLibrary({ dataDir, fetchFn = fetch, engine, online, store, r
 
   // ---------- Descargas ----------
   async function download(url) {
-    const u = new URL(url);
-    if (!/^https?:$/.test(u.protocol)) throw new Error('El enlace debe empezar por http o https');
-    if (isPrivateAddress(u.hostname)) throw new Error('Ese enlace no es de internet');
-    let res = await (mediaFetch || fetchFn)(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' }).catch(() => null);
+    const u = await assertPublicUrl(url);
+    const opts = { headers: { 'User-Agent': UA, Accept: '*/*' } };
+    // Cada redirección se revisa: ninguna página puede mandarnos a este PC.
+    let res = await fetchPublic(mediaFetch || fetchFn, u.href, opts).catch((err) => (/enlace/.test(err.message) ? Promise.reject(err) : null));
     // Si la página protege sus archivos, se prueba con el otro camino.
-    if ((!res || !res.ok) && mediaFetch) res = await fetchFn(u.href, { headers: { 'User-Agent': UA, Accept: '*/*' }, redirect: 'follow' }).catch(() => null);
+    if ((!res || !res.ok) && mediaFetch) res = await fetchPublic(fetchFn, u.href, opts).catch((err) => (/enlace/.test(err.message) ? Promise.reject(err) : null));
     if (!res) throw new Error('No hay conexión con esa página. Revisa tu internet.');
     if (!res.ok) throw new Error(`La página respondió ${res.status}`);
     const type = String(res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-    // Si la página redirigió a una dirección de este PC o de la casa, no se usa.
-    try {
-      if (res.url && isPrivateAddress(new URL(res.url).hostname)) throw new Error('private');
-    } catch {
-      throw new Error('Ese enlace no es de internet');
-    }
     const buf = await readLimited(res, MAX_BYTES, 'Ese sonido pesa más de 10 MB');
     return { buf, type, finalUrl: res.url || u.href };
   }

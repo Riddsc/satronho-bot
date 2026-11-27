@@ -6,7 +6,7 @@
 // Las imágenes se copian a tu PC la primera vez que se piden, para que no
 // se pierdan cuando la plataforma cambia sus enlaces.
 
-const { isPrivateAddress, readLimited } = require('../security');
+const { assertPublicUrl, fetchPublic, readLimited } = require('../security');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -71,19 +71,40 @@ function createGiftCatalog({ dataDir, broadcast = () => {}, fetchFn = fetch }) {
 
   // Imagen local: /gift-img/<hash>.<ext> (se descarga la primera vez).
   const localName = (url) => `${crypto.createHash('sha1').update(url).digest('hex').slice(0, 20)}.${(url.match(/\.(png|webp|jpe?g|gif)(\?|$)/i)?.[1] || 'png').toLowerCase()}`;
+  // Tope de la carpeta de imágenes: si se pasa, se borran las más viejas.
+  const MAX_CACHE_BYTES = 200 * 1024 * 1024;
+  const MAX_CACHE_FILES = 4000;
+  let cacheCheck = 0;
+  function trimCache() {
+    if (Date.now() - cacheCheck < 60 * 1000) return;
+    cacheCheck = Date.now();
+    try {
+      const files = fs.readdirSync(imgDir).map((name) => {
+        const full = path.join(imgDir, name);
+        const st = fs.statSync(full);
+        return { full, size: st.size, used: st.atimeMs || st.mtimeMs };
+      }).sort((a, b) => a.used - b.used);
+      let total = files.reduce((n, f) => n + f.size, 0);
+      let count = files.length;
+      for (const f of files) {
+        if (total <= MAX_CACHE_BYTES && count <= MAX_CACHE_FILES) break;
+        try { fs.rmSync(f.full); total -= f.size; count -= 1; } catch { /* en uso */ }
+      }
+    } catch { /* sin carpeta */ }
+  }
+
   async function imagePath(url) {
     if (!/^https:\/\//.test(url || '')) return null;
-    let host = '';
-    try { host = new URL(url).hostname; } catch { return null; }
-    if (isPrivateAddress(host)) return null; // solo imágenes de internet
+    try { await assertPublicUrl(url); } catch { return null; } // solo imágenes de internet
     const f = path.join(imgDir, localName(url));
     if (fs.existsSync(f)) return f;
-    const res = await fetchFn(url);
+    const res = await fetchPublic(fetchFn, url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const type = String(res.headers?.get?.('content-type') || '');
     if (type && !/^image\//i.test(type)) throw new Error('No es una imagen');
     const buf = await readLimited(res, 3 * 1024 * 1024, 'Imagen muy grande');
     fs.writeFileSync(f, buf);
+    trimCache();
     return f;
   }
 

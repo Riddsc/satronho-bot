@@ -297,7 +297,7 @@ function renderEditor() {
   let opts = '';
   if (t === 'coins') opts = `<div class="two"><label class="field"><span>Desde (monedas)</span><input type="number" min="0" data-d="min" value="${d.min ?? 1}"></label><label class="field"><span>Hasta (vacío = sin límite)</span><input type="number" min="0" data-d="max" value="${d.max ?? ''}"></label></div>`;
   if (t === 'likesPerson' || t === 'likesTotal') opts = `<label class="field"><span>Cada cuántos likes ${t === 'likesPerson' ? 'de la misma persona' : 'entre todos'}</span><input type="number" min="1" data-d="every" value="${d.every ?? (t === 'likesPerson' ? 100 : 1000)}"></label>`;
-  if (t === 'keyword') opts = `<label class="field"><span>Palabras o frases (separadas por coma)</span><input data-d="keyword" value="${esc(d.keyword || '')}" placeholder="saludos, buenas"></label>`;
+  if (t === 'keyword') opts = `<label class="field"><span>Palabras o frases (separadas por coma)</span><input id="ar-keyword" data-d="keyword" value="${esc(d.keyword || '')}" placeholder="saludos, buenas"></label>`;
   if (t === 'join') opts = '<p class="hint">⚠ En directos con mucha gente entra alguien cada segundo. Ponle una espera entre repeticiones (paso 2).</p>';
   $('#ar-opts').innerHTML = opts;
   renderPicker();

@@ -106,6 +106,50 @@ function isPrivateAddress(hostname) {
   return false;
 }
 
+// ¿Este enlace lleva a internet de verdad? Mira el nombre y también a qué
+// dirección apunta (un dominio cualquiera puede apuntar a 127.0.0.1).
+async function assertPublicUrl(raw, lookup = require('dns').promises.lookup) {
+  let u;
+  try {
+    u = new URL(String(raw));
+  } catch {
+    throw new Error('Ese enlace no es válido');
+  }
+  if (!/^https?:$/.test(u.protocol)) throw new Error('El enlace debe empezar por http o https');
+  if (isPrivateAddress(u.hostname)) throw new Error('Ese enlace no es de internet');
+  let addrs = [];
+  try {
+    addrs = await lookup(u.hostname.replace(/^\[|\]$/g, ''), { all: true });
+  } catch {
+    addrs = []; // sin respuesta del DNS: la descarga misma fallará si no existe
+  }
+  if (addrs.some((a) => isPrivateAddress(a.address))) throw new Error('Ese enlace no es de internet');
+  return u;
+}
+
+// Descarga siguiendo las redirecciones a mano: cada salto se revisa con
+// assertPublicUrl, así una página no puede mandarnos a este PC ni a la casa.
+async function fetchPublic(fetchFn, url, opts = {}, { maxRedirects = 5, lookup } = {}) {
+  let current = (await assertPublicUrl(url, lookup)).href;
+  for (let i = 0; i <= maxRedirects; i += 1) {
+    const res = await fetchFn(current, { ...opts, redirect: 'manual' });
+    const location = res.headers?.get?.('location');
+    if (res.status >= 300 && res.status < 400 && location) {
+      res.body?.cancel?.().catch?.(() => {});
+      current = (await assertPublicUrl(new URL(location, current).href, lookup)).href;
+      continue;
+    }
+    if (res.type === 'opaqueredirect') {
+      // Este fetch no deja ver a dónde redirige: se sigue normal y se revisa el final.
+      const followed = await fetchFn(current, { ...opts, redirect: 'follow' });
+      if (followed.url) await assertPublicUrl(followed.url, lookup);
+      return followed;
+    }
+    return res;
+  }
+  throw new Error('Ese enlace redirige demasiadas veces');
+}
+
 // Lee una respuesta sin pasarse de «max» bytes: corta la descarga en cuanto
 // se pasa, en vez de bajarla entera a la memoria y medirla después.
 async function readLimited(res, max, tooBig = 'El archivo es muy grande') {
@@ -132,4 +176,4 @@ async function readLimited(res, max, tooBig = 'El archivo es muy grande') {
   return Buffer.concat(parts);
 }
 
-module.exports = { readLimited, isLocalHost, isLocalOrigin, allowChange, createHttpGuard, verifyWsClient, frameHeaders, isSafeExternalUrl, isPrivateAddress };
+module.exports = { assertPublicUrl, fetchPublic, readLimited, isLocalHost, isLocalOrigin, allowChange, createHttpGuard, verifyWsClient, frameHeaders, isSafeExternalUrl, isPrivateAddress };

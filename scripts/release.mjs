@@ -27,6 +27,30 @@ const platform = process.env.SATRONHO_PLATFORM || 'win32';
 
 console.log(`Empaquetando ${pkg.productName} ${pkg.version} (${platform}) a nombre de ${pkg.author}…`);
 
+// Con el relé, la app autoriza Kick a través de él: si el relé es viejo o no
+// tiene la app de Kick, la versión saldría con Kick roto. Mejor frenar aquí.
+{
+  const relay = String(process.env.SATRONHO_SUPPORT_RELAY || '').replace(/\/+$/, '');
+  if (relay && process.env.SATRONHO_KICK_CLIENT_ID) {
+    let status = 0;
+    let text = '';
+    try {
+      const r = await fetch(`${relay}/kick/token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      status = r.status;
+      text = await r.text();
+    } catch (err) {
+      text = String(err?.message || err);
+    }
+    // Un relé al día responde 400 «Esta app de Kick no es la de Satronho Bot».
+    if (status !== 400 || !/Kick/.test(text)) {
+      console.error(`✗ El relé (${relay}) no está listo para Kick: respondió ${status || 'nada'} ${text.slice(0, 120)}`);
+      console.error('  Pega el reportes-worker.js nuevo en Cloudflare y agrega KICK_CLIENT_ID y KICK_CLIENT_SECRET (relay/LEEME.md).');
+      process.exit(1);
+    }
+    console.log('✓ El relé está listo para autorizar Kick');
+  }
+}
+
 const [outDir] = await packager({
   dir: root,
   out: path.join(root, 'dist'),
@@ -67,9 +91,15 @@ const [outDir] = await packager({
       } catch {
         /* sin src/builtin.json en este PC */
       }
+      // Con el relé (SUPPORT_RELAY_URL) el Client Secret NO entra en la app:
+      // va el Client ID y la dirección del relé, que hace el canje con Kick.
+      // Sin relé se graba el secret como antes, pero cualquiera que baje la
+      // app lo puede sacar: configura el relé (relay/LEEME.md).
       const clientId = process.env.SATRONHO_KICK_CLIENT_ID;
       const clientSecret = process.env.SATRONHO_KICK_CLIENT_SECRET;
-      if (clientId && clientSecret) data.kick = { clientId, clientSecret };
+      const relay = String(process.env.SATRONHO_SUPPORT_RELAY || '').replace(/\/+$/, '');
+      if (clientId && relay) data.kick = { clientId, tokenRelay: `${relay}/kick/token` };
+      else if (clientId && clientSecret) data.kick = { clientId, clientSecret };
       // App de Spotify (solo el Client ID: el inicio de sesión es con PKCE).
       if (process.env.SATRONHO_SPOTIFY_CLIENT_ID) data.spotify = { clientId: process.env.SATRONHO_SPOTIFY_CLIENT_ID };
       // Webhook de Discord para «Reportar un problema».
@@ -79,7 +109,7 @@ const [outDir] = await packager({
         delete data.discord;
       } else if (process.env.SATRONHO_DISCORD_WEBHOOK) data.discord = { webhook: process.env.SATRONHO_DISCORD_WEBHOOK };
       fs.writeFileSync(file, JSON.stringify(data, null, 2));
-      console.log(data.kick ? '✓ App de Kick incluida' : '⚠ Sin app de Kick incluida: cada streamer tendrá que pegar la suya en «Avanzado»');
+      console.log(data.kick?.tokenRelay ? '✓ App de Kick incluida (sin secret: el canje va por el relé)' : data.kick ? '⚠ App de Kick incluida CON el Client Secret dentro: configura SUPPORT_RELAY_URL (relay/LEEME.md)' : '⚠ Sin app de Kick incluida: cada streamer tendrá que pegar la suya en «Avanzado»');
       console.log(data.spotify ? '✓ App de Spotify incluida' : '⚠ Sin app de Spotify: cada streamer pega su Client ID en Música → Spotify');
       console.log(data.support ? '✓ Reportes por el relé incluidos' : data.discord ? '⚠ Reportes con el webhook directo (mejor configura SUPPORT_RELAY_URL, ver relay/LEEME.md)' : '⚠ Sin reportes: «Reportar un problema» no podrá enviar');
     },

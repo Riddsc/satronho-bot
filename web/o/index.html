@@ -24,9 +24,18 @@
 <script>
   (function () {
     var q = new URLSearchParams(location.search);
-    var path = q.get('p') || '/overlays/alerts.html';
-    // Solo overlays: este enlace nunca debe mostrar el panel de la app.
-    if (path.indexOf('/overlays/') !== 0 || path.indexOf('..') >= 0 || path.indexOf('\\') >= 0) path = '/overlays/alerts.html';
+    // Solo los overlays de la app, y sus opciones como texto simple: este
+    // enlace nunca debe mostrar el panel ni llevar código escondido.
+    var PAGES = ['alerts', 'goal', 'now-playing', 'podium', 'w', 'wheel'];
+    var path = '/overlays/alerts.html';
+    var m = /^\/overlays\/([a-z-]+)\.html(\?[^#]*)?$/.exec(q.get('p') || '');
+    if (m && PAGES.indexOf(m[1]) >= 0) {
+      var clean = [];
+      new URLSearchParams(m[2] || '').forEach(function (v, k) {
+        if (/^[a-z]{1,20}$/i.test(k) && /^[\p{L}\p{N}\p{Emoji_Presentation} _.,:#%!¡¿?-]{0,80}$/u.test(v)) clean.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
+      });
+      path = '/overlays/' + m[1] + '.html' + (clean.length ? '?' + clean.join('&') : '');
+    }
     var port = String(Number(q.get('port')) || 3800);
     var base = 'http://127.0.0.1:' + port;
     var f = document.getElementById('f');
