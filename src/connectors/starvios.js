@@ -15,17 +15,41 @@ const { createConnectorBase, cleanChannel, getJson } = require('./base');
 
 const SITE = 'https://starvios.com';
 
+// Saca la dirección y la clave pública de un archivo de la web de Starvios.
+// Desde nov. 2026 la dirección ya no es «xxx.supabase.co» sino un dominio
+// propio (VITE_SUPABASE_URL: `https://…lovable.cloud`). Se lee primero
+// esa variable; si no está, cualquier «*.supabase.co»; y si tampoco, el
+// identificador del proyecto (VITE_SUPABASE_PROJECT_ID).
+function configFrom(js) {
+  const text = String(js || '');
+  const key = text.match(/sb_publishable_[\w-]+/)?.[0];
+  if (!key) return null;
+  const named = text.match(/SUPABASE_URL\s*[:=]\s*[`'"](https:\/\/[^`'"\s]+)[`'"]/)?.[1];
+  const classic = text.match(/https:\/\/[a-z0-9]+\.supabase\.co/)?.[0];
+  const project = text.match(/SUPABASE_PROJECT_ID\s*[:=]\s*[`'"]([a-z0-9]+)[`'"]/)?.[1];
+  const url = (named || classic || (project ? `https://${project}.supabase.co` : '')).replace(/\/+$/, '');
+  return url ? { url, key } : null;
+}
+
 async function discoverConfig(fetchFn) {
   const res = await fetchFn(`${SITE}/`, { signal: AbortSignal.timeout(15000) });
   if (!res.ok) throw new Error(`Starvios no responde (HTTP ${res.status})`);
   const html = await res.text();
-  const asset = html.match(/(?:href|src)="(\/assets\/client-[\w-]+\.js)"/)?.[1];
-  if (!asset) throw new Error('Starvios cambió su web: actualiza Satronho Bot');
-  const js = await (await fetchFn(SITE + asset, { signal: AbortSignal.timeout(15000) })).text();
-  const url = js.match(/https:\/\/[a-z0-9]+\.supabase\.co/)?.[0];
-  const key = js.match(/sb_publishable_[\w-]+/)?.[0];
-  if (!url || !key) throw new Error('No se encontró la configuración pública de Starvios');
-  return { url, key };
+  const fromHtml = configFrom(html);
+  if (fromHtml) return fromHtml;
+  // Primero el archivo «client-…» (donde siempre estuvo) y luego el resto.
+  const assets = [...new Set([...html.matchAll(/(?:href|src)="(\/assets\/[\w.-]+\.js)"/g)].map((m) => m[1]))];
+  if (!assets.length) throw new Error('Starvios cambió su web: actualiza Satronho Bot');
+  assets.sort((a, b) => Number(!/\/client-/.test(a)) - Number(!/\/client-/.test(b)));
+  for (const asset of assets.slice(0, 60)) {
+    try {
+      const r = await fetchFn(SITE + asset, { signal: AbortSignal.timeout(15000) });
+      if (!r.ok) continue;
+      const found = configFrom(await r.text());
+      if (found) return found;
+    } catch { /* el siguiente */ }
+  }
+  throw new Error('No se encontró la configuración pública de Starvios');
 }
 
 // Busca un número en varios nombres posibles de campo.
@@ -311,4 +335,4 @@ function createStarviosConnector({ bus, onStatus, fetch: fetchFn = fetch, logFil
   return { connect, disconnect, followers };
 }
 
-module.exports = { createStarviosConnector, discoverConfig };
+module.exports = { createStarviosConnector, discoverConfig, configFrom };

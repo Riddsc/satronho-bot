@@ -19,6 +19,7 @@
 //   !quitar @ana 50       (moderadores) se las quitas
 
 const fs = require('fs');
+const { renameWithRetry } = require('../store');
 const path = require('path');
 const { t: tr, getLocale } = require('../i18n');
 
@@ -125,9 +126,10 @@ function createPoints({ store, dataDir, broadcast = () => {}, reply = () => {}, 
   function saveNow() {
     try {
       fs.writeFileSync(`${file}.tmp`, JSON.stringify(data));
-      fs.renameSync(`${file}.tmp`, file);
-    } catch {
-      /* se reintenta en el próximo cambio */
+      renameWithRetry(`${file}.tmp`, file);
+    } catch (err) {
+      console.error(`No se pudieron guardar las huellitas: ${err?.code || err?.message || err}`);
+      saveSoon(); // se reintenta en unos segundos
     }
   }
 

@@ -1,5 +1,40 @@
 [
   {
+    "version": "0.30.0",
+    "date": "2026-11-27",
+    "title": "Starvios vuelve a conectar y la app queda más segura",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "Starvios vuelve a conectar. Starvios cambió la dirección de su servidor y la app ya no encontraba su «información pública»; ahora la busca de la forma nueva (y de la vieja, por si acaso)."
+      },
+      {
+        "type": "arreglo",
+        "text": "Seguridad: un enlace de overlay armado con mala intención ya no puede meter código en la app. Los enlaces para TikTok LIVE Studio solo aceptan los overlays de Satronho Bot."
+      },
+      {
+        "type": "arreglo",
+        "text": "Seguridad: las páginas de internet ya no pueden ponernos a descargar imágenes, y ningún enlace (de sonidos o de imágenes) puede redirigir a tu PC o a tu red de la casa. La carpeta de imágenes guardadas tiene un tope para no llenar el disco."
+      },
+      {
+        "type": "arreglo",
+        "text": "Kick: la clave secreta de la app de Kick ya no viaja dentro de Satronho Bot. Autorizar tu cuenta funciona igual que antes."
+      },
+      {
+        "type": "arreglo",
+        "text": "Si el antivirus bloquea un momento el archivo de ajustes, la app lo vuelve a intentar sola en vez de perder lo que acababas de cambiar. Lo mismo con las huellitas y las estadísticas."
+      },
+      {
+        "type": "arreglo",
+        "text": "Los enlaces que abras desde la ventana aparte del chat se abren en tu navegador."
+      },
+      {
+        "type": "arreglo",
+        "text": "Alertas propias: si falta la palabra del chat, el aviso te lleva directo a ese campo."
+      }
+    ]
+  },
+  {
     "version": "0.29.2",
     "date": "2026-11-22",
     "title": "Únete al Discord de Satronho Apps",

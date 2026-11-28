@@ -19,6 +19,11 @@ const path = require('path');
 
 // App de Kick incluida. Orden: variables de entorno (desarrollo) y luego
 // src/builtin.json, que escribe scripts/release.mjs y no se sube a GitHub.
+//
+// Desde la 0.30 la versión publicada NO trae el Client Secret: trae la
+// dirección del relé (relay/reportes-worker.js → /kick/token), que guarda
+// el secret fuera de la app y hace el canje del permiso con Kick. Si una
+// copia de desarrollo trae el secret, se usa directo como antes.
 function builtinApp() {
   let file = {};
   try {
@@ -28,7 +33,9 @@ function builtinApp() {
   }
   const clientId = process.env.SATRONHO_KICK_CLIENT_ID || file.clientId || '';
   const clientSecret = process.env.SATRONHO_KICK_CLIENT_SECRET || file.clientSecret || '';
-  return clientId && clientSecret ? { clientId, clientSecret } : null;
+  const tokenRelay = process.env.SATRONHO_KICK_TOKEN_RELAY || file.tokenRelay || '';
+  if (!clientId || (!clientSecret && !/^https:\/\//.test(tokenRelay))) return null;
+  return clientSecret ? { clientId, clientSecret } : { clientId, tokenRelay };
 }
 
 const AUTH_URL = 'https://id.kick.com/oauth/authorize';
@@ -140,7 +147,7 @@ function createKickChat({ store, fetch: fetchFn = fetch, redirectUri, onChange =
     const challenge = b64url(crypto.createHash('sha256').update(verifier).digest());
     const state = b64url(crypto.randomBytes(18));
     for (const [k, v] of pendingAuth) if (Date.now() - v.ts > 15 * 60 * 1000) pendingAuth.delete(k); // intentos abandonados
-    pendingAuth.set(state, { verifier, account: account === 'bot' ? 'bot' : 'me', app: { clientId: app.clientId, clientSecret: app.clientSecret }, ts: Date.now() });
+    pendingAuth.set(state, { verifier, account: account === 'bot' ? 'bot' : 'me', app: { clientId: app.clientId, clientSecret: app.clientSecret, tokenRelay: app.tokenRelay }, ts: Date.now() });
     const q = new URLSearchParams({
       response_type: 'code',
       client_id: app.clientId,
@@ -154,11 +161,19 @@ function createKickChat({ store, fetch: fetchFn = fetch, redirectUri, onChange =
   }
 
   async function tokenRequest(app, params) {
-    const res = await fetchFn(TOKEN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
-      body: new URLSearchParams({ client_id: app.clientId, client_secret: app.clientSecret, ...params }).toString(),
-    });
+    // App incluida sin secret: el relé le pone el secret y habla con Kick.
+    const viaRelay = !app.clientSecret && app.tokenRelay;
+    const res = viaRelay
+      ? await fetchFn(app.tokenRelay, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ client_id: app.clientId, ...params }),
+      }).catch(() => { throw new Error('No pude hablar con el servidor de Satronho Bot para autorizar Kick. Revisa tu internet.'); })
+      : await fetchFn(TOKEN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+        body: new URLSearchParams({ client_id: app.clientId, client_secret: app.clientSecret, ...params }).toString(),
+      });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.access_token) throw new Error(data.error_description || data.message || `Kick respondió ${res.status}`);
     return {

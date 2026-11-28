@@ -76,6 +76,8 @@ jobs:
         env:
           SATRONHO_UPDATE_REPO: https://github.com/${{ github.repository }}
           # App de Kick «SatronhoBot»: Settings → Secrets and variables → Actions.
+          # Con SUPPORT_RELAY_URL el secret NO entra en la app (lo guarda el relé);
+          # KICK_CLIENT_SECRET solo se usa si no hay relé (no recomendado).
           SATRONHO_KICK_CLIENT_ID: ${{ secrets.KICK_CLIENT_ID }}
           SATRONHO_KICK_CLIENT_SECRET: ${{ secrets.KICK_CLIENT_SECRET }}
           # Webhook de Discord para «Reportar un problema».

@@ -347,21 +347,52 @@ class Store {
     this.saveTimer = setTimeout(() => this.saveNow(), 300);
   }
 
+  // Nunca lanza: si Windows (casi siempre el antivirus) tiene el archivo
+  // tomado justo en ese momento, se reintenta varias veces y luego cada
+  // pocos segundos. El problema queda anotado para «Reportar un problema».
   saveNow() {
     clearTimeout(this.saveTimer);
-    // Escritura atómica: si se corta la luz no queda un JSON a medias.
     const tmp = `${this.file}.tmp`;
-    fs.writeFileSync(tmp, JSON.stringify(this.data, null, 2));
-    // Copia de respaldo de la versión anterior (como mucho cada 10 minutos).
-    if (Date.now() - this.lastBackup > 10 * 60 * 1000 && fs.existsSync(this.file)) {
-      try {
-        JSON.parse(fs.readFileSync(this.file, 'utf8')); // solo si está sana
-        fs.copyFileSync(this.file, this.backup);
-        this.lastBackup = Date.now();
-      } catch { /* la copia anterior no servía: se conserva el respaldo que había */ }
+    try {
+      // Escritura atómica: si se corta la luz no queda un JSON a medias.
+      fs.writeFileSync(tmp, JSON.stringify(this.data, null, 2));
+      // Copia de respaldo de la versión anterior (como mucho cada 10 minutos).
+      if (Date.now() - this.lastBackup > 10 * 60 * 1000 && fs.existsSync(this.file)) {
+        try {
+          JSON.parse(fs.readFileSync(this.file, 'utf8')); // solo si está sana
+          fs.copyFileSync(this.file, this.backup);
+          this.lastBackup = Date.now();
+        } catch { /* la copia anterior no servía: se conserva el respaldo que había */ }
+      }
+      renameWithRetry(tmp, this.file);
+      if (this.saveError) console.warn('Configuración guardada de nuevo después de un error.');
+      this.saveError = null;
+      this.saveFailures = 0;
+      return true;
+    } catch (err) {
+      this.saveFailures = (this.saveFailures || 0) + 1;
+      this.saveError = { message: String(err?.code || err?.message || err), at: Date.now() };
+      console.error(`No se pudo guardar la configuración (intento ${this.saveFailures}): ${this.saveError.message}`);
+      clearTimeout(this.saveTimer);
+      this.saveTimer = setTimeout(() => this.saveNow(), Math.min(30000, 1000 * this.saveFailures));
+      return false;
     }
-    fs.renameSync(tmp, this.file);
   }
 }
 
-module.exports = { Store, DEFAULTS, DEFAULT_BANNED };
+// En Windows, renombrar falla un instante si otro programa tiene el archivo
+// abierto (EPERM, EBUSY, EACCES). Se reintenta unas veces antes de rendirse.
+function renameWithRetry(from, to, tries = 6) {
+  for (let i = 0; ; i += 1) {
+    try {
+      fs.renameSync(from, to);
+      return;
+    } catch (err) {
+      if (i >= tries || !['EPERM', 'EBUSY', 'EACCES'].includes(err?.code)) throw err;
+      const until = Date.now() + 40 * (i + 1);
+      while (Date.now() < until) { /* espera corta y síncrona */ }
+    }
+  }
+}
+
+module.exports = { Store, DEFAULTS, DEFAULT_BANNED, renameWithRetry };
