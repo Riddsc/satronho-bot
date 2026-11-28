@@ -67,8 +67,15 @@ function createTts({ store, broadcast, engine, online = null }) {
   }
   const announceAllowed = () => broadcast('tts-allowed', allowedList());
 
+  // Tope para que la lista no crezca sin fin: se quedan los más recientes.
+  const MAX_ALLOWED = 3000;
   function allow(user) {
-    store.set('ttsAllowed', { ...store.get('ttsAllowed'), [user.id]: { name: user.name, ts: Date.now() } });
+    let all = { ...store.get('ttsAllowed'), [user.id]: { name: user.name, ts: Date.now() } };
+    const ids = Object.keys(all);
+    if (ids.length > MAX_ALLOWED) {
+      all = Object.fromEntries(Object.entries(all).sort((a, b) => (b[1]?.ts || 0) - (a[1]?.ts || 0)).slice(0, MAX_ALLOWED));
+    }
+    store.set('ttsAllowed', all);
     announceAllowed();
   }
 

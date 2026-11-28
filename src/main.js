@@ -186,6 +186,17 @@ async function checkNotice(feed) {
   }
 }
 
+// ¿Se instaló con el instalador de Velopack (se actualiza sola) o es el .zip simple?
+function isVelopackInstall() {
+  if (!velopack) return false;
+  try {
+    new velopack.UpdateManager(OFFICIAL_FEED || 'https://github.com/Riddsc/satronho-bot').getCurrentVersion();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 let checking = false;
 async function checkForUpdates(store) {
   await ensureFeedAllowed(store);
@@ -529,7 +540,7 @@ if (!app.requestSingleInstanceLock()) {
     server = createServer({
       store,
       fetch: (url, opts) => net.fetch(url, opts),
-      appInfo: { version: app.getVersion(), portable: Boolean(velopack), locale: app.getLocale() },
+      appInfo: { version: app.getVersion(), installed: isVelopackInstall(), locale: app.getLocale() },
       hooks: { applyUpdate, checkForUpdates: () => checkForUpdates(store), onFeedChange: () => checkForUpdates(store), onWindowConfig: applyWindowConfig,
         updateLog: () => updLogTail(25),
         openAuthWindow,
@@ -609,6 +620,17 @@ if (!app.requestSingleInstanceLock()) {
 
     win.webContents.on('did-create-window', (child, { url: target }) => {
       if (String(target).includes('/popout-chat.html')) trackPopout(child, store);
+      // La ventana del chat sigue las mismas reglas que la principal: los
+      // enlaces se abren en tu navegador y la ventana no se cambia de página.
+      child.webContents.setWindowOpenHandler(({ url: link }) => {
+        if (isSafeExternalUrl(link)) shell.openExternal(link);
+        return { action: 'deny' };
+      });
+      child.webContents.on('will-navigate', (ev, link) => {
+        if (String(link).startsWith(url.replace(/\/$/, ''))) return;
+        ev.preventDefault();
+        if (isSafeExternalUrl(link)) shell.openExternal(link);
+      });
     });
 
     // Al tocar ✕: el panel muestra el aviso «¿Cerramos Satronho Bot?».
