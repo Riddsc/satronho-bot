@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.30.1",
+    "date": "2026-11-27",
+    "title": "«Reportar un problema» vuelve a funcionar",
+    "items": [
+      {
+        "type": "arreglo",
+        "text": "«Reportar un problema» vuelve a enviar: tus reportes llegan directo al equipo de Satronho Bot en Discord, con el diagnóstico solo si tú lo dejas marcado."
+      },
+      {
+        "type": "arreglo",
+        "text": "Kick: la clave secreta de la app de Kick ya no viaja dentro de Satronho Bot. Autorizar tu cuenta para escribir funciona igual que antes."
+      }
+    ]
+  },
+  {
     "version": "0.30.0",
     "date": "2026-11-27",
     "title": "Starvios vuelve a conectar y la app queda más segura",
